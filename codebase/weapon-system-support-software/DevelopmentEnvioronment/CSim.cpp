@@ -1,4 +1,4 @@
-#include "ComUtility.h"
+#include "Classes.hpp"
 
 /*
 CSim = basic command line utility
@@ -47,34 +47,23 @@ each time the user enters a new menu add spacing with a few \n then print the me
 */
 using namespace std;
 
-void readHandler(const boost::system::error_code& error, std::size_t bytes_transferred, boost::asio::serial_port& serial) {
-    if (!error) {
-        std::istream is(&serial);
-        std::string message;
-        std::getline(is, message);
-        std::cout << "Received: " << message << std::endl;
-
-        // Start a new read operation
-        boost::asio::async_read_until(serial, boost::asio::dynamic_buffer(message), '\n', 
-            std::bind(readHandler, std::placeholders::_1, std::placeholders::_2, std::ref(serial)));
-    } else {
-        std::cerr << "Error reading from serial port: " << error.message() << std::endl;
-    }
-}
-
 int main() {
-    boost::asio::io_context io_context;
-    boost::asio::serial_port serial(io_context);
+    //declare classes
 
-    // Open the serial port (replace "COM1" with your specific port on Windows, or "/dev/ttyUSB0" on Linux)
-    serial.open("/dev/ttyUSB0"); // Replace with your specific port
-    serial.set_option(boost::asio::serial_port_base::baud_rate(9600));
+    //initialize connection class (csim will listen for a handshake from ddm)
 
-    // Start an asynchronous read operation
-    boost::asio::async_read_until(serial, boost::asio::dynamic_buffer(std::string()), '\n', 
-        std::bind(readHandler, std::placeholders::_1, std::placeholders::_2, std::ref(serial)));
+    //print welcome 
+    cout << "\n\nWelcome to CSim\n-------------------\n";
+    cout << "This is a testing tool for the corresponding data display module, which must be run in parallel.\n";
+    cout << "For instructions on setting up a serial testing environment please visit *insert website link which has tutorial or maybe pdf included in installation?*\n";
+    cout << "Purpose: generate status information, and events/errors to send via RS-422 serial communication to the data display module.\n\n";
+    cout << "This program will attempt to connect to the data display module via\n*show user connection settings*";
 
-    io_context.run();
+    //call function to print connection settings
 
+    cout << "Program Start:\n--------------\n";
+    cout << "Input options:\n 1 to start random generation\n 2 to change random generation rate\n 3 to input custom event\n 4 to input custom error\n\n";
+
+    //take user input
     return 0;
 }

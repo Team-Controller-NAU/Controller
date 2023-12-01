@@ -1,7 +1,7 @@
 //This header file defines data types structures constants and classes which are shared between CSim and DataDisplay
 
 #include <string>
-#include <boost/asio.hpp>
+//#include <boost/asio.hpp>
 #include <iostream>
 
 using namespace std;
@@ -12,6 +12,7 @@ typedef enum { SINGLE, AUTOMATIC, BURST, SAFE } FiringModeType;
 
 struct ElectricalComponent 
    {
+    string name;
     int voltage;
     int current;
    };
