@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "WWuHVQ0xrh5XKmKB0XGJUTWhede2TNp0qZD/ISnpDUA2Usw/gf0xAGDBMsJCRCRvCOO9qJ/ednNqxKQzSOTYGA==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\zachp\\source\\repos\\weapon-system-support-software\\weapon-system-support-software\\weapon-system-support-software.vcxproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\zachp\\.nuget\\packages\\microsoft.windows.sdk.net.ref\\10.0.22621.29\\microsoft.windows.sdk.net.ref.10.0.22621.29.nupkg.sha512"
+  ],
+  "logs": []
+}
