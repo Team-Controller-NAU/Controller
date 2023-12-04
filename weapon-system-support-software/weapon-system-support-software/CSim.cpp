@@ -1,10 +1,10 @@
-#include "Classes.hpp"
+#include "Classes.h"
 #include "CSim_Utilities.hpp"
 //to compile: g++ -Wall CSim_Utilities.cpp CSim.cpp -o csim
 /*
 CSim = basic command line utility
 it is used by developers, so minimal input check is necessary
-will need a supporting header file to define a library of events, errors and parameters to be 
+will need a supporting header file to define a library of events, errors and parameters to be
 chosen from during random generation
 Upon startup...
     *launch connection and wait for handshake
@@ -17,14 +17,14 @@ Upon startup...
             "This program will attempt to connect to the data display module via\n"
             *show user connection settings*
             "Program Start:\n--------------\n
-            "Input options: 
+            "Input options:
                 1 to start random generation
                 2 to change random generation rate
                 3 to input custom event
                 4 to input custom error"
-            
+
             "waiting for handshake..."
-       then     
+       then
             "connection established"
 user responds 1:
     prompt "press q at any point to stop data generation"
@@ -45,9 +45,9 @@ int main() {
     string randomString((size_t)RANDOM_STRING_LEN, 'a');
 
     //functionality for changing the color of output text (windows exclusive)
-    #ifdef _WIN32
+#ifdef _WIN32
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    #endif
+#endif
 
     //TODO: initialize connection class (csim will listen for a handshake from ddm)
 
@@ -63,21 +63,21 @@ int main() {
     cout << "\n\nProgram Start:\n--------------\n";
 
     //each time user presses enter, a new string will be generated and sent through serial port
-    while( true )
-       {
-        #ifdef _WIN32
+    while (true)
+    {
+#ifdef _WIN32
         SetConsoleTextAttribute(hConsole, static_cast<WORD>(GREEN));
-        #endif
+#endif
 
         //prompt
         cout << "Input options:\n 1 to generate random string and send it through serial port\n\n";
 
-        #ifdef _WIN32
+#ifdef _WIN32
         SetConsoleTextAttribute(hConsole, static_cast<WORD>(WHITE));
-        #endif
+#endif
 
         cout << "Input: ";
-        
+
         //get input
         cin >> userInput;
 
@@ -88,7 +88,7 @@ int main() {
         cout << "Random String: " << randomString << endl << endl;
 
         //TODO: send string through serial port
-       }
+    }
 
     return 0;
 }
