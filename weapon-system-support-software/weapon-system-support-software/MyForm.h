@@ -1,5 +1,4 @@
 #pragma once
-
 namespace weaponsystemsupportsoftware {
 
 	using namespace System;
@@ -34,6 +33,8 @@ namespace weaponsystemsupportsoftware {
 				delete components;
 			}
 		}
+	private: System::Windows::Forms::Label^ label1;
+	protected:
 
 	private:
 		/// <summary>
@@ -48,12 +49,42 @@ namespace weaponsystemsupportsoftware {
 		/// </summary>
 		void InitializeComponent(void)
 		{
-			this->components = gcnew System::ComponentModel::Container();
-			this->Size = System::Drawing::Size(300,300);
-			this->Text = L"MyForm";
-			this->Padding = System::Windows::Forms::Padding(0);
+			this->label1 = (gcnew System::Windows::Forms::Label());
+			this->SuspendLayout();
+			// 
+			// label1
+			// 
+			this->label1->AutoSize = true;
+			this->label1->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
+			this->label1->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 32, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->label1->ForeColor = System::Drawing::Color::White;
+			this->label1->Location = System::Drawing::Point(69, 52);
+			this->label1->Name = L"label1";
+			this->label1->Size = System::Drawing::Size(194, 53);
+			this->label1->TabIndex = 0;
+			this->label1->Text = L"Text Box";
+			this->label1->Click += gcnew System::EventHandler(this, &MyForm::label1_Click);
+			// 
+			// MyForm
+			// 
+			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
+			this->BackColor = System::Drawing::SystemColors::ActiveCaptionText;
+			this->ClientSize = System::Drawing::Size(885, 261);
+			this->Controls->Add(this->label1);
+			this->Name = L"MyForm";
+			this->Text = L"Team Controller Demo";
+			this->ResumeLayout(false);
+			this->PerformLayout();
+
 		}
 #pragma endregion
+	private: System::Void label1_Click(System::Object^ sender, System::EventArgs^ e) {
+		String^ serialMessage = "This is our message";
+
+		this->label1->Text = serialMessage;
+	}
+		   
 	};
 }
