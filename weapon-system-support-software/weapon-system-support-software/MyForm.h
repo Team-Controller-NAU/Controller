@@ -1,6 +1,9 @@
 #pragma once
-namespace weaponsystemsupportsoftware {
+#ifndef MYFORM_H
+#define MYFORM_H
+#include "SerialCom.h"
 
+namespace weaponsystemsupportsoftware {
 	using namespace System;
 	using namespace System::ComponentModel;
 	using namespace System::Collections;
@@ -33,7 +36,19 @@ namespace weaponsystemsupportsoftware {
 				delete components;
 			}
 		}
-	private: System::Windows::Forms::Label^ label1;
+	private: System::Windows::Forms::Label^ messagelb;
+	protected:
+
+	private: System::Windows::Forms::Label^ statuslb;
+	private: System::Windows::Forms::Label^ sentlb;
+	private: System::Windows::Forms::Label^ reclb;
+
+
+
+
+
+
+
 	protected:
 
 	private:
@@ -49,30 +64,73 @@ namespace weaponsystemsupportsoftware {
 		/// </summary>
 		void InitializeComponent(void)
 		{
-			this->label1 = (gcnew System::Windows::Forms::Label());
+			this->messagelb = (gcnew System::Windows::Forms::Label());
+			this->statuslb = (gcnew System::Windows::Forms::Label());
+			this->sentlb = (gcnew System::Windows::Forms::Label());
+			this->reclb = (gcnew System::Windows::Forms::Label());
 			this->SuspendLayout();
 			// 
-			// label1
+			// messagelb
 			// 
-			this->label1->AutoSize = true;
-			this->label1->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
-			this->label1->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 32, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+			this->messagelb->AutoSize = true;
+			this->messagelb->BorderStyle = System::Windows::Forms::BorderStyle::Fixed3D;
+			this->messagelb->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 32, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
 				static_cast<System::Byte>(0)));
-			this->label1->ForeColor = System::Drawing::Color::White;
-			this->label1->Location = System::Drawing::Point(69, 52);
-			this->label1->Name = L"label1";
-			this->label1->Size = System::Drawing::Size(194, 53);
-			this->label1->TabIndex = 0;
-			this->label1->Text = L"Text Box";
-			this->label1->Click += gcnew System::EventHandler(this, &MyForm::label1_Click);
+			this->messagelb->ForeColor = System::Drawing::Color::White;
+			this->messagelb->Location = System::Drawing::Point(36, 190);
+			this->messagelb->Name = L"messagelb";
+			this->messagelb->Size = System::Drawing::Size(590, 53);
+			this->messagelb->TabIndex = 0;
+			this->messagelb->Text = L"Click here to send a message";
+			this->messagelb->Click += gcnew System::EventHandler(this, &MyForm::messagelb_Click);
+			// 
+			// statuslb
+			// 
+			this->statuslb->AutoSize = true;
+			this->statuslb->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 24.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->statuslb->ForeColor = System::Drawing::Color::White;
+			this->statuslb->Location = System::Drawing::Point(27, 9);
+			this->statuslb->Name = L"statuslb";
+			this->statuslb->Size = System::Drawing::Size(297, 38);
+			this->statuslb->TabIndex = 1;
+			this->statuslb->Text = L"Connection status: ";
+			this->statuslb->Click += gcnew System::EventHandler(this, &MyForm::statuslb_Click);
+			// 
+			// sentlb
+			// 
+			this->sentlb->AutoSize = true;
+			this->sentlb->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 24.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->sentlb->ForeColor = System::Drawing::Color::White;
+			this->sentlb->Location = System::Drawing::Point(29, 47);
+			this->sentlb->Name = L"sentlb";
+			this->sentlb->Size = System::Drawing::Size(244, 38);
+			this->sentlb->TabIndex = 2;
+			this->sentlb->Text = L"Sent Message: ";
+			// 
+			// reclb
+			// 
+			this->reclb->AutoSize = true;
+			this->reclb->Font = (gcnew System::Drawing::Font(L"Microsoft Sans Serif", 24.75F, System::Drawing::FontStyle::Regular, System::Drawing::GraphicsUnit::Point,
+				static_cast<System::Byte>(0)));
+			this->reclb->ForeColor = System::Drawing::Color::White;
+			this->reclb->Location = System::Drawing::Point(27, 85);
+			this->reclb->Name = L"reclb";
+			this->reclb->Size = System::Drawing::Size(314, 38);
+			this->reclb->TabIndex = 3;
+			this->reclb->Text = L"Received Message: ";
 			// 
 			// MyForm
 			// 
 			this->AutoScaleDimensions = System::Drawing::SizeF(6, 13);
 			this->AutoScaleMode = System::Windows::Forms::AutoScaleMode::Font;
 			this->BackColor = System::Drawing::SystemColors::ActiveCaptionText;
-			this->ClientSize = System::Drawing::Size(885, 261);
-			this->Controls->Add(this->label1);
+			this->ClientSize = System::Drawing::Size(1258, 261);
+			this->Controls->Add(this->reclb);
+			this->Controls->Add(this->sentlb);
+			this->Controls->Add(this->statuslb);
+			this->Controls->Add(this->messagelb);
 			this->Name = L"MyForm";
 			this->Text = L"Team Controller Demo";
 			this->ResumeLayout(false);
@@ -80,11 +138,24 @@ namespace weaponsystemsupportsoftware {
 
 		}
 #pragma endregion
-	private: System::Void label1_Click(System::Object^ sender, System::EventArgs^ e) {
-		String^ serialMessage = "This is our message";
+	private: System::Void messagelb_Click(System::Object^ sender, System::EventArgs^ e) {
+		if (index < 1)
+		{
+			doClick();
+			String^ sentNew = gcnew String(output[0].c_str());
+			String^ receivedNew = gcnew String(output[1].c_str());
+			String^ message = "The controller port and laptop port have been successfully opened.";
 
-		this->label1->Text = serialMessage;
+			this->statuslb->Text += message;
+			this->sentlb->Text += sentNew;
+			this->reclb->Text += receivedNew;
+			index++;
+		}
 	}
 		   
+	private: System::Void statuslb_Click(System::Object^ sender, System::EventArgs^ e) {
+	}
 	};
 }
+
+#endif
