@@ -1,6 +1,4 @@
 #pragma once
-#ifndef MYFORM_H
-#define MYFORM_H
 #include "SerialCom.h"
 
 namespace weaponsystemsupportsoftware {
@@ -42,12 +40,6 @@ namespace weaponsystemsupportsoftware {
 	private: System::Windows::Forms::Label^ statuslb;
 	private: System::Windows::Forms::Label^ sentlb;
 	private: System::Windows::Forms::Label^ reclb;
-
-
-
-
-
-
 
 	protected:
 
@@ -139,23 +131,27 @@ namespace weaponsystemsupportsoftware {
 		}
 #pragma endregion
 	private: System::Void messagelb_Click(System::Object^ sender, System::EventArgs^ e) {
-		if (index < 1)
-		{
-			doClick();
-			String^ sentNew = gcnew String(output[0].c_str());
-			String^ receivedNew = gcnew String(output[1].c_str());
-			String^ message = "The controller port and laptop port have been successfully opened.";
+		// initialize output array that demo will produce
+		std::string* output;
 
-			this->statuslb->Text += message;
-			this->sentlb->Text += sentNew;
-			this->reclb->Text += receivedNew;
-			index++;
-		}
+		// do serial demo
+		output = doDemo();
+
+		// extract sent/received messages from output
+		String^ sentMessage = gcnew String(output[0].c_str());
+		String^ receivedMessage = gcnew String(output[1].c_str());
+		String^ connectionMessage = "The controller port and laptop port have been successfully opened.";
+
+		// update gui message
+		this->statuslb->Text = "Connection status: " + connectionMessage;
+		this->sentlb->Text = "Sent Message: " + sentMessage;
+		this->reclb->Text = "Received Message: " + receivedMessage;
+
+		// free for every new
+		delete[] sentMessage, receivedMessage, output;
 	}
 		   
 	private: System::Void statuslb_Click(System::Object^ sender, System::EventArgs^ e) {
 	}
 	};
 }
-
-#endif
