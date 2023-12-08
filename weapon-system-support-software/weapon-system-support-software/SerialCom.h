@@ -1,7 +1,4 @@
 #pragma once
-#ifndef SERIALCOM_H
-#define SERIALCOM_H
-
 #include <boost/asio.hpp>
 #include <iostream>
 
@@ -32,7 +29,6 @@ public:
 		controllerPort.close();
 		laptopPort.close();
 	}
-
 
 	// writes to specified port with specified message
 	void write(std::string& message)
@@ -65,4 +61,3 @@ void doClick()
 	output[0] = sentMessage;
 	output[1] = received;
 }
-#endif
