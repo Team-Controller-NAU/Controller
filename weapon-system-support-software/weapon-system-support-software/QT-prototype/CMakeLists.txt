@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.5)
 
+set(CMAKE_PREFIX_PATH "C:/Qt/6.6.1/mingw_64")
+
 project(WSSS VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
@@ -25,7 +27,9 @@ set(PROJECT_SOURCES
     csim.cpp
     status.h
     status.cpp
-    constants.h  # Include constants.h in the project sources
+    constants.h
+    events.h
+    events.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

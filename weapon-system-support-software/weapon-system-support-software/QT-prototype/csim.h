@@ -4,6 +4,7 @@
 #include <QThread>
 #include <status.h>
 #include <connection.h>
+#include <events.h>
 #include <QDebug>
 
 // This class simulates the weapon controller, must be called in seperate thread so it doesnt
@@ -14,7 +15,7 @@ class CSim : public QThread
 
 public:
     // Constructor for CSim
-    CSim(QObject *parent = nullptr);
+    CSim(QObject *parent = nullptr, QString portName="");
 
     // Destructor for CSim
     ~CSim();
@@ -30,8 +31,15 @@ public:
     //stores port name for initializing connection class
     QString portName;
 
+    //written to when ddm is not connected. when connection occurs, data dump is performed
+    QString eventDumpMessage;
+    QString errorDumpMessage;
+
 public slots:
     void stopSimulation();
+
+    //reads messages from ddm, updates connected flag
+    void checkConnection(Connection *conn);
 
 private:
     //overloaded threading function.

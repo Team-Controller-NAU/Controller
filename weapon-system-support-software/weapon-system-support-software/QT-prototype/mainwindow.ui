@@ -7,62 +7,257 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>600</height>
+    <height>429</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLabel" name="stdoutLabel">
+   <widget class="QLabel" name="controls_header">
     <property name="geometry">
      <rect>
-      <x>180</x>
-      <y>20</y>
-      <width>261</width>
-      <height>71</height>
+      <x>30</x>
+      <y>10</y>
+      <width>131</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>Controls:</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="listener_title">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>30</y>
+      <width>201</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string/>
+     <string>Latest message:</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="CSim_button">
+   <widget class="QLabel" name="events_title">
     <property name="geometry">
      <rect>
-      <x>130</x>
-      <y>130</y>
-      <width>101</width>
-      <height>21</height>
+      <x>210</x>
+      <y>170</y>
+      <width>151</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string>Start CSim</string>
+     <string>Events and Errors:</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="send_message_button">
+   <widget class="QTextEdit" name="stdout_label">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>210</x>
+      <y>60</y>
+      <width>391</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QTextEdit" name="events_output">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>200</y>
+      <width>391</width>
+      <height>121</height>
+     </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="sender_title_2">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
       <y>100</y>
-      <width>141</width>
-      <height>21</height>
+      <width>131</width>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string>send message</string>
+     <string>Current status:</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="message_contents">
+   <widget class="QTextEdit" name="status_output">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>20</y>
-      <width>141</width>
-      <height>71</height>
+      <x>210</x>
+      <y>130</y>
+      <width>391</width>
+      <height>41</height>
      </rect>
     </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
    </widget>
+   <widget class="QFrame" name="frame">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>40</y>
+      <width>161</width>
+      <height>181</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <widget class="QLineEdit" name="message_contents">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>80</y>
+       <width>141</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="placeholderText">
+      <string>Input message...</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="CSim_button">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>140</y>
+       <width>141</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>12</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Start CSim</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="send_message_button">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>110</y>
+       <width>141</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Send message</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="controls_title_1">
+     <property name="geometry">
+      <rect>
+       <x>90</x>
+       <y>0</y>
+       <width>61</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>DDM port</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="controls_title">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>0</y>
+       <width>61</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>CSIM port</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="handshake_button">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>50</y>
+       <width>141</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Handshake</string>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="csim_port_selection">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>61</width>
+       <height>21</height>
+      </rect>
+     </property>
+    </widget>
+    <widget class="QComboBox" name="ddm_port_selection">
+     <property name="geometry">
+      <rect>
+       <x>80</x>
+       <y>20</y>
+       <width>71</width>
+       <height>22</height>
+      </rect>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QLabel" name="controls_header_2">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>10</y>
+      <width>131</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>14</pointsize>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="text">
+     <string>DDM:</string>
+    </property>
+   </widget>
+   <zorder>frame</zorder>
+   <zorder>controls_header</zorder>
+   <zorder>listener_title</zorder>
+   <zorder>events_title</zorder>
+   <zorder>stdout_label</zorder>
+   <zorder>events_output</zorder>
+   <zorder>sender_title_2</zorder>
+   <zorder>status_output</zorder>
+   <zorder>controls_header_2</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">

@@ -3,12 +3,12 @@
 //connection class constructor
 Connection::Connection(QString portName)
 
-    : portName(portName)
+    : portName(portName), connected(false)
 {
     //configure this connection to the given port name
     serialPort.setPortName(portName);
 
-    //configure port settings for RS422
+    //configure port settings
     serialPort.setBaudRate(QSerialPort::Baud9600);
     serialPort.setDataBits(QSerialPort::Data8);
     serialPort.setParity(QSerialPort::NoParity);
@@ -17,7 +17,7 @@ Connection::Connection(QString portName)
     //open the port
     serialPort.open(QIODevice::ReadWrite);
 
-    //notify user if there is a failure to open
+    //log result
     if (!serialPort.isOpen())
     {
         qDebug() << "Failed to open " << portName;
@@ -25,6 +25,9 @@ Connection::Connection(QString portName)
     else
     {
         qDebug() << portName << " opened successfully";
+
+        //clear any data already in buffer
+        serialPort.readAll();
     }
 }
 
@@ -46,7 +49,6 @@ void Connection::transmit(QString message)
     //wait for full message to be sent before continuing
     serialPort.waitForBytesWritten(100);
 
-
     if (bytesWritten == -1)
     {
         qWarning() << "Failed to write to " << portName << " : " << serialPort.errorString();
@@ -61,6 +63,10 @@ void Connection::transmit(QString message)
 //destructor for Connection class
 Connection::~Connection()
 {
+    //send message that connection is closing
+    transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + '\n');
+
     qDebug() << "Closing connection on port " << portName;
+
     serialPort.close();
 }

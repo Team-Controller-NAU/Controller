@@ -2,7 +2,12 @@
 
 Status::Status(QObject *parent)
     : QObject{parent}
-{}
+{
+    totalEvents = 0;
+    totalErrors = 0;
+    totalFiringEvents = 0;
+
+}
 
 //given a status message, update status class with new data
 void Status::loadData(QString statusMessage)

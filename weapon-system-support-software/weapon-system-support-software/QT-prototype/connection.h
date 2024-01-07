@@ -3,6 +3,7 @@
 
 #include <QDebug>
 #include <QtSerialPort>
+#include <constants.h>
 
 //use this class when you want to read data from weapon controller
 class Connection : public QObject
@@ -13,17 +14,20 @@ public:
     //qt serial port class
     QSerialPort serialPort;
 
+    //constructor, opens the port with given port name
+    Connection(QString portName);
+
+    //destructor, sends closing message to port then closes port
+    ~Connection();
+
     //stores name of port given upon initialization
     QString portName;
 
-    //constructor, opens the port, applies RS422 serial settings
-    Connection(QString portName);
-
-    //destructor, closes the port
-    ~Connection();
-
+    //true when proper handshake has occurred on connected port
+    bool connected;
 
 public slots:
+    //sends message through port
     void transmit(QString message);
 };
 
