@@ -61,7 +61,7 @@ void CSim::checkConnection(Connection *conn)
             {
             case CLOSING_CONNECTION:
                 // Log
-                qDebug() << "[CSIM] Disconnect message received from DDM. Serial communication halted";
+                qDebug() << "[CSIM] Disconnect message received from DDM. Serial communication halted" << qPrintable("\n");
 
                 // Update flag
                 conn->connected = false;
@@ -70,7 +70,7 @@ void CSim::checkConnection(Connection *conn)
 
             case LISTENING:
                 // Log
-                qDebug() << "[CSIM] DDM listening signal received. Serial communication beginning";
+                qDebug() << "[CSIM] DDM listening signal received. Serial communication beginning"<< qPrintable("\n");
 
                 // Send message to begin serial comm
                 conn->transmit(QString::number(BEGIN) + DELIMETER + '\n');
@@ -147,7 +147,7 @@ void CSim::run()
         {
             i++;
 
-            qDebug() << "bytes available: " << conn->serialPort.bytesAvailable();
+            //qDebug() << "bytes available: " << conn->serialPort.bytesAvailable();
 
             //log empty line (for output formatting)
             qSetMessagePattern("%{message}");
@@ -174,6 +174,9 @@ void CSim::run()
                 //send message through serial port
                 conn->transmit(message);
             }
+
+            //clear message
+            message = "";
 
             //20% chance of generating event
             if ( randomGenerator.bounded(1, 6) == 1)
@@ -217,8 +220,13 @@ void CSim::run()
                     }
 
                     //add event to event dump
-                    eventDumpMessage += message;
+                    eventDumpMessage += message + DELIMETER;
+
+                    qDebug() << "[CSIM] 1 event added to event dump";
                 }
+
+                //clear message
+                message = "";
             }
 
             //20% chance of generating error
@@ -258,12 +266,14 @@ void CSim::run()
                     //check if error dump is empty
                     if (errorDumpMessage.length() == 0)
                     {
-                        //add event dump message identifier
+                        //add error dump message identifier
                         errorDumpMessage = QString::number(ERROR_DUMP) + DELIMETER;
                     }
 
-                    //add event to event dump
-                    errorDumpMessage += message;
+                    //add error to event dump
+                    errorDumpMessage += message + DELIMETER;
+
+                    qDebug() << "[CSIM] 1 error added to error dump";
                 }
             }
 

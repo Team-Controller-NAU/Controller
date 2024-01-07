@@ -222,11 +222,20 @@ void MainWindow::readSerialData()
 
                     qDebug() <<  "Message id: event dump" << qPrintable("\n");
 
+                    //load all events to event linked list
+                    events->loadEventDump(message);
+
                     break;
 
                 case ERROR_DUMP:
 
                     qDebug() <<  "Message id: error dump" << qPrintable("\n");
+
+                    //load all errors to error linked list
+                    events->loadErrorDump(message);
+
+                    //update gui
+
 
                     break;
 
@@ -247,7 +256,7 @@ void MainWindow::readSerialData()
                 case CLOSING_CONNECTION:
 
                     //log
-                    qDebug() << "Controller disconnect message received : " << message;
+                    qDebug() << "Controller disconnect message received";
 
                     //assign conn flag
                     ddmCon->connected = false;
@@ -266,7 +275,7 @@ void MainWindow::readSerialData()
 
                 }
 
-                qDebug() << "remaining buffer: " << ddmCon->serialPort.peek(ddmCon->serialPort.bytesAvailable());
+                //qDebug() << "remaining buffer: " << ddmCon->serialPort.peek(ddmCon->serialPort.bytesAvailable());
         }
     }
     else

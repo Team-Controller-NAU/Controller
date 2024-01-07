@@ -413,11 +413,26 @@ void Events::loadEventData(QString message)
 
 void Events::loadErrorDump(QString message)
 {
+    // Split the dump messages into individual error sets
+    QStringList errorSets = message.split(",,", Qt::SkipEmptyParts);
 
+    // Iterate through the error sets and call loadErrorData for each
+    for (const QString &errorSet : errorSets)
+    {
+        // Call loadErrorData for each individual error set
+        loadErrorData(errorSet);
+    }
 }
 
 void Events::loadEventDump(QString message)
 {
+    // Split the dump messages into individual event sets
+    QStringList eventSets = message.split(",,", Qt::SkipEmptyParts);
 
+    // Iterate through the event sets and call loadEventData for each
+    for (const QString &eventSet : eventSets)
+    {
+        // Call loadEventData for each individual event set
+        loadEventData(eventSet);
+    }
 }
-

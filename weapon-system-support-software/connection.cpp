@@ -55,7 +55,7 @@ void Connection::transmit(QString message)
     }
     else
     {
-        qDebug() << "Message sent through " << portName << " : " << message;
+        qDebug() << "Message sent through " << portName << " : " << message << qPrintable("\n");
         //qDebug() << bytesWritten << " bytes written to the serial port.";
     }
 }
@@ -66,7 +66,7 @@ Connection::~Connection()
     //send message that connection is closing
     transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + '\n');
 
-    qDebug() << "Closing connection on port " << portName;
+    qDebug() << "Closing connection on port " << portName << qPrintable("\n");
 
     serialPort.close();
 }

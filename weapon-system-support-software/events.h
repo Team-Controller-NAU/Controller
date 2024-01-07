@@ -33,6 +33,7 @@ public:
 
     void loadErrorData(QString message);
     void loadEventData(QString message);
+
     void loadEventDump(QString message);
     void loadErrorDump(QString message);
 
