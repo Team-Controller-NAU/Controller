@@ -378,3 +378,33 @@ void MainWindow::on_handshake_button_clicked()
     }
 }
 
+//sends user to settings page when clicked
+void MainWindow::on_SettingsPageButton_clicked()
+{
+    ui->Flow_Label->setCurrentIndex(2);
+}
+
+//sends user to events page when clicked
+void MainWindow::on_EventsPageButton_clicked()
+{
+    ui->Flow_Label->setCurrentIndex(0);
+}
+
+//sends user to status page when clicked
+void MainWindow::on_StatusPageButton_clicked()
+{
+    ui->Flow_Label->setCurrentIndex(4);
+}
+
+//sends user to electrical page when clicked
+void MainWindow::on_ElectricalPageButton_clicked()
+{
+    ui->Flow_Label->setCurrentIndex(3);
+}
+
+//sends user to developer page when clicked
+void MainWindow::on_DevPageButton_clicked()
+{
+    ui->Flow_Label->setCurrentIndex(1);
+}
+

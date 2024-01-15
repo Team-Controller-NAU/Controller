@@ -55,6 +55,16 @@ private slots:
     void on_handshake_button_clicked();
     void handshake();
 
+    void on_SettingsPageButton_clicked();
+
+    void on_EventsPageButton_clicked();
+
+    void on_StatusPageButton_clicked();
+
+    void on_ElectricalPageButton_clicked();
+
+    void on_DevPageButton_clicked();
+
 private:
     Ui::MainWindow *ui;
 };
