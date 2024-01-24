@@ -239,7 +239,7 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
                </property>
               </widget>
              </item>
-             <item row="0" column="1" alignment="Qt::AlignRight|Qt::AlignBottom">
+             <item row="0" column="5" alignment="Qt::AlignRight|Qt::AlignBottom">
               <widget class="QComboBox" name="FilterBox">
                <property name="styleSheet">
                 <string notr="true">color: rgb(255, 255, 255);
@@ -251,59 +251,11 @@ border-color: rgb(255, 255, 255);</string>
                </property>
               </widget>
              </item>
-             <item row="4" column="0" colspan="2">
+             <item row="5" column="0" colspan="6">
               <layout class="QGridLayout" name="EventStatus">
                <property name="verticalSpacing">
                 <number>1</number>
                </property>
-               <item row="0" column="2" alignment="Qt::AlignHCenter">
-                <widget class="QLabel" name="ClearedErrorsLabel">
-                 <property name="maximumSize">
-                  <size>
-                   <width>16777215</width>
-                   <height>25</height>
-                  </size>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">color: rgb(255, 255, 255);font: 16pt &quot;Segoe UI&quot;;</string>
-                 </property>
-                 <property name="text">
-                  <string>Cleared Errors</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="3" alignment="Qt::AlignHCenter">
-                <widget class="QLabel" name="ActiveErrorsLabel">
-                 <property name="maximumSize">
-                  <size>
-                   <width>16777215</width>
-                   <height>25</height>
-                  </size>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">color: rgb(255, 255, 255);font: 16pt &quot;Segoe UI&quot;;</string>
-                 </property>
-                 <property name="text">
-                  <string>Active Errors</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="1" alignment="Qt::AlignHCenter">
-                <widget class="QLabel" name="TotalErrorsLabel_2">
-                 <property name="maximumSize">
-                  <size>
-                   <width>16777215</width>
-                   <height>25</height>
-                  </size>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">color: rgb(255, 255, 255);font: 16pt &quot;Segoe UI&quot;;</string>
-                 </property>
-                 <property name="text">
-                  <string>Total Errors</string>
-                 </property>
-                </widget>
-               </item>
                <item row="0" column="0" alignment="Qt::AlignHCenter">
                 <widget class="QLabel" name="TotalEventsLabel">
                  <property name="maximumSize">
@@ -324,6 +276,54 @@ font: 16pt &quot;Segoe UI&quot;;</string>
                  </property>
                 </widget>
                </item>
+               <item row="1" column="2">
+                <widget class="QTextEdit" name="ClearedErrorsOutput">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>50</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(255, 255, 255);
+background-color: rgb(39, 39, 39);
+border:none;
+font: 22pt &quot;Segoe UI&quot;;</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1" alignment="Qt::AlignHCenter">
+                <widget class="QLabel" name="TotalErrorsLabel_2">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>25</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(255, 255, 255);font: 16pt &quot;Segoe UI&quot;;</string>
+                 </property>
+                 <property name="text">
+                  <string>Total Errors</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="3">
+                <widget class="QPlainTextEdit" name="ActiveErrorOutput">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>50</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(255, 255, 255);
+background-color: rgb(39, 39, 39);
+border:none;
+font: 22pt &quot;Segoe UI&quot;;</string>
+                 </property>
+                </widget>
+               </item>
                <item row="1" column="0">
                 <widget class="QTextEdit" name="TotalEventsOutput">
                  <property name="maximumSize">
@@ -337,6 +337,22 @@ font: 16pt &quot;Segoe UI&quot;;</string>
 background-color: rgb(39, 39, 39);
 border:none;
 font: 22pt &quot;Segoe UI&quot;;</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="2" alignment="Qt::AlignHCenter">
+                <widget class="QLabel" name="ClearedErrorsLabel">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>25</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(255, 255, 255);font: 16pt &quot;Segoe UI&quot;;</string>
+                 </property>
+                 <property name="text">
+                  <string>Cleared Errors</string>
                  </property>
                 </widget>
                </item>
@@ -362,41 +378,58 @@ font: 22pt &quot;Segoe UI&quot;;</string>
                  </property>
                 </widget>
                </item>
-               <item row="1" column="2">
-                <widget class="QTextEdit" name="ClearedErrorsOutput">
+               <item row="0" column="3" alignment="Qt::AlignHCenter">
+                <widget class="QLabel" name="ActiveErrorsLabel">
                  <property name="maximumSize">
                   <size>
                    <width>16777215</width>
-                   <height>50</height>
+                   <height>25</height>
                   </size>
                  </property>
                  <property name="styleSheet">
-                  <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(39, 39, 39);
-border:none;
-font: 22pt &quot;Segoe UI&quot;;</string>
+                  <string notr="true">color: rgb(255, 255, 255);font: 16pt &quot;Segoe UI&quot;;</string>
+                 </property>
+                 <property name="text">
+                  <string>Active Errors</string>
                  </property>
                 </widget>
                </item>
-               <item row="1" column="3">
-                <widget class="QPlainTextEdit" name="ActiveErrorOutput">
-                 <property name="maximumSize">
+               <item row="2" column="3">
+                <widget class="QPushButton" name="download_button">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="baseSize">
                   <size>
-                   <width>16777215</width>
-                   <height>50</height>
+                   <width>0</width>
+                   <height>0</height>
                   </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>Segoe UI</family>
+                   <pointsize>12</pointsize>
+                   <italic>false</italic>
+                   <bold>false</bold>
+                   <kerning>true</kerning>
+                  </font>
+                 </property>
+                 <property name="layoutDirection">
+                  <enum>Qt::LeftToRight</enum>
                  </property>
                  <property name="styleSheet">
                   <string notr="true">color: rgb(255, 255, 255);
 background-color: rgb(39, 39, 39);
-border:none;
-font: 22pt &quot;Segoe UI&quot;;</string>
+font: 12pt &quot;Segoe UI&quot;;</string>
+                 </property>
+                 <property name="text">
+                  <string>Download</string>
                  </property>
                 </widget>
                </item>
               </layout>
              </item>
-             <item row="1" column="0" rowspan="3" colspan="2">
+             <item row="2" column="0" rowspan="3" colspan="6">
               <widget class="QTextEdit" name="events_output">
                <property name="styleSheet">
                 <string notr="true">color: rgb(255, 255, 255);
