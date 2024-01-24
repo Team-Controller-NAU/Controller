@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     ui(new Ui::MainWindow),
     ddmCon(nullptr),
+    reconnect(false),
     status(new Status()),
     events(new Events()),
     handshakeTimer( new QTimer(this) )
@@ -157,7 +158,7 @@ void MainWindow::readSerialData()
     //ensure port is open to prevent possible errors
     if (ddmCon->serialPort.isOpen())
     {
-        //read lines until all sent data is processed
+        //read lines until all data in buffer is processed
         while (ddmCon->serialPort.bytesAvailable() > 0)
         {
             //get serialized string from port
@@ -261,8 +262,15 @@ void MainWindow::readSerialData()
                     //assign conn flag
                     ddmCon->connected = false;
 
-                    //attempt handshake to reconnect, optional setting?
-                    //on_handshake_button_clicked();
+                    if (reconnect)
+                    {
+                        //attempt handshake to reconnect, (optional setting)
+                        on_handshake_button_clicked();
+                    }
+                    else
+                    {
+                        ui->handshake_button->setText("Handshake");
+                    }
 
                     break;
 
