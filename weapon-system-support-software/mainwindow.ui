@@ -580,20 +580,6 @@ border-right-color: rgb(255, 255, 255);</string>
                 </property>
                </widget>
               </item>
-              <item row="2" column="0" colspan="2">
-               <widget class="QPushButton" name="handshake_button">
-                <property name="styleSheet">
-                 <string notr="true">background-color: rgb(47, 47, 47);
-color: rgb(255, 255, 255);
-border-color: rgb(255, 255, 255);
-border-top-color: rgb(255, 255, 255);
-border-right-color: rgb(255, 255, 255);</string>
-                </property>
-                <property name="text">
-                 <string>Handshake</string>
-                </property>
-               </widget>
-              </item>
               <item row="3" column="0" colspan="2">
                <widget class="QLineEdit" name="message_contents">
                 <property name="styleSheet">
@@ -920,25 +906,6 @@ font: 20pt &quot;Segoe UI&quot;;</string>
                </property>
               </widget>
              </item>
-             <item row="4" column="0">
-              <widget class="QPushButton" name="diconnect_Button">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(254, 28, 28);
-border-color: rgb(255, 255, 255);
-font: 15pt &quot;Segoe UI&quot;;</string>
-               </property>
-               <property name="text">
-                <string>DISCONNECT</string>
-               </property>
-              </widget>
-             </item>
              <item row="4" column="3">
               <widget class="QPushButton" name="save_Button">
                <property name="sizePolicy">
@@ -990,6 +957,20 @@ font: 15pt &quot;Segoe UI&quot;;</string>
                </property>
               </widget>
              </item>
+             <item row="4" column="0">
+              <widget class="QPushButton" name="handshake_button">
+               <property name="styleSheet">
+                <string notr="true">background-color: rgb(47, 47, 47);
+color: rgb(255, 255, 255);
+border-color: rgb(255, 255, 255);
+border-top-color: rgb(255, 255, 255);
+border-right-color: rgb(255, 255, 255);</string>
+               </property>
+               <property name="text">
+                <string>Handshake</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </widget>
            <widget class="QWidget" name="Electrial_Page">
@@ -1018,7 +999,7 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>884</width>
+                  <width>614</width>
                   <height>744</height>
                  </rect>
                 </property>

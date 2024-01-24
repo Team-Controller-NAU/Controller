@@ -35,6 +35,8 @@ public:
     QString csimPortName;
     QString ddmPortName;
     QTimer* handshakeTimer;
+    //set true to enable automatic handshake once CSim sends closing connection message
+    bool reconnect;
 
 
 private slots:

@@ -26,7 +26,7 @@ Connection::Connection(QString portName)
     {
         qDebug() << portName << " opened successfully";
 
-        //clear any data already in buffer
+        serialPort.clear();
         serialPort.readAll();
     }
 }

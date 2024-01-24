@@ -34,6 +34,8 @@ void CSim::startCSim(QString portNameInput)
     if (!isRunning())
     {
         qDebug() << "[CSIM] Starting CSim in seperate thread";
+
+        //sets up thread and calls run()
         start();
     }
 }
@@ -126,7 +128,7 @@ void CSim::run()
     try
     {
         //Use smart pointers for automatic memory management (resources auto free when function exits)
-        std::unique_ptr<Connection> conn(new Connection(portName));
+        Connection *conn(new Connection(portName));
         std::unique_ptr<Status> status(new Status());
         std::unique_ptr<Events> events(new Events());
 
@@ -141,6 +143,8 @@ void CSim::run()
         QString message;
         int eventId = 0;
         stop = false;
+
+        conn->connected = false;
 
         //loop until told to stop by owner of csim handle
         while (!stop)
@@ -160,7 +164,7 @@ void CSim::run()
             status->randomize();
 
             //check conn before transmission
-            checkConnection(conn.get());
+            checkConnection(conn);
 
             //check if currently connected
             if (conn->connected)
@@ -182,7 +186,7 @@ void CSim::run()
             if ( randomGenerator.bounded(1, 6) == 1)
             {
                 //check conn before transmission
-                checkConnection(conn.get());
+                checkConnection(conn);
 
                 //check if currently connected
                 if (conn->connected)
@@ -233,7 +237,7 @@ void CSim::run()
             if ( randomGenerator.bounded(1, 6) == 1)
             {
                 //check conn before transmission
-                checkConnection(conn.get());
+                checkConnection(conn);
 
                 //check if currently connected
                 if (conn->connected)
@@ -280,6 +284,7 @@ void CSim::run()
             //wait for 2 seconds while monitoring serial port
             conn->serialPort.waitForReadyRead(2000);
         }
+        delete conn;
     }
     //error handling triggered, report error
     catch (const std::exception &ex)
