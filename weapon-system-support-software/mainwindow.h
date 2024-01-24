@@ -65,6 +65,8 @@ private slots:
 
     void on_DevPageButton_clicked();
 
+    void on_download_button_clicked();
+
 private:
     Ui::MainWindow *ui;
 };

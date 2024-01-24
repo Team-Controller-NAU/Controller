@@ -408,3 +408,10 @@ void MainWindow::on_DevPageButton_clicked()
     ui->Flow_Label->setCurrentIndex(1);
 }
 
+//download button for events in CSV format
+void MainWindow::on_download_button_clicked()
+{
+    //infrastructure needed for issue #4
+
+}
+
