@@ -35,9 +35,17 @@ public:
     QString csimPortName;
     QString ddmPortName;
     QTimer* handshakeTimer;
+    EventFilter eventFilter;
     //set true to enable automatic handshake once CSim sends closing connection message
     bool reconnect;
 
+signals:
+    //signal to be connected to csim's completeTransmissionRequest() slot
+    //will tell csim to send the message
+    void transmissionRequest(QString message);
+
+    //signal will be connected to csims clearError() slot.
+    void clearErrorRequest(int clearedId);
 
 private slots:
     //all gui slots go here. Any time an event happens, you may connect to a slot here
@@ -68,6 +76,10 @@ private slots:
     void on_DevPageButton_clicked();
 
     void on_download_button_clicked();
+
+    void on_clear_error_button_clicked();
+
+    void update_non_cleared_error_selection();
 
 private:
     Ui::MainWindow *ui;

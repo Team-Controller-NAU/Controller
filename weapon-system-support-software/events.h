@@ -23,13 +23,18 @@ public:
 
     void addEvent(int id, QString timeStamp, QString eventString);
     void addError(int id, QString timeStamp, QString eventString, bool cleared);
+    void freeError(int id);
     void freeLinkedLists();
     void outputToLogFile(std::string logFileName);
     bool clearError(int id);
 
+    void displayErrorLL();
+
     QString generateNodeMessage(EventNode *event);
     QString generateDataDump(EventNode *headPtr);
     QString generateClearedMessage(EventNode *error);
+
+    int getErrorIdByPosition(int pos);
 
     void loadErrorData(QString message);
     void loadEventData(QString message);

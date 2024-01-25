@@ -29,6 +29,9 @@ enum SerialMessageIdentifier { /*the following identifiers are used to id contro
                                /*the following identifiers are used for synchronization*/
                                LISTENING = 7, BEGIN = 8, CLOSING_CONNECTION = 9};
 
+//for filtering the event page output
+enum EventFilter {ALL, EVENTS, ERRORS, CLEARED_ERRORS, NON_CLEARED_ERRORS};
+
 const QString DELIMETER = ",";
 
 //set true to enable handshake timeout after timeout duration has passed if ddm is still not connected
@@ -49,5 +52,7 @@ const QString ERROR_MESSAGES[NUM_ERROR_MESSAGES] = {"Sample error message 1.22",
 
 const int NUM_ERROR_DELIMETERS = 4;
 const int NUM_EVENT_DELIMETERS = 3;
+
+const int DATA_NOT_FOUND = -101;
 
 #endif // CONSTANTS_H

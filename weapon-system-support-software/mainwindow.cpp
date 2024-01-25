@@ -11,9 +11,13 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     ui(new Ui::MainWindow),
     ddmCon(nullptr),
+    //setting determines if automatic handshake starts after csim disconnects
     reconnect(false),
     status(new Status()),
     events(new Events()),
+    //this determines what will be shown on the events page
+    eventFilter(ALL),
+    //timer is used to repeatedly transmit handshake signals
     handshakeTimer( new QTimer(this) )
 
 {
@@ -69,6 +73,12 @@ MainWindow::MainWindow(QWidget *parent)
     //this is necessary to prevent the gui from freezing. signals stop when timer is stoped
     connect(handshakeTimer, &QTimer::timeout, this, &MainWindow::handshake);
 
+    //connect custom transmission requests from ddm to csims execution slot
+    connect(this, &MainWindow::transmissionRequest, csimHandle, &CSim::completeTransmissionRequest);
+
+    //connect custom clear error requests from ddm to csims execution slot
+    connect(this, &MainWindow::clearErrorRequest, csimHandle, &CSim::clearError);
+
     //if handshake timeout is enabled, setup signal to timeout
     if (HANDSHAKE_TIMEOUT)
     {
@@ -113,8 +123,7 @@ void MainWindow::on_CSim_button_clicked()
         csimHandle->quit();
         csimHandle->wait();
 
-        //enable custom message inputs
-        ui->send_message_button->setEnabled(true);
+        //enable csim port selection
         ui->csim_port_selection->setEnabled(true);
     }
     //csim is not running, start it
@@ -126,8 +135,7 @@ void MainWindow::on_CSim_button_clicked()
         //start csim
         csimHandle->startCSim(csimPortName);
 
-        //temporarily disable custom message inputs
-        ui->send_message_button->setEnabled(false);
+        //temporarily disable csim port selection
         ui->csim_port_selection->setEnabled(false);
     }
 }
@@ -135,9 +143,6 @@ void MainWindow::on_CSim_button_clicked()
 //sends custom user input message
 void MainWindow::on_send_message_button_clicked()
 {
-    //open new connection on com4 (smart pointer auto frees memory when function exits)
-    std::unique_ptr<Connection> conn(new Connection(csimPortName));
-
     //get user input from input box
     QString userInput = ui->message_contents->text();
 
@@ -147,8 +152,21 @@ void MainWindow::on_send_message_button_clicked()
     //clear the contents of input box
     ui->message_contents->clear();
 
-    //send message through csim port
-    conn->transmit(userInput);
+    //check if csim has an active connection
+    if (csimHandle->connPtr != nullptr)
+    {
+        //send signal for csim to transmit message
+        emit transmissionRequest(userInput);
+    }
+    //no active connection from csim, make tmp connection
+    else
+    {
+        //open new connection on com4 (smart pointer auto frees memory when function exits)
+        std::unique_ptr<Connection> conn(new Connection(csimPortName));
+
+        //send message through csim port
+        conn->transmit(userInput);
+    }
 }
 
 //this function is called as a result of the readyRead signal being emmited by a connected serial port
@@ -184,12 +202,12 @@ void MainWindow::readSerialData()
             {
                 case STATUS:
 
+                    qDebug() <<  "Message id: status update" << qPrintable("\n");
+
                     //update status class with new data
                     status->loadData(message);
 
                     ui->status_output->setText(message);
-
-                    qDebug() <<  "Message id: status update" << qPrintable("\n");
 
                     break;
 
@@ -206,16 +224,23 @@ void MainWindow::readSerialData()
 
                 case ERROR:
 
+                    qDebug() <<  "Message id: error update" << qPrintable("\n");
+
                     //add new error to error ll
                     events->loadErrorData(message);
 
+                    //events->displayErrorLL();
+
                     ui->events_output->append(message);
 
-                    qDebug() <<  "Message id: error update" << qPrintable("\n");
+                    //update the cleared error selection box in dev tools
+                    update_non_cleared_error_selection();
 
                     break;
 
                 case ELECTRICAL:
+
+                    qDebug() <<  "Message id: electrical" << qPrintable("\n");
 
                     break;
 
@@ -241,10 +266,13 @@ void MainWindow::readSerialData()
                     break;
 
                 case CLEAR_ERROR:
-                    qDebug() << "Message id: clear error" << qPrintable("\n");
+                    qDebug() << "Message id: clear error " << message << qPrintable("\n");
 
                     //update cleared status of error with given id
-                    events->clearError(message.toInt());
+                    events->clearError(message.left(message.indexOf(DELIMETER)).toInt());
+
+                    //update the cleared error selection box in dev tools
+                    update_non_cleared_error_selection();
 
                     break;
 
@@ -429,5 +457,46 @@ void MainWindow::on_download_button_clicked()
 {
     //infrastructure needed for issue #4
 
+}
+
+void MainWindow::on_clear_error_button_clicked()
+{
+
+    //get error from combo box and split the error on delimeter
+    QStringList errorElements = ui->non_cleared_error_selection->currentText().split(DELIMETER);
+
+    if (errorElements.isEmpty() || errorElements.first().isEmpty())
+    {
+        return;
+    }
+
+    //get the id of the error
+    int errorId = errorElements[0].toInt();
+
+    //make a request to csim to clear the error
+    emit clearErrorRequest(errorId);
+}
+
+void MainWindow::update_non_cleared_error_selection()
+{
+    //clear combo box
+    ui->non_cleared_error_selection->clear();
+
+    //check for valid events ptr
+    if (csimHandle->eventsPtr != nullptr)
+    {
+        //get head node
+        EventNode *wkgPtr = csimHandle->eventsPtr->headErrorNode;
+
+        //loop until list ends
+        while (wkgPtr != nullptr)
+        {
+            //add the uncleared error to the combo box
+            ui->non_cleared_error_selection->addItem(QString::number(wkgPtr->id) + DELIMETER + wkgPtr->eventString);
+
+            //get next error
+            wkgPtr = wkgPtr->nextPtr;
+        }
+    }
 }
 

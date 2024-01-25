@@ -24,7 +24,7 @@ public:
     void startCSim(const QString portNameInput);
 
     //loops until signaled to stop by bool value or threading signals. Generates new status at a time interval
-    //specified by value in constants.h
+    //specified by value in constants.h, generates events and errors randomly, clears non-cleared errors randomly
     //void simulateWeaponController();
     bool stop;
 
@@ -35,11 +35,23 @@ public:
     QString eventDumpMessage;
     QString errorDumpMessage;
 
+    //stores the location of the conn class declared in the run function
+    Connection *connPtr;
+    //stores locatin of events class declared in run function
+    Events *eventsPtr;
+
 public slots:
     void stopSimulation();
 
     //reads messages from ddm, updates connected flag
     void checkConnection(Connection *conn);
+
+    //sends custom message from csim
+    void completeTransmissionRequest(const QString &message);
+
+    //clears error with given id, sends clear error message through
+    //serial port
+    void clearError(int clearedId);
 
 private:
     //overloaded threading function.
