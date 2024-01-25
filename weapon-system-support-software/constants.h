@@ -21,12 +21,13 @@ const int NUM_FIRING_MODE = 4;
 enum FeedPosition {FEEDING=0, CHAMBERING=45, LOCKING=90, FIRING=135, UNLOCKING=180, EXTRACTING=225, EJECTING=270, COCKING=315};
 const int NUM_FEED_POSITION = 8;
 const int FEED_POSITION_INCREMENT_VALUE = 360/NUM_FEED_POSITION;
+//------------
 
 enum SerialMessageIdentifier { /*the following identifiers are used to id controller data*/
                                EVENT_DUMP = 0, ERROR_DUMP = 1, ELECTRICAL = 2, EVENT =3, ERROR =4,
-                               STATUS =5,
+                               STATUS =5, CLEAR_ERROR = 6,
                                /*the following identifiers are used for synchronization*/
-                               LISTENING = 6, BEGIN = 7, CLOSING_CONNECTION = 8};
+                               LISTENING = 7, BEGIN = 8, CLOSING_CONNECTION = 9};
 
 const QString DELIMETER = ",";
 

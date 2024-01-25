@@ -148,7 +148,7 @@ void Events::freeLinkedLists()
 bool Events::clearError(int id)
 {
     //init vars
-    EventNode *wkgPtr = headEventNode;
+    EventNode *wkgPtr = headErrorNode;
 
     //loop through error linked list
     while (wkgPtr != nullptr)
@@ -157,6 +157,9 @@ bool Events::clearError(int id)
         if (wkgPtr->id == id)
         {
             wkgPtr->cleared = true;
+
+            qDebug() << "Error " << id << " cleared";
+
             return true;
         }
 

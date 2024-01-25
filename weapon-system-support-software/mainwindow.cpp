@@ -240,6 +240,14 @@ void MainWindow::readSerialData()
 
                     break;
 
+                case CLEAR_ERROR:
+                    qDebug() << "Message id: clear error" << qPrintable("\n");
+
+                    //update cleared status of error with given id
+                    events->clearError(message.toInt());
+
+                    break;
+
                 case BEGIN:
 
                     //stop handshake protocols
