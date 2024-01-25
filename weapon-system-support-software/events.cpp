@@ -328,87 +328,52 @@ QString Events::generateDataDump(EventNode *headPtr)
 //function developed to handle reading a node message and create a new error node with given data
 void Events::loadErrorData(QString message)
 {
-    //locate first comma
-    int commaPosition = message.indexOf(DELIMETER);
+    // parse message
+    QStringList values = message.split(DELIMETER);
 
-    //extract id
-    int id = message.left(commaPosition).toInt();
+    // check for real error
+    if(values.length() > NUM_ERROR_DELIMETERS)
+    {
+        // get values
+        int id = values[0].toInt();
+        QString timeStamp = values[1];
+        QString eventString = values[2];
 
-    //cut message
-    message = message.right(commaPosition);
+        qDebug() << id << " " << timeStamp << " " << eventString << "\n";
 
-
-
-    //get comma pos
-    commaPosition = message.indexOf(DELIMETER);
-
-    //extract time stamp
-    QString timeStamp = message.left(commaPosition);
-
-    //cut message
-    message = message.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = message.indexOf(DELIMETER);
-
-    //extract event string
-    QString eventString = message.left(commaPosition);
-
-    //cut message
-    message = message.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = message.indexOf(DELIMETER);
-
-    //extract cleared status
-    bool cleared = (message.left(commaPosition) == "1");
-
-
-    //using extracted data, add an error to the end of the error linked list
-    addError(id, timeStamp, eventString, cleared);
+        //using extracted data, add an error to the end of the error linked list
+        addError(id, timeStamp, eventString, false);
+    }
+    else
+    {
+        qDebug() << "Invalid input to load error data: " << message << "\n";
+    }
 }
 
 //function developed to handle reading a node message and create a new event node with given data
 void Events::loadEventData(QString message)
 {
-    //locate first comma
-    int commaPosition = message.indexOf(DELIMETER);
+    // parse data
+    QStringList values = message.split(DELIMETER);
+    qDebug() << values << "\n";
 
-    //extract id
-    int id = message.left(commaPosition).toInt();
+    // check for real event
+    if(values.length() > NUM_EVENT_DELIMETERS)
+    {
+        // get values
+        int id = values[0].toInt();
+        QString timeStamp = values[1];
+        QString eventString = values[2];
 
-    //cut message
-    message = message.right(commaPosition);
+        qDebug() << id << " " << timeStamp << " " << eventString << "\n";
 
-
-
-    //get comma pos
-    commaPosition = message.indexOf(DELIMETER);
-
-    //extract time stamp
-    QString timeStamp = message.left(commaPosition);
-
-    //cut message
-    message = message.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = message.indexOf(DELIMETER);
-
-    //extract event string
-    QString eventString = message.left(commaPosition);
-
-    //cut message
-    message = message.right(commaPosition);
-
-
-    //using extracted data add a new event to the end of the events linked list
-    addEvent( id, timeStamp, eventString);
+        // using extracted data add a new event to the end of the events linked list
+        addEvent( id, timeStamp, eventString);
+    }
+    else
+    {
+        qDebug() << "Invalid input to load event data: " << message << "\n";
+    }
 }
 
 void Events::loadErrorDump(QString message)
@@ -419,8 +384,12 @@ void Events::loadErrorDump(QString message)
     // Iterate through the error sets and call loadErrorData for each
     for (const QString &errorSet : errorSets)
     {
-        // Call loadErrorData for each individual error set
-        loadErrorData(errorSet);
+        // check for empty
+        if(!errorSets.isEmpty() && errorSet != "\n")
+        {
+            // Call loadErrorData for each individual error set
+            loadErrorData(errorSet);
+        }
     }
 }
 
@@ -432,7 +401,11 @@ void Events::loadEventDump(QString message)
     // Iterate through the event sets and call loadEventData for each
     for (const QString &eventSet : eventSets)
     {
-        // Call loadEventData for each individual event set
-        loadEventData(eventSet);
+        // check for empty
+        if(!eventSets.isEmpty() && eventSet != "\n")
+        {
+            // Call loadEventData for each individual event set
+            loadEventData(eventSet);
+        }
     }
 }
