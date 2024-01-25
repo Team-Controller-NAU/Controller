@@ -41,9 +41,12 @@ const QString INITIAL_CSIM_PORT = "COM4";
 const QString INITIAL_DDM_PORT = "COM5";
 
 const int NUM_EVENT_MESSAGES = 3;
-const QString EVENT_MESSAGES[NUM_EVENT_MESSAGES] = {"Sample event message 1", "Sample event message 2, 76, 55.4", "Sample event message 3, 2"};
+const QString EVENT_MESSAGES[NUM_EVENT_MESSAGES] = {"Sample event message 1", "Sample event message 2; 76; 55.4", "Sample event message 3; 2"};
 
 const int NUM_ERROR_MESSAGES = 3;
-const QString ERROR_MESSAGES[NUM_ERROR_MESSAGES] = {"Sample error message 1.22", "Sample error message 2, 5, 0", "Sample error message 3, 677"};
+const QString ERROR_MESSAGES[NUM_ERROR_MESSAGES] = {"Sample error message 1.22", "Sample error message 2; 5; 0", "Sample error message 3; 677"};
+
+const int NUM_ERROR_DELIMETERS = 4;
+const int NUM_EVENT_DELIMETERS = 3;
 
 #endif // CONSTANTS_H

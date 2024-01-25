@@ -258,6 +258,8 @@ void CSim::run()
                 //put random event message in message
                 message += ERROR_MESSAGES[randomGenerator.bounded(0, NUM_ERROR_MESSAGES)] + DELIMETER;
 
+                // TODO: cleared/not cleared
+
                 //check if currently connected
                 if (conn->connected)
                 {
