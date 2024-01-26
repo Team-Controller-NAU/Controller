@@ -79,25 +79,42 @@ void Events::addError(int id, QString timeStamp, QString eventString, bool clear
 
 
     //check if linked list is currently empty
-    if (headEventNode == nullptr)
+    if (headErrorNode == nullptr)
     {
         //assign new node as head of list
-        headEventNode = newNode;
+        headErrorNode = newNode;
 
         //assign tail ptr
-        lastEventNode = newNode;
+        lastErrorNode = newNode;
     }
     //otherwise, ll is not empty
     else
     {
         //append node to list
-        lastEventNode->nextPtr = newNode;
+        lastErrorNode->nextPtr = newNode;
 
-        lastEventNode = newNode;
+        lastErrorNode = newNode;
     }
 
     //log: new err created
     qDebug() << "New error node created. Total nodes: " << totalNodes << " total errors: " << totalErrors;
+}
+
+void Events::displayErrorLL()
+{
+    EventNode *wkgPtr = headErrorNode;
+
+    qDebug() << "====Printing Error Linked List ====";
+    qDebug() << "Total Errors " << totalErrors;
+
+    while (wkgPtr != nullptr)
+    {
+        qDebug() << "Error " << wkgPtr->id << wkgPtr->eventString << wkgPtr->cleared;
+
+        wkgPtr = wkgPtr->nextPtr;
+    }
+
+    qDebug() << "===================================";
 }
 
 //free memory allocated to error and event linked lists
@@ -166,6 +183,8 @@ bool Events::clearError(int id)
         //iterate to next error node
         wkgPtr = wkgPtr->nextPtr;
     }
+
+    qDebug() << "Error " << id << " was not found and could not be cleared";
 
     //no id was found and we reached end of list, return failure
     return false;
@@ -277,6 +296,71 @@ void Events::outputToLogFile(std::string logFileName)
     }
 }
 
+//searches for error with given id, removes it from error linked list (intended for CSim use only)
+void Events::freeError(int id)
+{
+    EventNode *wkgPtr = headErrorNode;
+
+    //check if this error is head node
+    if (headErrorNode->id == id)
+    {
+        //assign new head
+        headErrorNode = headErrorNode->nextPtr;
+
+        //free old head
+        free(wkgPtr);
+
+        //decriment total errors
+        totalErrors--;
+
+        return;
+    }
+
+    //head node is not the error we need to delete, get next
+    wkgPtr = wkgPtr->nextPtr;
+
+    //assign wkgPtr2 to trail wkgPtr
+    EventNode *wkgPtr2 = headErrorNode;
+
+    //loop until list ends
+    while (wkgPtr != nullptr)
+    {
+        //check if current node is to be freed
+        if (wkgPtr->id == id)
+        {
+            //link list around deleted node
+            wkgPtr2->nextPtr = wkgPtr->nextPtr;
+
+            //check if the deleted node is the last node in list
+            if (wkgPtr->nextPtr == nullptr)
+            {
+                //update last node ptr
+                lastErrorNode = wkgPtr2;
+            }
+
+            //delete the node
+            free(wkgPtr);
+
+            //update total errors
+            totalErrors--;
+
+            //return success
+            return;
+        }
+       //otherwise, get next node
+        else
+        {
+            //update trailing ptr
+            wkgPtr2 = wkgPtr;
+            //get next node
+            wkgPtr = wkgPtr->nextPtr;
+        }
+    }
+
+    //no node with given id was found
+    qDebug() << "[CSIM] No node with id " << id << " was found, no deletions made";
+}
+
 //generate message containing data from given event or error, csim will attach an identifier to the
 //begining of message to tell ddm if it is an error or event
 QString Events::generateNodeMessage(EventNode *event)
@@ -328,6 +412,30 @@ QString Events::generateDataDump(EventNode *headPtr)
 }
 
 
+//retrieves the error in position i in the linked list
+int Events::getErrorIdByPosition(int pos)
+{
+    EventNode *wkgPtr = headErrorNode;
+    int i = 0;
+
+    //loop until we reach the position, or ll ends
+    while(i != pos && wkgPtr != nullptr)
+    {
+        //get next error
+        wkgPtr = wkgPtr->nextPtr;
+        i++;
+    }
+
+    //check if we got to correct position
+    if (i == pos)
+    {
+        return wkgPtr->id;
+    }
+
+    //otherwise data not found
+    return DATA_NOT_FOUND;
+}
+
 //function developed to handle reading a node message and create a new error node with given data
 void Events::loadErrorData(QString message)
 {
@@ -341,11 +449,12 @@ void Events::loadErrorData(QString message)
         int id = values[0].toInt();
         QString timeStamp = values[1];
         QString eventString = values[2];
+        bool cleared = (values[3] == "1");
 
         qDebug() << id << " " << timeStamp << " " << eventString << "\n";
 
         //using extracted data, add an error to the end of the error linked list
-        addError(id, timeStamp, eventString, false);
+        addError(id, timeStamp, eventString, cleared);
     }
     else
     {
@@ -382,16 +491,16 @@ void Events::loadEventData(QString message)
 void Events::loadErrorDump(QString message)
 {
     // Split the dump messages into individual error sets
-    QStringList errorSets = message.split(",,", Qt::SkipEmptyParts);
+    QStringList errorSet = message.split(",,", Qt::SkipEmptyParts);
 
     // Iterate through the error sets and call loadErrorData for each
-    for (const QString &errorSet : errorSets)
+    for (const QString &error : errorSet)
     {
         // check for empty
-        if(!errorSets.isEmpty() && errorSet != "\n")
+        if(!errorSet.isEmpty() && error != "\n")
         {
             // Call loadErrorData for each individual error set
-            loadErrorData(errorSet);
+            loadErrorData(error);
         }
     }
 }
@@ -399,16 +508,16 @@ void Events::loadErrorDump(QString message)
 void Events::loadEventDump(QString message)
 {
     // Split the dump messages into individual event sets
-    QStringList eventSets = message.split(",,", Qt::SkipEmptyParts);
+    QStringList eventSet = message.split(",,", Qt::SkipEmptyParts);
 
     // Iterate through the event sets and call loadEventData for each
-    for (const QString &eventSet : eventSets)
+    for (const QString &event : eventSet)
     {
         // check for empty
-        if(!eventSets.isEmpty() && eventSet != "\n")
+        if(!eventSet.isEmpty() && event != "\n")
         {
             // Call loadEventData for each individual event set
-            loadEventData(eventSet);
+            loadEventData(event);
         }
     }
 }
