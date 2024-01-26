@@ -22,6 +22,11 @@ public:
 
     //stores name of port given upon initialization
     QString portName;
+    QSerialPort::BaudRate baudRate;
+    QSerialPort::DataBits dataBits;
+    QSerialPort::Parity parity;
+    QSerialPort::StopBits stopBits;
+    QSerialPort::FlowControl flowControl;
 
     //true when proper handshake has occurred on connected port
     bool connected;

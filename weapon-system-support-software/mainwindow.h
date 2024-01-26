@@ -81,6 +81,21 @@ private slots:
 
     void update_non_cleared_error_selection();
 
+    void setup_connection_settings();
+
+    void on_baud_rate_selection_currentIndexChanged(int index);
+
+    void on_stop_bit_selection_currentIndexChanged(int index);
+
+    void on_flow_control_selection_currentIndexChanged(int index);
+
+    void on_parity_selection_currentIndexChanged(int index);
+
+    void on_data_bits_selection_currentIndexChanged(int index);
+
+    void disableConnectionChanges();
+    void enableConnectionChanges();
+
 private:
     Ui::MainWindow *ui;
 };

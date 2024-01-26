@@ -2,6 +2,8 @@
 #define CONSTANTS_H
 
 #include <QString>
+#include <QSerialPortInfo>
+#include <QSerialPort>
 
 //this file will define enumerated values and constants used elsewhere in code
 
@@ -32,6 +34,16 @@ enum SerialMessageIdentifier { /*the following identifiers are used to id contro
 //for filtering the event page output
 enum EventFilter {ALL, EVENTS, ERRORS, CLEARED_ERRORS, NON_CLEARED_ERRORS};
 
+enum Parity {NO_PARITY, EVEN_PARITY, ODD_PARITY};
+
+enum StopBits {ONE, ONE_AND_A_HALF, TWO};
+
+const QSerialPort::BaudRate INITIAL_BAUD_RATE = QSerialPort::Baud9600;
+const QSerialPort::DataBits INITIAL_DATA_BITS = QSerialPort::Data8;
+const QSerialPort::Parity INITIAL_PARITY = QSerialPort::NoParity;
+const QSerialPort::StopBits INITIAL_STOP_BITS = QSerialPort::OneStop;
+const QSerialPort::FlowControl INITIAL_FLOW_CONTROL = QSerialPort::NoFlowControl;
+
 const QString DELIMETER = ",";
 
 //set true to enable handshake timeout after timeout duration has passed if ddm is still not connected
@@ -50,8 +62,8 @@ const QString EVENT_MESSAGES[NUM_EVENT_MESSAGES] = {"Sample event message 1", "S
 const int NUM_ERROR_MESSAGES = 3;
 const QString ERROR_MESSAGES[NUM_ERROR_MESSAGES] = {"Sample error message 1.22", "Sample error message 2; 5; 0", "Sample error message 3; 677"};
 
-const int NUM_ERROR_DELIMETERS = 4;
-const int NUM_EVENT_DELIMETERS = 3;
+const int NUM_ERROR_DELIMETERS = 3;
+const int NUM_EVENT_DELIMETERS = 2;
 
 const int DATA_NOT_FOUND = -101;
 
