@@ -3,7 +3,9 @@
 //connection class constructor
 Connection::Connection(QString portName)
 
-    : portName(portName), connected(false)
+    : portName(portName), connected(false), baudRate(INITIAL_BAUD_RATE),
+    dataBits(INITIAL_DATA_BITS), parity(INITIAL_PARITY), stopBits(INITIAL_STOP_BITS),
+    flowControl(INITIAL_FLOW_CONTROL)
 {
     //configure this connection to the given port name
     serialPort.setPortName(portName);

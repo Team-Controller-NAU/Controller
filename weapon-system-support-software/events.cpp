@@ -488,6 +488,10 @@ void Events::loadErrorDump(QString message)
     // Split the dump messages into individual error sets
     QStringList errorSet = message.split(",,", Qt::SkipEmptyParts);
 
+    //errorSet[errorSet.size() - 1].append(",");
+
+    qDebug() << errorSet;
+
     // Iterate through the error sets and call loadErrorData for each
     for (const QString &error : errorSet)
     {

@@ -31,8 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     //scan available ports, add port names to port selection combo boxes
-    setup_ddm_port_selection(0);
-    setup_csim_port_selection(0);
+    setup_connection_settings();
 
     // Iterate through items in the port selection combo boxes
     for (int i = 0; i < ui->ddm_port_selection->count(); ++i)
@@ -405,7 +404,9 @@ void MainWindow::on_handshake_button_clicked()
         handshakeTimer->start();
 
         ui->handshake_button->setText("Stop handshake");
-        ui->ddm_port_selection->setEnabled(false);
+
+        //disable changes to connection settings
+        disableConnectionChanges();
     }
     else
     {
@@ -416,7 +417,9 @@ void MainWindow::on_handshake_button_clicked()
         handshakeTimer->stop();
 
         ui->handshake_button->setText("Handshake");
-        ui->ddm_port_selection->setEnabled(true);
+
+        //allow user to modify connection settings
+        enableConnectionChanges();
 
         ddmCon->connected = false;
     }
@@ -500,3 +503,234 @@ void MainWindow::update_non_cleared_error_selection()
     }
 }
 
+//makes all settings in connection settings uneditable (call when ddm connection
+//is made)
+void MainWindow::disableConnectionChanges()
+{
+    ui->ddm_port_selection->setDisabled(true);
+    ui->baud_rate_selection->setDisabled(true);
+    ui->data_bits_selection->setDisabled(true);
+    ui->parity_selection->setDisabled(true);
+    ui->stop_bit_selection->setDisabled(true);
+    ui->flow_control_selection->setDisabled(true);
+}
+
+
+void MainWindow::enableConnectionChanges()
+{
+    ui->ddm_port_selection->setEnabled(true);
+    ui->baud_rate_selection->setEnabled(true);
+    ui->data_bits_selection->setEnabled(true);
+    ui->parity_selection->setEnabled(true);
+    ui->stop_bit_selection->setEnabled(true);
+    ui->flow_control_selection->setEnabled(true);
+}
+
+
+void MainWindow::setup_connection_settings()
+{
+    int i;
+
+    //setup port name selections
+    setup_ddm_port_selection(0);
+    setup_csim_port_selection(0);
+
+    //add settings for baud rate
+    for (i=1200; i <= 38400; i*=2 )
+    {
+        ui->baud_rate_selection->addItem(QString::number(i));
+    }
+    ui->baud_rate_selection->addItem(QString::number(57600));
+    ui->baud_rate_selection->addItem(QString::number(115200));
+
+    //add settings for data bits
+    for (i=5; i <= 8; i++)
+    {
+        ui->data_bits_selection->addItem(QString::number(i));
+    }
+
+    //add settings for parity
+    ui->parity_selection->addItem("No Parity");
+    ui->parity_selection->addItem("Even Parity");
+    ui->parity_selection->addItem("Odd Parity");
+    ui->parity_selection->addItem("Space Parity");
+    ui->parity_selection->addItem("Mark Parity");
+
+    //add settings for stop bits
+    ui->stop_bit_selection->addItem("One Stop");
+    ui->stop_bit_selection->addItem("One and Half Stop");
+    ui->stop_bit_selection->addItem("Two Stop");
+
+    //add flow control settings
+    ui->flow_control_selection->addItem("No Flow Control");
+    ui->flow_control_selection->addItem("Hardware Control");
+    ui->flow_control_selection->addItem("Software Control");
+
+    //set starting values
+    ui->baud_rate_selection->setCurrentIndex(ui->baud_rate_selection->findText(QString::number(INITIAL_BAUD_RATE)));
+    ui->data_bits_selection->setCurrentIndex(ui->data_bits_selection->findText(QString::number(INITIAL_DATA_BITS)));
+    ui->parity_selection->setCurrentIndex(static_cast<int>(INITIAL_PARITY));
+    ui->flow_control_selection->setCurrentIndex(static_cast<int>(INITIAL_FLOW_CONTROL));
+
+    switch (INITIAL_STOP_BITS)
+    {
+    case QSerialPort::OneStop:
+        ui->stop_bit_selection->setCurrentIndex(0); // Assuming One Stop is the first item
+        break;
+    case QSerialPort::OneAndHalfStop:
+        ui->stop_bit_selection->setCurrentIndex(1); // Assuming One and a half Stop is the second item
+        break;
+    case QSerialPort::TwoStop:
+        ui->stop_bit_selection->setCurrentIndex(2); // Assuming Two Stop is the third item
+        break;
+    default:
+        // Handle default case
+        break;
+    }
+}
+
+
+void MainWindow::on_baud_rate_selection_currentIndexChanged(int index)
+{
+    if (ddmCon == nullptr) {
+        // Handle case where ddmCon pointer is not initialized
+        return;
+    }
+
+    switch (index)
+    {
+    case 0:
+        ddmCon->baudRate = QSerialPort::Baud1200;
+        break;
+    case 1:
+        ddmCon->baudRate = QSerialPort::Baud2400;
+        break;
+    case 2:
+        ddmCon->baudRate = QSerialPort::Baud4800;
+        break;
+    case 3:
+        ddmCon->baudRate = QSerialPort::Baud9600;
+        break;
+    case 4:
+        ddmCon->baudRate = QSerialPort::Baud19200;
+        break;
+    case 5:
+        ddmCon->baudRate = QSerialPort::Baud38400;
+        break;
+    case 6:
+        ddmCon->baudRate = QSerialPort::Baud57600;
+        break;
+    case 7:
+        ddmCon->baudRate = QSerialPort::Baud115200;
+        break;
+    default:
+        // Handle default case
+        break;
+    }
+}
+
+
+void MainWindow::on_stop_bit_selection_currentIndexChanged(int index)
+{
+    if (ddmCon == nullptr) {
+        // Handle case where ddmCon pointer is not initialized
+        return;
+    }
+
+    switch (index)
+    {
+    case 0:
+        ddmCon->stopBits = QSerialPort::OneStop;
+        break;
+    case 1:
+        ddmCon->stopBits = QSerialPort::OneAndHalfStop;
+        break;
+    case 2:
+        ddmCon->stopBits = QSerialPort::TwoStop;
+        break;
+    default:
+        // Handle default case
+        break;
+    }
+}
+
+void MainWindow::on_flow_control_selection_currentIndexChanged(int index)
+{
+    if (ddmCon == nullptr) {
+        // Handle case where ddmCon pointer is not initialized
+        return;
+    }
+
+    switch (index)
+    {
+    case 0:
+        ddmCon->flowControl = QSerialPort::NoFlowControl;
+        break;
+    case 1:
+        ddmCon->flowControl = QSerialPort::HardwareControl;
+        break;
+    case 2:
+        ddmCon->flowControl = QSerialPort::SoftwareControl;
+        break;
+    default:
+        // Handle default case
+        break;
+    }
+}
+
+void MainWindow::on_parity_selection_currentIndexChanged(int index)
+{
+    if (ddmCon == nullptr) {
+        // Handle case where ddmCon pointer is not initialized
+        return;
+    }
+
+    switch (index)
+    {
+    case 0:
+        ddmCon->parity = QSerialPort::NoParity;
+        break;
+    case 1:
+        ddmCon->parity = QSerialPort::EvenParity;
+        break;
+    case 2:
+        ddmCon->parity = QSerialPort::OddParity;
+        break;
+    case 3:
+        ddmCon->parity = QSerialPort::SpaceParity;
+        break;
+    case 4:
+        ddmCon->parity = QSerialPort::MarkParity;
+        break;
+    default:
+        // Handle default case
+        break;
+    }
+}
+
+void MainWindow::on_data_bits_selection_currentIndexChanged(int index)
+{
+    if (ddmCon == nullptr) {
+        // Handle case where ddmCon pointer is not initialized
+        return;
+    }
+
+    switch (index)
+    {
+    case 0:
+        ddmCon->dataBits = QSerialPort::Data5;
+        break;
+    case 1:
+        ddmCon->dataBits = QSerialPort::Data6;
+        break;
+    case 2:
+        ddmCon->dataBits = QSerialPort::Data7;
+        break;
+    case 3:
+        ddmCon->dataBits = QSerialPort::Data8;
+        break;
+    default:
+        // Handle default case
+        break;
+    }
+}
