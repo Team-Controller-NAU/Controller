@@ -11,10 +11,11 @@ Connection::Connection(QString portName)
     serialPort.setPortName(portName);
 
     //configure port settings
-    serialPort.setBaudRate(QSerialPort::Baud9600);
-    serialPort.setDataBits(QSerialPort::Data8);
-    serialPort.setParity(QSerialPort::NoParity);
-    serialPort.setStopBits(QSerialPort::OneStop);
+    serialPort.setBaudRate(INITIAL_BAUD_RATE);
+    serialPort.setDataBits(INITIAL_DATA_BITS);
+    serialPort.setParity(INITIAL_PARITY);
+    serialPort.setStopBits(INITIAL_STOP_BITS);
+    serialPort.setFlowControl(INITIAL_FLOW_CONTROL);
 
     //open the port
     serialPort.open(QIODevice::ReadWrite);

@@ -3,7 +3,7 @@
 //constructor
 CSim::CSim(QObject *parent, QString portName)
     : QThread(parent), stop(false), portName(portName),
-    connPtr(nullptr), eventsPtr(nullptr)
+    connPtr(nullptr), eventsPtr(nullptr), startupTime(QDateTime::currentMSecsSinceEpoch())
 {
     // Avoid class initialization until thread is running
 }
@@ -157,6 +157,23 @@ void CSim::checkConnection(Connection *conn)
     }
 }
 
+//returns a qstring containing the time since start up in D:H:M:S
+QString CSim::getTimeStamp()
+{
+    // Calculate elapsed time since startup
+    qint64 elapsedTime = QDateTime::currentMSecsSinceEpoch() - startupTime;
+
+    // Convert milliseconds to days, hours, minutes, and seconds
+    int days = elapsedTime / (1000 * 60 * 60 * 24);
+    int hours = (elapsedTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60);
+    int minutes = (elapsedTime % (1000 * 60 * 60)) / (1000 * 60);
+    int seconds = (elapsedTime % (1000 * 60)) / 1000;
+
+    // Format the timestamp as "D:H:M:S" and return
+    return QString("%1:%2:%3:%4").arg(days).arg(hours, 2, 10, QLatin1Char('0')).arg(minutes, 2, 10,
+                                     QLatin1Char('0')).arg(seconds, 2, 10, QLatin1Char('0'));
+}
+
 //this function contains main event loop for simulating weapon controller.
 //generates data and sends through serial port at time intervals defined by CSIM_GENERATION_INTERVAL
 //alter time interval from constants.h
@@ -165,12 +182,17 @@ void CSim::run()
     //error handling (isolates potential crash to this thread, and reports reason for crash)
     try
     {
-        //Use smart pointers for automatic memory management (resources auto free when function exits)
+        //init connection
         Connection *conn(new Connection(portName));
         connPtr = conn;
-        std::unique_ptr<Status> status(new Status());
+
+        //init events class (csim only uses this to store non cleared errors so that it can
+        //clear them later)
         Events *events(new Events());
         eventsPtr = events;
+
+        //for status use smart pointer for automatic memory management (resources auto free when function exits)
+        std::unique_ptr<Status> status(new Status());
 
         // Get time based seed for rng
         qint64 seed = QDateTime::currentMSecsSinceEpoch();
@@ -197,8 +219,6 @@ void CSim::run()
         while (!stop)
         {
             i++;
-
-            //qDebug() << "bytes available: " << conn->serialPort.bytesAvailable();
 
             //log empty line (for output formatting)
             qSetMessagePattern("%{message}");
@@ -249,7 +269,7 @@ void CSim::run()
                 eventId++;
 
                 //put time stamp in message
-                message += QTime::currentTime().toString("[hh:mm:ss]") + DELIMETER;
+                message += getTimeStamp() + DELIMETER;
 
                 //put random event message in message
                 message += EVENT_MESSAGES[randomGenerator.bounded(0, NUM_EVENT_MESSAGES)] + DELIMETER;
@@ -300,7 +320,7 @@ void CSim::run()
                 timeStamp = QTime::currentTime().toString("[hh:mm:ss]");
 
                 //put time stamp in message
-                message += timeStamp + DELIMETER;
+                message += getTimeStamp() + DELIMETER;
 
                 //get random error message
                 errorMessage = ERROR_MESSAGES[randomGenerator.bounded(0, NUM_ERROR_MESSAGES)];
