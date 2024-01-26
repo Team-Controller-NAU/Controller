@@ -11,12 +11,15 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     ui(new Ui::MainWindow),
     ddmCon(nullptr),
-    //setting determines if automatic handshake starts after csim disconnects
-    reconnect(false),
     status(new Status()),
     events(new Events()),
+
+    //setting determines if automatic handshake starts after csim disconnects
+    reconnect(false),
+
     //this determines what will be shown on the events page
     eventFilter(ALL),
+
     //timer is used to repeatedly transmit handshake signals
     handshakeTimer( new QTimer(this) )
 

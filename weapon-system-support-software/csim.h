@@ -35,6 +35,9 @@ public:
     QString eventDumpMessage;
     QString errorDumpMessage;
 
+    //used for generating run time stamp
+    qint64 startupTime;
+
     //stores the location of the conn class declared in the run function
     Connection *connPtr;
     //stores locatin of events class declared in run function
@@ -45,6 +48,9 @@ public slots:
 
     //reads messages from ddm, updates connected flag
     void checkConnection(Connection *conn);
+
+    //returns a qstring containing the time since start up in D:H:M:S
+    QString getTimeStamp();
 
     //sends custom message from csim
     void completeTransmissionRequest(const QString &message);
