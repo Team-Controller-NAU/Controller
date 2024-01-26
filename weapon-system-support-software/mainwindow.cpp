@@ -287,6 +287,7 @@ void MainWindow::readSerialData()
                     qDebug() << "Begin signal received, handshake complete";
 
                     ui->handshake_button->setText("Disconnect");
+                    ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #FE1C1C;font: 15pt Segoe UI;");
 
                     ddmCon->connected = true;
 
@@ -307,7 +308,8 @@ void MainWindow::readSerialData()
                     }
                     else
                     {
-                        ui->handshake_button->setText("Handshake");
+                        ui->handshake_button->setText("Connect");
+                        ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #14AE5C;font: 15pt Segoe UI;");
                     }
 
                     break;
@@ -406,7 +408,9 @@ void MainWindow::on_handshake_button_clicked()
         // Start the timer to periodically check the handshake status
         handshakeTimer->start();
 
-        ui->handshake_button->setText("Stop handshake");
+        ui->handshake_button->setText("Connecting");
+        ui->handshake_button->setStyleSheet("color: #FFFFFF;border-color: rgb(255, 255, 255);background-color: #FF7518;font: 15pt Segoe UI;");
+        ui->ddm_port_selection->setEnabled(false);
 
         //disable changes to connection settings
         disableConnectionChanges();
@@ -419,7 +423,9 @@ void MainWindow::on_handshake_button_clicked()
 
         handshakeTimer->stop();
 
-        ui->handshake_button->setText("Handshake");
+        ui->handshake_button->setText("Connect");
+        ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #14AE5C;font: 15pt Segoe UI;");
+        ui->ddm_port_selection->setEnabled(true);
 
         //allow user to modify connection settings
         enableConnectionChanges();
@@ -432,30 +438,49 @@ void MainWindow::on_handshake_button_clicked()
 void MainWindow::on_SettingsPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(2);
+    resetPageButton();
+    ui->SettingsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;");
 }
 
 //sends user to events page when clicked
 void MainWindow::on_EventsPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(0);
+    resetPageButton();
+    ui->EventsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;");
 }
 
 //sends user to status page when clicked
 void MainWindow::on_StatusPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(4);
+    resetPageButton();
+    ui->StatusPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;");
 }
 
 //sends user to electrical page when clicked
 void MainWindow::on_ElectricalPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(3);
+    resetPageButton();
+    ui->ElectricalPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;");
 }
 
 //sends user to developer page when clicked
 void MainWindow::on_DevPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(1);
+    resetPageButton();
+    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;");
+}
+
+void MainWindow::resetPageButton()
+{
+    ui->SettingsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);border-color: rgb(255, 255, 255);");
+    ui->EventsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);border-color: rgb(255, 255, 255);");
+    ui->StatusPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);border-color: rgb(255, 255, 255);");
+    ui->ElectricalPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);border-color: rgb(255, 255, 255);");
+    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);border-color: rgb(255, 255, 255);");
 }
 
 //download button for events in CSV format

@@ -75,6 +75,8 @@ private slots:
 
     void on_DevPageButton_clicked();
 
+    void resetPageButton();
+
     void on_download_button_clicked();
 
     void on_clear_error_button_clicked();
