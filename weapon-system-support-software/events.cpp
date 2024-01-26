@@ -265,7 +265,7 @@ void Events::outputToLogFile(std::string logFileName)
             }
 
             //print data of chosen node
-            logFile << nextPrintPtr->timeStamp.toStdString() << " " << nextPrintPtr->eventString.toStdString();
+            logFile << "ID: " << nextPrintPtr->id << " " << nextPrintPtr->timeStamp.toStdString() << " " << nextPrintPtr->eventString.toStdString();
 
             //check if chosen node is error node
             if (printErr)
@@ -451,8 +451,6 @@ void Events::loadErrorData(QString message)
         QString eventString = values[2];
         bool cleared = (values[3] == "1");
 
-        qDebug() << id << " " << timeStamp << " " << eventString << "\n";
-
         //using extracted data, add an error to the end of the error linked list
         addError(id, timeStamp, eventString, cleared);
     }
@@ -467,7 +465,6 @@ void Events::loadEventData(QString message)
 {
     // parse data
     QStringList values = message.split(DELIMETER);
-    qDebug() << values << "\n";
 
     // check for real event
     if(values.length() > NUM_EVENT_DELIMETERS)
@@ -476,8 +473,6 @@ void Events::loadEventData(QString message)
         int id = values[0].toInt();
         QString timeStamp = values[1];
         QString eventString = values[2];
-
-        qDebug() << id << " " << timeStamp << " " << eventString << "\n";
 
         // using extracted data add a new event to the end of the events linked list
         addEvent( id, timeStamp, eventString);

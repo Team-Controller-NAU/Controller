@@ -272,7 +272,6 @@ void CSim::run()
 
                     //add event to event dump
                     eventDumpMessage += message + DELIMETER;
-
                     qDebug() << "[CSIM] 1 event added to event dump";
                 }
 
@@ -342,7 +341,6 @@ void CSim::run()
 
                     //add error to event dump
                     errorDumpMessage += message + DELIMETER;
-
                     qDebug() << "[CSIM] 1 error added to error dump";
                 }
             }
