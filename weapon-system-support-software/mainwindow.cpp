@@ -462,7 +462,7 @@ void MainWindow::on_DevPageButton_clicked()
 void MainWindow::on_download_button_clicked()
 {
     //infrastructure needed for issue #4
-
+    events->outputToLogFile("logfile.txt");
 }
 
 void MainWindow::on_clear_error_button_clicked()
