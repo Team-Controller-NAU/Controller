@@ -173,16 +173,18 @@ void MainWindow::on_send_message_button_clicked()
 //in other words, this function is called whenever ddm port receives a new message
 void MainWindow::readSerialData()
 {
-    // initialize variables
-    QStringList errorSet;
-    QStringList eventSet;
-
     //ensure port is open to prevent possible errors
     if (ddmCon->serialPort.isOpen())
     {
         //read lines until all data in buffer is processed
         while (ddmCon->serialPort.bytesAvailable() > 0)
         {
+            // declare variables
+            EventNode* wkgErrPtr;
+            EventNode* wkgEventPtr;
+            bool printErr;
+            QString dumpMessage;
+
             //get serialized string from port
             QByteArray serializedMessage = ddmCon->serialPort.readLine();
 
@@ -273,23 +275,28 @@ void MainWindow::readSerialData()
                     // load all events to event linked list
                     events->loadEventDump(message);
 
-                    // split the dump messages into individual event sets
-                    eventSet = message.split(",,", Qt::SkipEmptyParts);
+                    // reset dump
+                    dumpMessage = "";
+                    wkgErrPtr = events->headErrorNode;
+                    wkgEventPtr = events->headEventNode;
+
+                    // loop through all errors and events
+                    while (wkgErrPtr != nullptr || wkgEventPtr != nullptr)
+                    {
+                        // get next to print by ID
+                        EventNode* nextPrintPtr = events->getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
+
+                        // set dump message
+                        if (nextPrintPtr->id != 0) dumpMessage += '\n';
+                        dumpMessage += QString::number(nextPrintPtr->id) + ',' + nextPrintPtr->timeStamp + ',' + nextPrintPtr->eventString + ',';
+                        if (printErr) dumpMessage += (nextPrintPtr->cleared ? "1," : "0,");
+                        dumpMessage += "\n";
+                    }
 
                     // update total events gui
+                    ui->events_output->setText(dumpMessage);
                     ui->TotalEventsOutput->setText(QString::number(events->totalEvents));
                     ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
-
-                    // iterate through the event sets and update gui
-                    for (const QString &event : eventSet)
-                    {
-                        // check for empty
-                        if(!eventSet.isEmpty() && event != "\n")
-                        {
-                            // update gui
-                            ui->events_output->append(event + ",\n");
-                        }
-                    }
 
                     break;
 
@@ -300,21 +307,26 @@ void MainWindow::readSerialData()
                     // load all errors to error linked list
                     events->loadErrorDump(message);
 
-                    // update gui
-                    errorSet = message.split(",,", Qt::SkipEmptyParts);
+                    // reset dump
+                    dumpMessage = "";
+                    wkgErrPtr = events->headErrorNode;
+                    wkgEventPtr = events->headEventNode;
 
-                    // iterate through the error sets and update gui
-                    for (const QString &error : errorSet)
+                    // loop through all errors and events
+                    while (wkgErrPtr != nullptr || wkgEventPtr != nullptr)
                     {
-                        // check for empty
-                        if(!errorSet.isEmpty() && error != "\n")
-                        {
-                            // update gui
-                            ui->events_output->append(error + ",\n");
-                        }
+                        // get next to print by ID
+                        EventNode* nextPrintPtr = events->getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
+
+                        // set dump message
+                        if (nextPrintPtr->id != 0) dumpMessage += '\n';
+                        dumpMessage += QString::number(nextPrintPtr->id) + ',' + nextPrintPtr->timeStamp + ',' + nextPrintPtr->eventString + ',';
+                        if (printErr) dumpMessage += (nextPrintPtr->cleared ? "1," : "0,");
+                        dumpMessage += "\n";
                     }
 
                     // update total errors gui
+                    ui->events_output->setText(dumpMessage);
                     ui->TotalErrorsOutput->setText(QString::number(events->totalErrors));
                     ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
 
