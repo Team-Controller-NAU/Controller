@@ -173,6 +173,10 @@ void MainWindow::on_send_message_button_clicked()
 //in other words, this function is called whenever ddm port receives a new message
 void MainWindow::readSerialData()
 {
+    // initialize variables
+    QStringList errorSet;
+    QStringList eventSet;
+
     //ensure port is open to prevent possible errors
     if (ddmCon->serialPort.isOpen())
     {
@@ -248,8 +252,22 @@ void MainWindow::readSerialData()
 
                     qDebug() <<  "Message id: event dump" << qPrintable("\n");
 
-                    //load all events to event linked list
+                    // load all events to event linked list
                     events->loadEventDump(message);
+
+                    // split the dump messages into individual event sets
+                    eventSet = message.split(",,", Qt::SkipEmptyParts);
+
+                    // // iterate through the event sets and update gui
+                    // for (const QString &event : eventSet)
+                    // {
+                    //     // check for empty
+                    //     if(!eventSet.isEmpty() && event != "\n")
+                    //     {
+                    //         // update gui
+                    //         ui->events_output->append(event + ",\n");
+                    //     }
+                    // }
 
                     break;
 
@@ -257,11 +275,22 @@ void MainWindow::readSerialData()
 
                     qDebug() <<  "Message id: error dump" << qPrintable("\n");
 
-                    //load all errors to error linked list
+                    // load all errors to error linked list
                     events->loadErrorDump(message);
 
-                    //update gui
+                    // update gui
+                    errorSet = message.split(",,", Qt::SkipEmptyParts);
 
+                    // iterate through the error sets and update gui
+                    for (const QString &error : errorSet)
+                    {
+                        // check for empty
+                        if(!errorSet.isEmpty() && error != "\n")
+                        {
+                            // update gui
+                            ui->events_output->append(error + ",\n");
+                        }
+                    }
 
                     break;
 
@@ -431,6 +460,7 @@ void MainWindow::on_SettingsPageButton_clicked()
 //sends user to events page when clicked
 void MainWindow::on_EventsPageButton_clicked()
 {
+    // TODO: first visit refresh page with dump of whole LL??
     ui->Flow_Label->setCurrentIndex(0);
 }
 
@@ -455,8 +485,11 @@ void MainWindow::on_DevPageButton_clicked()
 //download button for events in CSV format
 void MainWindow::on_download_button_clicked()
 {
-    //infrastructure needed for issue #4
-    events->outputToLogFile("logfile.txt");
+    // get current date
+    QString logFileName = QDateTime::currentDateTime().date().toString("MM-dd-yyyy");
+
+    // save logfile
+    events->outputToLogFile(logFileName.toStdString() + "-logfile.txt");
 }
 
 void MainWindow::on_clear_error_button_clicked()

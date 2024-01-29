@@ -27,6 +27,7 @@ public:
     void addError(int id, QString timeStamp, QString eventString, bool cleared);
     void freeError(int id);
     void freeLinkedLists();
+    EventNode* getNextNodeToPrint(EventNode*& eventPtr, EventNode*& errorPtr, bool& printErr);
     void outputToLogFile(std::string logFileName);
     bool clearError(int id);
 
