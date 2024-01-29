@@ -7,6 +7,7 @@ Events::Events()
     totalEvents = 0;
     totalErrors= 0;
     totalNodes= 0;
+    totalCleared = 0;
 
     headEventNode= nullptr;
     lastEventNode= nullptr;
@@ -75,6 +76,7 @@ void Events::addError(int id, QString timeStamp, QString eventString, bool clear
     //increment counters
     totalNodes++;
     totalErrors++;
+    if(cleared) totalCleared++;
 
 
     //check if linked list is currently empty
@@ -175,6 +177,8 @@ bool Events::clearError(int id)
             wkgPtr->cleared = true;
 
             qDebug() << "Error " << id << " cleared";
+
+            totalCleared++;
 
             return true;
         }
@@ -348,6 +352,9 @@ void Events::freeError(int id)
                 //update last node ptr
                 lastErrorNode = wkgPtr2;
             }
+
+            // update total cleared (error does not exist, therefore it can not be cleared)
+            if(wkgPtr->cleared) totalCleared--;
 
             //delete the node
             free(wkgPtr);

@@ -48,6 +48,7 @@ public:
     int totalEvents;
     int totalErrors;
     int totalNodes;
+    int totalCleared;
 
     EventNode *headEventNode;
     EventNode *lastEventNode;

@@ -217,28 +217,46 @@ void MainWindow::readSerialData()
 
                 case EVENT:
 
+                    // status
                     qDebug() <<  "Message id: event update" << qPrintable("\n");
 
                     //add new event to event ll
                     events->loadEventData(message);
 
+                    // update GUI
                     ui->events_output->append(message);
+
+                    // update total events gui
+                    ui->TotalEventsOutput->setText(QString::number(events->totalEvents));
+                    ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
 
                     break;
 
                 case ERROR:
 
+                    // status
                     qDebug() <<  "Message id: error update" << qPrintable("\n");
 
                     //add new error to error ll
                     events->loadErrorData(message);
 
-                    //events->displayErrorLL();
-
+                    // update GUI
                     ui->events_output->append(message);
 
                     //update the cleared error selection box in dev tools
                     update_non_cleared_error_selection();
+
+                    // update total errors gui
+                    ui->TotalErrorsOutput->setText(QString::number(events->totalErrors));
+                    ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
+
+                    // update cleared errors gui
+                    ui->ClearedErrorsOutput->setText(QString::number(events->totalCleared));
+                    ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
+
+                    // update active errors gui
+                    ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
+                    ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
 
                     break;
 
@@ -258,16 +276,20 @@ void MainWindow::readSerialData()
                     // split the dump messages into individual event sets
                     eventSet = message.split(",,", Qt::SkipEmptyParts);
 
-                    // // iterate through the event sets and update gui
-                    // for (const QString &event : eventSet)
-                    // {
-                    //     // check for empty
-                    //     if(!eventSet.isEmpty() && event != "\n")
-                    //     {
-                    //         // update gui
-                    //         ui->events_output->append(event + ",\n");
-                    //     }
-                    // }
+                    // update total events gui
+                    ui->TotalEventsOutput->setText(QString::number(events->totalEvents));
+                    ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
+
+                    // iterate through the event sets and update gui
+                    for (const QString &event : eventSet)
+                    {
+                        // check for empty
+                        if(!eventSet.isEmpty() && event != "\n")
+                        {
+                            // update gui
+                            ui->events_output->append(event + ",\n");
+                        }
+                    }
 
                     break;
 
@@ -292,6 +314,18 @@ void MainWindow::readSerialData()
                         }
                     }
 
+                    // update total errors gui
+                    ui->TotalErrorsOutput->setText(QString::number(events->totalErrors));
+                    ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
+
+                    // update cleared errors gui
+                    ui->ClearedErrorsOutput->setText(QString::number(events->totalCleared));
+                    ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
+
+                    // update active errors gui
+                    ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
+                    ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
+
                     break;
 
                 case CLEAR_ERROR:
@@ -302,6 +336,14 @@ void MainWindow::readSerialData()
 
                     //update the cleared error selection box in dev tools
                     update_non_cleared_error_selection();
+
+                    // update cleared errors gui
+                    ui->ClearedErrorsOutput->setText(QString::number(events->totalCleared));
+                    ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
+
+                    // update active errors gui
+                    ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
+                    ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
 
                     break;
 
