@@ -5,6 +5,7 @@
 #include <status.h>
 #include <connection.h>
 #include <events.h>
+#include <electrical.h>
 #include <QDebug>
 
 // This class simulates the weapon controller, must be called in seperate thread so it doesnt
@@ -35,10 +36,15 @@ public:
     QString eventDumpMessage;
     QString errorDumpMessage;
 
+    //used for the electrical data dump at beginning of run
+    QString electricalDumpMessage;
+
     //stores the location of the conn class declared in the run function
     Connection *connPtr;
     //stores locatin of events class declared in run function
     Events *eventsPtr;
+
+    electrical *electricalPtr;
 
 public slots:
     void stopSimulation();
