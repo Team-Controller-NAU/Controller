@@ -172,8 +172,8 @@ void CSim::run()
         Events *events(new Events());
         eventsPtr = events;
 
-        electrical *electricals(new electrical());
-        electricalPtr = electricals;
+        //electrical *electricals(new electrical());
+        //electricalPtr = electricals;
 
         // Get time based seed for rng
         qint64 seed = QDateTime::currentMSecsSinceEpoch();
