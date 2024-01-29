@@ -1,7 +1,6 @@
 #include "events.h"
 #include "constants.h"
 
-
 Events::Events()
 {
     //initialize variables
@@ -192,8 +191,16 @@ bool Events::clearError(int id)
 
 void Events::outputToLogFile(std::string logFileName)
 {
+    //ask user where to put log file directory
+    QString path = QFileDialog::getExistingDirectory(NULL,
+                                                     QObject::tr("Choose or Create a Logfile Directory"),
+                                                     "/home",
+                                                     QFileDialog::DontResolveSymlinks);
+
+    qDebug() << path << "Path has been chosen";
+
     // Open the log file in overwrite mode
-    std::ofstream logFile(logFileName, std::ios::out);
+    std::ofstream logFile(path.toStdString() + '/' + logFileName, std::ios::out);
 
     if (logFile.is_open())
     {

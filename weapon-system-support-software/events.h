@@ -6,6 +6,8 @@
 #include <QDebug>
 #include <iostream>
 #include <QDateTime>
+#include <QFileDialog>
+
 
 struct EventNode {
     int id;
