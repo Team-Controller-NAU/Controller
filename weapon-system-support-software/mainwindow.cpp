@@ -21,7 +21,10 @@ MainWindow::MainWindow(QWidget *parent)
     eventFilter(ALL),
 
     //timer is used to repeatedly transmit handshake signals
-    handshakeTimer( new QTimer(this) )
+    handshakeTimer( new QTimer(this) ),
+
+    // timer is used to update the GUI
+    lastMessageTimer( new QTimer(this) )
 
 {
     //init vars
@@ -80,6 +83,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     //connect custom clear error requests from ddm to csims execution slot
     connect(this, &MainWindow::clearErrorRequest, csimHandle, &CSim::clearError);
+
+    // connect update elapsed time function to a timer
+    lastMessageTimer->setInterval(2000);
+    connect(lastMessageTimer, &QTimer::timeout, this, &MainWindow::updateTimer);
 
     //if handshake timeout is enabled, setup signal to timeout
     if (HANDSHAKE_TIMEOUT)
@@ -412,6 +419,8 @@ void MainWindow::readSerialData()
 
                 //qDebug() << "remaining buffer: " << ddmCon->serialPort.peek(ddmCon->serialPort.bytesAvailable());
         }
+        // update the timestamp of last received message
+        timeLastReceived = QDateTime::currentDateTime();
     }
     else
     {
@@ -494,6 +503,8 @@ void MainWindow::on_handshake_button_clicked()
 
         // Start the timer to periodically check the handshake status
         handshakeTimer->start();
+        lastMessageTimer->start();
+        timeLastReceived = QDateTime::currentDateTime();
 
         ui->handshake_button->setText("Connecting");
         ui->handshake_button->setStyleSheet("color: #FFFFFF;border-color: rgb(255, 255, 255);background-color: #FF7518;font: 15pt Segoe UI;");
@@ -509,6 +520,7 @@ void MainWindow::on_handshake_button_clicked()
         ddmCon->transmit(QString::number(CLOSING_CONNECTION) + '\n');
 
         handshakeTimer->stop();
+        lastMessageTimer->stop();
 
         ui->handshake_button->setText("Connect");
         ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #14AE5C;font: 15pt Segoe UI;");
@@ -851,5 +863,41 @@ void MainWindow::on_data_bits_selection_currentIndexChanged(int index)
     default:
         // Handle default case
         break;
+    }
+}
+
+// method updates the elapsed time since last message received to DDM
+void MainWindow::updateTimer()
+{
+    // initialize variables
+    QTime elapsedTime;
+    QString message;
+
+    // calculate time elapsed since the last time DDM received a message
+    QDateTime currentTime = QDateTime::currentDateTime();
+
+    // the msecsto method returns the amount of ms from timeLastRecieved to currentTime
+    qint64 elapsedMs = timeLastReceived.msecsTo(currentTime);
+
+    // check for negative elapsed time
+    if(elapsedMs < 0)
+    {
+        qDebug() << "Error: time since last DDM message received is negative.\n";
+    }
+    // check for invalid datetime
+    else if(elapsedMs == 0)
+    {
+        qDebug() << "Error: either datetime is invalid.\n";
+    }
+    // assume positive elapsed time
+    else
+    {
+        // convert back into QTime instead of qint64
+        elapsedTime = QTime(0, 0, 0).addMSecs(elapsedMs);
+
+        // update gui
+        message = "Elapsed time since last message received to DDM: " + elapsedTime.toString("HH:mm:ss");
+        ui->DDMTimer->setText(message);
+        ui->DDMTimer->setAlignment(Qt::AlignRight);
     }
 }

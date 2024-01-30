@@ -35,6 +35,8 @@ public:
     QString csimPortName;
     QString ddmPortName;
     QTimer* handshakeTimer;
+    QTimer* lastMessageTimer;
+    QDateTime timeLastReceived;
     EventFilter eventFilter;
     //set true to enable automatic handshake once CSim sends closing connection message
     bool reconnect;
@@ -50,6 +52,7 @@ signals:
 private slots:
     //all gui slots go here. Any time an event happens, you may connect to a slot here
     //and the mainwindow class can execute functions based on events.
+    void updateTimer();
     void on_CSim_button_clicked();
     void readSerialData();
     void on_send_message_button_clicked();
