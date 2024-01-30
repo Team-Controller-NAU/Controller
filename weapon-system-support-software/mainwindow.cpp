@@ -233,6 +233,8 @@ void MainWindow::readSerialData()
                     // update total events gui
                     ui->TotalEventsOutput->setText(QString::number(events->totalEvents));
                     ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
+                    ui->statusEventOutput->setText(QString::number(events->totalEvents));
+                    ui->statusEventOutput->setAlignment(Qt::AlignCenter);
 
                     break;
 
@@ -253,6 +255,8 @@ void MainWindow::readSerialData()
                     // update total errors gui
                     ui->TotalErrorsOutput->setText(QString::number(events->totalErrors));
                     ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
+                    ui->statusErrorOutput->setText(QString::number(events->totalErrors));
+                    ui->statusErrorOutput->setAlignment(Qt::AlignCenter);
 
                     // update cleared errors gui
                     ui->ClearedErrorsOutput->setText(QString::number(events->totalCleared));
@@ -522,7 +526,7 @@ void MainWindow::on_SettingsPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(2);
     resetPageButton();
-    ui->SettingsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;");
+    ui->SettingsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
 }
 
 //sends user to events page when clicked
@@ -531,7 +535,7 @@ void MainWindow::on_EventsPageButton_clicked()
     // TODO: first visit refresh page with dump of whole LL??
     ui->Flow_Label->setCurrentIndex(0);
     resetPageButton();
-    ui->EventsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;");
+    ui->EventsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
 }
 
 //sends user to status page when clicked
@@ -539,7 +543,7 @@ void MainWindow::on_StatusPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(4);
     resetPageButton();
-    ui->StatusPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;");
+    ui->StatusPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
 }
 
 //sends user to electrical page when clicked
@@ -547,7 +551,7 @@ void MainWindow::on_ElectricalPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(3);
     resetPageButton();
-    ui->ElectricalPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;");
+    ui->ElectricalPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
 }
 
 //sends user to developer page when clicked
@@ -555,16 +559,16 @@ void MainWindow::on_DevPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(1);
     resetPageButton();
-    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;");
+    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
 }
 
 void MainWindow::resetPageButton()
 {
-    ui->SettingsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);border-color: rgb(255, 255, 255);");
-    ui->EventsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);border-color: rgb(255, 255, 255);");
-    ui->StatusPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);border-color: rgb(255, 255, 255);");
-    ui->ElectricalPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);border-color: rgb(255, 255, 255);");
-    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);border-color: rgb(255, 255, 255);");
+    ui->SettingsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
+    ui->EventsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
+    ui->StatusPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
+    ui->ElectricalPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
+    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
 }
 
 //download button for events in CSV format
