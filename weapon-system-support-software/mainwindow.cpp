@@ -181,6 +181,12 @@ void MainWindow::readSerialData()
         //read lines until all data in buffer is processed
         while (ddmCon->serialPort.bytesAvailable() > 0)
         {
+            // declare variables
+            EventNode* wkgErrPtr;
+            EventNode* wkgEventPtr;
+            bool printErr;
+            QString dumpMessage;
+
             //get serialized string from port
             QByteArray serializedMessage = ddmCon->serialPort.readLine();
 
@@ -215,28 +221,46 @@ void MainWindow::readSerialData()
 
                 case EVENT:
 
+                    // status
                     qDebug() <<  "Message id: event update" << qPrintable("\n");
 
                     //add new event to event ll
                     events->loadEventData(message);
 
+                    // update GUI
                     ui->events_output->append(message);
+
+                    // update total events gui
+                    ui->TotalEventsOutput->setText(QString::number(events->totalEvents));
+                    ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
 
                     break;
 
                 case ERROR:
 
+                    // status
                     qDebug() <<  "Message id: error update" << qPrintable("\n");
 
                     //add new error to error ll
                     events->loadErrorData(message);
 
-                    //events->displayErrorLL();
-
+                    // update GUI
                     ui->events_output->append(message);
 
                     //update the cleared error selection box in dev tools
                     update_non_cleared_error_selection();
+
+                    // update total errors gui
+                    ui->TotalErrorsOutput->setText(QString::number(events->totalErrors));
+                    ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
+
+                    // update cleared errors gui
+                    ui->ClearedErrorsOutput->setText(QString::number(events->totalCleared));
+                    ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
+
+                    // update active errors gui
+                    ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
+                    ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
 
                     break;
 
@@ -250,8 +274,31 @@ void MainWindow::readSerialData()
 
                     qDebug() <<  "Message id: event dump" << qPrintable("\n");
 
-                    //load all events to event linked list
+                    // load all events to event linked list
                     events->loadEventDump(message);
+
+                    // reset dump
+                    dumpMessage = "";
+                    wkgErrPtr = events->headErrorNode;
+                    wkgEventPtr = events->headEventNode;
+
+                    // loop through all errors and events
+                    while (wkgErrPtr != nullptr || wkgEventPtr != nullptr)
+                    {
+                        // get next to print by ID
+                        EventNode* nextPrintPtr = events->getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
+
+                        // set dump message
+                        if (nextPrintPtr->id != 0) dumpMessage += '\n';
+                        dumpMessage += QString::number(nextPrintPtr->id) + ',' + nextPrintPtr->timeStamp + ',' + nextPrintPtr->eventString + ',';
+                        if (printErr) dumpMessage += (nextPrintPtr->cleared ? "1," : "0,");
+                        dumpMessage += "\n";
+                    }
+
+                    // update total events gui
+                    ui->events_output->setText(dumpMessage);
+                    ui->TotalEventsOutput->setText(QString::number(events->totalEvents));
+                    ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
 
                     break;
 
@@ -259,11 +306,39 @@ void MainWindow::readSerialData()
 
                     qDebug() <<  "Message id: error dump" << qPrintable("\n");
 
-                    //load all errors to error linked list
+                    // load all errors to error linked list
                     events->loadErrorDump(message);
 
-                    //update gui
+                    // reset dump
+                    dumpMessage = "";
+                    wkgErrPtr = events->headErrorNode;
+                    wkgEventPtr = events->headEventNode;
 
+                    // loop through all errors and events
+                    while (wkgErrPtr != nullptr || wkgEventPtr != nullptr)
+                    {
+                        // get next to print by ID
+                        EventNode* nextPrintPtr = events->getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
+
+                        // set dump message
+                        if (nextPrintPtr->id != 0) dumpMessage += '\n';
+                        dumpMessage += QString::number(nextPrintPtr->id) + ',' + nextPrintPtr->timeStamp + ',' + nextPrintPtr->eventString + ',';
+                        if (printErr) dumpMessage += (nextPrintPtr->cleared ? "1," : "0,");
+                        dumpMessage += "\n";
+                    }
+
+                    // update total errors gui
+                    ui->events_output->setText(dumpMessage);
+                    ui->TotalErrorsOutput->setText(QString::number(events->totalErrors));
+                    ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
+
+                    // update cleared errors gui
+                    ui->ClearedErrorsOutput->setText(QString::number(events->totalCleared));
+                    ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
+
+                    // update active errors gui
+                    ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
+                    ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
 
                     break;
 
@@ -275,6 +350,14 @@ void MainWindow::readSerialData()
 
                     //update the cleared error selection box in dev tools
                     update_non_cleared_error_selection();
+
+                    // update cleared errors gui
+                    ui->ClearedErrorsOutput->setText(QString::number(events->totalCleared));
+                    ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
+
+                    // update active errors gui
+                    ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
+                    ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
 
                     break;
 
@@ -445,6 +528,7 @@ void MainWindow::on_SettingsPageButton_clicked()
 //sends user to events page when clicked
 void MainWindow::on_EventsPageButton_clicked()
 {
+    // TODO: first visit refresh page with dump of whole LL??
     ui->Flow_Label->setCurrentIndex(0);
     resetPageButton();
     ui->EventsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;");
@@ -486,8 +570,11 @@ void MainWindow::resetPageButton()
 //download button for events in CSV format
 void MainWindow::on_download_button_clicked()
 {
-    //infrastructure needed for issue #4
-    events->outputToLogFile("logfile.txt");
+    // get current date
+    QString logFileName = QDateTime::currentDateTime().date().toString("MM-dd-yyyy");
+
+    // save logfile
+    events->outputToLogFile(logFileName.toStdString() + "-logfile.txt");
 }
 
 void MainWindow::on_clear_error_button_clicked()

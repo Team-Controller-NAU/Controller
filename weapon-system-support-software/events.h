@@ -6,6 +6,8 @@
 #include <QDebug>
 #include <iostream>
 #include <QDateTime>
+#include <QFileDialog>
+
 
 struct EventNode {
     int id;
@@ -25,6 +27,7 @@ public:
     void addError(int id, QString timeStamp, QString eventString, bool cleared);
     void freeError(int id);
     void freeLinkedLists();
+    EventNode* getNextNodeToPrint(EventNode*& eventPtr, EventNode*& errorPtr, bool& printErr);
     void outputToLogFile(std::string logFileName);
     bool clearError(int id);
 
@@ -45,6 +48,7 @@ public:
     int totalEvents;
     int totalErrors;
     int totalNodes;
+    int totalCleared;
 
     EventNode *headEventNode;
     EventNode *lastEventNode;

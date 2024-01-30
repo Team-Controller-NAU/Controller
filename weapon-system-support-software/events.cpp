@@ -1,13 +1,13 @@
 #include "events.h"
 #include "constants.h"
 
-
 Events::Events()
 {
     //initialize variables
     totalEvents = 0;
     totalErrors= 0;
     totalNodes= 0;
+    totalCleared = 0;
 
     headEventNode= nullptr;
     lastEventNode= nullptr;
@@ -76,6 +76,7 @@ void Events::addError(int id, QString timeStamp, QString eventString, bool clear
     //increment counters
     totalNodes++;
     totalErrors++;
+    if(cleared) totalCleared++;
 
 
     //check if linked list is currently empty
@@ -177,6 +178,8 @@ bool Events::clearError(int id)
 
             qDebug() << "Error " << id << " cleared";
 
+            totalCleared++;
+
             return true;
         }
 
@@ -190,98 +193,110 @@ bool Events::clearError(int id)
     return false;
 }
 
+// analyzes both linked lists to determine what to output next based on ID
+EventNode* Events::getNextNodeToPrint(EventNode*& eventPtr, EventNode*& errorPtr, bool& printErr)
+{
+    // initialize variables
+    EventNode* nextPrintPtr = nullptr;
+
+    // check if both lists have valid ptrs to nodes
+    if (eventPtr != nullptr && errorPtr != nullptr)
+    {
+        // check if next even has lower id than next error
+        if (errorPtr->id > eventPtr->id)
+        {
+            // choose  this event to print
+            nextPrintPtr = eventPtr;
+
+            // set no error flag
+            printErr = false;
+
+            // get next event
+            eventPtr = eventPtr->nextPtr;
+        }
+        else
+        {
+            // choose this error to print
+            nextPrintPtr = errorPtr;
+
+            // set err flag
+            printErr = true;
+
+            // get next error
+            errorPtr = errorPtr->nextPtr;
+        }
+    }
+    // check for only events
+    else if (eventPtr != nullptr)
+    {
+        // choose this event to print
+        nextPrintPtr = eventPtr;
+
+        // set no err flag
+        printErr = false;
+
+        // get next event
+        eventPtr = eventPtr->nextPtr;
+    }
+    // otherwise there are only errors
+    else
+    {
+        // choose this err to print
+        nextPrintPtr = errorPtr;
+
+        // set err flag
+        printErr = true;
+
+        // get next err
+        errorPtr = errorPtr->nextPtr;
+    }
+
+    // return next ptr
+    return nextPrintPtr;
+}
+
 void Events::outputToLogFile(std::string logFileName)
 {
+    //ask user where to put log file directory
+    QString path = QFileDialog::getExistingDirectory(NULL,
+                                                     QObject::tr("Choose or Create a Logfile Directory"),
+                                                     "/home",
+                                                     QFileDialog::DontResolveSymlinks);
+
+    qDebug() << path << "Path has been chosen";
+
     // Open the log file in overwrite mode
-    std::ofstream logFile(logFileName, std::ios::out);
+    std::ofstream logFile(path.toStdString() + '/' + logFileName, std::ios::out);
 
     if (logFile.is_open())
     {
-        //declare variables
-        EventNode *wkgErrPtr = headErrorNode;
-        EventNode *wkgEventPtr = headEventNode;
-        EventNode *nextPrintPtr;
+        // declare variables
+        EventNode* wkgErrPtr = headErrorNode;
+        EventNode* wkgEventPtr = headEventNode;
         bool printErr;
 
-        //get todays date
+        // get today's date
         QString currentDateString = QDateTime::currentDateTime().date().toString("MM/dd/yyyy");
 
-        //print log file header
+        // print log file header
         logFile << "====== " << currentDateString.toStdString() << " ======" << std::endl << std::endl;
 
-        //loop through events and errors
+        // loop through events and errors
         while (wkgErrPtr != nullptr || wkgEventPtr != nullptr)
         {
-            //check if both linked lists have valid ptrs to nodes
-            if (wkgErrPtr != nullptr && wkgEventPtr != nullptr)
-            {
-                //check if next event has lower id than next error
-                if (wkgErrPtr->id > wkgEventPtr->id)
-                {
-                    //choose this event to print
-                    nextPrintPtr = wkgEventPtr;
+            EventNode* nextPrintPtr = getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
 
-                    //set no error flag
-                    printErr = false;
-
-                    //get next event
-                    wkgEventPtr = wkgEventPtr->nextPtr;
-                }
-                else
-                {
-                    //choose this error to print
-                    nextPrintPtr = wkgErrPtr;
-
-                    //set err flag
-                    printErr = true;
-
-                    //get next error
-                    wkgErrPtr = wkgErrPtr->nextPtr;
-                }
-            }
-            //check for only events
-            else if (wkgEventPtr != nullptr)
-            {
-                //choose this event to print
-                nextPrintPtr = wkgEventPtr;
-
-                //set no err flag
-                printErr = false;
-
-                //get next event
-                wkgEventPtr = wkgEventPtr->nextPtr;
-            }
-            //otherwise there are only errors
-            else
-            {
-                //choose this err to print
-                nextPrintPtr = wkgErrPtr;
-
-                //set err flag
-                printErr = true;
-
-                //get next err
-                wkgErrPtr = wkgErrPtr->nextPtr;
-            }
-
-            //print data of chosen node
+            // print data of chosen node
             logFile << "ID: " << nextPrintPtr->id << " " << nextPrintPtr->timeStamp.toStdString() << " " << nextPrintPtr->eventString.toStdString();
 
-            //check if chosen node is error node
+            // check if chosen node is an error node
             if (printErr)
             {
-                //print cleared status
-                if (nextPrintPtr->cleared)
-                {
-                    logFile << ", CLEARED";
-                }
-                else
-                {
-                    logFile << ", NOT CLEARED";
-                }
+                // print cleared status
+                logFile << (nextPrintPtr->cleared ? ", CLEARED" : ", NOT CLEARED");
             }
 
-            //end current line
+            // end the current line
             logFile << std::endl;
         }
 
@@ -337,6 +352,9 @@ void Events::freeError(int id)
                 //update last node ptr
                 lastErrorNode = wkgPtr2;
             }
+
+            // update total cleared (error does not exist, therefore it can not be cleared)
+            if(wkgPtr->cleared) totalCleared--;
 
             //delete the node
             free(wkgPtr);
