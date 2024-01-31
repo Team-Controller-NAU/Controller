@@ -1,5 +1,4 @@
 #include "electrical.h"
-#include "constants.h"
 
 electrical::electrical()
 {
@@ -15,6 +14,8 @@ electrical::electrical()
 electrical::~electrical()
 {
     //call free ll
+    qDebug() << "Deleting Electrical Data";
+    freeLL();
 }
 
 void electrical::addNode(int id, QString name, int voltage, int amps)
