@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>968</width>
-    <height>570</height>
+    <height>596</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -533,6 +533,26 @@ border-color: rgb(255, 255, 255);</string>
                <property name="editable">
                 <bool>false</bool>
                </property>
+               <item>
+                <property name="text">
+                 <string>All Events</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>All Errors</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Cleared Errors</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Non-Cleared Errors</string>
+                </property>
+               </item>
               </widget>
              </item>
              <item row="0" column="0" alignment="Qt::AlignLeft">
@@ -1185,7 +1205,7 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>896</width>
+                  <width>614</width>
                   <height>744</height>
                  </rect>
                 </property>
