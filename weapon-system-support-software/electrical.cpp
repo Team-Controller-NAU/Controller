@@ -1,4 +1,5 @@
 #include "electrical.h"
+#include "constants.h"
 
 electrical::electrical()
 {
@@ -87,4 +88,36 @@ void electrical::freeLL()
     //once out of loop, set head and last to null
     headNode = lastNode = nullptr;
 }
+
+QString electrical::generateElectricalMessage()
+{
+    // electrical components have:
+    /**
+     * name
+     * amps
+     * volts
+     * */
+
+    //add values to message
+    QString message = QString::number(ELECTRICAL) + DELIMETER;
+    message += QString::number(7) + DELIMETER;
+    message += names[rand()%6] + DELIMETER;
+    message += QString::number(rand()%100) + DELIMETER;
+    message += QString::number(rand()%30) + DELIMETER;
+
+    return message + '\n';
+}
+
+void electrical::createElectricalLL()
+{
+    for(int index = 0; index < 6; index ++)
+    {
+        //create a new ll node
+        // uses the index for id, a names list in .h
+        // voltage is a random value from 0 to 99
+        // amp is a random value from 0 to 49
+        addNode(index, names[index], rand() % 100, rand() % 50);
+    }
+}
+
 

@@ -115,6 +115,9 @@ void CSim::checkConnection(Connection *conn)
                 // Send message to begin serial comm
                 conn->transmit(QString::number(BEGIN) + DELIMETER + '\n');
 
+                //dump electrical data
+                conn->transmit(QString::number(ELECTRICAL) + DELIMETER + '\n');
+
                 //check for existing event dump message
                 if (eventDumpMessage.length() > 0)
                 {
