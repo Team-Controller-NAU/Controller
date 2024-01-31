@@ -2,6 +2,8 @@
 #define CONSTANTS_H
 
 #include <QString>
+#include <QSerialPortInfo>
+#include <QSerialPort>
 
 //this file will define enumerated values and constants used elsewhere in code
 
@@ -31,6 +33,16 @@ enum SerialMessageIdentifier { /*the following identifiers are used to id contro
 
 //for filtering the event page output
 enum EventFilter {ALL, EVENTS, ERRORS, CLEARED_ERRORS, NON_CLEARED_ERRORS};
+
+enum Parity {NO_PARITY, EVEN_PARITY, ODD_PARITY};
+
+enum StopBits {ONE, ONE_AND_A_HALF, TWO};
+
+const QSerialPort::BaudRate INITIAL_BAUD_RATE = QSerialPort::Baud9600;
+const QSerialPort::DataBits INITIAL_DATA_BITS = QSerialPort::Data8;
+const QSerialPort::Parity INITIAL_PARITY = QSerialPort::NoParity;
+const QSerialPort::StopBits INITIAL_STOP_BITS = QSerialPort::OneStop;
+const QSerialPort::FlowControl INITIAL_FLOW_CONTROL = QSerialPort::NoFlowControl;
 
 const QString DELIMETER = ",";
 

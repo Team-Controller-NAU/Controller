@@ -11,14 +11,20 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     ui(new Ui::MainWindow),
     ddmCon(nullptr),
-    //setting determines if automatic handshake starts after csim disconnects
-    reconnect(false),
     status(new Status()),
     events(new Events()),
+
+    //setting determines if automatic handshake starts after csim disconnects
+    reconnect(false),
+
     //this determines what will be shown on the events page
     eventFilter(ALL),
+
     //timer is used to repeatedly transmit handshake signals
-    handshakeTimer( new QTimer(this) )
+    handshakeTimer( new QTimer(this) ),
+
+    // timer is used to update the GUI
+    lastMessageTimer( new QTimer(this) )
 
 {
     //init vars
@@ -31,8 +37,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     //scan available ports, add port names to port selection combo boxes
-    setup_ddm_port_selection(0);
-    setup_csim_port_selection(0);
+    setup_connection_settings();
 
     // Iterate through items in the port selection combo boxes
     for (int i = 0; i < ui->ddm_port_selection->count(); ++i)
@@ -78,6 +83,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     //connect custom clear error requests from ddm to csims execution slot
     connect(this, &MainWindow::clearErrorRequest, csimHandle, &CSim::clearError);
+
+    // connect update elapsed time function to a timer
+    lastMessageTimer->setInterval(2000);
+    connect(lastMessageTimer, &QTimer::timeout, this, &MainWindow::updateTimer);
 
     //if handshake timeout is enabled, setup signal to timeout
     if (HANDSHAKE_TIMEOUT)
@@ -179,6 +188,12 @@ void MainWindow::readSerialData()
         //read lines until all data in buffer is processed
         while (ddmCon->serialPort.bytesAvailable() > 0)
         {
+            // declare variables
+            EventNode* wkgErrPtr;
+            EventNode* wkgEventPtr;
+            bool printErr;
+            QString dumpMessage;
+
             //get serialized string from port
             QByteArray serializedMessage = ddmCon->serialPort.readLine();
 
@@ -213,28 +228,50 @@ void MainWindow::readSerialData()
 
                 case EVENT:
 
+                    // status
                     qDebug() <<  "Message id: event update" << qPrintable("\n");
 
                     //add new event to event ll
                     events->loadEventData(message);
 
+                    // update GUI
                     ui->events_output->append(message);
+
+                    // update total events gui
+                    ui->TotalEventsOutput->setText(QString::number(events->totalEvents));
+                    ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
+                    ui->statusEventOutput->setText(QString::number(events->totalEvents));
+                    ui->statusEventOutput->setAlignment(Qt::AlignCenter);
 
                     break;
 
                 case ERROR:
 
+                    // status
                     qDebug() <<  "Message id: error update" << qPrintable("\n");
 
                     //add new error to error ll
                     events->loadErrorData(message);
 
-                    //events->displayErrorLL();
-
+                    // update GUI
                     ui->events_output->append(message);
 
                     //update the cleared error selection box in dev tools
                     update_non_cleared_error_selection();
+
+                    // update total errors gui
+                    ui->TotalErrorsOutput->setText(QString::number(events->totalErrors));
+                    ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
+                    ui->statusErrorOutput->setText(QString::number(events->totalErrors));
+                    ui->statusErrorOutput->setAlignment(Qt::AlignCenter);
+
+                    // update cleared errors gui
+                    ui->ClearedErrorsOutput->setText(QString::number(events->totalCleared));
+                    ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
+
+                    // update active errors gui
+                    ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
+                    ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
 
                     break;
 
@@ -248,8 +285,31 @@ void MainWindow::readSerialData()
 
                     qDebug() <<  "Message id: event dump" << qPrintable("\n");
 
-                    //load all events to event linked list
+                    // load all events to event linked list
                     events->loadEventDump(message);
+
+                    // reset dump
+                    dumpMessage = "";
+                    wkgErrPtr = events->headErrorNode;
+                    wkgEventPtr = events->headEventNode;
+
+                    // loop through all errors and events
+                    while (wkgErrPtr != nullptr || wkgEventPtr != nullptr)
+                    {
+                        // get next to print by ID
+                        EventNode* nextPrintPtr = events->getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
+
+                        // set dump message
+                        if (nextPrintPtr->id != 0) dumpMessage += '\n';
+                        dumpMessage += QString::number(nextPrintPtr->id) + ',' + nextPrintPtr->timeStamp + ',' + nextPrintPtr->eventString + ',';
+                        if (printErr) dumpMessage += (nextPrintPtr->cleared ? "1," : "0,");
+                        dumpMessage += "\n";
+                    }
+
+                    // update total events gui
+                    ui->events_output->setText(dumpMessage);
+                    ui->TotalEventsOutput->setText(QString::number(events->totalEvents));
+                    ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
 
                     break;
 
@@ -257,11 +317,39 @@ void MainWindow::readSerialData()
 
                     qDebug() <<  "Message id: error dump" << qPrintable("\n");
 
-                    //load all errors to error linked list
+                    // load all errors to error linked list
                     events->loadErrorDump(message);
 
-                    //update gui
+                    // reset dump
+                    dumpMessage = "";
+                    wkgErrPtr = events->headErrorNode;
+                    wkgEventPtr = events->headEventNode;
 
+                    // loop through all errors and events
+                    while (wkgErrPtr != nullptr || wkgEventPtr != nullptr)
+                    {
+                        // get next to print by ID
+                        EventNode* nextPrintPtr = events->getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
+
+                        // set dump message
+                        if (nextPrintPtr->id != 0) dumpMessage += '\n';
+                        dumpMessage += QString::number(nextPrintPtr->id) + ',' + nextPrintPtr->timeStamp + ',' + nextPrintPtr->eventString + ',';
+                        if (printErr) dumpMessage += (nextPrintPtr->cleared ? "1," : "0,");
+                        dumpMessage += "\n";
+                    }
+
+                    // update total errors gui
+                    ui->events_output->setText(dumpMessage);
+                    ui->TotalErrorsOutput->setText(QString::number(events->totalErrors));
+                    ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
+
+                    // update cleared errors gui
+                    ui->ClearedErrorsOutput->setText(QString::number(events->totalCleared));
+                    ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
+
+                    // update active errors gui
+                    ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
+                    ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
 
                     break;
 
@@ -274,6 +362,14 @@ void MainWindow::readSerialData()
                     //update the cleared error selection box in dev tools
                     update_non_cleared_error_selection();
 
+                    // update cleared errors gui
+                    ui->ClearedErrorsOutput->setText(QString::number(events->totalCleared));
+                    ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
+
+                    // update active errors gui
+                    ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
+                    ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
+
                     break;
 
                 case BEGIN:
@@ -285,6 +381,7 @@ void MainWindow::readSerialData()
                     qDebug() << "Begin signal received, handshake complete";
 
                     ui->handshake_button->setText("Disconnect");
+                    ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #FE1C1C;font: 15pt Segoe UI;");
 
                     ddmCon->connected = true;
 
@@ -305,7 +402,8 @@ void MainWindow::readSerialData()
                     }
                     else
                     {
-                        ui->handshake_button->setText("Handshake");
+                        ui->handshake_button->setText("Connect");
+                        ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #14AE5C;font: 15pt Segoe UI;");
                     }
 
                     break;
@@ -321,6 +419,8 @@ void MainWindow::readSerialData()
 
                 //qDebug() << "remaining buffer: " << ddmCon->serialPort.peek(ddmCon->serialPort.bytesAvailable());
         }
+        // update the timestamp of last received message
+        timeLastReceived = QDateTime::currentDateTime();
     }
     else
     {
@@ -403,9 +503,15 @@ void MainWindow::on_handshake_button_clicked()
 
         // Start the timer to periodically check the handshake status
         handshakeTimer->start();
+        lastMessageTimer->start();
+        timeLastReceived = QDateTime::currentDateTime();
 
-        ui->handshake_button->setText("Stop handshake");
+        ui->handshake_button->setText("Connecting");
+        ui->handshake_button->setStyleSheet("color: #FFFFFF;border-color: rgb(255, 255, 255);background-color: #FF7518;font: 15pt Segoe UI;");
         ui->ddm_port_selection->setEnabled(false);
+
+        //disable changes to connection settings
+        disableConnectionChanges();
     }
     else
     {
@@ -414,9 +520,14 @@ void MainWindow::on_handshake_button_clicked()
         ddmCon->transmit(QString::number(CLOSING_CONNECTION) + '\n');
 
         handshakeTimer->stop();
+        lastMessageTimer->stop();
 
-        ui->handshake_button->setText("Handshake");
+        ui->handshake_button->setText("Connect");
+        ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #14AE5C;font: 15pt Segoe UI;");
         ui->ddm_port_selection->setEnabled(true);
+
+        //allow user to modify connection settings
+        enableConnectionChanges();
 
         ddmCon->connected = false;
     }
@@ -426,37 +537,60 @@ void MainWindow::on_handshake_button_clicked()
 void MainWindow::on_SettingsPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(2);
+    resetPageButton();
+    ui->SettingsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
 }
 
 //sends user to events page when clicked
 void MainWindow::on_EventsPageButton_clicked()
 {
+    // TODO: first visit refresh page with dump of whole LL??
     ui->Flow_Label->setCurrentIndex(0);
+    resetPageButton();
+    ui->EventsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
 }
 
 //sends user to status page when clicked
 void MainWindow::on_StatusPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(4);
+    resetPageButton();
+    ui->StatusPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
 }
 
 //sends user to electrical page when clicked
 void MainWindow::on_ElectricalPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(3);
+    resetPageButton();
+    ui->ElectricalPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
 }
 
 //sends user to developer page when clicked
 void MainWindow::on_DevPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(1);
+    resetPageButton();
+    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
+}
+
+void MainWindow::resetPageButton()
+{
+    ui->SettingsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
+    ui->EventsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
+    ui->StatusPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
+    ui->ElectricalPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
+    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
 }
 
 //download button for events in CSV format
 void MainWindow::on_download_button_clicked()
 {
-    //infrastructure needed for issue #4
-    events->outputToLogFile("logfile.txt");
+    // get current date
+    QString logFileName = QDateTime::currentDateTime().date().toString("MM-dd-yyyy");
+
+    // save logfile
+    events->outputToLogFile(logFileName.toStdString() + "-logfile.txt");
 }
 
 void MainWindow::on_clear_error_button_clicked()
@@ -500,3 +634,270 @@ void MainWindow::update_non_cleared_error_selection()
     }
 }
 
+//makes all settings in connection settings uneditable (call when ddm connection
+//is made)
+void MainWindow::disableConnectionChanges()
+{
+    ui->ddm_port_selection->setDisabled(true);
+    ui->baud_rate_selection->setDisabled(true);
+    ui->data_bits_selection->setDisabled(true);
+    ui->parity_selection->setDisabled(true);
+    ui->stop_bit_selection->setDisabled(true);
+    ui->flow_control_selection->setDisabled(true);
+}
+
+
+void MainWindow::enableConnectionChanges()
+{
+    ui->ddm_port_selection->setEnabled(true);
+    ui->baud_rate_selection->setEnabled(true);
+    ui->data_bits_selection->setEnabled(true);
+    ui->parity_selection->setEnabled(true);
+    ui->stop_bit_selection->setEnabled(true);
+    ui->flow_control_selection->setEnabled(true);
+}
+
+
+void MainWindow::setup_connection_settings()
+{
+    int i;
+
+    //setup port name selections
+    setup_ddm_port_selection(0);
+    setup_csim_port_selection(0);
+
+    //add settings for baud rate
+    for (i=1200; i <= 38400; i*=2 )
+    {
+        ui->baud_rate_selection->addItem(QString::number(i));
+    }
+    ui->baud_rate_selection->addItem(QString::number(57600));
+    ui->baud_rate_selection->addItem(QString::number(115200));
+
+    //add settings for data bits
+    for (i=5; i <= 8; i++)
+    {
+        ui->data_bits_selection->addItem(QString::number(i));
+    }
+
+    //add settings for parity
+    ui->parity_selection->addItem("No Parity");
+    ui->parity_selection->addItem("Even Parity");
+    ui->parity_selection->addItem("Odd Parity");
+    ui->parity_selection->addItem("Space Parity");
+    ui->parity_selection->addItem("Mark Parity");
+
+    //add settings for stop bits
+    ui->stop_bit_selection->addItem("One Stop");
+    ui->stop_bit_selection->addItem("One and Half Stop");
+    ui->stop_bit_selection->addItem("Two Stop");
+
+    //add flow control settings
+    ui->flow_control_selection->addItem("No Flow Control");
+    ui->flow_control_selection->addItem("Hardware Control");
+    ui->flow_control_selection->addItem("Software Control");
+
+    //set starting values
+    ui->baud_rate_selection->setCurrentIndex(ui->baud_rate_selection->findText(QString::number(INITIAL_BAUD_RATE)));
+    ui->data_bits_selection->setCurrentIndex(ui->data_bits_selection->findText(QString::number(INITIAL_DATA_BITS)));
+    ui->parity_selection->setCurrentIndex(static_cast<int>(INITIAL_PARITY));
+    ui->flow_control_selection->setCurrentIndex(static_cast<int>(INITIAL_FLOW_CONTROL));
+
+    switch (INITIAL_STOP_BITS)
+    {
+    case QSerialPort::OneStop:
+        ui->stop_bit_selection->setCurrentIndex(0); // Assuming One Stop is the first item
+        break;
+    case QSerialPort::OneAndHalfStop:
+        ui->stop_bit_selection->setCurrentIndex(1); // Assuming One and a half Stop is the second item
+        break;
+    case QSerialPort::TwoStop:
+        ui->stop_bit_selection->setCurrentIndex(2); // Assuming Two Stop is the third item
+        break;
+    default:
+        // Handle default case
+        break;
+    }
+}
+
+
+void MainWindow::on_baud_rate_selection_currentIndexChanged(int index)
+{
+    if (ddmCon == nullptr) {
+        // Handle case where ddmCon pointer is not initialized
+        return;
+    }
+
+    switch (index)
+    {
+    case 0:
+        ddmCon->baudRate = QSerialPort::Baud1200;
+        break;
+    case 1:
+        ddmCon->baudRate = QSerialPort::Baud2400;
+        break;
+    case 2:
+        ddmCon->baudRate = QSerialPort::Baud4800;
+        break;
+    case 3:
+        ddmCon->baudRate = QSerialPort::Baud9600;
+        break;
+    case 4:
+        ddmCon->baudRate = QSerialPort::Baud19200;
+        break;
+    case 5:
+        ddmCon->baudRate = QSerialPort::Baud38400;
+        break;
+    case 6:
+        ddmCon->baudRate = QSerialPort::Baud57600;
+        break;
+    case 7:
+        ddmCon->baudRate = QSerialPort::Baud115200;
+        break;
+    default:
+        // Handle default case
+        break;
+    }
+}
+
+
+void MainWindow::on_stop_bit_selection_currentIndexChanged(int index)
+{
+    if (ddmCon == nullptr) {
+        // Handle case where ddmCon pointer is not initialized
+        return;
+    }
+
+    switch (index)
+    {
+    case 0:
+        ddmCon->stopBits = QSerialPort::OneStop;
+        break;
+    case 1:
+        ddmCon->stopBits = QSerialPort::OneAndHalfStop;
+        break;
+    case 2:
+        ddmCon->stopBits = QSerialPort::TwoStop;
+        break;
+    default:
+        // Handle default case
+        break;
+    }
+}
+
+void MainWindow::on_flow_control_selection_currentIndexChanged(int index)
+{
+    if (ddmCon == nullptr) {
+        // Handle case where ddmCon pointer is not initialized
+        return;
+    }
+
+    switch (index)
+    {
+    case 0:
+        ddmCon->flowControl = QSerialPort::NoFlowControl;
+        break;
+    case 1:
+        ddmCon->flowControl = QSerialPort::HardwareControl;
+        break;
+    case 2:
+        ddmCon->flowControl = QSerialPort::SoftwareControl;
+        break;
+    default:
+        // Handle default case
+        break;
+    }
+}
+
+void MainWindow::on_parity_selection_currentIndexChanged(int index)
+{
+    if (ddmCon == nullptr) {
+        // Handle case where ddmCon pointer is not initialized
+        return;
+    }
+
+    switch (index)
+    {
+    case 0:
+        ddmCon->parity = QSerialPort::NoParity;
+        break;
+    case 1:
+        ddmCon->parity = QSerialPort::EvenParity;
+        break;
+    case 2:
+        ddmCon->parity = QSerialPort::OddParity;
+        break;
+    case 3:
+        ddmCon->parity = QSerialPort::SpaceParity;
+        break;
+    case 4:
+        ddmCon->parity = QSerialPort::MarkParity;
+        break;
+    default:
+        // Handle default case
+        break;
+    }
+}
+
+void MainWindow::on_data_bits_selection_currentIndexChanged(int index)
+{
+    if (ddmCon == nullptr) {
+        // Handle case where ddmCon pointer is not initialized
+        return;
+    }
+
+    switch (index)
+    {
+    case 0:
+        ddmCon->dataBits = QSerialPort::Data5;
+        break;
+    case 1:
+        ddmCon->dataBits = QSerialPort::Data6;
+        break;
+    case 2:
+        ddmCon->dataBits = QSerialPort::Data7;
+        break;
+    case 3:
+        ddmCon->dataBits = QSerialPort::Data8;
+        break;
+    default:
+        // Handle default case
+        break;
+    }
+}
+
+// method updates the elapsed time since last message received to DDM
+void MainWindow::updateTimer()
+{
+    // initialize variables
+    QTime elapsedTime;
+    QString message;
+
+    // calculate time elapsed since the last time DDM received a message
+    QDateTime currentTime = QDateTime::currentDateTime();
+
+    // the msecsto method returns the amount of ms from timeLastRecieved to currentTime
+    qint64 elapsedMs = timeLastReceived.msecsTo(currentTime);
+
+    // check for negative elapsed time
+    if(elapsedMs < 0)
+    {
+        qDebug() << "Error: time since last DDM message received is negative.\n";
+    }
+    // check for invalid datetime
+    else if(elapsedMs == 0)
+    {
+        qDebug() << "Error: either datetime is invalid.\n";
+    }
+    // assume positive elapsed time
+    else
+    {
+        // convert back into QTime instead of qint64
+        elapsedTime = QTime(0, 0, 0).addMSecs(elapsedMs);
+
+        // update gui
+        message = "Elapsed time since last message received to DDM: " + elapsedTime.toString("HH:mm:ss");
+        ui->DDMTimer->setText(message);
+        ui->DDMTimer->setAlignment(Qt::AlignRight);
+    }
+}
