@@ -101,6 +101,8 @@ private slots:
     void disableConnectionChanges();
     void enableConnectionChanges();
 
+    void on_FilterBox_currentIndexChanged(int index);
+
 private:
     Ui::MainWindow *ui;
 };

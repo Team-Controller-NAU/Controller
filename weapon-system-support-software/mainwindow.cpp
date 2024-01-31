@@ -901,3 +901,25 @@ void MainWindow::updateTimer()
         ui->DDMTimer->setAlignment(Qt::AlignRight);
     }
 }
+
+void MainWindow::on_FilterBox_currentIndexChanged(int index)
+{
+    EventNode *workingPointer = events->headEventNode;
+    bool printErr;
+
+    switch(index)
+    {
+    case 1:
+        qDebug() << "All events filter selected";
+        // update gui, display which filter selected
+        ui->events_output->append("=== All Events Filter Selected === \n");
+
+        while(workingPointer != nullptr)
+        {
+            //check if the event id is 0 -> ALL
+
+        }
+
+    }
+}
+

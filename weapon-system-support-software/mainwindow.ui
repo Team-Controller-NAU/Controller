@@ -523,38 +523,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
                </item>
               </layout>
              </item>
-             <item row="0" column="5" alignment="Qt::AlignRight|Qt::AlignBottom">
-              <widget class="QComboBox" name="FilterBox">
-               <property name="styleSheet">
-                <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(39, 39, 39);
-border-color: rgb(255, 255, 255);</string>
-               </property>
-               <property name="editable">
-                <bool>false</bool>
-               </property>
-               <item>
-                <property name="text">
-                 <string>All Events</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>All Errors</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Cleared Errors</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string>Non-Cleared Errors</string>
-                </property>
-               </item>
-              </widget>
-             </item>
              <item row="0" column="0" alignment="Qt::AlignLeft">
               <widget class="QLabel" name="Event_Header">
                <property name="sizePolicy">
@@ -578,6 +546,43 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
                <property name="text">
                 <string>Events</string>
                </property>
+              </widget>
+             </item>
+             <item row="0" column="5">
+              <widget class="QComboBox" name="FilterBox">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 255, 255);
+background-color: rgb(39, 39, 39);
+border-color: rgb(255, 255, 255);</string>
+               </property>
+               <property name="editable">
+                <bool>false</bool>
+               </property>
+               <item>
+                <property name="text">
+                 <string>Select a filter</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>All Events</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>All Errors</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Cleared Errors</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string>Non-Cleared Errors</string>
+                </property>
+               </item>
               </widget>
              </item>
             </layout>
