@@ -33,9 +33,7 @@ enum SerialMessageIdentifier { /*the following identifiers are used to id contro
 
 //for filtering the event page output
 enum EventFilter {ALL, EVENTS, ERRORS, CLEARED_ERRORS, NON_CLEARED_ERRORS};
-
 enum Parity {NO_PARITY, EVEN_PARITY, ODD_PARITY};
-
 enum StopBits {ONE, ONE_AND_A_HALF, TWO};
 
 const QSerialPort::BaudRate INITIAL_BAUD_RATE = QSerialPort::Baud9600;
