@@ -126,11 +126,14 @@ void MainWindow::on_CSim_button_clicked()
     //check if csim is currently running
     if (csimHandle->isRunning())
     {
-        //csim is running, shut it down
-        csimHandle->stop = true;
+        // csim is running, shut it down
+        csimHandle->stopSimulation();
+
+        // stop ddm timer
+        lastMessageTimer->stop();
+
+        // update ui
         ui->CSim_button->setText("Start CSim");
-        csimHandle->quit();
-        csimHandle->wait();
 
         //enable csim port selection
         ui->csim_port_selection->setEnabled(true);
@@ -193,6 +196,8 @@ void MainWindow::readSerialData()
             EventNode* wkgEventPtr;
             bool printErr;
             QString dumpMessage;
+            QString logFileName;
+            QStringList messageSet;
 
             //get serialized string from port
             QByteArray serializedMessage = ddmCon->serialPort.readLine();
@@ -235,7 +240,7 @@ void MainWindow::readSerialData()
                     events->loadEventData(message);
 
                     // update GUI
-                    ui->events_output->append(message);
+                    if (eventFilter == ALL || eventFilter == EVENTS) ui->events_output->append(message);
 
                     // update total events gui
                     ui->TotalEventsOutput->setText(QString::number(events->totalEvents));
@@ -253,8 +258,26 @@ void MainWindow::readSerialData()
                     //add new error to error ll
                     events->loadErrorData(message);
 
-                    // update GUI
-                    ui->events_output->append(message);
+                    // check for any type of error filter, including all
+                    if(eventFilter != EVENTS)
+                    {
+                        // check for cleared filter
+                        if(eventFilter == CLEARED_ERRORS && events->lastErrorNode->cleared)
+                        {
+                            ui->events_output->append(message);
+                        }
+                        // check for non-cleared filter
+                        else if (eventFilter == NON_CLEARED_ERRORS && !events->lastErrorNode->cleared)
+                        {
+                            ui->events_output->append(message);
+                        }
+                        // check for all or errors filter
+                        else if (eventFilter == ALL || eventFilter == ERRORS)
+                        {
+                            ui->events_output->append(message);
+                        }
+                    }
+                    // otherwise do nothing
 
                     //update the cleared error selection box in dev tools
                     update_non_cleared_error_selection();
@@ -293,23 +316,49 @@ void MainWindow::readSerialData()
                     wkgErrPtr = events->headErrorNode;
                     wkgEventPtr = events->headEventNode;
 
-                    // loop through all errors and events
-                    while (wkgErrPtr != nullptr || wkgEventPtr != nullptr)
+                    // check for all filter
+                    if(eventFilter == ALL)
                     {
-                        // get next to print by ID
-                        EventNode* nextPrintPtr = events->getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
+                        // loop through all errors and events
+                        while (wkgErrPtr != nullptr || wkgEventPtr != nullptr)
+                        {
+                            // get next to print by ID
+                            EventNode* nextPrintPtr = events->getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
 
-                        // set dump message
-                        if (nextPrintPtr->id != 0) dumpMessage += '\n';
-                        dumpMessage += QString::number(nextPrintPtr->id) + ',' + nextPrintPtr->timeStamp + ',' + nextPrintPtr->eventString + ',';
-                        if (printErr) dumpMessage += (nextPrintPtr->cleared ? "1," : "0,");
-                        dumpMessage += "\n";
+                            // set dump message
+                            if (dumpMessage != "") dumpMessage += '\n';
+                            dumpMessage += QString::number(nextPrintPtr->id) + ',' + nextPrintPtr->timeStamp + ',' + nextPrintPtr->eventString + ',';
+                            if (printErr) dumpMessage += (nextPrintPtr->cleared ? "1," : "0,");
+                            dumpMessage += "\n";
+                        }
+
+                        // update gui
+                        ui->events_output->setText(dumpMessage);
                     }
+                    // check for events filter
+                    else if(eventFilter == EVENTS)
+                    {
+                        // split the event dump messages up
+                        messageSet = message.split(",,", Qt::SkipEmptyParts);
+
+                        // iterate through the event set
+                        for (const QString &event : messageSet)
+                        {
+                            // check for empty
+                            if(!messageSet.isEmpty() && event != "\n")
+                            {
+                                // update gui
+                                ui->events_output->append(event + ",\n");
+                            }
+                        }
+                    }
+                    // otherwise do nothing
 
                     // update total events gui
-                    ui->events_output->setText(dumpMessage);
                     ui->TotalEventsOutput->setText(QString::number(events->totalEvents));
                     ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
+                    ui->statusEventOutput->setText(QString::number(events->totalEvents));
+                    ui->statusEventOutput->setAlignment(Qt::AlignCenter);
 
                     break;
 
@@ -325,23 +374,93 @@ void MainWindow::readSerialData()
                     wkgErrPtr = events->headErrorNode;
                     wkgEventPtr = events->headEventNode;
 
-                    // loop through all errors and events
-                    while (wkgErrPtr != nullptr || wkgEventPtr != nullptr)
+                    // check for all filter
+                    if(eventFilter == ALL)
                     {
-                        // get next to print by ID
-                        EventNode* nextPrintPtr = events->getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
+                        // loop through all errors and events
+                        while (wkgErrPtr != nullptr || wkgEventPtr != nullptr)
+                        {
+                            // get next to print by ID
+                            EventNode* nextPrintPtr = events->getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
 
-                        // set dump message
-                        if (nextPrintPtr->id != 0) dumpMessage += '\n';
-                        dumpMessage += QString::number(nextPrintPtr->id) + ',' + nextPrintPtr->timeStamp + ',' + nextPrintPtr->eventString + ',';
-                        if (printErr) dumpMessage += (nextPrintPtr->cleared ? "1," : "0,");
-                        dumpMessage += "\n";
+                            // set dump message
+                            if (dumpMessage != "") dumpMessage += '\n';
+                            dumpMessage += QString::number(nextPrintPtr->id) + ',' + nextPrintPtr->timeStamp + ',' + nextPrintPtr->eventString + ',';
+                            if (printErr) dumpMessage += (nextPrintPtr->cleared ? "1," : "0,");
+                            dumpMessage += "\n";
+                        }
+
+                        // update gui
+                        ui->events_output->setText(dumpMessage);
                     }
+                    // check for any errors filter
+                    else if(eventFilter != EVENTS)
+                    {
+                        // check for cleared filter
+                        if(eventFilter == CLEARED_ERRORS)
+                        {
+                            // loop through all errors
+                            while(wkgErrPtr != nullptr)
+                            {
+                                // check for cleared
+                                if(wkgErrPtr->cleared)
+                                {
+                                    // set dump message
+                                    if (dumpMessage != "") dumpMessage += '\n';
+                                    dumpMessage += QString::number(wkgErrPtr->id) + ',' + wkgErrPtr->timeStamp + ',' + wkgErrPtr->eventString + ',';
+                                    dumpMessage += (wkgErrPtr->cleared ? "1," : "0,");
+                                    dumpMessage += "\n";
+                                }
+                                wkgErrPtr = wkgErrPtr->nextPtr;
+                            }
+                            // update ui
+                            ui->events_output->setText(dumpMessage);
+                        }
+                        // check for non-cleared filter
+                        else if(eventFilter == NON_CLEARED_ERRORS)
+                        {
+                            // loop through all errors
+                            while(wkgErrPtr != nullptr)
+                            {
+                                // check for non-cleared
+                                if(!wkgErrPtr->cleared)
+                                {
+                                    // set dump message
+                                    if (dumpMessage != "") dumpMessage += '\n';
+                                    dumpMessage += QString::number(wkgErrPtr->id) + ',' + wkgErrPtr->timeStamp + ',' + wkgErrPtr->eventString + ',';
+                                    dumpMessage += (wkgErrPtr->cleared ? "1," : "0,");
+                                    dumpMessage += "\n";
+                                }
+                                wkgErrPtr = wkgErrPtr->nextPtr;
+                            }
+                            // update ui
+                            ui->events_output->setText(dumpMessage);
+                        }
+                        // assume errors filter
+                        else
+                        {
+                            // split the event dump messages up
+                            messageSet = message.split(",,", Qt::SkipEmptyParts);
+
+                            // iterate through the event set
+                            for (const QString &error : messageSet)
+                            {
+                                // check for empty
+                                if(!messageSet.isEmpty() && error != "\n")
+                                {
+                                    // update gui
+                                    ui->events_output->append(error + ",\n");
+                                }
+                            }
+                        }
+                    }
+                    // otherwise do nothing
 
                     // update total errors gui
-                    ui->events_output->setText(dumpMessage);
                     ui->TotalErrorsOutput->setText(QString::number(events->totalErrors));
                     ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
+                    ui->statusErrorOutput->setText(QString::number(events->totalErrors));
+                    ui->statusErrorOutput->setAlignment(Qt::AlignCenter);
 
                     // update cleared errors gui
                     ui->ClearedErrorsOutput->setText(QString::number(events->totalCleared));
@@ -377,11 +496,31 @@ void MainWindow::readSerialData()
                     //stop handshake protocols
                     handshakeTimer->stop();
 
-                    //
+                    // debug
                     qDebug() << "Begin signal received, handshake complete";
 
+                    // update ui
                     ui->handshake_button->setText("Disconnect");
                     ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #FE1C1C;font: 15pt Segoe UI;");
+
+                    events->freeLinkedLists();
+                    ui->events_output->clear();
+
+                    ui->TotalEventsOutput->setText("0");
+                    ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
+                    ui->statusEventOutput->setText("0");
+                    ui->statusEventOutput->setAlignment(Qt::AlignCenter);
+
+                    ui->TotalErrorsOutput->setText("0");
+                    ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
+                    ui->statusErrorOutput->setText("0");
+                    ui->statusErrorOutput->setAlignment(Qt::AlignCenter);
+
+                    ui->ClearedErrorsOutput->setText("0");
+                    ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
+
+                    ui->ActiveErrorsOutput->setText("0");
+                    ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
 
                     ddmCon->connected = true;
 
@@ -391,6 +530,16 @@ void MainWindow::readSerialData()
 
                     //log
                     qDebug() << "Controller disconnect message received";
+
+                    // check for not empty
+                    if(events->totalNodes != 0)
+                    {
+                        // new "session" ended, save to log file
+                        logFileName = QDateTime::currentDateTime().date().toString("MM-dd-yyyy");
+
+                        // save logfile
+                        events->outputToLogFile(logFileName.toStdString() + "-logfile.txt");
+                    }
 
                     //assign conn flag
                     ddmCon->connected = false;
@@ -480,6 +629,7 @@ void MainWindow::on_ddm_port_selection_currentIndexChanged(int index)
     if (ddmCon != nullptr)
     {
         //close current connection
+        if (ddmCon->connected) ddmCon->transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + '\n');
         delete ddmCon;
 
         //open new connection
@@ -528,6 +678,16 @@ void MainWindow::on_handshake_button_clicked()
 
         //allow user to modify connection settings
         enableConnectionChanges();
+
+        // check for not empty
+        if(events->totalNodes != 0)
+        {
+            // new "session" ended, save to log file
+            QString logFileName = QDateTime::currentDateTime().date().toString("MM-dd-yyyy");
+
+            // save logfile
+            events->outputToLogFile(logFileName.toStdString() + "-logfile.txt");
+        }
 
         ddmCon->connected = false;
     }
@@ -904,22 +1064,158 @@ void MainWindow::updateTimer()
 
 void MainWindow::on_FilterBox_currentIndexChanged(int index)
 {
-    EventNode *workingPointer = events->headEventNode;
+    // initialize slot
+    EventNode* wkgErrPtr = events->headErrorNode;
+    EventNode* wkgEventPtr = events->headEventNode;
+    QString dumpMessage;
     bool printErr;
 
+    // check for which filter
     switch(index)
     {
-    case 1:
-        qDebug() << "All events filter selected";
-        // update gui, display which filter selected
-        ui->events_output->append("=== All Events Filter Selected === \n");
+        case 0:
 
-        while(workingPointer != nullptr)
-        {
-            //check if the event id is 0 -> ALL
+            qDebug() << "All filter selected";
 
+            // set filter
+            eventFilter = ALL;
+
+            // reset dump
+            dumpMessage = "";
+
+            // loop through all errors and events
+            while (wkgErrPtr != nullptr || wkgEventPtr != nullptr)
+            {
+                // get next to print by ID
+                EventNode* nextPrintPtr = events->getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
+
+                // set dump message
+                if (dumpMessage != "") dumpMessage += '\n';
+                dumpMessage += QString::number(nextPrintPtr->id) + ',' + nextPrintPtr->timeStamp + ',' + nextPrintPtr->eventString + ',';
+                if (printErr) dumpMessage += (nextPrintPtr->cleared ? "1," : "0,");
+                dumpMessage += "\n";
+            }
+
+            // update ui
+            ui->events_output->setText(dumpMessage);
+
+            break;
+
+        case 1:
+
+            qDebug() << "All events filter selected";
+
+            // set filter
+            eventFilter = EVENTS;
+
+            // reset dump
+            dumpMessage = "";
+
+            // loop through all events
+            while (wkgEventPtr != nullptr)
+            {
+                // set dump message
+                if (dumpMessage != "") dumpMessage += '\n';
+                dumpMessage += QString::number(wkgEventPtr->id) + ',' + wkgEventPtr->timeStamp + ',' + wkgEventPtr->eventString + ',';
+                dumpMessage += "\n";
+                wkgEventPtr = wkgEventPtr->nextPtr;
+            }
+
+            // update ui
+            ui->events_output->setText(dumpMessage);
+
+            break;
+
+        case 2:
+
+            qDebug() << "All errors filter selected";
+
+            //set filter
+            eventFilter = ERRORS;
+
+            // reset dump
+            dumpMessage = "";
+
+            // loop through all errors
+            while (wkgErrPtr != nullptr)
+            {
+                // set dump message
+                if (dumpMessage != "") dumpMessage += '\n';
+                dumpMessage += QString::number(wkgErrPtr->id) + ',' + wkgErrPtr->timeStamp + ',' + wkgErrPtr->eventString + ',';
+                dumpMessage += (wkgErrPtr->cleared ? "1," : "0,");
+                dumpMessage += "\n";
+                wkgErrPtr = wkgErrPtr->nextPtr;
+            }
+
+            // update ui
+            ui->events_output->setText(dumpMessage);
+
+            break;
+
+        case 3:
+
+            qDebug() << "All cleared errors filter selected";
+
+            // set filter
+            eventFilter = CLEARED_ERRORS;
+
+            // reset dump
+            dumpMessage = "";
+
+            // loop through all errors
+            while (wkgErrPtr != nullptr)
+            {
+                // check for cleared
+                if (wkgErrPtr->cleared)
+                {
+                    // set dump message
+                    if (dumpMessage != "") dumpMessage += '\n';
+                    dumpMessage += QString::number(wkgErrPtr->id) + ',' + wkgErrPtr->timeStamp + ',' + wkgErrPtr->eventString + ',';
+                    dumpMessage += (wkgErrPtr->cleared ? "1," : "0,");
+                    dumpMessage += "\n";
+                }
+                wkgErrPtr = wkgErrPtr->nextPtr;
+            }
+
+            // update ui
+            ui->events_output->setText(dumpMessage);
+
+            break;
+
+        case 4:
+
+            qDebug() << "All non-cleared errors filter selected";
+
+            // set filter
+            eventFilter = NON_CLEARED_ERRORS;
+
+            // reset dump
+            dumpMessage = "";
+
+            // loop through all errors
+            while (wkgErrPtr != nullptr)
+            {
+                // check for non-cleared
+                if (!wkgErrPtr->cleared)
+                {
+                    // set dump message
+                    if (dumpMessage != "") dumpMessage += '\n';
+                    dumpMessage += QString::number(wkgErrPtr->id) + ',' + wkgErrPtr->timeStamp + ',' + wkgErrPtr->eventString + ',';
+                    dumpMessage += (wkgErrPtr->cleared ? "1," : "0,");
+                    dumpMessage += "\n";
+                }
+                wkgErrPtr = wkgErrPtr->nextPtr;
+            }
+
+            // update ui
+            ui->events_output->setText(dumpMessage);
+
+            break;
+
+        default:
+
+            // do nothing
+            qDebug() << "Error: Unrecognized filter index.";
         }
-
-    }
 }
 

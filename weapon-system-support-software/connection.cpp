@@ -66,9 +66,6 @@ void Connection::transmit(QString message)
 //destructor for Connection class
 Connection::~Connection()
 {
-    //send message that connection is closing
-    transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + '\n');
-
     qDebug() << "Closing connection on port " << portName << qPrintable("\n");
 
     serialPort.close();
