@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/resources">
+        <file>Images/greenButton.png</file>
+        <file>Images/redButton.png</file>
+        <file>Images/blankButton.png</file>
+    </qresource>
+</RCC>

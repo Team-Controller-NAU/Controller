@@ -194,6 +194,10 @@ void MainWindow::readSerialData()
             bool printErr;
             QString dumpMessage;
 
+            //get images for buttons
+            QPixmap greenButton(":/resources/Images/greenButton.png");
+            QPixmap redButton(":/resources/Images/redButton.png");
+
             //get serialized string from port
             QByteArray serializedMessage = ddmCon->serialPort.readLine();
 
@@ -382,6 +386,7 @@ void MainWindow::readSerialData()
 
                     ui->handshake_button->setText("Disconnect");
                     ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #FE1C1C;font: 15pt Segoe UI;");
+                    ui->connectionStatus->setPixmap(greenButton);
 
                     ddmCon->connected = true;
 
@@ -404,6 +409,7 @@ void MainWindow::readSerialData()
                     {
                         ui->handshake_button->setText("Connect");
                         ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #14AE5C;font: 15pt Segoe UI;");
+                        ui->connectionStatus->setPixmap(redButton);
                     }
 
                     break;
@@ -496,6 +502,8 @@ void MainWindow::on_ddm_port_selection_currentIndexChanged(int index)
 //toggles handshake process on and off. Once connected, allow for disconnect (send disconnect message to controller)
 void MainWindow::on_handshake_button_clicked()
 {
+    QPixmap redButton(":/resources/Images/redButton.png");
+
     // Check if the timer is started or ddmCon is not connected
     if ( !handshakeTimer->isActive() && !ddmCon->connected )
     {
@@ -524,6 +532,7 @@ void MainWindow::on_handshake_button_clicked()
 
         ui->handshake_button->setText("Connect");
         ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #14AE5C;font: 15pt Segoe UI;");
+        ui->connectionStatus->setPixmap(redButton);
         ui->ddm_port_selection->setEnabled(true);
 
         //allow user to modify connection settings
