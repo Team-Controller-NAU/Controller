@@ -15,6 +15,11 @@ CSim::~CSim()
 
     // Stop the thread
     stop = true;
+    quit();
+
+    // clear dump messages
+    eventDumpMessage = "";
+    errorDumpMessage = "";
 
     // Waits for the thread to finish
     wait();
@@ -60,8 +65,15 @@ void CSim::completeTransmissionRequest(const QString &message)
 //can be called to end the csim event loop
 void CSim::stopSimulation()
 {
-    // Stop the simulation
+    qDebug() << "Terminating controller simulator thread";
+
+    // Stop the thread
     stop = true;
+    quit();
+
+    // clear dump messages
+    eventDumpMessage = "";
+    errorDumpMessage = "";
 }
 
 //starts csim in seperate thread, messages will be sent through given port
@@ -393,6 +405,7 @@ void CSim::run()
         } //end main execution loop
 
         //free connection class
+        if (conn->connected) conn->transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + '\n');
         delete conn;
         connPtr = nullptr;
 

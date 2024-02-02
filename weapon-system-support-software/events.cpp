@@ -159,6 +159,10 @@ void Events::freeLinkedLists()
 
     //ensure head and tail point to null symbolizing empty list
     headErrorNode = lastErrorNode = nullptr;
+    totalErrors = 0;
+    totalEvents = 0;
+    totalNodes = 0;
+    totalCleared = 0;
 }
 
 //attempts to find the error node with given id, and update its cleared variable to true

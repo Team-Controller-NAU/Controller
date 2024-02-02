@@ -38,6 +38,7 @@ public:
     QTimer* lastMessageTimer;
     QDateTime timeLastReceived;
     EventFilter eventFilter;
+
     //set true to enable automatic handshake once CSim sends closing connection message
     bool reconnect;
 
@@ -100,6 +101,8 @@ private slots:
 
     void disableConnectionChanges();
     void enableConnectionChanges();
+
+    void on_FilterBox_currentIndexChanged(int index);
 
 private:
     Ui::MainWindow *ui;
