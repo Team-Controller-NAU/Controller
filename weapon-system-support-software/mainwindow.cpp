@@ -199,6 +199,10 @@ void MainWindow::readSerialData()
             QString logFileName;
             QStringList messageSet;
 
+            //get images for buttons
+            QPixmap greenButton(":/resources/Images/greenButton.png");
+            QPixmap redButton(":/resources/Images/redButton.png");
+
             //get serialized string from port
             QByteArray serializedMessage = ddmCon->serialPort.readLine();
 
@@ -502,6 +506,7 @@ void MainWindow::readSerialData()
                     // update ui
                     ui->handshake_button->setText("Disconnect");
                     ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #FE1C1C;font: 15pt Segoe UI;");
+                    ui->connectionStatus->setPixmap(greenButton);
 
                     events->freeLinkedLists();
                     ui->events_output->clear();
@@ -555,8 +560,10 @@ void MainWindow::readSerialData()
                     }
                     else
                     {
+                        //refreshes connection button/displays
                         ui->handshake_button->setText("Connect");
                         ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #14AE5C;font: 15pt Segoe UI;");
+                        ui->connectionStatus->setPixmap(redButton);
                     }
 
                     break;
@@ -650,6 +657,8 @@ void MainWindow::on_ddm_port_selection_currentIndexChanged(int index)
 //toggles handshake process on and off. Once connected, allow for disconnect (send disconnect message to controller)
 void MainWindow::on_handshake_button_clicked()
 {
+    QPixmap redButton(":/resources/Images/redButton.png");
+
     // Check if the timer is started or ddmCon is not connected
     if ( !handshakeTimer->isActive() && !ddmCon->connected )
     {
@@ -660,6 +669,7 @@ void MainWindow::on_handshake_button_clicked()
         lastMessageTimer->start();
         timeLastReceived = QDateTime::currentDateTime();
 
+        //refreshes connection button/displays
         ui->handshake_button->setText("Connecting");
         ui->handshake_button->setStyleSheet("color: #FFFFFF;border-color: rgb(255, 255, 255);background-color: #FF7518;font: 15pt Segoe UI;");
         ui->ddm_port_selection->setEnabled(false);
@@ -676,8 +686,10 @@ void MainWindow::on_handshake_button_clicked()
         handshakeTimer->stop();
         lastMessageTimer->stop();
 
+        //refreshes connection button/displays
         ui->handshake_button->setText("Connect");
         ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #14AE5C;font: 15pt Segoe UI;");
+        ui->connectionStatus->setPixmap(redButton);
         ui->ddm_port_selection->setEnabled(true);
 
         //allow user to modify connection settings
@@ -738,6 +750,7 @@ void MainWindow::on_DevPageButton_clicked()
     ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
 }
 
+//reset all tab buttons to default style
 void MainWindow::resetPageButton()
 {
     ui->SettingsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
