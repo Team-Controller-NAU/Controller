@@ -15,6 +15,11 @@ CSim::~CSim()
 
     // Stop the thread
     stop = true;
+    quit();
+
+    // clear dump messages
+    eventDumpMessage = "";
+    errorDumpMessage = "";
 
     // Waits for the thread to finish
     wait();
@@ -60,8 +65,15 @@ void CSim::completeTransmissionRequest(const QString &message)
 //can be called to end the csim event loop
 void CSim::stopSimulation()
 {
-    // Stop the simulation
+    qDebug() << "Terminating controller simulator thread";
+
+    // Stop the thread
     stop = true;
+    quit();
+
+    // clear dump messages
+    eventDumpMessage = "";
+    errorDumpMessage = "";
 }
 
 //starts csim in seperate thread, messages will be sent through given port
@@ -114,6 +126,9 @@ void CSim::checkConnection(Connection *conn)
 
                 // Send message to begin serial comm
                 conn->transmit(QString::number(BEGIN) + DELIMETER + '\n');
+
+                //dump electrical data
+                conn->transmit(QString::number(ELECTRICAL) + DELIMETER + '\n');
 
                 //check for existing event dump message
                 if (eventDumpMessage.length() > 0)
@@ -190,6 +205,7 @@ void CSim::run()
         //clear them later)
         Events *events(new Events());
         eventsPtr = events;
+
 
         //for status use smart pointer for automatic memory management (resources auto free when function exits)
         std::unique_ptr<Status> status(new Status());
@@ -389,6 +405,7 @@ void CSim::run()
         } //end main execution loop
 
         //free connection class
+        if (conn->connected) conn->transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + '\n');
         delete conn;
         connPtr = nullptr;
 
