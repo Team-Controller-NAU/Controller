@@ -85,7 +85,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(this, &MainWindow::clearErrorRequest, csimHandle, &CSim::clearError);
 
     // connect update elapsed time function to a timer
-    lastMessageTimer->setInterval(2000);
+    lastMessageTimer->setInterval(1000);
     connect(lastMessageTimer, &QTimer::timeout, this, &MainWindow::updateTimer);
 
     //if handshake timeout is enabled, setup signal to timeout
@@ -543,6 +543,10 @@ void MainWindow::readSerialData()
 
                     //assign conn flag
                     ddmCon->connected = false;
+
+                    // update time since last message so its not frozen
+                    ui->DDMTimer->setText("Time Since Last Message: 00:00:00");
+                    ui->DDMTimer->setAlignment(Qt::AlignRight);
 
                     if (reconnect)
                     {
@@ -1056,7 +1060,7 @@ void MainWindow::updateTimer()
         elapsedTime = QTime(0, 0, 0).addMSecs(elapsedMs);
 
         // update gui
-        message = "Elapsed time since last message received to DDM: " + elapsedTime.toString("HH:mm:ss");
+        message = "Time Since Last Message: " + elapsedTime.toString("HH:mm:ss");
         ui->DDMTimer->setText(message);
         ui->DDMTimer->setAlignment(Qt::AlignRight);
     }
