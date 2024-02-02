@@ -17,10 +17,17 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Weapon System Support Software</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="resources.qrc">
+    <normaloff>:/resources/Images/TeamControllerLogo.jpg</normaloff>:/resources/Images/TeamControllerLogo.jpg</iconset>
   </property>
   <property name="toolTipDuration">
    <number>0</number>
+  </property>
+  <property name="autoFillBackground">
+   <bool>false</bool>
   </property>
   <property name="styleSheet">
    <string notr="true">background-color: rgb(47, 47, 47);
@@ -1205,8 +1212,8 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
                 <property name="geometry">
                  <rect>
                   <x>0</x>
-                  <y>0</y>
-                  <width>614</width>
+                  <y>-374</y>
+                  <width>896</width>
                   <height>744</height>
                  </rect>
                 </property>
@@ -1241,6 +1248,9 @@ background-color: rgb(179, 179, 179);</string>
                        <width>0</width>
                        <height>100</height>
                       </size>
+                     </property>
+                     <property name="contextMenuPolicy">
+                      <enum>Qt::NoContextMenu</enum>
                      </property>
                      <property name="styleSheet">
                       <string notr="true">font: 20pt &quot;Segoe UI&quot;;
@@ -1283,6 +1293,9 @@ background-color: rgb(179, 179, 179);</string>
                        <height>100</height>
                       </size>
                      </property>
+                     <property name="contextMenuPolicy">
+                      <enum>Qt::NoContextMenu</enum>
+                     </property>
                      <property name="styleSheet">
                       <string notr="true">font: 20pt &quot;Segoe UI&quot;;
 background-color: rgb(117, 117, 117);
@@ -1323,6 +1336,9 @@ background-color: rgb(179, 179, 179);</string>
                        <width>0</width>
                        <height>100</height>
                       </size>
+                     </property>
+                     <property name="contextMenuPolicy">
+                      <enum>Qt::NoContextMenu</enum>
                      </property>
                      <property name="styleSheet">
                       <string notr="true">font: 20pt &quot;Segoe UI&quot;;
@@ -1365,6 +1381,9 @@ background-color: rgb(179, 179, 179);</string>
                        <height>100</height>
                       </size>
                      </property>
+                     <property name="contextMenuPolicy">
+                      <enum>Qt::NoContextMenu</enum>
+                     </property>
                      <property name="styleSheet">
                       <string notr="true">font: 20pt &quot;Segoe UI&quot;;
 background-color: rgb(117, 117, 117);
@@ -1405,6 +1424,9 @@ background-color: rgb(179, 179, 179);</string>
                        <width>0</width>
                        <height>100</height>
                       </size>
+                     </property>
+                     <property name="contextMenuPolicy">
+                      <enum>Qt::NoContextMenu</enum>
                      </property>
                      <property name="styleSheet">
                       <string notr="true">font: 20pt &quot;Segoe UI&quot;;
@@ -1447,6 +1469,9 @@ background-color: rgb(179, 179, 179);</string>
                        <height>100</height>
                       </size>
                      </property>
+                     <property name="contextMenuPolicy">
+                      <enum>Qt::NoContextMenu</enum>
+                     </property>
                      <property name="styleSheet">
                       <string notr="true">font: 20pt &quot;Segoe UI&quot;;
 background-color: rgb(117, 117, 117);
@@ -1488,6 +1513,9 @@ background-color: rgb(179, 179, 179);</string>
                        <height>100</height>
                       </size>
                      </property>
+                     <property name="contextMenuPolicy">
+                      <enum>Qt::NoContextMenu</enum>
+                     </property>
                      <property name="styleSheet">
                       <string notr="true">font: 20pt &quot;Segoe UI&quot;;
 background-color: rgb(117, 117, 117);
@@ -1528,6 +1556,9 @@ background-color: rgb(179, 179, 179);</string>
                        <width>0</width>
                        <height>100</height>
                       </size>
+                     </property>
+                     <property name="contextMenuPolicy">
+                      <enum>Qt::NoContextMenu</enum>
                      </property>
                      <property name="styleSheet">
                       <string notr="true">font: 20pt &quot;Segoe UI&quot;;
