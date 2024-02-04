@@ -540,10 +540,11 @@ void MainWindow::readSerialData()
                     if(events->totalNodes != 0)
                     {
                         // new "session" ended, save to log file
-                        logFileName = QDateTime::currentDateTime().date().toString("MM-dd-yyyy");
+                        qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
+                        QString logFileName = QString::number(secsSinceEpoch);
 
-                        // save logfile
-                        events->outputToLogFile(logFileName.toStdString() + "-logfile.txt");
+                        // save logfile - autosave condition
+                        events->outputToLogFile(logFileName.toStdString() + "-logfile-A.txt");
                     }
 
                     //assign conn flag
@@ -699,10 +700,11 @@ void MainWindow::on_handshake_button_clicked()
         if(events->totalNodes != 0)
         {
             // new "session" ended, save to log file
-            QString logFileName = QDateTime::currentDateTime().date().toString("MM-dd-yyyy");
+            qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
+            QString logFileName = QString::number(secsSinceEpoch);
 
-            // save logfile
-            events->outputToLogFile(logFileName.toStdString() + "-logfile.txt");
+            // save logfile - autosave conditon
+            events->outputToLogFile(logFileName.toStdString() + "-logfile-A.txt");
         }
 
         ddmCon->connected = false;
@@ -764,10 +766,13 @@ void MainWindow::resetPageButton()
 void MainWindow::on_download_button_clicked()
 {
     // get current date
-    QString logFileName = QDateTime::currentDateTime().date().toString("MM-dd-yyyy");
+    //QString logFileName = QDateTime::currentDateTime().date().toString("MM-dd-yyyy");
 
-    // save logfile
-    events->outputToLogFile(logFileName.toStdString() + "-logfile.txt");
+    qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
+    QString logFileName = QString::number(secsSinceEpoch);
+
+    // save logfile - mannually done
+    events->outputToLogFile(logFileName.toStdString() + "-logfile-M.txt");
 }
 
 void MainWindow::on_clear_error_button_clicked()
