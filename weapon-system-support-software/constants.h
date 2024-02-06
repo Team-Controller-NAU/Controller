@@ -67,4 +67,6 @@ const int DATA_NOT_FOUND = -101;
 
 const QString LOG_FILE_PATH = "/temp/WSSS_LogFiles";
 
+const QString QDEBUG_OUTPUT_FORMAT = "[%{time h:mm:ss}] %{message}";
+
 #endif // CONSTANTS_H

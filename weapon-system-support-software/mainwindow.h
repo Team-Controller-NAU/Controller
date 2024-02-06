@@ -50,6 +50,9 @@ signals:
     //signal will be connected to csims clearError() slot.
     void clearErrorRequest(int clearedId);
 
+    //signal will be connected to csims outputSessionString() slot.
+    void outputMessagesSentRequest();
+
 private slots:
     //all gui slots go here. Any time an event happens, you may connect to a slot here
     //and the mainwindow class can execute functions based on events.
@@ -103,6 +106,8 @@ private slots:
     void enableConnectionChanges();
 
     void on_FilterBox_currentIndexChanged(int index);
+
+    void on_output_messages_sent_button_clicked();
 
 private:
     Ui::MainWindow *ui;
