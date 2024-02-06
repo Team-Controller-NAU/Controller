@@ -261,16 +261,81 @@ EventNode* Events::getNextNodeToPrint(EventNode*& eventPtr, EventNode*& errorPtr
 
 void Events::outputToLogFile(std::string logFileName)
 {
-    //ask user where to put log file directory
-    QString path = QFileDialog::getExistingDirectory(NULL,
-                                                     QObject::tr("Choose or Create a Logfile Directory"),
-                                                     "/home",
-                                                     QFileDialog::DontResolveSymlinks);
+    QDir path(LOG_FILE_PATH);
 
-    qDebug() << path << "Path has been chosen";
+    if(!path.exists())
+    {
+        if(path.mkpath("."))
+        {
+            qDebug() << "log file directory has been successfully made in the temp folder";
+        }
+        else
+        {
+            qDebug() << "The log file directory failed to create";
+        }
+    }
+    else
+    {
+        qDebug() << "Log file directory already exists";
+    }
+
+    // check number of autosaved files
+    QStringList numberAutosaves = path.entryList(QStringList("*-A*"), QDir::Files) ;
+
+    if(numberAutosaves.count() > 4)
+    {
+        // assume too many files, initialize variables
+        qint64 oldestTime = QDateTime::currentSecsSinceEpoch();
+        QString fileToDelete;
+
+        // loop through the autosaved files
+        for(const QString &fileName:numberAutosaves)
+        {
+            QFileInfo fileInformation(path.filePath(fileName));
+
+            // bool is just used to check the name split operation
+            bool good;
+            qint64 timestamp = fileInformation.baseName().split('-').first().toLongLong(&good);
+
+            //check for older file and good opeation
+            if(good && timestamp < oldestTime)
+            {
+                //set oldest and file to delete
+                oldestTime = timestamp;
+                fileToDelete = fileName;
+            }
+
+        }
+
+        qDebug() << numberAutosaves.count() << " autosaved log files detected, deleting: " << fileToDelete;
+
+        // check if file exists
+        if(!fileToDelete.isEmpty())
+        {
+            // file is there, get path
+            QString deletionPath = path.filePath(fileToDelete);
+
+            if(QFile::remove(deletionPath))
+            {
+                qDebug() << "Deletion successful";
+            }
+
+            else
+            {
+                qDebug() << "Deletion failed";
+            }
+        }
+
+        // otherwise, files does not exist
+        else
+        {
+            qDebug() << "File does not exist";
+        }
+
+    }
 
     // Open the log file in overwrite mode
-    std::ofstream logFile(path.toStdString() + '/' + logFileName, std::ios::out);
+    std::ofstream logFile(LOG_FILE_PATH.toStdString() + '/' + logFileName, std::ios::out);
 
     if (logFile.is_open())
     {
