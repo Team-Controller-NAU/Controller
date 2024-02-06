@@ -2,7 +2,8 @@
 
 //constructor
 CSim::CSim(QObject *parent, QString portName)
-    : QThread(parent), stop(false), portName(portName)
+    : QThread(parent), stop(false), portName(portName),
+    connPtr(nullptr), eventsPtr(nullptr), startupTime(QDateTime::currentMSecsSinceEpoch())
 {
     // Avoid class initialization until thread is running
 }
@@ -14,16 +15,65 @@ CSim::~CSim()
 
     // Stop the thread
     stop = true;
+    quit();
+
+    // clear dump messages
+    eventDumpMessage = "";
+    errorDumpMessage = "";
 
     // Waits for the thread to finish
     wait();
 }
 
+//slot, clears error then deletes from events class + sends clear error message to ddm,
+//can be called by csim as part of routine operation or can be called by user through ddm developer interface
+void CSim::clearError(int clearedId)
+{
+    //if events ptr is null, return
+    if (eventsPtr == nullptr)
+    {
+        qDebug() << "Unable to clear error, no events class declared";
+        return;
+    }
+
+    //free the error from the linked list
+    eventsPtr->freeError(clearedId);
+
+    //transmit error cleared message to ddm
+    connPtr->transmit(QString::number(CLEAR_ERROR) + DELIMETER + QString::number(clearedId) + DELIMETER);
+}
+
+//slot connected to transmissionRequest signal in ddm,
+//will simply send the given message through csims serial port
+void CSim::completeTransmissionRequest(const QString &message)
+{
+    //check if conn is active
+    if (connPtr != nullptr)
+    {
+        qDebug() << "[CSIM] transmission request received from DDM.";
+
+        //transmit message as requested by ddm
+        connPtr->transmit(message);
+
+        return;
+    }
+
+    qDebug() << "[CSIM] transmission request declined, no active CSIM connection";
+}
+
+
 //can be called to end the csim event loop
 void CSim::stopSimulation()
 {
-    // Stop the simulation
+    qDebug() << "Terminating controller simulator thread";
+
+    // Stop the thread
     stop = true;
+    quit();
+
+    // clear dump messages
+    eventDumpMessage = "";
+    errorDumpMessage = "";
 }
 
 //starts csim in seperate thread, messages will be sent through given port
@@ -34,6 +84,8 @@ void CSim::startCSim(QString portNameInput)
     if (!isRunning())
     {
         qDebug() << "[CSIM] Starting CSim in seperate thread";
+
+        //sets up thread and calls run()
         start();
     }
 }
@@ -74,6 +126,9 @@ void CSim::checkConnection(Connection *conn)
 
                 // Send message to begin serial comm
                 conn->transmit(QString::number(BEGIN) + DELIMETER + '\n');
+
+                //dump electrical data
+                conn->transmit(QString::number(ELECTRICAL) + DELIMETER + '\n');
 
                 //check for existing event dump message
                 if (eventDumpMessage.length() > 0)
@@ -117,6 +172,23 @@ void CSim::checkConnection(Connection *conn)
     }
 }
 
+//returns a qstring containing the time since start up in D:H:M:S
+QString CSim::getTimeStamp()
+{
+    // Calculate elapsed time since startup
+    qint64 elapsedTime = QDateTime::currentMSecsSinceEpoch() - startupTime;
+
+    // Convert milliseconds to days, hours, minutes, and seconds
+    int days = elapsedTime / (1000 * 60 * 60 * 24);
+    int hours = (elapsedTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60);
+    int minutes = (elapsedTime % (1000 * 60 * 60)) / (1000 * 60);
+    int seconds = (elapsedTime % (1000 * 60)) / 1000;
+
+    // Format the timestamp as "D:H:M:S" and return
+    return QString("%1:%2:%3:%4").arg(days).arg(hours, 2, 10, QLatin1Char('0')).arg(minutes, 2, 10,
+                                     QLatin1Char('0')).arg(seconds, 2, 10, QLatin1Char('0'));
+}
+
 //this function contains main event loop for simulating weapon controller.
 //generates data and sends through serial port at time intervals defined by CSIM_GENERATION_INTERVAL
 //alter time interval from constants.h
@@ -125,10 +197,18 @@ void CSim::run()
     //error handling (isolates potential crash to this thread, and reports reason for crash)
     try
     {
-        //Use smart pointers for automatic memory management (resources auto free when function exits)
-        std::unique_ptr<Connection> conn(new Connection(portName));
+        //init connection
+        Connection *conn(new Connection(portName));
+        connPtr = conn;
+
+        //init events class (csim only uses this to store non cleared errors so that it can
+        //clear them later)
+        Events *events(new Events());
+        eventsPtr = events;
+
+
+        //for status use smart pointer for automatic memory management (resources auto free when function exits)
         std::unique_ptr<Status> status(new Status());
-        std::unique_ptr<Events> events(new Events());
 
         // Get time based seed for rng
         qint64 seed = QDateTime::currentMSecsSinceEpoch();
@@ -142,12 +222,19 @@ void CSim::run()
         int eventId = 0;
         stop = false;
 
+        //variables for saving non-cleared errors
+        bool cleared;
+        QString timeStamp;
+        QString errorMessage;
+        int clearedId;
+
+
+        conn->connected = false;
+
         //loop until told to stop by owner of csim handle
         while (!stop)
         {
             i++;
-
-            //qDebug() << "bytes available: " << conn->serialPort.bytesAvailable();
 
             //log empty line (for output formatting)
             qSetMessagePattern("%{message}");
@@ -160,7 +247,7 @@ void CSim::run()
             status->randomize();
 
             //check conn before transmission
-            checkConnection(conn.get());
+            checkConnection(conn);
 
             //check if currently connected
             if (conn->connected)
@@ -182,7 +269,7 @@ void CSim::run()
             if ( randomGenerator.bounded(1, 6) == 1)
             {
                 //check conn before transmission
-                checkConnection(conn.get());
+                checkConnection(conn);
 
                 //check if currently connected
                 if (conn->connected)
@@ -198,7 +285,7 @@ void CSim::run()
                 eventId++;
 
                 //put time stamp in message
-                message += QTime::currentTime().toString("[hh:mm:ss]") + DELIMETER;
+                message += getTimeStamp() + DELIMETER;
 
                 //put random event message in message
                 message += EVENT_MESSAGES[randomGenerator.bounded(0, NUM_EVENT_MESSAGES)] + DELIMETER;
@@ -221,7 +308,6 @@ void CSim::run()
 
                     //add event to event dump
                     eventDumpMessage += message + DELIMETER;
-
                     qDebug() << "[CSIM] 1 event added to event dump";
                 }
 
@@ -230,10 +316,11 @@ void CSim::run()
             }
 
             //20% chance of generating error
-            if ( randomGenerator.bounded(1, 6) == 1)
+            //TEMPORARILY SET TO GENERATE ERROR EACH ITERATION
+            if ( true )//randomGenerator.bounded(1, 6) == 1)
             {
                 //check conn before transmission
-                checkConnection(conn.get());
+                checkConnection(conn);
 
                 //check if currently connected
                 if (conn->connected)
@@ -245,14 +332,32 @@ void CSim::run()
                 //put event id in message
                 message += QString::number(eventId) + DELIMETER;
 
-                //increment event id
-                eventId++;
+                //generate time stamp
+                timeStamp = QTime::currentTime().toString("[hh:mm:ss]");
 
                 //put time stamp in message
-                message += QTime::currentTime().toString("[hh:mm:ss]") + DELIMETER;
+                message += getTimeStamp() + DELIMETER;
 
-                //put random event message in message
-                message += ERROR_MESSAGES[randomGenerator.bounded(0, NUM_ERROR_MESSAGES)] + DELIMETER;
+                //get random error message
+                errorMessage = ERROR_MESSAGES[randomGenerator.bounded(0, NUM_ERROR_MESSAGES)];
+
+                //put error message in message
+                message += errorMessage + DELIMETER;
+
+                //set cleared / not cleared
+                cleared = randomGenerator.bounded(0,2);
+
+                // append cleared val
+                message += QString::number(cleared) + DELIMETER;
+
+                //if cleared is false, store error in case of later clear
+                if (!cleared)
+                {
+                    events->addError(eventId, timeStamp, errorMessage, cleared);
+                }
+
+                //increment event id
+                eventId++;
 
                 //check if currently connected
                 if (conn->connected)
@@ -272,14 +377,41 @@ void CSim::run()
 
                     //add error to event dump
                     errorDumpMessage += message + DELIMETER;
-
                     qDebug() << "[CSIM] 1 error added to error dump";
                 }
             }
 
+            //10% chance of clearing an error (if no errors, bypass)
+            if (randomGenerator.bounded(1, 11) == 1 && events->totalErrors > 0)
+            {
+                //pick a random error to clear
+                clearedId = events->getErrorIdByPosition(randomGenerator.bounded(0,events->totalErrors));
+
+                //check if data found
+                if (clearedId != DATA_NOT_FOUND)
+                {
+                    //remove error from linked list and transmit clear error msg to ddm
+                    clearError(clearedId);
+                }
+
+            }
+
+            //check for signals from ddm
+            QCoreApplication::processEvents();
+
             //wait for 2 seconds while monitoring serial port
             conn->serialPort.waitForReadyRead(2000);
-        }
+
+        } //end main execution loop
+
+        //free connection class
+        if (conn->connected) conn->transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + '\n');
+        delete conn;
+        connPtr = nullptr;
+
+        //free events class
+        delete events;
+        eventsPtr = nullptr;
     }
     //error handling triggered, report error
     catch (const std::exception &ex)

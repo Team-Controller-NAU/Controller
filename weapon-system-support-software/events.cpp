@@ -1,13 +1,13 @@
 #include "events.h"
 #include "constants.h"
 
-
 Events::Events()
 {
     //initialize variables
     totalEvents = 0;
     totalErrors= 0;
     totalNodes= 0;
+    totalCleared = 0;
 
     headEventNode= nullptr;
     lastEventNode= nullptr;
@@ -76,28 +76,46 @@ void Events::addError(int id, QString timeStamp, QString eventString, bool clear
     //increment counters
     totalNodes++;
     totalErrors++;
+    if(cleared) totalCleared++;
 
 
     //check if linked list is currently empty
-    if (headEventNode == nullptr)
+    if (headErrorNode == nullptr)
     {
         //assign new node as head of list
-        headEventNode = newNode;
+        headErrorNode = newNode;
 
         //assign tail ptr
-        lastEventNode = newNode;
+        lastErrorNode = newNode;
     }
     //otherwise, ll is not empty
     else
     {
         //append node to list
-        lastEventNode->nextPtr = newNode;
+        lastErrorNode->nextPtr = newNode;
 
-        lastEventNode = newNode;
+        lastErrorNode = newNode;
     }
 
     //log: new err created
     qDebug() << "New error node created. Total nodes: " << totalNodes << " total errors: " << totalErrors;
+}
+
+void Events::displayErrorLL()
+{
+    EventNode *wkgPtr = headErrorNode;
+
+    qDebug() << "====Printing Error Linked List ====";
+    qDebug() << "Total Errors " << totalErrors;
+
+    while (wkgPtr != nullptr)
+    {
+        qDebug() << "Error " << wkgPtr->id << wkgPtr->eventString << wkgPtr->cleared;
+
+        wkgPtr = wkgPtr->nextPtr;
+    }
+
+    qDebug() << "===================================";
 }
 
 //free memory allocated to error and event linked lists
@@ -141,6 +159,10 @@ void Events::freeLinkedLists()
 
     //ensure head and tail point to null symbolizing empty list
     headErrorNode = lastErrorNode = nullptr;
+    totalErrors = 0;
+    totalEvents = 0;
+    totalNodes = 0;
+    totalCleared = 0;
 }
 
 //attempts to find the error node with given id, and update its cleared variable to true
@@ -148,7 +170,7 @@ void Events::freeLinkedLists()
 bool Events::clearError(int id)
 {
     //init vars
-    EventNode *wkgPtr = headEventNode;
+    EventNode *wkgPtr = headErrorNode;
 
     //loop through error linked list
     while (wkgPtr != nullptr)
@@ -157,6 +179,11 @@ bool Events::clearError(int id)
         if (wkgPtr->id == id)
         {
             wkgPtr->cleared = true;
+
+            qDebug() << "Error " << id << " cleared";
+
+            totalCleared++;
+
             return true;
         }
 
@@ -164,102 +191,181 @@ bool Events::clearError(int id)
         wkgPtr = wkgPtr->nextPtr;
     }
 
+    qDebug() << "Error " << id << " was not found and could not be cleared";
+
     //no id was found and we reached end of list, return failure
     return false;
 }
 
+// analyzes both linked lists to determine what to output next based on ID
+EventNode* Events::getNextNodeToPrint(EventNode*& eventPtr, EventNode*& errorPtr, bool& printErr)
+{
+    // initialize variables
+    EventNode* nextPrintPtr = nullptr;
+
+    // check if both lists have valid ptrs to nodes
+    if (eventPtr != nullptr && errorPtr != nullptr)
+    {
+        // check if next even has lower id than next error
+        if (errorPtr->id > eventPtr->id)
+        {
+            // choose  this event to print
+            nextPrintPtr = eventPtr;
+
+            // set no error flag
+            printErr = false;
+
+            // get next event
+            eventPtr = eventPtr->nextPtr;
+        }
+        else
+        {
+            // choose this error to print
+            nextPrintPtr = errorPtr;
+
+            // set err flag
+            printErr = true;
+
+            // get next error
+            errorPtr = errorPtr->nextPtr;
+        }
+    }
+    // check for only events
+    else if (eventPtr != nullptr)
+    {
+        // choose this event to print
+        nextPrintPtr = eventPtr;
+
+        // set no err flag
+        printErr = false;
+
+        // get next event
+        eventPtr = eventPtr->nextPtr;
+    }
+    // otherwise there are only errors
+    else
+    {
+        // choose this err to print
+        nextPrintPtr = errorPtr;
+
+        // set err flag
+        printErr = true;
+
+        // get next err
+        errorPtr = errorPtr->nextPtr;
+    }
+
+    // return next ptr
+    return nextPrintPtr;
+}
+
 void Events::outputToLogFile(std::string logFileName)
 {
+    QDir path(LOG_FILE_PATH);
+
+    if(!path.exists())
+    {
+        if(path.mkpath("."))
+        {
+            qDebug() << "log file directory has been successfully made in the temp folder";
+        }
+        else
+        {
+            qDebug() << "The log file directory failed to create";
+        }
+    }
+    else
+    {
+        qDebug() << "Log file directory already exists";
+    }
+
+    // check number of autosaved files
+    QStringList numberAutosaves = path.entryList(QStringList("*-A*"), QDir::Files) ;
+
+    if(numberAutosaves.count() > 4)
+    {
+        // assume too many files, initialize variables
+        qint64 oldestTime = QDateTime::currentSecsSinceEpoch();
+        QString fileToDelete;
+
+        // loop through the autosaved files
+        for(const QString &fileName:numberAutosaves)
+        {
+            QFileInfo fileInformation(path.filePath(fileName));
+
+            // bool is just used to check the name split operation
+            bool good;
+            qint64 timestamp = fileInformation.baseName().split('-').first().toLongLong(&good);
+
+            //check for older file and good opeation
+            if(good && timestamp < oldestTime)
+            {
+                //set oldest and file to delete
+                oldestTime = timestamp;
+                fileToDelete = fileName;
+            }
+
+        }
+
+        qDebug() << numberAutosaves.count() << " autosaved log files detected, deleting: " << fileToDelete;
+
+        // check if file exists
+        if(!fileToDelete.isEmpty())
+        {
+            // file is there, get path
+            QString deletionPath = path.filePath(fileToDelete);
+
+            if(QFile::remove(deletionPath))
+            {
+                qDebug() << "Deletion successful";
+            }
+
+            else
+            {
+                qDebug() << "Deletion failed";
+            }
+        }
+
+        // otherwise, files does not exist
+        else
+        {
+            qDebug() << "File does not exist";
+        }
+
+    }
+
     // Open the log file in overwrite mode
-    std::ofstream logFile(logFileName, std::ios::out);
+    std::ofstream logFile(LOG_FILE_PATH.toStdString() + '/' + logFileName, std::ios::out);
 
     if (logFile.is_open())
     {
-        //declare variables
-        EventNode *wkgErrPtr = headErrorNode;
-        EventNode *wkgEventPtr = headEventNode;
-        EventNode *nextPrintPtr;
+        // declare variables
+        EventNode* wkgErrPtr = headErrorNode;
+        EventNode* wkgEventPtr = headEventNode;
         bool printErr;
 
-        //get todays date
+        // get today's date
         QString currentDateString = QDateTime::currentDateTime().date().toString("MM/dd/yyyy");
 
-        //print log file header
+        // print log file header
         logFile << "====== " << currentDateString.toStdString() << " ======" << std::endl << std::endl;
 
-        //loop through events and errors
+        // loop through events and errors
         while (wkgErrPtr != nullptr || wkgEventPtr != nullptr)
         {
-            //check if both linked lists have valid ptrs to nodes
-            if (wkgErrPtr != nullptr && wkgEventPtr != nullptr)
-            {
-                //check if next event has lower id than next error
-                if (wkgErrPtr->id > wkgEventPtr->id)
-                {
-                    //choose this event to print
-                    nextPrintPtr = wkgEventPtr;
+            EventNode* nextPrintPtr = getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
 
-                    //set no error flag
-                    printErr = false;
+            // print data of chosen node
+            logFile << "ID: " << nextPrintPtr->id << " " << nextPrintPtr->timeStamp.toStdString() << " " << nextPrintPtr->eventString.toStdString();
 
-                    //get next event
-                    wkgEventPtr = wkgEventPtr->nextPtr;
-                }
-                else
-                {
-                    //choose this error to print
-                    nextPrintPtr = wkgErrPtr;
-
-                    //set err flag
-                    printErr = true;
-
-                    //get next error
-                    wkgErrPtr = wkgErrPtr->nextPtr;
-                }
-            }
-            //check for only events
-            else if (wkgEventPtr != nullptr)
-            {
-                //choose this event to print
-                nextPrintPtr = wkgEventPtr;
-
-                //set no err flag
-                printErr = false;
-
-                //get next event
-                wkgEventPtr = wkgEventPtr->nextPtr;
-            }
-            //otherwise there are only errors
-            else
-            {
-                //choose this err to print
-                nextPrintPtr = wkgErrPtr;
-
-                //set err flag
-                printErr = true;
-
-                //get next err
-                wkgErrPtr = wkgErrPtr->nextPtr;
-            }
-
-            //print data of chosen node
-            logFile << nextPrintPtr->timeStamp.toStdString() << " " << nextPrintPtr->eventString.toStdString();
-
-            //check if chosen node is error node
+            // check if chosen node is an error node
             if (printErr)
             {
-                //print cleared status
-                if (nextPrintPtr->cleared)
-                {
-                    logFile << ", CLEARED";
-                }
-                else
-                {
-                    logFile << ", NOT CLEARED";
-                }
+                // print cleared status
+                logFile << (nextPrintPtr->cleared ? ", CLEARED" : ", NOT CLEARED");
             }
 
-            //end current line
+            // end the current line
             logFile << std::endl;
         }
 
@@ -272,6 +378,74 @@ void Events::outputToLogFile(std::string logFileName)
         //the log file could not be opened
         qDebug() << "Unable to open the log file";
     }
+}
+
+//searches for error with given id, removes it from error linked list (intended for CSim use only)
+void Events::freeError(int id)
+{
+    EventNode *wkgPtr = headErrorNode;
+
+    //check if this error is head node
+    if (headErrorNode->id == id)
+    {
+        //assign new head
+        headErrorNode = headErrorNode->nextPtr;
+
+        //free old head
+        free(wkgPtr);
+
+        //decriment total errors
+        totalErrors--;
+
+        return;
+    }
+
+    //head node is not the error we need to delete, get next
+    wkgPtr = wkgPtr->nextPtr;
+
+    //assign wkgPtr2 to trail wkgPtr
+    EventNode *wkgPtr2 = headErrorNode;
+
+    //loop until list ends
+    while (wkgPtr != nullptr)
+    {
+        //check if current node is to be freed
+        if (wkgPtr->id == id)
+        {
+            //link list around deleted node
+            wkgPtr2->nextPtr = wkgPtr->nextPtr;
+
+            //check if the deleted node is the last node in list
+            if (wkgPtr->nextPtr == nullptr)
+            {
+                //update last node ptr
+                lastErrorNode = wkgPtr2;
+            }
+
+            // update total cleared (error does not exist, therefore it can not be cleared)
+            if(wkgPtr->cleared) totalCleared--;
+
+            //delete the node
+            free(wkgPtr);
+
+            //update total errors
+            totalErrors--;
+
+            //return success
+            return;
+        }
+       //otherwise, get next node
+        else
+        {
+            //update trailing ptr
+            wkgPtr2 = wkgPtr;
+            //get next node
+            wkgPtr = wkgPtr->nextPtr;
+        }
+    }
+
+    //no node with given id was found
+    qDebug() << "[CSIM] No node with id " << id << " was found, no deletions made";
 }
 
 //generate message containing data from given event or error, csim will attach an identifier to the
@@ -325,114 +499,111 @@ QString Events::generateDataDump(EventNode *headPtr)
 }
 
 
+//retrieves the error in position i in the linked list
+int Events::getErrorIdByPosition(int pos)
+{
+    EventNode *wkgPtr = headErrorNode;
+    int i = 0;
+
+    //loop until we reach the position, or ll ends
+    while(i != pos && wkgPtr != nullptr)
+    {
+        //get next error
+        wkgPtr = wkgPtr->nextPtr;
+        i++;
+    }
+
+    //check if we got to correct position
+    if (i == pos)
+    {
+        return wkgPtr->id;
+    }
+
+    //otherwise data not found
+    return DATA_NOT_FOUND;
+}
+
 //function developed to handle reading a node message and create a new error node with given data
 void Events::loadErrorData(QString message)
 {
-    //locate first comma
-    int commaPosition = message.indexOf(DELIMETER);
+    // parse message
+    QStringList values = message.split(DELIMETER);
 
-    //extract id
-    int id = message.left(commaPosition).toInt();
+    // check for real error
+    if(values.length() > NUM_ERROR_DELIMETERS)
+    {
+        // get values
+        int id = values[0].toInt();
+        QString timeStamp = values[1];
+        QString eventString = values[2];
+        bool cleared = (values[3] == "1");
 
-    //cut message
-    message = message.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = message.indexOf(DELIMETER);
-
-    //extract time stamp
-    QString timeStamp = message.left(commaPosition);
-
-    //cut message
-    message = message.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = message.indexOf(DELIMETER);
-
-    //extract event string
-    QString eventString = message.left(commaPosition);
-
-    //cut message
-    message = message.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = message.indexOf(DELIMETER);
-
-    //extract cleared status
-    bool cleared = (message.left(commaPosition) == "1");
-
-
-    //using extracted data, add an error to the end of the error linked list
-    addError(id, timeStamp, eventString, cleared);
+        //using extracted data, add an error to the end of the error linked list
+        addError(id, timeStamp, eventString, cleared);
+    }
+    else
+    {
+        qDebug() << "Invalid input to load error data: " << message << "\n";
+    }
 }
 
 //function developed to handle reading a node message and create a new event node with given data
 void Events::loadEventData(QString message)
 {
-    //locate first comma
-    int commaPosition = message.indexOf(DELIMETER);
+    // parse data
+    QStringList values = message.split(DELIMETER);
 
-    //extract id
-    int id = message.left(commaPosition).toInt();
+    // check for real event
+    if(values.length() > NUM_EVENT_DELIMETERS)
+    {
+        // get values
+        int id = values[0].toInt();
+        QString timeStamp = values[1];
+        QString eventString = values[2];
 
-    //cut message
-    message = message.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = message.indexOf(DELIMETER);
-
-    //extract time stamp
-    QString timeStamp = message.left(commaPosition);
-
-    //cut message
-    message = message.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = message.indexOf(DELIMETER);
-
-    //extract event string
-    QString eventString = message.left(commaPosition);
-
-    //cut message
-    message = message.right(commaPosition);
-
-
-    //using extracted data add a new event to the end of the events linked list
-    addEvent( id, timeStamp, eventString);
+        // using extracted data add a new event to the end of the events linked list
+        addEvent( id, timeStamp, eventString);
+    }
+    else
+    {
+        qDebug() << "Invalid input to load event data: " << message << "\n";
+    }
 }
 
 void Events::loadErrorDump(QString message)
 {
     // Split the dump messages into individual error sets
-    QStringList errorSets = message.split(",,", Qt::SkipEmptyParts);
+    QStringList errorSet = message.split(",,", Qt::SkipEmptyParts);
+
+    //errorSet[errorSet.size() - 1].append(",");
+
+    qDebug() << errorSet;
 
     // Iterate through the error sets and call loadErrorData for each
-    for (const QString &errorSet : errorSets)
+    for (const QString &error : errorSet)
     {
-        // Call loadErrorData for each individual error set
-        loadErrorData(errorSet);
+        // check for empty
+        if(!errorSet.isEmpty() && error != "\n")
+        {
+            // Call loadErrorData for each individual error set
+            loadErrorData(error);
+        }
     }
 }
 
 void Events::loadEventDump(QString message)
 {
     // Split the dump messages into individual event sets
-    QStringList eventSets = message.split(",,", Qt::SkipEmptyParts);
+    QStringList eventSet = message.split(",,", Qt::SkipEmptyParts);
 
     // Iterate through the event sets and call loadEventData for each
-    for (const QString &eventSet : eventSets)
+    for (const QString &event : eventSet)
     {
-        // Call loadEventData for each individual event set
-        loadEventData(eventSet);
+        // check for empty
+        if(!eventSet.isEmpty() && event != "\n")
+        {
+            // Call loadEventData for each individual event set
+            loadEventData(event);
+        }
     }
 }

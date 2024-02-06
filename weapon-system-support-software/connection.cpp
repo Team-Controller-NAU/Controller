@@ -3,16 +3,19 @@
 //connection class constructor
 Connection::Connection(QString portName)
 
-    : portName(portName), connected(false)
+    : portName(portName), connected(false), baudRate(INITIAL_BAUD_RATE),
+    dataBits(INITIAL_DATA_BITS), parity(INITIAL_PARITY), stopBits(INITIAL_STOP_BITS),
+    flowControl(INITIAL_FLOW_CONTROL)
 {
     //configure this connection to the given port name
     serialPort.setPortName(portName);
 
     //configure port settings
-    serialPort.setBaudRate(QSerialPort::Baud9600);
-    serialPort.setDataBits(QSerialPort::Data8);
-    serialPort.setParity(QSerialPort::NoParity);
-    serialPort.setStopBits(QSerialPort::OneStop);
+    serialPort.setBaudRate(INITIAL_BAUD_RATE);
+    serialPort.setDataBits(INITIAL_DATA_BITS);
+    serialPort.setParity(INITIAL_PARITY);
+    serialPort.setStopBits(INITIAL_STOP_BITS);
+    serialPort.setFlowControl(INITIAL_FLOW_CONTROL);
 
     //open the port
     serialPort.open(QIODevice::ReadWrite);
@@ -26,7 +29,7 @@ Connection::Connection(QString portName)
     {
         qDebug() << portName << " opened successfully";
 
-        //clear any data already in buffer
+        serialPort.clear();
         serialPort.readAll();
     }
 }
@@ -63,9 +66,6 @@ void Connection::transmit(QString message)
 //destructor for Connection class
 Connection::~Connection()
 {
-    //send message that connection is closing
-    transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + '\n');
-
     qDebug() << "Closing connection on port " << portName << qPrintable("\n");
 
     serialPort.close();
