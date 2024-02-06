@@ -500,6 +500,12 @@ void MainWindow::readSerialData()
                     //stop handshake protocols
                     handshakeTimer->stop();
 
+                    // start last message timer if not already active
+                    if(!lastMessageTimer->isActive())
+                    {
+                        lastMessageTimer->start();
+                    }
+
                     // debug
                     qDebug() << "Begin signal received, handshake complete";
 
@@ -553,6 +559,12 @@ void MainWindow::readSerialData()
                     // update time since last message so its not frozen
                     ui->DDMTimer->setText("Time Since Last Message: 00:00:00");
                     ui->DDMTimer->setAlignment(Qt::AlignRight);
+
+                    // stop last message timer if still active
+                    if(lastMessageTimer->isActive())
+                    {
+                        lastMessageTimer->stop();
+                    }
 
                     if (reconnect)
                     {
@@ -667,7 +679,11 @@ void MainWindow::on_handshake_button_clicked()
 
         // Start the timer to periodically check the handshake status
         handshakeTimer->start();
-        lastMessageTimer->start();
+        if(!lastMessageTimer->isActive())
+        {
+            lastMessageTimer->start();
+        }
+
         timeLastReceived = QDateTime::currentDateTime();
 
         //refreshes connection button/displays
@@ -685,7 +701,14 @@ void MainWindow::on_handshake_button_clicked()
         ddmCon->transmit(QString::number(CLOSING_CONNECTION) + '\n');
 
         handshakeTimer->stop();
-        lastMessageTimer->stop();
+        if(lastMessageTimer->isActive())
+        {
+            lastMessageTimer->stop();
+        }
+
+        // update time since last message so its not frozen
+        ui->DDMTimer->setText("Time Since Last Message: 00:00:00");
+        ui->DDMTimer->setAlignment(Qt::AlignRight);
 
         //refreshes connection button/displays
         ui->handshake_button->setText("Connect");

@@ -265,7 +265,7 @@ void Events::outputToLogFile(std::string logFileName)
 
     if(!path.exists())
     {
-        if(path.mkpath("."))
+        if(path.mkpath(LOG_FILE_PATH))
         {
             qDebug() << "log file directory has been successfully made in the temp folder";
         }
