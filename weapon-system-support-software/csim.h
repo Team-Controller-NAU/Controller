@@ -43,6 +43,8 @@ public:
     //used for generating run time stamp
     qint64 startupTime;
 
+    //stores all messages sent from csim during a session
+    QString messagesSent;
 
     //stores the location of the conn class declared in the run function
     Connection *connPtr;
@@ -66,6 +68,12 @@ public slots:
     //clears error with given id, sends clear error message through
     //serial port
     void clearError(int clearedId);
+
+    //outputs messages sent this session to the qDebug()
+    void outputMessagesSent();
+
+    //logs empty line to qDebug
+    void logEmptyLine();
 
 private:
     //overloaded threading function.

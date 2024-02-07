@@ -30,6 +30,7 @@ public:
     //data classes
     Status *status;
     Events *events;
+    QSettings userSettings;
 
     // vars
     QString csimPortName;
@@ -42,6 +43,20 @@ public:
     //set true to enable automatic handshake once CSim sends closing connection message
     bool reconnect;
 
+    // Declare toString methods
+    static QString toString(QSerialPort::BaudRate baudRate);
+    static QString toString(QSerialPort::DataBits dataBits);
+    static QString toString(QSerialPort::Parity parity);
+    static QString toString(QSerialPort::StopBits stopBits);
+    static QString toString(QSerialPort::FlowControl flowControl);
+
+    // Declare fromString methods
+    static QSerialPort::BaudRate fromStringBaudRate(QString baudRateStr);
+    static QSerialPort::DataBits fromStringDataBits(QString dataBitsStr);
+    static QSerialPort::Parity fromStringParity(QString parityStr);
+    static QSerialPort::StopBits fromStringStopBits(QString stopBitsStr);
+    static QSerialPort::FlowControl fromStringFlowControl(QString flowControlStr);
+
 signals:
     //signal to be connected to csim's completeTransmissionRequest() slot
     //will tell csim to send the message
@@ -49,6 +64,9 @@ signals:
 
     //signal will be connected to csims clearError() slot.
     void clearErrorRequest(int clearedId);
+
+    //signal will be connected to csims outputSessionString() slot.
+    void outputMessagesSentRequest();
 
 private slots:
     //all gui slots go here. Any time an event happens, you may connect to a slot here
@@ -103,6 +121,8 @@ private slots:
     void enableConnectionChanges();
 
     void on_FilterBox_currentIndexChanged(int index);
+
+    void on_output_messages_sent_button_clicked();
 
 private:
     Ui::MainWindow *ui;

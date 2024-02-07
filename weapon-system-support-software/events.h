@@ -7,6 +7,7 @@
 #include <iostream>
 #include <QDateTime>
 #include <QFileDialog>
+#include <QFileInfo>
 
 
 struct EventNode {
