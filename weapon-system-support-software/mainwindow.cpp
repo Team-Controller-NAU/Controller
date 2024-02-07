@@ -2,7 +2,6 @@
 #include "mainwindow.h"
 #include "csim.h"
 #include "constants.h"
-#include "settings.h"
 #include "./ui_mainwindow.h"
 
 
