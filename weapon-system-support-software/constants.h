@@ -65,6 +65,6 @@ const int NUM_EVENT_DELIMETERS = 2;
 
 const int DATA_NOT_FOUND = -101;
 
-const QString LOGFILE_FOLDER_NAME = "WSSS_Logfiles";
+const QString LOGFILE_FOLDER_NAME = "/WSSS_Logfiles";
 
 #endif // CONSTANTS_H
