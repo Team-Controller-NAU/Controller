@@ -261,26 +261,32 @@ EventNode* Events::getNextNodeToPrint(EventNode*& eventPtr, EventNode*& errorPtr
 
 void Events::outputToLogFile(std::string logFileName)
 {
-    QDir path(LOG_FILE_PATH);
+    // get the path to the users temp folder
+    QString tempPath = QDir::tempPath() + LOGFILE_FOLDER_NAME;
+    QDir path(tempPath);
 
+    // check if the path does not lead to anything
     if(!path.exists())
     {
-        if(path.mkpath(LOG_FILE_PATH))
+        // check if can make path successfully
+        if(path.mkpath("."))
         {
             qDebug() << "log file directory has been successfully made in the temp folder";
         }
+
         else
         {
             qDebug() << "The log file directory failed to create";
         }
     }
+
     else
     {
         qDebug() << "Log file directory already exists";
     }
 
     // check number of autosaved files
-    QStringList numberAutosaves = path.entryList(QStringList("*-A*"), QDir::Files) ;
+    QStringList numberAutosaves = path.entryList(QStringList("*-A*"), QDir::Files);
 
     if(numberAutosaves.count() > 4)
     {
@@ -335,7 +341,7 @@ void Events::outputToLogFile(std::string logFileName)
     }
 
     // Open the log file in overwrite mode
-    std::ofstream logFile(LOG_FILE_PATH.toStdString() + '/' + logFileName, std::ios::out);
+    std::ofstream logFile(tempPath.toStdString() + '/' + logFileName, std::ios::out);
 
     if (logFile.is_open())
     {
