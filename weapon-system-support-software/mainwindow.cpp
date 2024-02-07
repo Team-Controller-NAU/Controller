@@ -78,11 +78,17 @@ MainWindow::MainWindow(QWidget *parent)
     //this is necessary to prevent the gui from freezing. signals stop when timer is stoped
     connect(handshakeTimer, &QTimer::timeout, this, &MainWindow::handshake);
 
+    //CSIM control slots ==============================================================
+
     //connect custom transmission requests from ddm to csims execution slot
     connect(this, &MainWindow::transmissionRequest, csimHandle, &CSim::completeTransmissionRequest);
 
     //connect custom clear error requests from ddm to csims execution slot
     connect(this, &MainWindow::clearErrorRequest, csimHandle, &CSim::clearError);
+
+    //connect output session string to ddm output session string slot
+    connect(this, &MainWindow::outputMessagesSentRequest, csimHandle, &CSim::outputMessagesSent);
+    //=================================================================================
 
     // connect update elapsed time function to a timer
     lastMessageTimer->setInterval(1000);
@@ -155,28 +161,32 @@ void MainWindow::on_CSim_button_clicked()
 //sends custom user input message
 void MainWindow::on_send_message_button_clicked()
 {
-    //get user input from input box
-    QString userInput = ui->message_contents->text();
+    // Get user input from input box
+    QString userInput = ui->message_contents->toPlainText();
 
-    //add new line for data parsing
-    userInput += '\n';
+    // Replace literal "\n" characters with actual newline characters
+    userInput.replace("\\n", "\n");
 
-    //clear the contents of input box
+    // Add newline character if userInput does not end with newline
+    if (!userInput.endsWith('\n'))
+        userInput += '\n';
+
+    // Clear the contents of input box
     ui->message_contents->clear();
 
-    //check if csim has an active connection
+    // Check if csim has an active connection
     if (csimHandle->connPtr != nullptr)
     {
-        //send signal for csim to transmit message
+        // Send signal for csim to transmit message
         emit transmissionRequest(userInput);
     }
-    //no active connection from csim, make tmp connection
+    // No active connection from csim, make temporary connection
     else
     {
-        //open new connection on com4 (smart pointer auto frees memory when function exits)
+        // Open new connection on com4 (smart pointer auto frees memory when function exits)
         std::unique_ptr<Connection> conn(new Connection(csimPortName));
 
-        //send message through csim port
+        // Send message through csim port
         conn->transmit(userInput);
     }
 }
@@ -1262,5 +1272,12 @@ void MainWindow::on_FilterBox_currentIndexChanged(int index)
             // do nothing
             qDebug() << "Error: Unrecognized filter index.";
         }
+}
+
+
+void MainWindow::on_output_messages_sent_button_clicked()
+{
+    //send request for csim to output its session string
+    emit outputMessagesSentRequest();
 }
 

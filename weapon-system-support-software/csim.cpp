@@ -41,19 +41,35 @@ void CSim::clearError(int clearedId)
 
     //transmit error cleared message to ddm
     connPtr->transmit(QString::number(CLEAR_ERROR) + DELIMETER + QString::number(clearedId) + DELIMETER);
+
+    //store message
+    messagesSent += QString::number(CLEAR_ERROR) + DELIMETER + QString::number(clearedId) + DELIMETER;
 }
 
 //slot connected to transmissionRequest signal in ddm,
 //will simply send the given message through csims serial port
 void CSim::completeTransmissionRequest(const QString &message)
 {
-    //check if conn is active
+    // Check if conn is active
     if (connPtr != nullptr)
     {
         qDebug() << "[CSIM] transmission request received from DDM.";
 
-        //transmit message as requested by ddm
-        connPtr->transmit(message);
+        // Split the message into individual lines manually
+        QStringList lines = message.split('\n', Qt::SkipEmptyParts);
+
+        // Transmit each line in the list
+        for (const QString& line : lines)
+        {
+            // Append newline character to each line
+            QString lineWithNewline = line + "\n";
+
+            // Transmit the line
+            connPtr->transmit(lineWithNewline);
+
+            // Store line
+            messagesSent += lineWithNewline;
+        }
 
         return;
     }
@@ -127,14 +143,23 @@ void CSim::checkConnection(Connection *conn)
                 // Send message to begin serial comm
                 conn->transmit(QString::number(BEGIN) + DELIMETER + '\n');
 
+                //store message
+                messagesSent += QString::number(BEGIN) + DELIMETER + '\n';
+
                 //dump electrical data
                 conn->transmit(QString::number(ELECTRICAL) + DELIMETER + '\n');
+
+                //store message
+                messagesSent += QString::number(ELECTRICAL) + DELIMETER + '\n';
 
                 //check for existing event dump message
                 if (eventDumpMessage.length() > 0)
                 {
                     //send event dump
                     conn->transmit( eventDumpMessage + '\n');
+
+                    //store message
+                    messagesSent += eventDumpMessage + '\n';
 
                     //empty event dump
                     eventDumpMessage = "";
@@ -145,6 +170,9 @@ void CSim::checkConnection(Connection *conn)
                 {
                     //send error dump
                     conn->transmit( errorDumpMessage + '\n');
+
+                    //store message
+                    messagesSent += errorDumpMessage + '\n';
 
                     //empty error dump
                     errorDumpMessage = "";
@@ -236,10 +264,7 @@ void CSim::run()
         {
             i++;
 
-            //log empty line (for output formatting)
-            qSetMessagePattern("%{message}");
-            qDebug();
-            qSetMessagePattern("[%{time h:mm:ss}] %{message}");
+            logEmptyLine();
 
             qDebug() << "[CSIM] Iteration: " << i;
 
@@ -260,6 +285,9 @@ void CSim::run()
 
                 //send message through serial port
                 conn->transmit(message);
+
+                //store message
+                messagesSent += message;
             }
 
             //clear message
@@ -295,6 +323,9 @@ void CSim::run()
                 {
                     //transmit message through serial port
                     conn->transmit(message +'\n');
+
+                    //store message
+                    messagesSent += message + '\n';
                 }
                 //otherwise, not currently connected
                 else
@@ -364,6 +395,9 @@ void CSim::run()
                 {
                     //transmit message through serial port
                     conn->transmit(message + '\n');
+
+                    //store message
+                    messagesSent += message + '\n';
                 }
                 //otherwise, not currently connected
                 else
@@ -405,7 +439,11 @@ void CSim::run()
         } //end main execution loop
 
         //free connection class
-        if (conn->connected) conn->transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + '\n');
+        if (conn->connected)
+        {
+            conn->transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + '\n');
+            messagesSent += QString::number(static_cast<int>(CLOSING_CONNECTION)) + '\n';
+        }
         delete conn;
         connPtr = nullptr;
 
@@ -418,4 +456,25 @@ void CSim::run()
     {
         qDebug() << "[CSIM] Exception in CSim::run(): " << ex.what();
     }
+}
+
+//outputs messages sent this session, can be called via dev tools page
+void CSim::outputMessagesSent()
+{
+    logEmptyLine();
+
+    qDebug() << "[CSIM] Messages sent from " << portName << "this session:\n" << messagesSent;
+}
+
+//logs empty line to qdebug
+void CSim::logEmptyLine()
+{
+    //revert to standard output format
+    qSetMessagePattern("%{message}");
+
+    //log empty line
+    qDebug();
+
+    //enable custom message format
+    qSetMessagePattern(QDEBUG_OUTPUT_FORMAT);
 }

@@ -286,7 +286,7 @@ font: 16pt &quot;Segoe UI&quot;;</string>
             </sizepolicy>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="Events_page">
             <layout class="QGridLayout" name="gridLayout_3">
@@ -706,7 +706,7 @@ border-color: rgb(255, 255, 255);</string>
                <x>360</x>
                <y>60</y>
                <width>161</width>
-               <height>211</height>
+               <height>111</height>
               </rect>
              </property>
              <property name="frameShape">
@@ -716,21 +716,7 @@ border-color: rgb(255, 255, 255);</string>
               <enum>QFrame::Raised</enum>
              </property>
              <layout class="QGridLayout" name="gridLayout_2">
-              <item row="9" column="0" colspan="4">
-               <widget class="QPushButton" name="send_message_button">
-                <property name="styleSheet">
-                 <string notr="true">background-color: rgb(47, 47, 47);
-color: rgb(255, 255, 255);
-border-color: rgb(255, 255, 255);
-border-top-color: rgb(255, 255, 255);
-border-right-color: rgb(255, 255, 255);</string>
-                </property>
-                <property name="text">
-                 <string>Send message</string>
-                </property>
-               </widget>
-              </item>
-              <item row="10" column="0" colspan="4">
+              <item row="2" column="1">
                <widget class="QPushButton" name="CSim_button">
                 <property name="font">
                  <font>
@@ -749,39 +735,7 @@ border-right-color: rgb(255, 255, 255);</string>
                 </property>
                </widget>
               </item>
-              <item row="0" column="0">
-               <widget class="QLabel" name="controls_title">
-                <property name="styleSheet">
-                 <string notr="true">color: rgb(255, 255, 255);</string>
-                </property>
-                <property name="text">
-                 <string>CSIM port</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="3">
-               <widget class="QLabel" name="controls_title_1">
-                <property name="styleSheet">
-                 <string notr="true">color: rgb(255, 255, 255);</string>
-                </property>
-                <property name="text">
-                 <string>DDM port</string>
-                </property>
-               </widget>
-              </item>
-              <item row="7" column="0" rowspan="2" colspan="4">
-               <widget class="QLineEdit" name="message_contents">
-                <property name="styleSheet">
-                 <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(39, 39, 39);
-border-color: rgb(255, 255, 255);</string>
-                </property>
-                <property name="placeholderText">
-                 <string>Input message...</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="0">
+              <item row="1" column="1">
                <widget class="QComboBox" name="csim_port_selection">
                 <property name="styleSheet">
                  <string notr="true">background-color: rgb(47, 47, 47);
@@ -789,6 +743,16 @@ color: rgb(255, 255, 255);
 border-color: rgb(255, 255, 255);
 border-top-color: rgb(255, 255, 255);
 border-right-color: rgb(255, 255, 255);</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLabel" name="controls_title">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(255, 255, 255);</string>
+                </property>
+                <property name="text">
+                 <string>CSIM port</string>
                 </property>
                </widget>
               </item>
@@ -871,6 +835,80 @@ border-color: rgb(255, 255, 255);</string>
              </property>
              <property name="text">
               <string>Clear Error</string>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="send_message_button">
+             <property name="geometry">
+              <rect>
+               <x>540</x>
+               <y>350</y>
+               <width>141</width>
+               <height>24</height>
+              </rect>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(47, 47, 47);
+color: rgb(255, 255, 255);
+border-color: rgb(255, 255, 255);
+border-top-color: rgb(255, 255, 255);
+border-right-color: rgb(255, 255, 255);</string>
+             </property>
+             <property name="text">
+              <string>Send message</string>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="output_messages_sent_button">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>280</y>
+               <width>341</width>
+               <height>31</height>
+              </rect>
+             </property>
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Output All Messages Sent From Controller (to qDebug())</string>
+             </property>
+            </widget>
+            <widget class="QLabel" name="controls_header_4">
+             <property name="geometry">
+              <rect>
+               <x>540</x>
+               <y>160</y>
+               <width>291</width>
+               <height>41</height>
+              </rect>
+             </property>
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">color: rgb(255, 255, 255);</string>
+             </property>
+             <property name="text">
+              <string>Send Messages from CSim</string>
+             </property>
+            </widget>
+            <widget class="QTextEdit" name="message_contents">
+             <property name="geometry">
+              <rect>
+               <x>540</x>
+               <y>200</y>
+               <width>281</width>
+               <height>141</height>
+              </rect>
+             </property>
+             <property name="placeholderText">
+              <string>Input message...</string>
              </property>
             </widget>
            </widget>
