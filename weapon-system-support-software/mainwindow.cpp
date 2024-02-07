@@ -2,6 +2,7 @@
 #include "mainwindow.h"
 #include "csim.h"
 #include "constants.h"
+#include "settings.h"
 #include "./ui_mainwindow.h"
 
 
@@ -24,38 +25,21 @@ MainWindow::MainWindow(QWidget *parent)
     handshakeTimer( new QTimer(this) ),
 
     // timer is used to update the GUI
-    lastMessageTimer( new QTimer(this) )
+    lastMessageTimer( new QTimer(this) ),
+
+    //init user settings to our organization and project
+    userSettings("Team Controller", "WSSS")
 
 {
-    //init vars
-    QString portName;
 
     //set output settings for qDebug
-    qSetMessagePattern("[%{time h:mm:ss}] %{message}");
+    qSetMessagePattern(QDEBUG_OUTPUT_FORMAT);
 
     //init gui
     ui->setupUi(this);
 
     //scan available ports, add port names to port selection combo boxes
     setup_connection_settings();
-
-    // Iterate through items in the port selection combo boxes
-    for (int i = 0; i < ui->ddm_port_selection->count(); ++i)
-    {
-        //get val at current index
-        portName = ui->ddm_port_selection->itemText(i);
-
-        //if COM4 found,init csim to com4
-        if (portName == INITIAL_CSIM_PORT)
-        {
-            ui->csim_port_selection->setCurrentIndex(i);
-        }
-        //if com5 found init ddm to com5
-        else if (portName == INITIAL_DDM_PORT)
-        {
-            ui->ddm_port_selection->setCurrentIndex(i);
-        }
-    }
 
     //update class port name values
     csimPortName = ui->csim_port_selection->currentText();
@@ -122,73 +106,6 @@ void MainWindow::handshake()
 
     //keep gui interactive
     QCoreApplication::processEvents();
-}
-
-
-//button toggles csim random generation on and off. first click will setup thread and run csim.
-//second will terminate thread and close csim connection.
-void MainWindow::on_CSim_button_clicked()
-{
-    //check if csim is currently running
-    if (csimHandle->isRunning())
-    {
-        // csim is running, shut it down
-        csimHandle->stopSimulation();
-
-        // stop ddm timer
-        lastMessageTimer->stop();
-
-        // update ui
-        ui->CSim_button->setText("Start CSim");
-
-        //enable csim port selection
-        ui->csim_port_selection->setEnabled(true);
-    }
-    //csim is not running, start it
-    else
-    {
-        //set button to display the option to stop csim
-        ui->CSim_button->setText("Stop CSim");
-
-        //start csim
-        csimHandle->startCSim(csimPortName);
-
-        //temporarily disable csim port selection
-        ui->csim_port_selection->setEnabled(false);
-    }
-}
-
-//sends custom user input message
-void MainWindow::on_send_message_button_clicked()
-{
-    // Get user input from input box
-    QString userInput = ui->message_contents->toPlainText();
-
-    // Replace literal "\n" characters with actual newline characters
-    userInput.replace("\\n", "\n");
-
-    // Add newline character if userInput does not end with newline
-    if (!userInput.endsWith('\n'))
-        userInput += '\n';
-
-    // Clear the contents of input box
-    ui->message_contents->clear();
-
-    // Check if csim has an active connection
-    if (csimHandle->connPtr != nullptr)
-    {
-        // Send signal for csim to transmit message
-        emit transmissionRequest(userInput);
-    }
-    // No active connection from csim, make temporary connection
-    else
-    {
-        // Open new connection on com4 (smart pointer auto frees memory when function exits)
-        std::unique_ptr<Connection> conn(new Connection(csimPortName));
-
-        // Send message through csim port
-        conn->transmit(userInput);
-    }
 }
 
 //this function is called as a result of the readyRead signal being emmited by a connected serial port
@@ -611,219 +528,38 @@ void MainWindow::readSerialData()
     }
 }
 
-
-//runs when the user selects an option out of csim port drop down menu
-void MainWindow::on_csim_port_selection_currentIndexChanged(int index)
-{
-    if (ui->ddm_port_selection->currentText() == "")
-    {
-        return;
-    }
-
-    //update port
-    csimPortName = ui->csim_port_selection->currentText();
-
-    qDebug() << "CSIM port set to " << csimPortName;
-}
-
-//scan for serial ports, add to csim port selection box
 void MainWindow::setup_csim_port_selection(int index)
 {
     // Fetch available serial ports and add their names to the combo box
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
     {
-        ui->csim_port_selection->addItem(info.portName());
+        QString portName = info.portName();
+        ui->csim_port_selection->addItem(portName);
+
+        // Check if the current port name matches the one declared in settings
+        if (portName == userSettings.value("csimPortName").toString())
+        {
+            // If a match is found, set the current index of the combo box
+            ui->csim_port_selection->setCurrentIndex(ui->csim_port_selection->count() - 1);
+        }
     }
 }
 
-
-//scan for serial ports, add to ddm port selection box
 void MainWindow::setup_ddm_port_selection(int index)
 {
     // Fetch available serial ports and add their names to the combo box
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
     {
-        ui->ddm_port_selection->addItem(info.portName());
-    }
-}
+        QString portName = info.portName();
+        ui->ddm_port_selection->addItem(portName);
 
-//runs when user changes ddm port. Close old connection, make new one and connect to ready
-//read signal to listen for controller.
-void MainWindow::on_ddm_port_selection_currentIndexChanged(int index)
-{
-    if (ui->ddm_port_selection->currentText() == "")
-    {
-        return;
-    }
-
-    //update port name
-    ddmPortName = ui->ddm_port_selection->currentText();
-
-    //check if ddmCon is allocated
-    if (ddmCon != nullptr)
-    {
-        //close current connection
-        if (ddmCon->connected) ddmCon->transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + '\n');
-        delete ddmCon;
-
-        //open new connection
-        ddmCon = new Connection(ddmPortName);
-
-        //set up signal and slot (when a message is sent to DDMs serial port, the readyRead signal is emitted and
-        //readSerialData() is called)
-        connect(&ddmCon->serialPort, &QSerialPort::readyRead, this, &MainWindow::readSerialData);
-
-        qDebug() << "GUI is now listening to port " << ddmCon->portName;
-    }
-}
-
-//toggles handshake process on and off. Once connected, allow for disconnect (send disconnect message to controller)
-void MainWindow::on_handshake_button_clicked()
-{
-    QPixmap redButton(":/resources/Images/redButton.png");
-
-    // Check if the timer is started or ddmCon is not connected
-    if ( !handshakeTimer->isActive() && !ddmCon->connected )
-    {
-        qDebug() << "Beginning handshake with controller" << Qt::endl;
-
-        // Start the timer to periodically check the handshake status
-        handshakeTimer->start();
-        if(!lastMessageTimer->isActive())
+        // Check if the current port name matches the one declared in settings
+        if (portName == userSettings.value("portName").toString())
         {
-            lastMessageTimer->start();
+            // If a match is found, set the current index of the combo box
+            ui->ddm_port_selection->setCurrentIndex(ui->ddm_port_selection->count() - 1);
         }
-
-        timeLastReceived = QDateTime::currentDateTime();
-
-        //refreshes connection button/displays
-        ui->handshake_button->setText("Connecting");
-        ui->handshake_button->setStyleSheet("color: #FFFFFF;border-color: rgb(255, 255, 255);background-color: #FF7518;font: 15pt Segoe UI;");
-        ui->ddm_port_selection->setEnabled(false);
-
-        //disable changes to connection settings
-        disableConnectionChanges();
     }
-    else
-    {
-        qDebug() << "Sending disconnect message to controller" << Qt::endl;
-
-        ddmCon->transmit(QString::number(CLOSING_CONNECTION) + '\n');
-
-        handshakeTimer->stop();
-        if(lastMessageTimer->isActive())
-        {
-            lastMessageTimer->stop();
-        }
-
-        // update time since last message so its not frozen
-        ui->DDMTimer->setText("Time Since Last Message: 00:00:00");
-        ui->DDMTimer->setAlignment(Qt::AlignRight);
-
-        //refreshes connection button/displays
-        ui->handshake_button->setText("Connect");
-        ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #14AE5C;font: 15pt Segoe UI;");
-        ui->connectionStatus->setPixmap(redButton);
-        ui->ddm_port_selection->setEnabled(true);
-
-        //allow user to modify connection settings
-        enableConnectionChanges();
-
-        // check for not empty
-        if(events->totalNodes != 0)
-        {
-            // new "session" ended, save to log file
-            qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
-            QString logFileName = QString::number(secsSinceEpoch);
-
-            // save logfile - autosave conditon
-            events->outputToLogFile(logFileName.toStdString() + "-logfile-A.txt");
-        }
-
-        ddmCon->connected = false;
-    }
-}
-
-//sends user to settings page when clicked
-void MainWindow::on_SettingsPageButton_clicked()
-{
-    ui->Flow_Label->setCurrentIndex(2);
-    resetPageButton();
-    ui->SettingsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
-}
-
-//sends user to events page when clicked
-void MainWindow::on_EventsPageButton_clicked()
-{
-    // TODO: first visit refresh page with dump of whole LL??
-    ui->Flow_Label->setCurrentIndex(0);
-    resetPageButton();
-    ui->EventsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
-}
-
-//sends user to status page when clicked
-void MainWindow::on_StatusPageButton_clicked()
-{
-    ui->Flow_Label->setCurrentIndex(4);
-    resetPageButton();
-    ui->StatusPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
-}
-
-//sends user to electrical page when clicked
-void MainWindow::on_ElectricalPageButton_clicked()
-{
-    ui->Flow_Label->setCurrentIndex(3);
-    resetPageButton();
-    ui->ElectricalPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
-}
-
-//sends user to developer page when clicked
-void MainWindow::on_DevPageButton_clicked()
-{
-    ui->Flow_Label->setCurrentIndex(1);
-    resetPageButton();
-    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
-}
-
-//reset all tab buttons to default style
-void MainWindow::resetPageButton()
-{
-    ui->SettingsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
-    ui->EventsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
-    ui->StatusPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
-    ui->ElectricalPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
-    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
-}
-
-//download button for events in CSV format
-void MainWindow::on_download_button_clicked()
-{
-    // get current date
-    //QString logFileName = QDateTime::currentDateTime().date().toString("MM-dd-yyyy");
-
-    qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
-    QString logFileName = QString::number(secsSinceEpoch);
-
-    // save logfile - mannually done
-    events->outputToLogFile(logFileName.toStdString() + "-logfile-M.txt");
-}
-
-void MainWindow::on_clear_error_button_clicked()
-{
-
-    //get error from combo box and split the error on delimeter
-    QStringList errorElements = ui->non_cleared_error_selection->currentText().split(DELIMETER);
-
-    if (errorElements.isEmpty() || errorElements.first().isEmpty())
-    {
-        return;
-    }
-
-    //get the id of the error
-    int errorId = errorElements[0].toInt();
-
-    //make a request to csim to clear the error
-    emit clearErrorRequest(errorId);
 }
 
 void MainWindow::update_non_cleared_error_selection()
@@ -876,207 +612,82 @@ void MainWindow::enableConnectionChanges()
 void MainWindow::setup_connection_settings()
 {
     int i;
+    QString currentPortName;
 
-    //setup port name selections
+    //for each serial setting, check if the value is already set
+    //if not, initialize them
+    userSettings.setValue("portName", QVariant::fromValue(INITIAL_DDM_PORT));
+    userSettings.setValue("csimPortName", QVariant::fromValue(INITIAL_CSIM_PORT));
+    userSettings.setValue("baudRate", QVariant::fromValue(INITIAL_BAUD_RATE));
+    userSettings.setValue("dataBits", QVariant::fromValue(INITIAL_DATA_BITS));
+    userSettings.setValue("parity", QVariant::fromValue(INITIAL_PARITY));
+    userSettings.setValue("stopBits", QVariant::fromValue(INITIAL_STOP_BITS));
+    userSettings.setValue("flowControl", QVariant::fromValue(INITIAL_FLOW_CONTROL));
+
+    /* uncomment to show the current settings upon startup
+    qDebug() << "portName type:" << userSettings.value("portName").type() << "value:" << userSettings.value("portName");
+    qDebug() << "csimPortName type:" << userSettings.value("csimPortName").type() << "value:" << userSettings.value("csimPortName");
+    qDebug() << "baudRate type:" << userSettings.value("baudRate").type() << "value:" << userSettings.value("baudRate");
+    qDebug() << "dataBits type:" << userSettings.value("dataBits").type() << "value:" << userSettings.value("dataBits");
+    qDebug() << "parity type:" << userSettings.value("parity").type() << "value:" << userSettings.value("parity");
+    qDebug() << "stopBits type:" << userSettings.value("stopBits").type() << "value:" << userSettings.value("stopBits");
+    qDebug() << "flowControl type:" << userSettings.value("flowControl").type() << "value:" << userSettings.value("flowControl");
+    */
+
+    //setup port name selections on gui (scans for available ports)
     setup_ddm_port_selection(0);
     setup_csim_port_selection(0);
 
-    //add settings for baud rate
-    for (i=1200; i <= 38400; i*=2 )
-    {
-        ui->baud_rate_selection->addItem(QString::number(i));
-    }
-    ui->baud_rate_selection->addItem(QString::number(57600));
-    ui->baud_rate_selection->addItem(QString::number(115200));
+    // Add baud rate settings
+    ui->baud_rate_selection->addItem(toString(QSerialPort::Baud1200));
+    ui->baud_rate_selection->addItem(toString(QSerialPort::Baud2400));
+    ui->baud_rate_selection->addItem(toString(QSerialPort::Baud4800));
+    ui->baud_rate_selection->addItem(toString(QSerialPort::Baud9600));
+    ui->baud_rate_selection->addItem(toString(QSerialPort::Baud19200));
+    ui->baud_rate_selection->addItem(toString(QSerialPort::Baud38400));
+    ui->baud_rate_selection->addItem(toString(QSerialPort::Baud57600));
+    ui->baud_rate_selection->addItem(toString(QSerialPort::Baud115200));
 
-    //add settings for data bits
-    for (i=5; i <= 8; i++)
-    {
-        ui->data_bits_selection->addItem(QString::number(i));
-    }
+    // Add data bits settings
+    ui->data_bits_selection->addItem(toString(QSerialPort::Data5));
+    ui->data_bits_selection->addItem(toString(QSerialPort::Data6));
+    ui->data_bits_selection->addItem(toString(QSerialPort::Data7));
+    ui->data_bits_selection->addItem(toString(QSerialPort::Data8));
 
-    //add settings for parity
-    ui->parity_selection->addItem("No Parity");
-    ui->parity_selection->addItem("Even Parity");
-    ui->parity_selection->addItem("Odd Parity");
-    ui->parity_selection->addItem("Space Parity");
-    ui->parity_selection->addItem("Mark Parity");
+    // Add parity settings
+    ui->parity_selection->addItem(toString(QSerialPort::NoParity));
+    ui->parity_selection->addItem(toString(QSerialPort::EvenParity));
+    ui->parity_selection->addItem(toString(QSerialPort::OddParity));
+    ui->parity_selection->addItem(toString(QSerialPort::SpaceParity));
+    ui->parity_selection->addItem(toString(QSerialPort::MarkParity));
 
-    //add settings for stop bits
-    ui->stop_bit_selection->addItem("One Stop");
-    ui->stop_bit_selection->addItem("One and Half Stop");
-    ui->stop_bit_selection->addItem("Two Stop");
+    // Add stop bits settings
+    ui->stop_bit_selection->addItem(toString(QSerialPort::OneStop));
+    ui->stop_bit_selection->addItem(toString(QSerialPort::OneAndHalfStop));
+    ui->stop_bit_selection->addItem(toString(QSerialPort::TwoStop));
 
-    //add flow control settings
-    ui->flow_control_selection->addItem("No Flow Control");
-    ui->flow_control_selection->addItem("Hardware Control");
-    ui->flow_control_selection->addItem("Software Control");
+    // Add flow control settings
+    ui->flow_control_selection->addItem(toString(QSerialPort::NoFlowControl));
+    ui->flow_control_selection->addItem(toString(QSerialPort::HardwareControl));
+    ui->flow_control_selection->addItem(toString(QSerialPort::SoftwareControl));
 
-    //set starting values
-    ui->baud_rate_selection->setCurrentIndex(ui->baud_rate_selection->findText(QString::number(INITIAL_BAUD_RATE)));
-    ui->data_bits_selection->setCurrentIndex(ui->data_bits_selection->findText(QString::number(INITIAL_DATA_BITS)));
-    ui->parity_selection->setCurrentIndex(static_cast<int>(INITIAL_PARITY));
-    ui->flow_control_selection->setCurrentIndex(static_cast<int>(INITIAL_FLOW_CONTROL));
+    // Set initial values for the q combo boxes like an absolute gangsta
+    ui->baud_rate_selection->setCurrentIndex(ui->baud_rate_selection->findText(toString(static_cast<QSerialPort::BaudRate>(userSettings.value("baudRate").toInt()))));
+    ui->data_bits_selection->setCurrentIndex(ui->data_bits_selection->findText(toString(static_cast<QSerialPort::DataBits>(userSettings.value("dataBits").toInt()))));
+    ui->parity_selection->setCurrentIndex(ui->parity_selection->findText(toString(static_cast<QSerialPort::Parity>(userSettings.value("parity").toInt()))));
+    ui->stop_bit_selection->setCurrentIndex(ui->stop_bit_selection->findText(toString(static_cast<QSerialPort::StopBits>(userSettings.value("stopBits").toInt()))));
+    ui->flow_control_selection->setCurrentIndex(ui->flow_control_selection->findText(toString(static_cast<QSerialPort::FlowControl>(userSettings.value("flowControl").toInt()))));
 
-    switch (INITIAL_STOP_BITS)
-    {
+    // Set initial stop bits value
+    switch (INITIAL_STOP_BITS) {
     case QSerialPort::OneStop:
-        ui->stop_bit_selection->setCurrentIndex(0); // Assuming One Stop is the first item
+        ui->stop_bit_selection->setCurrentIndex(ui->stop_bit_selection->findText(toString(QSerialPort::OneStop)));
         break;
     case QSerialPort::OneAndHalfStop:
-        ui->stop_bit_selection->setCurrentIndex(1); // Assuming One and a half Stop is the second item
+        ui->stop_bit_selection->setCurrentIndex(ui->stop_bit_selection->findText(toString(QSerialPort::OneAndHalfStop)));
         break;
     case QSerialPort::TwoStop:
-        ui->stop_bit_selection->setCurrentIndex(2); // Assuming Two Stop is the third item
-        break;
-    default:
-        // Handle default case
-        break;
-    }
-}
-
-
-void MainWindow::on_baud_rate_selection_currentIndexChanged(int index)
-{
-    if (ddmCon == nullptr) {
-        // Handle case where ddmCon pointer is not initialized
-        return;
-    }
-
-    switch (index)
-    {
-    case 0:
-        ddmCon->baudRate = QSerialPort::Baud1200;
-        break;
-    case 1:
-        ddmCon->baudRate = QSerialPort::Baud2400;
-        break;
-    case 2:
-        ddmCon->baudRate = QSerialPort::Baud4800;
-        break;
-    case 3:
-        ddmCon->baudRate = QSerialPort::Baud9600;
-        break;
-    case 4:
-        ddmCon->baudRate = QSerialPort::Baud19200;
-        break;
-    case 5:
-        ddmCon->baudRate = QSerialPort::Baud38400;
-        break;
-    case 6:
-        ddmCon->baudRate = QSerialPort::Baud57600;
-        break;
-    case 7:
-        ddmCon->baudRate = QSerialPort::Baud115200;
-        break;
-    default:
-        // Handle default case
-        break;
-    }
-}
-
-
-void MainWindow::on_stop_bit_selection_currentIndexChanged(int index)
-{
-    if (ddmCon == nullptr) {
-        // Handle case where ddmCon pointer is not initialized
-        return;
-    }
-
-    switch (index)
-    {
-    case 0:
-        ddmCon->stopBits = QSerialPort::OneStop;
-        break;
-    case 1:
-        ddmCon->stopBits = QSerialPort::OneAndHalfStop;
-        break;
-    case 2:
-        ddmCon->stopBits = QSerialPort::TwoStop;
-        break;
-    default:
-        // Handle default case
-        break;
-    }
-}
-
-void MainWindow::on_flow_control_selection_currentIndexChanged(int index)
-{
-    if (ddmCon == nullptr) {
-        // Handle case where ddmCon pointer is not initialized
-        return;
-    }
-
-    switch (index)
-    {
-    case 0:
-        ddmCon->flowControl = QSerialPort::NoFlowControl;
-        break;
-    case 1:
-        ddmCon->flowControl = QSerialPort::HardwareControl;
-        break;
-    case 2:
-        ddmCon->flowControl = QSerialPort::SoftwareControl;
-        break;
-    default:
-        // Handle default case
-        break;
-    }
-}
-
-void MainWindow::on_parity_selection_currentIndexChanged(int index)
-{
-    if (ddmCon == nullptr) {
-        // Handle case where ddmCon pointer is not initialized
-        return;
-    }
-
-    switch (index)
-    {
-    case 0:
-        ddmCon->parity = QSerialPort::NoParity;
-        break;
-    case 1:
-        ddmCon->parity = QSerialPort::EvenParity;
-        break;
-    case 2:
-        ddmCon->parity = QSerialPort::OddParity;
-        break;
-    case 3:
-        ddmCon->parity = QSerialPort::SpaceParity;
-        break;
-    case 4:
-        ddmCon->parity = QSerialPort::MarkParity;
-        break;
-    default:
-        // Handle default case
-        break;
-    }
-}
-
-void MainWindow::on_data_bits_selection_currentIndexChanged(int index)
-{
-    if (ddmCon == nullptr) {
-        // Handle case where ddmCon pointer is not initialized
-        return;
-    }
-
-    switch (index)
-    {
-    case 0:
-        ddmCon->dataBits = QSerialPort::Data5;
-        break;
-    case 1:
-        ddmCon->dataBits = QSerialPort::Data6;
-        break;
-    case 2:
-        ddmCon->dataBits = QSerialPort::Data7;
-        break;
-    case 3:
-        ddmCon->dataBits = QSerialPort::Data8;
-        break;
-    default:
-        // Handle default case
+        ui->stop_bit_selection->setCurrentIndex(ui->stop_bit_selection->findText(toString(QSerialPort::TwoStop)));
         break;
     }
 }
@@ -1117,167 +728,153 @@ void MainWindow::updateTimer()
     }
 }
 
-void MainWindow::on_FilterBox_currentIndexChanged(int index)
-{
-    // initialize slot
-    EventNode* wkgErrPtr = events->headErrorNode;
-    EventNode* wkgEventPtr = events->headEventNode;
-    QString dumpMessage;
-    bool printErr;
+//======================================================================================
+//To string methods for QSerialPortEnumeratedValues
+//======================================================================================
+// Convert QSerialPort::BaudRate to string
+QString MainWindow::toString(QSerialPort::BaudRate baudRate) {
+    switch (baudRate) {
+    case QSerialPort::Baud1200: return "1200";
+    case QSerialPort::Baud2400: return "2400";
+    case QSerialPort::Baud4800: return "4800";
+    case QSerialPort::Baud9600: return "9600";
+    case QSerialPort::Baud19200: return "19200";
+    case QSerialPort::Baud38400: return "38400";
+    case QSerialPort::Baud57600: return "57600";
+    case QSerialPort::Baud115200: return "115200";
+    default:
+        // Invalid input, throw an exception or return a default value indicating an error
+        throw std::invalid_argument("Invalid baud rate enum value");
+    }
+}
 
-    // check for which filter
-    switch(index)
-    {
-        case 0:
+QString MainWindow::toString(QSerialPort::DataBits dataBits) {
+    switch (dataBits) {
+    case QSerialPort::Data5: return "5";
+    case QSerialPort::Data6: return "6";
+    case QSerialPort::Data7: return "7";
+    case QSerialPort::Data8: return "8";
+    default:
+        // Invalid input, throw an exception or return a default value indicating an error
+        throw std::invalid_argument("Invalid data bits enum value");
+    }
+}
 
-            qDebug() << "All filter selected";
+QString MainWindow::toString(QSerialPort::Parity parity) {
+    switch (parity) {
+    case QSerialPort::NoParity: return "No Parity";
+    case QSerialPort::EvenParity: return "Even Parity";
+    case QSerialPort::OddParity: return "Odd Parity";
+    case QSerialPort::SpaceParity: return "Space Parity";
+    case QSerialPort::MarkParity: return "Mark Parity";
+    default:
+        // Invalid input, throw an exception or return a default value indicating an error
+        throw std::invalid_argument("Invalid parity enum value");
+    }
+}
 
-            // set filter
-            eventFilter = ALL;
+QString MainWindow::toString(QSerialPort::StopBits stopBits) {
+    switch (stopBits) {
+    case QSerialPort::OneStop: return "1";
+    case QSerialPort::OneAndHalfStop: return "1.5";
+    case QSerialPort::TwoStop: return "2";
+    default:
+        // Invalid input, throw an exception or return a default value indicating an error
+        throw std::invalid_argument("Invalid stop bits enum value");
+    }
+}
 
-            // reset dump
-            dumpMessage = "";
-
-            // loop through all errors and events
-            while (wkgErrPtr != nullptr || wkgEventPtr != nullptr)
-            {
-                // get next to print by ID
-                EventNode* nextPrintPtr = events->getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
-
-                // set dump message
-                if (dumpMessage != "") dumpMessage += '\n';
-                dumpMessage += QString::number(nextPrintPtr->id) + ',' + nextPrintPtr->timeStamp + ',' + nextPrintPtr->eventString + ',';
-                if (printErr) dumpMessage += (nextPrintPtr->cleared ? "1," : "0,");
-                dumpMessage += "\n";
-            }
-
-            // update ui
-            ui->events_output->setText(dumpMessage);
-
-            break;
-
-        case 1:
-
-            qDebug() << "All events filter selected";
-
-            // set filter
-            eventFilter = EVENTS;
-
-            // reset dump
-            dumpMessage = "";
-
-            // loop through all events
-            while (wkgEventPtr != nullptr)
-            {
-                // set dump message
-                if (dumpMessage != "") dumpMessage += '\n';
-                dumpMessage += QString::number(wkgEventPtr->id) + ',' + wkgEventPtr->timeStamp + ',' + wkgEventPtr->eventString + ',';
-                dumpMessage += "\n";
-                wkgEventPtr = wkgEventPtr->nextPtr;
-            }
-
-            // update ui
-            ui->events_output->setText(dumpMessage);
-
-            break;
-
-        case 2:
-
-            qDebug() << "All errors filter selected";
-
-            //set filter
-            eventFilter = ERRORS;
-
-            // reset dump
-            dumpMessage = "";
-
-            // loop through all errors
-            while (wkgErrPtr != nullptr)
-            {
-                // set dump message
-                if (dumpMessage != "") dumpMessage += '\n';
-                dumpMessage += QString::number(wkgErrPtr->id) + ',' + wkgErrPtr->timeStamp + ',' + wkgErrPtr->eventString + ',';
-                dumpMessage += (wkgErrPtr->cleared ? "1," : "0,");
-                dumpMessage += "\n";
-                wkgErrPtr = wkgErrPtr->nextPtr;
-            }
-
-            // update ui
-            ui->events_output->setText(dumpMessage);
-
-            break;
-
-        case 3:
-
-            qDebug() << "All cleared errors filter selected";
-
-            // set filter
-            eventFilter = CLEARED_ERRORS;
-
-            // reset dump
-            dumpMessage = "";
-
-            // loop through all errors
-            while (wkgErrPtr != nullptr)
-            {
-                // check for cleared
-                if (wkgErrPtr->cleared)
-                {
-                    // set dump message
-                    if (dumpMessage != "") dumpMessage += '\n';
-                    dumpMessage += QString::number(wkgErrPtr->id) + ',' + wkgErrPtr->timeStamp + ',' + wkgErrPtr->eventString + ',';
-                    dumpMessage += (wkgErrPtr->cleared ? "1," : "0,");
-                    dumpMessage += "\n";
-                }
-                wkgErrPtr = wkgErrPtr->nextPtr;
-            }
-
-            // update ui
-            ui->events_output->setText(dumpMessage);
-
-            break;
-
-        case 4:
-
-            qDebug() << "All non-cleared errors filter selected";
-
-            // set filter
-            eventFilter = NON_CLEARED_ERRORS;
-
-            // reset dump
-            dumpMessage = "";
-
-            // loop through all errors
-            while (wkgErrPtr != nullptr)
-            {
-                // check for non-cleared
-                if (!wkgErrPtr->cleared)
-                {
-                    // set dump message
-                    if (dumpMessage != "") dumpMessage += '\n';
-                    dumpMessage += QString::number(wkgErrPtr->id) + ',' + wkgErrPtr->timeStamp + ',' + wkgErrPtr->eventString + ',';
-                    dumpMessage += (wkgErrPtr->cleared ? "1," : "0,");
-                    dumpMessage += "\n";
-                }
-                wkgErrPtr = wkgErrPtr->nextPtr;
-            }
-
-            // update ui
-            ui->events_output->setText(dumpMessage);
-
-            break;
-
-        default:
-
-            // do nothing
-            qDebug() << "Error: Unrecognized filter index.";
-        }
+QString MainWindow::toString(QSerialPort::FlowControl flowControl) {
+    switch (flowControl) {
+    case QSerialPort::NoFlowControl: return "No Flow Control";
+    case QSerialPort::HardwareControl: return "Hardware Control";
+    case QSerialPort::SoftwareControl: return "Software Control";
+    default:
+        // Invalid input, throw an exception or return a default value indicating an error
+        throw std::invalid_argument("Invalid flow control enum value");
+    }
 }
 
 
-void MainWindow::on_output_messages_sent_button_clicked()
-{
-    //send request for csim to output its session string
-    emit outputMessagesSentRequest();
+//======================================================================================
+//From string methods for QSerialPortEnumeratedValues
+//======================================================================================
+//======================================================================================
+//From string methods for QSerialPortEnumeratedValues
+//======================================================================================
+QSerialPort::BaudRate MainWindow::fromStringBaudRate(QString baudRateStr) {
+    if (baudRateStr == "1200") {
+        return QSerialPort::Baud1200;
+    } else if (baudRateStr == "2400") {
+        return QSerialPort::Baud2400;
+    } else if (baudRateStr == "4800") {
+        return QSerialPort::Baud4800;
+    } else if (baudRateStr == "9600") {
+        return QSerialPort::Baud9600;
+    } else if (baudRateStr == "19200") {
+        return QSerialPort::Baud19200;
+    } else if (baudRateStr == "38400") {
+        return QSerialPort::Baud38400;
+    } else if (baudRateStr == "57600") {
+        return QSerialPort::Baud57600;
+    } else if (baudRateStr == "115200") {
+        return QSerialPort::Baud115200;
+    } else {
+        throw std::invalid_argument("Invalid baud rate string");
+    }
+}
+
+QSerialPort::DataBits MainWindow::fromStringDataBits(QString dataBitsStr) {
+    if (dataBitsStr == "5") {
+        return QSerialPort::Data5;
+    } else if (dataBitsStr == "6") {
+        return QSerialPort::Data6;
+    } else if (dataBitsStr == "7") {
+        return QSerialPort::Data7;
+    } else if (dataBitsStr == "8") {
+        return QSerialPort::Data8;
+    } else {
+        throw std::invalid_argument("Invalid data bits string");
+    }
+}
+
+QSerialPort::Parity MainWindow::fromStringParity(QString parityStr) {
+    if (parityStr == "No Parity") {
+        return QSerialPort::NoParity;
+    } else if (parityStr == "Even Parity") {
+        return QSerialPort::EvenParity;
+    } else if (parityStr == "Odd Parity") {
+        return QSerialPort::OddParity;
+    } else if (parityStr == "Space Parity") {
+        return QSerialPort::SpaceParity;
+    } else if (parityStr == "Mark Parity") {
+        return QSerialPort::MarkParity;
+    } else {
+        throw std::invalid_argument("Invalid parity string");
+    }
+}
+
+QSerialPort::StopBits MainWindow::fromStringStopBits(QString stopBitsStr) {
+    if (stopBitsStr == "1") {
+        return QSerialPort::OneStop;
+    } else if (stopBitsStr == "1.5") {
+        return QSerialPort::OneAndHalfStop;
+    } else if (stopBitsStr == "2") {
+        return QSerialPort::TwoStop;
+    } else {
+        throw std::invalid_argument("Invalid stop bits string");
+    }
+}
+
+QSerialPort::FlowControl MainWindow::fromStringFlowControl(QString flowControlStr) {
+    if (flowControlStr == "No Flow Control") {
+        return QSerialPort::NoFlowControl;
+    } else if (flowControlStr == "Hardware Control") {
+        return QSerialPort::HardwareControl;
+    } else if (flowControlStr == "Software Control") {
+        return QSerialPort::SoftwareControl;
+    } else {
+        throw std::invalid_argument("Invalid flow control string");
+    }
 }
 

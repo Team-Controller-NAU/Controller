@@ -34,7 +34,6 @@ public:
 public slots:
     //sends message through port
     void transmit(QString message);
-
 };
 
 #endif // CLASSES_H
