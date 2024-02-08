@@ -14,7 +14,11 @@ public:
     //qt serial port class
     QSerialPort serialPort;
 
-    //constructor, opens the port with given port name
+    //constructor, opens the port with given port name and initial settings
+    Connection(QString portName, QSerialPort::BaudRate baudRate,
+               QSerialPort::DataBits dataBits, QSerialPort::Parity parity,
+               QSerialPort::StopBits stopBits, QSerialPort::FlowControl flowControl);
+    //overloaded constructor uses initial serail setting constants
     Connection(QString portName);
 
     //destructor, sends closing message to port then closes port
@@ -22,11 +26,6 @@ public:
 
     //stores name of port given upon initialization
     QString portName;
-    QSerialPort::BaudRate baudRate;
-    QSerialPort::DataBits dataBits;
-    QSerialPort::Parity parity;
-    QSerialPort::StopBits stopBits;
-    QSerialPort::FlowControl flowControl;
 
     //true when proper handshake has occurred on connected port
     bool connected;

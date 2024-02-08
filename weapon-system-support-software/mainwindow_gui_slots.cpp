@@ -2,7 +2,6 @@
 #include "mainwindow.h"
 #include "csim.h"
 #include "constants.h"
-#include "settings.h"
 #include "./ui_mainwindow.h"
 
 //this file contains only the implementation of the GUI slots. Declare
@@ -18,28 +17,28 @@ void MainWindow::on_baud_rate_selection_currentIndexChanged(int index)
     switch (index)
     {
     case 0:
-        ddmCon->baudRate = QSerialPort::Baud1200;
+        ddmCon->serialPort.setBaudRate(QSerialPort::Baud1200);
         break;
     case 1:
-        ddmCon->baudRate = QSerialPort::Baud2400;
+        ddmCon->serialPort.setBaudRate(QSerialPort::Baud2400);
         break;
     case 2:
-        ddmCon->baudRate = QSerialPort::Baud4800;
+        ddmCon->serialPort.setBaudRate(QSerialPort::Baud4800);
         break;
     case 3:
-        ddmCon->baudRate = QSerialPort::Baud9600;
+        ddmCon->serialPort.setBaudRate(QSerialPort::Baud9600);
         break;
     case 4:
-        ddmCon->baudRate = QSerialPort::Baud19200;
+        ddmCon->serialPort.setBaudRate(QSerialPort::Baud19200);
         break;
     case 5:
-        ddmCon->baudRate = QSerialPort::Baud38400;
+        ddmCon->serialPort.setBaudRate(QSerialPort::Baud38400);
         break;
     case 6:
-        ddmCon->baudRate = QSerialPort::Baud57600;
+        ddmCon->serialPort.setBaudRate(QSerialPort::Baud57600);
         break;
     case 7:
-        ddmCon->baudRate = QSerialPort::Baud115200;
+        ddmCon->serialPort.setBaudRate(QSerialPort::Baud115200);
         break;
     default:
         // Handle default case
@@ -122,16 +121,16 @@ void MainWindow::on_data_bits_selection_currentIndexChanged(int index)
     switch (index)
     {
     case 0:
-        ddmCon->dataBits = QSerialPort::Data5;
+        ddmCon->serialPort.setDataBits(QSerialPort::Data5);
         break;
     case 1:
-        ddmCon->dataBits = QSerialPort::Data6;
+        ddmCon->serialPort.setDataBits(QSerialPort::Data6);
         break;
     case 2:
-        ddmCon->dataBits = QSerialPort::Data7;
+        ddmCon->serialPort.setDataBits(QSerialPort::Data7);
         break;
     case 3:
-        ddmCon->dataBits = QSerialPort::Data8;
+        ddmCon->serialPort.setDataBits(QSerialPort::Data8);
         break;
     default:
         // Handle default case
@@ -151,22 +150,8 @@ void MainWindow::on_ddm_port_selection_currentIndexChanged(int index)
     //update port name
     ddmPortName = ui->ddm_port_selection->currentText();
 
-    //check if ddmCon is allocated
-    if (ddmCon != nullptr)
-    {
-        //close current connection
-        if (ddmCon->connected) ddmCon->transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + '\n');
-        delete ddmCon;
-
-        //open new connection
-        ddmCon = new Connection(ddmPortName);
-
-        //set up signal and slot (when a message is sent to DDMs serial port, the readyRead signal is emitted and
-        //readSerialData() is called)
-        connect(&ddmCon->serialPort, &QSerialPort::readyRead, this, &MainWindow::readSerialData);
-
-        qDebug() << "GUI is now listening to port " << ddmCon->portName;
-    }
+    //create connection class
+    createDDMCon();
 }
 
 //sends user to developer page when clicked
@@ -374,13 +359,13 @@ void MainWindow::on_flow_control_selection_currentIndexChanged(int index)
     switch (index)
     {
     case 0:
-        ddmCon->flowControl = QSerialPort::NoFlowControl;
+        ddmCon->serialPort.setFlowControl(QSerialPort::NoFlowControl);
         break;
     case 1:
-        ddmCon->flowControl = QSerialPort::HardwareControl;
+        ddmCon->serialPort.setFlowControl(QSerialPort::HardwareControl);
         break;
     case 2:
-        ddmCon->flowControl = QSerialPort::SoftwareControl;
+        ddmCon->serialPort.setFlowControl(QSerialPort::SoftwareControl);
         break;
     default:
         // Handle default case
@@ -471,24 +456,38 @@ void MainWindow::on_parity_selection_currentIndexChanged(int index)
     switch (index)
     {
     case 0:
-        ddmCon->parity = QSerialPort::NoParity;
+        ddmCon->serialPort.setParity(QSerialPort::NoParity);
         break;
     case 1:
-        ddmCon->parity = QSerialPort::EvenParity;
+        ddmCon->serialPort.setParity(QSerialPort::EvenParity);
         break;
     case 2:
-        ddmCon->parity = QSerialPort::OddParity;
+        ddmCon->serialPort.setParity(QSerialPort::OddParity);
         break;
     case 3:
-        ddmCon->parity = QSerialPort::SpaceParity;
+        ddmCon->serialPort.setParity(QSerialPort::SpaceParity);
         break;
     case 4:
-        ddmCon->parity = QSerialPort::MarkParity;
+        ddmCon->serialPort.setParity(QSerialPort::MarkParity);
         break;
     default:
-        // Handle default case
+        // do nothing
         break;
     }
+}
+
+//saves user settings into the qSettings class for cross session storage
+void MainWindow::on_save_Button_clicked()
+{
+    // Load all of the current connection settings into the settings class
+    // Storing the enum values as strings
+    userSettings.setValue("baudRate", ui->baud_rate_selection->currentText());
+    userSettings.setValue("dataBits", ui->data_bits_selection->currentText());
+    userSettings.setValue("parity", ui->parity_selection->currentText());
+    userSettings.setValue("stopBits", ui->stop_bit_selection->currentText());
+    userSettings.setValue("flowControl", ui->flow_control_selection->currentText());
+
+    displaySavedConnectionSettings();
 }
 
 //sends custom user input message
@@ -517,7 +516,12 @@ void MainWindow::on_send_message_button_clicked()
     else
     {
         // Open new connection on com4 (smart pointer auto frees memory when function exits)
-        std::unique_ptr<Connection> conn(new Connection(csimPortName));
+            std::unique_ptr<Connection> conn(new Connection(ui->csim_port_selection->currentText(),
+                                fromStringBaudRate(ui->baud_rate_selection->currentText()),
+                                fromStringDataBits(ui->data_bits_selection->currentText()),
+                                fromStringParity(ui->parity_selection->currentText()),
+                                fromStringStopBits(ui->stop_bit_selection->currentText()),
+                                fromStringFlowControl(ui->flow_control_selection->currentText())));
 
         // Send message through csim port
         conn->transmit(userInput);
@@ -550,13 +554,13 @@ void MainWindow::on_stop_bit_selection_currentIndexChanged(int index)
     switch (index)
     {
     case 0:
-        ddmCon->stopBits = QSerialPort::OneStop;
+        ddmCon->serialPort.setStopBits(QSerialPort::OneStop);
         break;
     case 1:
-        ddmCon->stopBits = QSerialPort::OneAndHalfStop;
+        ddmCon->serialPort.setStopBits(QSerialPort::OneAndHalfStop);
         break;
     case 2:
-        ddmCon->stopBits = QSerialPort::TwoStop;
+        ddmCon->serialPort.setStopBits(QSerialPort::TwoStop);
         break;
     default:
         // Handle default case
@@ -573,3 +577,34 @@ void MainWindow::resetPageButton()
     ui->ElectricalPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
     ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
 }
+
+//restores connection settings to the values saved to the system as default
+void MainWindow::on_restore_Button_clicked()
+{
+    // Retrieve the default connection settings from the settings class
+    QString defaultBaudRate = userSettings.value("baudRate").toString();
+    QString defaultDataBits = userSettings.value("dataBits").toString();
+    QString defaultParity = userSettings.value("parity").toString();
+    QString defaultStopBits = userSettings.value("stopBits").toString();
+    QString defaultFlowControl = userSettings.value("flowControl").toString();
+
+    // Set the default values to the GUI elements if they exist in the combo boxes
+    if (ui->baud_rate_selection->findText(defaultBaudRate) != -1)
+        ui->baud_rate_selection->setCurrentText(defaultBaudRate);
+
+    if (ui->data_bits_selection->findText(defaultDataBits) != -1)
+        ui->data_bits_selection->setCurrentText(defaultDataBits);
+
+    if (ui->parity_selection->findText(defaultParity) != -1)
+        ui->parity_selection->setCurrentText(defaultParity);
+
+    if (ui->stop_bit_selection->findText(defaultStopBits) != -1)
+        ui->stop_bit_selection->setCurrentText(defaultStopBits);
+
+    if (ui->flow_control_selection->findText(defaultFlowControl) != -1)
+        ui->flow_control_selection->setCurrentText(defaultFlowControl);
+
+    //restart connection
+    createDDMCon();
+}
+

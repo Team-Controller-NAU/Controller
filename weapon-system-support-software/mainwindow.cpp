@@ -2,7 +2,6 @@
 #include "mainwindow.h"
 #include "csim.h"
 #include "constants.h"
-#include "settings.h"
 #include "./ui_mainwindow.h"
 
 
@@ -45,8 +44,13 @@ MainWindow::MainWindow(QWidget *parent)
     csimPortName = ui->csim_port_selection->currentText();
     ddmPortName = ui->ddm_port_selection->currentText();
 
-    //init ddm connection
-    ddmCon = new Connection(ddmPortName);
+    //init ddm connection using the current values set in connection settings
+    ddmCon = new Connection(ui->ddm_port_selection->currentText(),
+                            fromStringBaudRate(ui->baud_rate_selection->currentText()),
+                            fromStringDataBits(ui->data_bits_selection->currentText()),
+                            fromStringParity(ui->parity_selection->currentText()),
+                            fromStringStopBits(ui->stop_bit_selection->currentText()),
+                            fromStringFlowControl(ui->flow_control_selection->currentText()));
 
     //init csim class, assign serial port
     csimHandle = new CSim(nullptr, csimPortName);
@@ -96,6 +100,30 @@ MainWindow::~MainWindow()
     delete csimHandle;
     delete status;
     delete events;
+}
+
+void MainWindow::createDDMCon()
+{
+    //check if ddmCon is allocated
+    if (ddmCon != nullptr)
+    {
+        //close current connection
+        delete ddmCon;
+
+        //open new connection
+        ddmCon = new Connection(ui->ddm_port_selection->currentText(),
+                                fromStringBaudRate(ui->baud_rate_selection->currentText()),
+                                fromStringDataBits(ui->data_bits_selection->currentText()),
+                                fromStringParity(ui->parity_selection->currentText()),
+                                fromStringStopBits(ui->stop_bit_selection->currentText()),
+                                fromStringFlowControl(ui->flow_control_selection->currentText()));
+
+        //set up signal and slot (when a message is sent to DDMs serial port, the readyRead signal is emitted and
+        //readSerialData() is called)
+        connect(&ddmCon->serialPort, &QSerialPort::readyRead, this, &MainWindow::readSerialData);
+
+        qDebug() << "GUI is now listening to port " << ddmCon->portName;
+    }
 }
 
 //initial synchronization between controller and ddm
@@ -608,31 +636,56 @@ void MainWindow::enableConnectionChanges()
     ui->flow_control_selection->setEnabled(true);
 }
 
+//support function, outputs usersettings values to qdebug
+void MainWindow::displaySavedConnectionSettings()
+{
+    logEmptyLine();
+    qDebug() << "Connection Settings Saved Cross Session:";
+    // Print the values of each setting
+    qDebug() << "DDM Port: " << userSettings.value("portName").toString();
+    qDebug() << "CSIM Port: " << userSettings.value("csimPortName").toString();
+    qDebug() << "baudRate:" << userSettings.value("baudRate").toString();
+    qDebug() << "dataBits:" << userSettings.value("dataBits").toString();
+    qDebug() << "parity:" << userSettings.value("parity").toString();
+    qDebug() << "stopBits:" << userSettings.value("stopBits").toString();
+    qDebug() << "flowControl:" << userSettings.value("flowControl").toString() << Qt::endl;
+}
 
 void MainWindow::setup_connection_settings()
 {
     int i;
-    QString currentPortName;
 
-    //for each serial setting, check if the value is already set
-    //if not, initialize them
-    userSettings.setValue("portName", QVariant::fromValue(INITIAL_DDM_PORT));
-    userSettings.setValue("csimPortName", QVariant::fromValue(INITIAL_CSIM_PORT));
-    userSettings.setValue("baudRate", QVariant::fromValue(INITIAL_BAUD_RATE));
-    userSettings.setValue("dataBits", QVariant::fromValue(INITIAL_DATA_BITS));
-    userSettings.setValue("parity", QVariant::fromValue(INITIAL_PARITY));
-    userSettings.setValue("stopBits", QVariant::fromValue(INITIAL_STOP_BITS));
-    userSettings.setValue("flowControl", QVariant::fromValue(INITIAL_FLOW_CONTROL));
+    // Check and set initial value for "portName"
+    if (userSettings.value("portName").toString().isEmpty())
+        userSettings.setValue("portName", INITIAL_DDM_PORT);
 
-    /* uncomment to show the current settings upon startup
-    qDebug() << "portName type:" << userSettings.value("portName").type() << "value:" << userSettings.value("portName");
-    qDebug() << "csimPortName type:" << userSettings.value("csimPortName").type() << "value:" << userSettings.value("csimPortName");
-    qDebug() << "baudRate type:" << userSettings.value("baudRate").type() << "value:" << userSettings.value("baudRate");
-    qDebug() << "dataBits type:" << userSettings.value("dataBits").type() << "value:" << userSettings.value("dataBits");
-    qDebug() << "parity type:" << userSettings.value("parity").type() << "value:" << userSettings.value("parity");
-    qDebug() << "stopBits type:" << userSettings.value("stopBits").type() << "value:" << userSettings.value("stopBits");
-    qDebug() << "flowControl type:" << userSettings.value("flowControl").type() << "value:" << userSettings.value("flowControl");
-    */
+    // Check and set initial value for "csimPortName"
+    if (userSettings.value("csimPortName").toString().isEmpty())
+        userSettings.setValue("csimPortName", INITIAL_CSIM_PORT);
+
+    // Check and set initial value for "baudRate"
+    if (userSettings.value("baudRate").toString().isEmpty())
+        userSettings.setValue("baudRate", toString(INITIAL_BAUD_RATE));
+
+    // Check and set initial value for "dataBits"
+    if (userSettings.value("dataBits").toString().isEmpty())
+        userSettings.setValue("dataBits", toString(INITIAL_DATA_BITS));
+
+    // Check and set initial value for "parity"
+    if (userSettings.value("parity").toString().isEmpty())
+        userSettings.setValue("parity", toString(INITIAL_PARITY));
+
+    // Check and set initial value for "stopBits"
+    if (userSettings.value("stopBits").toString().isEmpty())
+        userSettings.setValue("stopBits", toString(INITIAL_STOP_BITS));
+
+    // Check and set initial value for "flowControl"
+    if (userSettings.value("flowControl").toString().isEmpty())
+        userSettings.setValue("flowControl", toString(INITIAL_FLOW_CONTROL));
+
+
+    // Display user settings
+    displaySavedConnectionSettings();
 
     //setup port name selections on gui (scans for available ports)
     setup_ddm_port_selection(0);
@@ -671,15 +724,16 @@ void MainWindow::setup_connection_settings()
     ui->flow_control_selection->addItem(toString(QSerialPort::HardwareControl));
     ui->flow_control_selection->addItem(toString(QSerialPort::SoftwareControl));
 
-    // Set initial values for the q combo boxes like an absolute gangsta
-    ui->baud_rate_selection->setCurrentIndex(ui->baud_rate_selection->findText(toString(static_cast<QSerialPort::BaudRate>(userSettings.value("baudRate").toInt()))));
-    ui->data_bits_selection->setCurrentIndex(ui->data_bits_selection->findText(toString(static_cast<QSerialPort::DataBits>(userSettings.value("dataBits").toInt()))));
-    ui->parity_selection->setCurrentIndex(ui->parity_selection->findText(toString(static_cast<QSerialPort::Parity>(userSettings.value("parity").toInt()))));
-    ui->stop_bit_selection->setCurrentIndex(ui->stop_bit_selection->findText(toString(static_cast<QSerialPort::StopBits>(userSettings.value("stopBits").toInt()))));
-    ui->flow_control_selection->setCurrentIndex(ui->flow_control_selection->findText(toString(static_cast<QSerialPort::FlowControl>(userSettings.value("flowControl").toInt()))));
+    // Set initial values for the q combo boxes
+    ui->baud_rate_selection->setCurrentIndex(ui->baud_rate_selection->findText(userSettings.value("baudRate").toString()));
+    ui->data_bits_selection->setCurrentIndex(ui->data_bits_selection->findText(userSettings.value("dataBits").toString()));
+    ui->parity_selection->setCurrentIndex(ui->parity_selection->findText(userSettings.value("parity").toString()));
+    ui->stop_bit_selection->setCurrentIndex(ui->stop_bit_selection->findText(userSettings.value("stopBits").toString()));
+    ui->flow_control_selection->setCurrentIndex(ui->flow_control_selection->findText(userSettings.value("flowControl").toString()));
+
 
     // Set initial stop bits value
-    switch (INITIAL_STOP_BITS) {
+    switch (fromStringStopBits(userSettings.value("stopBits").toString())) {
     case QSerialPort::OneStop:
         ui->stop_bit_selection->setCurrentIndex(ui->stop_bit_selection->findText(toString(QSerialPort::OneStop)));
         break;
@@ -743,8 +797,8 @@ QString MainWindow::toString(QSerialPort::BaudRate baudRate) {
     case QSerialPort::Baud57600: return "57600";
     case QSerialPort::Baud115200: return "115200";
     default:
-        // Invalid input, throw an exception or return a default value indicating an error
-        throw std::invalid_argument("Invalid baud rate enum value");
+        // Invalid input, throw an exception with the parameter value
+        throw std::invalid_argument("Invalid baud rate enum value: " + QString::number(baudRate).toStdString());
     }
 }
 
@@ -755,8 +809,8 @@ QString MainWindow::toString(QSerialPort::DataBits dataBits) {
     case QSerialPort::Data7: return "7";
     case QSerialPort::Data8: return "8";
     default:
-        // Invalid input, throw an exception or return a default value indicating an error
-        throw std::invalid_argument("Invalid data bits enum value");
+        // Invalid input, throw an exception with the parameter value
+        throw std::invalid_argument("Invalid data bits enum value: " + QString::number(dataBits).toStdString());
     }
 }
 
@@ -768,8 +822,8 @@ QString MainWindow::toString(QSerialPort::Parity parity) {
     case QSerialPort::SpaceParity: return "Space Parity";
     case QSerialPort::MarkParity: return "Mark Parity";
     default:
-        // Invalid input, throw an exception or return a default value indicating an error
-        throw std::invalid_argument("Invalid parity enum value");
+        // Invalid input, throw an exception with the parameter value
+        throw std::invalid_argument("Invalid parity enum value: " + QString::number(parity).toStdString());
     }
 }
 
@@ -779,8 +833,8 @@ QString MainWindow::toString(QSerialPort::StopBits stopBits) {
     case QSerialPort::OneAndHalfStop: return "1.5";
     case QSerialPort::TwoStop: return "2";
     default:
-        // Invalid input, throw an exception or return a default value indicating an error
-        throw std::invalid_argument("Invalid stop bits enum value");
+        // Invalid input, throw an exception with the parameter value
+        throw std::invalid_argument("Invalid stop bits enum value: " + QString::number(stopBits).toStdString());
     }
 }
 
@@ -790,15 +844,13 @@ QString MainWindow::toString(QSerialPort::FlowControl flowControl) {
     case QSerialPort::HardwareControl: return "Hardware Control";
     case QSerialPort::SoftwareControl: return "Software Control";
     default:
-        // Invalid input, throw an exception or return a default value indicating an error
-        throw std::invalid_argument("Invalid flow control enum value");
+        // Invalid input, throw an exception with the parameter value
+        throw std::invalid_argument("Invalid flow control enum value: " + QString::number(flowControl).toStdString());
     }
 }
 
 
-//======================================================================================
-//From string methods for QSerialPortEnumeratedValues
-//======================================================================================
+
 //======================================================================================
 //From string methods for QSerialPortEnumeratedValues
 //======================================================================================
@@ -820,7 +872,7 @@ QSerialPort::BaudRate MainWindow::fromStringBaudRate(QString baudRateStr) {
     } else if (baudRateStr == "115200") {
         return QSerialPort::Baud115200;
     } else {
-        throw std::invalid_argument("Invalid baud rate string");
+        throw std::invalid_argument("Invalid baud rate string: " + baudRateStr.toStdString());
     }
 }
 
@@ -834,7 +886,7 @@ QSerialPort::DataBits MainWindow::fromStringDataBits(QString dataBitsStr) {
     } else if (dataBitsStr == "8") {
         return QSerialPort::Data8;
     } else {
-        throw std::invalid_argument("Invalid data bits string");
+        throw std::invalid_argument("Invalid data bits string: " + dataBitsStr.toStdString());
     }
 }
 
@@ -850,7 +902,7 @@ QSerialPort::Parity MainWindow::fromStringParity(QString parityStr) {
     } else if (parityStr == "Mark Parity") {
         return QSerialPort::MarkParity;
     } else {
-        throw std::invalid_argument("Invalid parity string");
+        throw std::invalid_argument("Invalid parity string: " + parityStr.toStdString());
     }
 }
 
@@ -862,7 +914,7 @@ QSerialPort::StopBits MainWindow::fromStringStopBits(QString stopBitsStr) {
     } else if (stopBitsStr == "2") {
         return QSerialPort::TwoStop;
     } else {
-        throw std::invalid_argument("Invalid stop bits string");
+        throw std::invalid_argument("Invalid stop bits string: " + stopBitsStr.toStdString());
     }
 }
 
@@ -874,7 +926,19 @@ QSerialPort::FlowControl MainWindow::fromStringFlowControl(QString flowControlSt
     } else if (flowControlStr == "Software Control") {
         return QSerialPort::SoftwareControl;
     } else {
-        throw std::invalid_argument("Invalid flow control string");
+        throw std::invalid_argument("Invalid flow control string: " + flowControlStr.toStdString());
     }
 }
 
+//logs empty line to qdebug
+void MainWindow::logEmptyLine()
+{
+    //revert to standard output format
+    qSetMessagePattern("%{message}");
+
+    //log empty line
+    qDebug();
+
+    //enable custom message format
+    qSetMessagePattern(QDEBUG_OUTPUT_FORMAT);
+}
