@@ -438,12 +438,13 @@ void CSim::run()
 
         } //end main execution loop
 
-        //free connection class
+        //if connected, add disconnect message to messagesSent (sent in destructor)
         if (conn->connected)
         {
-            conn->transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + '\n');
             messagesSent += QString::number(static_cast<int>(CLOSING_CONNECTION)) + '\n';
         }
+
+        //free connection
         delete conn;
         connPtr = nullptr;
 

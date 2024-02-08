@@ -43,6 +43,11 @@ public:
     //set true to enable automatic handshake once CSim sends closing connection message
     bool reconnect;
 
+    //creates a new connection using currently selected serial port settings
+    void createDDMCon();
+
+    void logEmptyLine();
+
     // Declare toString methods
     static QString toString(QSerialPort::BaudRate baudRate);
     static QString toString(QSerialPort::DataBits dataBits);
@@ -74,6 +79,7 @@ private slots:
     void updateTimer();
     void on_CSim_button_clicked();
     void readSerialData();
+    void displaySavedConnectionSettings();
     void on_send_message_button_clicked();
 
     void on_csim_port_selection_currentIndexChanged(int index);
@@ -123,6 +129,10 @@ private slots:
     void on_FilterBox_currentIndexChanged(int index);
 
     void on_output_messages_sent_button_clicked();
+
+    void on_save_Button_clicked();
+
+    void on_restore_Button_clicked();
 
 private:
     Ui::MainWindow *ui;
