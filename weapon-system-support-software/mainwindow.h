@@ -2,10 +2,12 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <connection.h>
 #include <QtConcurrent>
+#include <QDesktopServices>
+#include <connection.h>
 #include <csim.h>
 #include <events.h>
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -133,6 +135,10 @@ private slots:
     void on_save_Button_clicked();
 
     void on_restore_Button_clicked();
+
+    void on_openLogfileFolder_clicked();
+
+    void on_setLogfileFolder_clicked();
 
 private:
     Ui::MainWindow *ui;

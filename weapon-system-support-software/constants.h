@@ -4,6 +4,7 @@
 #include <QString>
 #include <QSerialPortInfo>
 #include <QSerialPort>
+#include <QDir>
 
 //this file will define enumerated values and constants used elsewhere in code
 
@@ -65,7 +66,7 @@ const int NUM_EVENT_DELIMETERS = 2;
 
 const int DATA_NOT_FOUND = -101;
 
-const QString LOGFILE_FOLDER_NAME = "/WSSS_Logfiles";
+const QString INITIAL_LOGFILE_LOCATION = QDir::tempPath() + "/WSSS_Logfiles";
 
 const QString QDEBUG_OUTPUT_FORMAT = "[%{time h:mm:ss}] %{message}";
 
