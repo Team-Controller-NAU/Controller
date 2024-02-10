@@ -613,3 +613,71 @@ void Events::loadEventDump(QString message)
         }
     }
 }
+
+//takes
+void Events::appendMessageToLogfile(QString logfileName, QString message, int eventCounter, int errorCounter, bool event)
+{
+    QFile file(logfileName);
+    int id;
+
+    // check if the file does not exist
+    if (!file.exists()) {
+        // test if
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            // Failed to create the file
+            qDebug() << "Unable to create running logfile";
+            return;
+        }
+        file.close();
+    }
+
+    // check if the app can open the file
+    if (!file.open(QIODevice::Append | QIODevice::Text)) {
+        // Failed to open the file
+        qDebug() << "Unable to open running logfile";
+        return;
+    }
+
+    //
+    // check if the message is an event
+    if(event)
+    {
+        id = eventCounter;
+    }
+    else
+    {
+        id = errorCounter;
+    }
+
+    // split the message into its parts
+    QStringList messageSplit = message.split(DELIMETER);
+
+    // write to file
+    QTextStream out(&file);
+
+    // write message to file
+    if(event)
+    {
+        out << "\n";
+    }
+    out << "ID: " << id << messageSplit[1] << " " << messageSplit[2] << " " << messageSplit[3] << " ";
+
+    // check for error message
+    if(!event)
+    {
+        // check the cleared bool
+        if(messageSplit[4].toInt() == 0 || messageSplit[5].toInt() == 0)
+        {
+            out << ", NOT CLEARED";
+        }
+        else if(messageSplit[5].toInt() == 1)
+        {
+            out << ", CLEARED";
+        }
+    }
+
+    out << "\n";
+
+    // Close the file
+    file.close();
+}

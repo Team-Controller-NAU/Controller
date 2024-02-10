@@ -151,8 +151,15 @@ void MainWindow::readSerialData()
             EventNode* wkgEventPtr;
             bool printErr;
             QString dumpMessage;
-            QString logFileName;
             QStringList messageSet;
+
+            //gets the approx time of the start of session for the logfile
+            qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
+            //QString logFileName = QString::number(secsSinceEpoch);
+            QString runningLogFileName = "C:/WSSS/appendTest1.txt";
+            int eventLogCounter = 0;
+            int errorLogCounter = 0;
+
 
             //get images for buttons
             QPixmap greenButton(":/resources/Images/greenButton.png");
@@ -188,6 +195,7 @@ void MainWindow::readSerialData()
 
                     ui->status_output->setText(message);
 
+
                     break;
 
                 case EVENT:
@@ -206,6 +214,9 @@ void MainWindow::readSerialData()
                     ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
                     ui->statusEventOutput->setText(QString::number(events->totalEvents));
                     ui->statusEventOutput->setAlignment(Qt::AlignCenter);
+
+                    events->appendMessageToLogfile(runningLogFileName, "Event: " + message, eventLogCounter, errorLogCounter, true);
+                    eventLogCounter += 1;
 
                     break;
 
@@ -254,6 +265,9 @@ void MainWindow::readSerialData()
                     // update active errors gui
                     ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
                     ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
+
+                    events->appendMessageToLogfile(runningLogFileName, message, eventLogCounter, errorLogCounter, false);
+                    errorLogCounter += 1;
 
                     break;
 
@@ -319,6 +333,8 @@ void MainWindow::readSerialData()
                     ui->statusEventOutput->setText(QString::number(events->totalEvents));
                     ui->statusEventOutput->setAlignment(Qt::AlignCenter);
 
+                    // write dump to log file
+                    events->appendMessageToLogfile(runningLogFileName, dumpMessage, eventLogCounter, errorLogCounter, true);
                     break;
 
                 case ERROR_DUMP:
@@ -428,6 +444,8 @@ void MainWindow::readSerialData()
                     // update active errors gui
                     ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
                     ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
+
+                    events->appendMessageToLogfile(runningLogFileName, dumpMessage, eventLogCounter, errorLogCounter, false);
 
                     break;
 

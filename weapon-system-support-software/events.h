@@ -46,6 +46,8 @@ public:
     void loadEventDump(QString message);
     void loadErrorDump(QString message);
 
+    void appendMessageToLogfile(QString logfileName, QString message, int eventCounter, int errorCounter, bool event);
+
     int totalEvents;
     int totalErrors;
     int totalNodes;
