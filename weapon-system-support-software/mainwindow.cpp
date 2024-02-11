@@ -648,7 +648,8 @@ void MainWindow::displaySavedConnectionSettings()
     qDebug() << "dataBits:" << userSettings.value("dataBits").toString();
     qDebug() << "parity:" << userSettings.value("parity").toString();
     qDebug() << "stopBits:" << userSettings.value("stopBits").toString();
-    qDebug() << "flowControl:" << userSettings.value("flowControl").toString() << Qt::endl;
+    qDebug() << "flowControl:" << userSettings.value("flowControl").toString();
+    qDebug() << "logfile location: " << userSettings.value("logfileLocation").toString() << Qt::endl;
 }
 
 void MainWindow::setup_connection_settings()
@@ -942,3 +943,6 @@ void MainWindow::logEmptyLine()
     //enable custom message format
     qSetMessagePattern(QDEBUG_OUTPUT_FORMAT);
 }
+
+
+

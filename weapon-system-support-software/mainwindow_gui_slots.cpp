@@ -608,3 +608,40 @@ void MainWindow::on_restore_Button_clicked()
     createDDMCon();
 }
 
+void MainWindow::on_openLogfileFolder_clicked()
+{
+    // if the user hasnt set log file location user settings, temp folder is opened
+    if (userSettings.value("logfileLocation").toString().isEmpty())
+    {
+        QDesktopServices::openUrl(QUrl::fromLocalFile(INITIAL_LOGFILE_LOCATION));
+    }
+
+    else
+    {
+        //open from the user settings
+        QDesktopServices::openUrl(QUrl::fromLocalFile(userSettings.value("logfileLocation").toString()));
+        qDebug() << "log file location opening: " << userSettings.value("logfileLocation").toString();
+    }
+    // save user settings
+    userSettings.sync();
+}
+
+void MainWindow::on_setLogfileFolder_clicked()
+{
+    // set logfile location with the user choice
+    userSettings.setValue("logfileLocation", QFileDialog::getExistingDirectory(this, tr("Create or Select a logfolder directory")));
+
+    // check the success of saving settings
+    if(userSettings.status() != QSettings::NoError)
+    {
+        qDebug() << "Error while saving user settings: " << userSettings.status();
+    }
+
+    else
+    {
+        qDebug() << "Successfully set user settings";
+    }
+
+    //sync user settings
+    userSettings.sync();
+}

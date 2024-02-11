@@ -14,6 +14,8 @@ Events::Events()
 
     headErrorNode= nullptr;
     lastErrorNode= nullptr;
+
+
 }
 
 Events::~Events()
@@ -261,9 +263,11 @@ EventNode* Events::getNextNodeToPrint(EventNode*& eventPtr, EventNode*& errorPtr
 
 void Events::outputToLogFile(std::string logFileName)
 {
+    QSettings userSettings("Team Controller", "WSSS");
     // get the path to the users temp folder
-    QString tempPath = QDir::tempPath() + LOGFILE_FOLDER_NAME;
-    QDir path(tempPath);
+    // QString tempPath = QDir::tempPath() + LOGFILE_FOLDER_NAME;
+    QString userSetPath = userSettings.value("logfileLocation").toString();
+    QDir path(userSetPath);
 
     // check if the path does not lead to anything
     if(!path.exists())
@@ -341,7 +345,7 @@ void Events::outputToLogFile(std::string logFileName)
     }
 
     // Open the log file in overwrite mode
-    std::ofstream logFile(tempPath.toStdString() + '/' + logFileName, std::ios::out);
+    std::ofstream logFile(userSetPath.toStdString() + '/' + logFileName, std::ios::out);
 
     if (logFile.is_open())
     {
