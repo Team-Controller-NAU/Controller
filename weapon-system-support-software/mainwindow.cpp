@@ -206,6 +206,9 @@ void MainWindow::readSerialData()
                     //add new event to event ll
                     events->loadEventData(message);
 
+                    // update log file (false for not dump)
+                    events->appendToLogfile(runningLogFileName, message, false);
+
                     // update GUI
                     if (eventFilter == ALL || eventFilter == EVENTS) ui->events_output->append(message);
 
@@ -214,10 +217,6 @@ void MainWindow::readSerialData()
                     ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
                     ui->statusEventOutput->setText(QString::number(events->totalEvents));
                     ui->statusEventOutput->setAlignment(Qt::AlignCenter);
-
-                    events->appendMessageToLogfile(runningLogFileName, "Event: " + message, eventLogCounter, errorLogCounter, true);
-                    eventLogCounter += 1;
-
                     break;
 
                 case ERROR:
@@ -227,6 +226,9 @@ void MainWindow::readSerialData()
 
                     //add new error to error ll
                     events->loadErrorData(message);
+
+                    // update log file (false for not dump)
+                    events->appendToLogfile(runningLogFileName, message, false);
 
                     // check for any type of error filter, including all
                     if(eventFilter != EVENTS)
@@ -265,10 +267,6 @@ void MainWindow::readSerialData()
                     // update active errors gui
                     ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
                     ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
-
-                    events->appendMessageToLogfile(runningLogFileName, message, eventLogCounter, errorLogCounter, false);
-                    errorLogCounter += 1;
-
                     break;
 
                 case ELECTRICAL:
@@ -283,6 +281,9 @@ void MainWindow::readSerialData()
 
                     // load all events to event linked list
                     events->loadEventDump(message);
+
+                    // update log file (true for dump)
+                    events->appendToLogfile(runningLogFileName, message, true);
 
                     // reset dump
                     dumpMessage = "";
@@ -332,9 +333,6 @@ void MainWindow::readSerialData()
                     ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
                     ui->statusEventOutput->setText(QString::number(events->totalEvents));
                     ui->statusEventOutput->setAlignment(Qt::AlignCenter);
-
-                    // write dump to log file
-                    events->appendMessageToLogfile(runningLogFileName, dumpMessage, eventLogCounter, errorLogCounter, true);
                     break;
 
                 case ERROR_DUMP:
@@ -343,6 +341,9 @@ void MainWindow::readSerialData()
 
                     // load all errors to error linked list
                     events->loadErrorDump(message);
+
+                    // update log file (true for dump)
+                    events->appendToLogfile(runningLogFileName, message, true);
 
                     // reset dump
                     dumpMessage = "";
@@ -445,8 +446,6 @@ void MainWindow::readSerialData()
                     ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
                     ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
 
-                    events->appendMessageToLogfile(runningLogFileName, dumpMessage, eventLogCounter, errorLogCounter, false);
-
                     break;
 
                 case CLEAR_ERROR:
@@ -465,6 +464,9 @@ void MainWindow::readSerialData()
                     // update active errors gui
                     ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
                     ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
+
+                    // TOOD: update events tab GUI, update live log file
+                    // ...
 
                     break;
 
@@ -516,15 +518,15 @@ void MainWindow::readSerialData()
                     qDebug() << "Controller disconnect message received";
 
                     // check for not empty
-                    if(events->totalNodes != 0)
-                    {
-                        // new "session" ended, save to log file
-                        qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
-                        QString logFileName = QString::number(secsSinceEpoch);
+                    // if(events->totalNodes != 0)
+                    // {
+                    //     // new "session" ended, save to log file
+                    //     qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
+                    //     QString logFileName = QString::number(secsSinceEpoch);
 
-                        // save logfile - autosave condition
-                        events->outputToLogFile(logFileName.toStdString() + "-logfile-A.txt");
-                    }
+                    //     // save logfile - autosave condition
+                    //     events->outputToLogFile(logFileName.toStdString() + "-logfile-A.txt");
+                    // }
 
                     //assign conn flag
                     ddmCon->connected = false;
@@ -801,7 +803,7 @@ void MainWindow::updateTimer()
 }
 
 //======================================================================================
-//To string methods for QSerialPortEnumeratedValues
+// To string methods for QSerialPortEnumeratedValues
 //======================================================================================
 // Convert QSerialPort::BaudRate to string
 QString MainWindow::toString(QSerialPort::BaudRate baudRate) {

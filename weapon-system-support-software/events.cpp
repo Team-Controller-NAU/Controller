@@ -614,17 +614,26 @@ void Events::loadEventDump(QString message)
     }
 }
 
-//takes
-void Events::appendMessageToLogfile(QString logfileName, QString message, int eventCounter, int errorCounter, bool event)
+// takes message and appends it to log file
+void Events::appendToLogfile(QString logfileName, QString message, bool dump)
 {
+    // initialize method
     QFile file(logfileName);
+    QStringList messageSplit;
+    QString timeStamp;
+    QString eventString;
+    EventNode* wkgErrPtr;
+    EventNode* wkgEventPtr;
     int id;
+    bool printErr;
 
     // check if the file does not exist
-    if (!file.exists()) {
-        // test if
-        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            // Failed to create the file
+    if (!file.exists())
+    {
+        // test if possible to append
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+        {
+            // failed to create the file
             qDebug() << "Unable to create running logfile";
             return;
         }
@@ -632,51 +641,83 @@ void Events::appendMessageToLogfile(QString logfileName, QString message, int ev
     }
 
     // check if the app can open the file
-    if (!file.open(QIODevice::Append | QIODevice::Text)) {
-        // Failed to open the file
+    if (!file.open(QIODevice::Append | QIODevice::Text))
+    {
+        // failed to open the file
         qDebug() << "Unable to open running logfile";
         return;
     }
 
-    //
-    // check if the message is an event
-    if(event)
+    // check for dump
+    // assuming this can only happen after a new "session" begins
+    if (dump)
     {
-        id = eventCounter;
+        // initialize ptrs
+        wkgErrPtr = headErrorNode;
+        wkgEventPtr = headEventNode;
+
+        // loop through all errors and events so the log file is in order..
+        while(wkgErrPtr != nullptr || wkgEventPtr != nullptr)
+        {
+            // get next to print by ID
+            EventNode* nextPrintPtr = getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
+
+            // get parts
+            id = nextPrintPtr->id;
+            timeStamp = nextPrintPtr->timeStamp;
+            eventString = nextPrintPtr-> eventString;
+
+            // write to file
+            QTextStream out(&file);
+            out << "ID: " << id << " " << timeStamp << " " << eventString;
+
+            // check for error
+            if (printErr)
+            {
+                // check for cleared
+                out << (nextPrintPtr->cleared ? ", CLEARED" : ", NOT CLEARED");
+            }
+
+            // end the current line
+            out << Qt::endl;
+        }
     }
+    // assume not a dump
     else
     {
-        id = errorCounter;
-    }
+        // split the message into its parts
+        messageSplit = message.split(DELIMETER);
 
-    // split the message into its parts
-    QStringList messageSplit = message.split(DELIMETER);
-
-    // write to file
-    QTextStream out(&file);
-
-    // write message to file
-    if(event)
-    {
-        out << "\n";
-    }
-    out << "ID: " << id << messageSplit[1] << " " << messageSplit[2] << " " << messageSplit[3] << " ";
-
-    // check for error message
-    if(!event)
-    {
-        // check the cleared bool
-        if(messageSplit[4].toInt() == 0 || messageSplit[5].toInt() == 0)
+        // check for real event/error
+        if (messageSplit.length() > NUM_EVENT_DELIMETERS)
         {
-            out << ", NOT CLEARED";
-        }
-        else if(messageSplit[5].toInt() == 1)
-        {
-            out << ", CLEARED";
+            // get parts
+            id = messageSplit[0].toInt();
+            timeStamp = messageSplit[1];
+            eventString = messageSplit[2];
+
+            // write to file
+            QTextStream out(&file);
+            out << "ID: " << id << " " << timeStamp << " " << eventString;
+
+            // check for error
+            if (messageSplit.length() > NUM_ERROR_DELIMETERS)
+            {
+                // check for cleared
+                if (messageSplit[3] == "1")
+                {
+                    out << ", CLEARED";
+                }
+                else
+                {
+                    out << ", NOT CLEARED";
+                }
+            }
+
+            // end the current line
+            out << Qt::endl;
         }
     }
-
-    out << "\n";
 
     // Close the file
     file.close();
