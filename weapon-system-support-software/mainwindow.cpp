@@ -89,6 +89,10 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     qDebug() << "GUI is now listening to port " << ddmCon->portName;
+
+    // set logfile name
+    qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
+    logfileName = QString::number(secsSinceEpoch);
 }
 
 //destructor
@@ -153,13 +157,6 @@ void MainWindow::readSerialData()
             QString dumpMessage;
             QStringList messageSet;
 
-            //gets the approx time of the start of session for the logfile
-            qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
-            //QString logFileName = QString::number(secsSinceEpoch);
-            QString runningLogFileName = "C:/WSSS/appendTest1.txt";
-            int eventLogCounter = 0;
-            int errorLogCounter = 0;
-
 
             //get images for buttons
             QPixmap greenButton(":/resources/Images/greenButton.png");
@@ -207,7 +204,9 @@ void MainWindow::readSerialData()
                     events->loadEventData(message);
 
                     // update log file (false for not dump)
-                    events->appendToLogfile(runningLogFileName, message, false);
+                    events->appendToLogfile(QDir::tempPath() + "/WSSS_Logfiles/" + logfileName + "-logfile-A.txt",
+                                            message,
+                                            false);
 
                     // update GUI
                     if (eventFilter == ALL || eventFilter == EVENTS) ui->events_output->append(message);
@@ -228,7 +227,9 @@ void MainWindow::readSerialData()
                     events->loadErrorData(message);
 
                     // update log file (false for not dump)
-                    events->appendToLogfile(runningLogFileName, message, false);
+                    events->appendToLogfile(QDir::tempPath() + "/WSSS_Logfiles/" + logfileName + "-logfile-A.txt",
+                                            message,
+                                            false);
 
                     // check for any type of error filter, including all
                     if(eventFilter != EVENTS)
@@ -283,7 +284,9 @@ void MainWindow::readSerialData()
                     events->loadEventDump(message);
 
                     // update log file (true for dump)
-                    events->appendToLogfile(runningLogFileName, message, true);
+                    events->appendToLogfile(QDir::tempPath() + "/WSSS_Logfiles/" + logfileName + "-logfile-A.txt",
+                                            message,
+                                            true);
 
                     // reset dump
                     dumpMessage = "";
@@ -343,7 +346,9 @@ void MainWindow::readSerialData()
                     events->loadErrorDump(message);
 
                     // update log file (true for dump)
-                    events->appendToLogfile(runningLogFileName, message, true);
+                    events->appendToLogfile(QDir::tempPath() + "/WSSS_Logfiles/" + logfileName + "-logfile-A.txt",
+                                            message,
+                                            true);
 
                     // reset dump
                     dumpMessage = "";

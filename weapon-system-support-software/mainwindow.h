@@ -39,6 +39,7 @@ public:
     QTimer* lastMessageTimer;
     QDateTime timeLastReceived;
     EventFilter eventFilter;
+    QString logfileName;
 
     //set true to enable automatic handshake once CSim sends closing connection message
     bool reconnect;

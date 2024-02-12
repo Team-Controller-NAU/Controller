@@ -259,6 +259,7 @@ EventNode* Events::getNextNodeToPrint(EventNode*& eventPtr, EventNode*& errorPtr
     return nextPrintPtr;
 }
 
+// primarily used to mannually save events/errors to logfiles
 void Events::outputToLogFile(std::string logFileName)
 {
     // get the path to the users temp folder
@@ -284,61 +285,7 @@ void Events::outputToLogFile(std::string logFileName)
     {
         qDebug() << "Log file directory already exists";
     }
-
-    // check number of autosaved files
-    QStringList numberAutosaves = path.entryList(QStringList("*-A*"), QDir::Files);
-
-    if(numberAutosaves.count() > 4)
-    {
-        // assume too many files, initialize variables
-        qint64 oldestTime = QDateTime::currentSecsSinceEpoch();
-        QString fileToDelete;
-
-        // loop through the autosaved files
-        for(const QString &fileName:numberAutosaves)
-        {
-            QFileInfo fileInformation(path.filePath(fileName));
-
-            // bool is just used to check the name split operation
-            bool good;
-            qint64 timestamp = fileInformation.baseName().split('-').first().toLongLong(&good);
-
-            //check for older file and good opeation
-            if(good && timestamp < oldestTime)
-            {
-                //set oldest and file to delete
-                oldestTime = timestamp;
-                fileToDelete = fileName;
-            }
-
-        }
-
-        qDebug() << numberAutosaves.count() << " autosaved log files detected, deleting: " << fileToDelete;
-
-        // check if file exists
-        if(!fileToDelete.isEmpty())
-        {
-            // file is there, get path
-            QString deletionPath = path.filePath(fileToDelete);
-
-            if(QFile::remove(deletionPath))
-            {
-                qDebug() << "Deletion successful";
-            }
-
-            else
-            {
-                qDebug() << "Deletion failed";
-            }
-        }
-
-        // otherwise, files does not exist
-        else
-        {
-            qDebug() << "File does not exist";
-        }
-
-    }
+    // dont need to check for multiple manual saves
 
     // Open the log file in overwrite mode
     std::ofstream logFile(tempPath.toStdString() + '/' + logFileName, std::ios::out);
@@ -615,17 +562,23 @@ void Events::loadEventDump(QString message)
 }
 
 // takes message and appends it to log file
-void Events::appendToLogfile(QString logfileName, QString message, bool dump)
+void Events::appendToLogfile(QString logfilePath, QString message, bool dump)
 {
     // initialize method
-    QFile file(logfileName);
+    QFile file(logfilePath);
     QStringList messageSplit;
     QString timeStamp;
     QString eventString;
     EventNode* wkgErrPtr;
     EventNode* wkgEventPtr;
+
+    // will change with user settings
+    QString tempPath = QDir::tempPath();
+    QDir path(tempPath + "/WSSS_Logfiles");
+
     int id;
     bool printErr;
+
 
     // check if the file does not exist
     if (!file.exists())
@@ -646,6 +599,60 @@ void Events::appendToLogfile(QString logfileName, QString message, bool dump)
         // failed to open the file
         qDebug() << "Unable to open running logfile";
         return;
+    }
+
+    // check number of autosaved files
+    QStringList numberAutosaves = path.entryList(QStringList("*logfile-A.txt"), QDir::Files);
+
+    if(numberAutosaves.count() > 5)
+    {
+        // assume too many files, initialize variables
+        qint64 oldestTime = QDateTime::currentSecsSinceEpoch();
+        QString fileToDelete;
+
+        // loop through the autosaved files
+        for(const QString &fileName:numberAutosaves)
+        {
+            QFileInfo fileInformation(path.filePath(fileName));
+
+            // bool is just used to check the name split operation
+            bool good;
+            qint64 timestamp = fileInformation.baseName().split('-').first().toLongLong(&good);
+
+            //check for older file and good opeation
+            if(good && timestamp < oldestTime)
+            {
+                //set oldest and file to delete
+                oldestTime = timestamp;
+                fileToDelete = fileName;
+            }
+
+        }
+
+        qDebug() << numberAutosaves.count() << " autosaved log files detected, deleting: " << fileToDelete;
+
+        // check if file exists
+        if(!fileToDelete.isEmpty())
+        {
+            // file is there, get path
+            QString deletionPath = path.filePath(fileToDelete);
+
+            if(QFile::remove(deletionPath))
+            {
+                qDebug() << "Deletion successful";
+            }
+
+            else
+            {
+                qDebug() << "Deletion failed";
+            }
+        }
+
+        // otherwise, files does not exist
+        else
+        {
+            qDebug() << "File does not exist";
+        }
     }
 
     // check for dump
