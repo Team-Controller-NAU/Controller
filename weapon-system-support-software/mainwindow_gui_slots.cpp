@@ -429,11 +429,11 @@ void MainWindow::on_handshake_button_clicked()
         if(events->totalNodes != 0)
         {
             // new "session" ended, save to log file
-            qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
-            QString logFileName = QString::number(secsSinceEpoch);
+            // qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
+            // QString logFileName = QString::number(secsSinceEpoch);
 
             // save logfile - autosave conditon
-            events->outputToLogFile(logFileName.toStdString() + "-logfile-A.txt");
+            //events->outputToLogFile(logFileName.toStdString() + "-logfile-A.txt");
         }
 
         ddmCon->connected = false;

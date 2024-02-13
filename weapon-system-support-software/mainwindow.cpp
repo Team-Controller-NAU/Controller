@@ -89,6 +89,10 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     qDebug() << "GUI is now listening to port " << ddmCon->portName;
+
+    // set logfile name
+    qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
+    logfileName = QString::number(secsSinceEpoch);
 }
 
 //destructor
@@ -151,8 +155,8 @@ void MainWindow::readSerialData()
             EventNode* wkgEventPtr;
             bool printErr;
             QString dumpMessage;
-            QString logFileName;
             QStringList messageSet;
+
 
             //get images for buttons
             QPixmap greenButton(":/resources/Images/greenButton.png");
@@ -188,6 +192,7 @@ void MainWindow::readSerialData()
 
                     ui->status_output->setText(message);
 
+
                     break;
 
                 case EVENT:
@@ -198,6 +203,11 @@ void MainWindow::readSerialData()
                     //add new event to event ll
                     events->loadEventData(message);
 
+                    // update log file (false for not dump)
+                    events->appendToLogfile(QDir::tempPath() + "/WSSS_Logfiles/" + logfileName + "-logfile-A.txt",
+                                            message,
+                                            false);
+
                     // update GUI
                     if (eventFilter == ALL || eventFilter == EVENTS) ui->events_output->append(message);
 
@@ -206,7 +216,6 @@ void MainWindow::readSerialData()
                     ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
                     ui->statusEventOutput->setText(QString::number(events->totalEvents));
                     ui->statusEventOutput->setAlignment(Qt::AlignCenter);
-
                     break;
 
                 case ERROR:
@@ -216,6 +225,11 @@ void MainWindow::readSerialData()
 
                     //add new error to error ll
                     events->loadErrorData(message);
+
+                    // update log file (false for not dump)
+                    events->appendToLogfile(QDir::tempPath() + "/WSSS_Logfiles/" + logfileName + "-logfile-A.txt",
+                                            message,
+                                            false);
 
                     // check for any type of error filter, including all
                     if(eventFilter != EVENTS)
@@ -254,7 +268,6 @@ void MainWindow::readSerialData()
                     // update active errors gui
                     ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
                     ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
-
                     break;
 
                 case ELECTRICAL:
@@ -269,6 +282,11 @@ void MainWindow::readSerialData()
 
                     // load all events to event linked list
                     events->loadEventDump(message);
+
+                    // update log file (true for dump)
+                    events->appendToLogfile(QDir::tempPath() + "/WSSS_Logfiles/" + logfileName + "-logfile-A.txt",
+                                            message,
+                                            true);
 
                     // reset dump
                     dumpMessage = "";
@@ -318,7 +336,6 @@ void MainWindow::readSerialData()
                     ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
                     ui->statusEventOutput->setText(QString::number(events->totalEvents));
                     ui->statusEventOutput->setAlignment(Qt::AlignCenter);
-
                     break;
 
                 case ERROR_DUMP:
@@ -327,6 +344,11 @@ void MainWindow::readSerialData()
 
                     // load all errors to error linked list
                     events->loadErrorDump(message);
+
+                    // update log file (true for dump)
+                    events->appendToLogfile(QDir::tempPath() + "/WSSS_Logfiles/" + logfileName + "-logfile-A.txt",
+                                            message,
+                                            true);
 
                     // reset dump
                     dumpMessage = "";
@@ -448,6 +470,9 @@ void MainWindow::readSerialData()
                     ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
                     ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
 
+                    // TOOD: update events tab GUI, update live log file
+                    // ...
+
                     break;
 
                 case BEGIN:
@@ -498,15 +523,15 @@ void MainWindow::readSerialData()
                     qDebug() << "Controller disconnect message received";
 
                     // check for not empty
-                    if(events->totalNodes != 0)
-                    {
-                        // new "session" ended, save to log file
-                        qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
-                        QString logFileName = QString::number(secsSinceEpoch);
+                    // if(events->totalNodes != 0)
+                    // {
+                    //     // new "session" ended, save to log file
+                    //     qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
+                    //     QString logFileName = QString::number(secsSinceEpoch);
 
-                        // save logfile - autosave condition
-                        events->outputToLogFile(logFileName.toStdString() + "-logfile-A.txt");
-                    }
+                    //     // save logfile - autosave condition
+                    //     events->outputToLogFile(logFileName.toStdString() + "-logfile-A.txt");
+                    // }
 
                     //assign conn flag
                     ddmCon->connected = false;
@@ -784,7 +809,7 @@ void MainWindow::updateTimer()
 }
 
 //======================================================================================
-//To string methods for QSerialPortEnumeratedValues
+// To string methods for QSerialPortEnumeratedValues
 //======================================================================================
 // Convert QSerialPort::BaudRate to string
 QString MainWindow::toString(QSerialPort::BaudRate baudRate) {
