@@ -575,14 +575,15 @@ void Events::appendToLogfile(QString logfilePath, QString message, bool dump)
     QString eventString;
     EventNode* wkgErrPtr;
     EventNode* wkgEventPtr;
+    QSettings userSettings("Team Controller", "WSSS");
 
     // will change with user settings
-    QString tempPath = QDir::tempPath();
-    QDir path(tempPath + "/WSSS_Logfiles");
+    QString userSetPath = userSettings.value("logfileLocation").toString();
+    //QString tempPath = QDir::tempPath();
+    QDir path(userSetPath);
 
     int id;
     bool printErr;
-
 
     // check if the file does not exist
     if (!file.exists())

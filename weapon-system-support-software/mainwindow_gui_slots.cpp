@@ -613,6 +613,23 @@ void MainWindow::on_openLogfileFolder_clicked()
     // if the user hasnt set log file location user settings, temp folder is opened
     if (userSettings.value("logfileLocation").toString().isEmpty())
     {
+        // create a QDir object for the path
+        QDir path(INITIAL_LOGFILE_LOCATION);
+
+        // check if the path does not lead to anything
+        if(!path.exists())
+        {
+            // check if can make path successfully
+            if(path.mkpath("."))
+            {
+                qDebug() << "Logfile directory created at: " << INITIAL_LOGFILE_LOCATION;
+            }
+
+            else
+            {
+                qDebug() << "The log file directory failed to create";
+            }
+        }
         QDesktopServices::openUrl(QUrl::fromLocalFile(INITIAL_LOGFILE_LOCATION));
     }
 
@@ -628,6 +645,9 @@ void MainWindow::on_openLogfileFolder_clicked()
 
 void MainWindow::on_setLogfileFolder_clicked()
 {
+    // save prev user settings value
+    QString previousPath = userSettings.value("logfileLocation").toString();
+
     // set logfile location with the user choice
     userSettings.setValue("logfileLocation", QFileDialog::getExistingDirectory(this, tr("Create or Select a logfolder directory")));
 
@@ -636,7 +656,14 @@ void MainWindow::on_setLogfileFolder_clicked()
     {
         qDebug() << "Error while saving user settings: " << userSettings.status();
     }
-
+    // check if user exited the dialog box
+    else if(userSettings.value("logfileLocation").toString() == "")
+    {
+        // revert to previous user setting
+        userSettings.setValue("logfileLocation", previousPath);
+        qDebug() << "No logfile directory set. Reverting to previous path: " << previousPath;
+    }
+    // otherwise, assume successful logfile directory creation
     else
     {
         qDebug() << "Successfully set user settings";
