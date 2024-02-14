@@ -204,7 +204,7 @@ void MainWindow::readSerialData()
                     events->loadEventData(message);
 
                     // update log file (false for not dump)
-                    events->appendToLogfile(QDir::tempPath() + "/WSSS_Logfiles/" + logfileName + "-logfile-A.txt",
+                    events->appendToLogfile(userSettings.value("logfileLocation").toString() + "/" + logfileName + "-logfile-A.txt",
                                             message,
                                             false);
 
@@ -227,7 +227,7 @@ void MainWindow::readSerialData()
                     events->loadErrorData(message);
 
                     // update log file (false for not dump)
-                    events->appendToLogfile(QDir::tempPath() + "/WSSS_Logfiles/" + logfileName + "-logfile-A.txt",
+                    events->appendToLogfile(userSettings.value("logfileLocation").toString() + "/" + logfileName + "-logfile-A.txt",
                                             message,
                                             false);
 
@@ -284,7 +284,7 @@ void MainWindow::readSerialData()
                     events->loadEventDump(message);
 
                     // update log file (true for dump)
-                    events->appendToLogfile(QDir::tempPath() + "/WSSS_Logfiles/" + logfileName + "-logfile-A.txt",
+                    events->appendToLogfile(userSettings.value("logfileLocation").toString() + "/" + logfileName + "-logfile-A.txt",
                                             message,
                                             true);
 
@@ -346,7 +346,7 @@ void MainWindow::readSerialData()
                     events->loadErrorDump(message);
 
                     // update log file (true for dump)
-                    events->appendToLogfile(QDir::tempPath() + "/WSSS_Logfiles/" + logfileName + "-logfile-A.txt",
+                    events->appendToLogfile(userSettings.value("logfileLocation").toString() + "/" + logfileName + "-logfile-A.txt",
                                             message,
                                             true);
 
