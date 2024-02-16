@@ -286,7 +286,7 @@ font: 16pt &quot;Segoe UI&quot;;</string>
             </sizepolicy>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>2</number>
            </property>
            <widget class="QWidget" name="Events_page">
             <layout class="QGridLayout" name="gridLayout_3">
@@ -1332,8 +1332,8 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
                 <property name="geometry">
                  <rect>
                   <x>0</x>
-                  <y>-352</y>
-                  <width>896</width>
+                  <y>0</y>
+                  <width>168</width>
                   <height>744</height>
                  </rect>
                 </property>

@@ -94,6 +94,9 @@ MainWindow::MainWindow(QWidget *parent)
     // set logfile name
     qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
     logfileName = QString::number(secsSinceEpoch);
+
+    // ensures that the application will open on the events page
+    on_EventsPageButton_clicked();
 }
 
 //destructor
