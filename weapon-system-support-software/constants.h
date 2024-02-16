@@ -61,8 +61,11 @@ const QString EVENT_MESSAGES[NUM_EVENT_MESSAGES] = {"Sample event message 1", "S
 const int NUM_ERROR_MESSAGES = 3;
 const QString ERROR_MESSAGES[NUM_ERROR_MESSAGES] = {"Sample error message 1.22", "Sample error message 2; 5; 0", "Sample error message 3; 677"};
 
+const QString ELECTRICAL_MESSAGES = "Servo Motor, 19, 2,,Pump Cooler, 2, 3,,Internal Temp Sensor, 33, 4";
+
 const int NUM_ERROR_DELIMETERS = 3;
 const int NUM_EVENT_DELIMETERS = 2;
+const int NUM_ELECTRIC_DELIMETERS = 2;
 
 const int DATA_NOT_FOUND = -101;
 

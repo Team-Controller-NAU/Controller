@@ -13,6 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
     ddmCon(nullptr),
     status(new Status()),
     events(new Events()),
+    electricalObject(new electrical()),
 
     //setting determines if automatic handshake starts after csim disconnects
     reconnect(false),
@@ -104,6 +105,7 @@ MainWindow::~MainWindow()
     delete csimHandle;
     delete status;
     delete events;
+    delete electricalObject;
 }
 
 void MainWindow::createDDMCon()
@@ -153,6 +155,7 @@ void MainWindow::readSerialData()
             // declare variables
             EventNode* wkgErrPtr;
             EventNode* wkgEventPtr;
+            electricalNode* wkgElecPtr;
             bool printErr;
             QString dumpMessage;
             QStringList messageSet;
@@ -273,6 +276,21 @@ void MainWindow::readSerialData()
                 case ELECTRICAL:
 
                     qDebug() <<  "Message id: electrical" << qPrintable("\n");
+                    //dump electrical data
+                    electricalObject->loadElecDump(message);
+
+                    wkgElecPtr = electricalObject->headNode;
+
+                    ui->Cooling_Label->setText(wkgElecPtr->name);
+                    ui->Cooling_Stats->setText("Voltage: " + QString::number(wkgElecPtr->voltage) + '\n' + "Amps: " +  QString::number(wkgElecPtr->amps));
+
+                    wkgElecPtr = wkgElecPtr->nextNode;
+                    ui->InternalTemp_Label->setText(wkgElecPtr->name);
+                    ui->InternalTemp_Stats->setText("Voltage: " + QString::number(wkgElecPtr->voltage) + '\n' + "Amps: " + QString::number(wkgElecPtr->amps));
+
+                    wkgElecPtr = wkgElecPtr->nextNode;
+                    ui->ExternalTemp_Label->setText(wkgElecPtr->name);
+                    ui->ExternalTemp_Stats->setText("Voltage: " + QString::number(wkgElecPtr->voltage) + '\n' + "Amps: " + QString::number(wkgElecPtr->amps));
 
                     break;
 

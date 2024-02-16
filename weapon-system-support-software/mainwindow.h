@@ -7,6 +7,7 @@
 #include <connection.h>
 #include <csim.h>
 #include <events.h>
+#include <electrical.h>
 
 
 QT_BEGIN_NAMESPACE
@@ -32,6 +33,7 @@ public:
     //data classes
     Status *status;
     Events *events;
+    electrical *electricalObject;
     QSettings userSettings;
 
     // vars
