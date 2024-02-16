@@ -606,7 +606,7 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
                </property>
               </widget>
              </item>
-             <item row="0" column="5">
+             <item row="0" column="5" alignment="Qt::AlignBottom">
               <widget class="QComboBox" name="FilterBox">
                <property name="styleSheet">
                 <string notr="true">color: rgb(255, 255, 255);
@@ -1333,7 +1333,7 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>614</width>
+                  <width>168</width>
                   <height>744</height>
                  </rect>
                 </property>
@@ -1357,7 +1357,7 @@ font: 20pt &quot;Segoe UI&quot;;
 background-color: rgb(179, 179, 179);</string>
                      </property>
                      <property name="text">
-                      <string>#7</string>
+                      <string/>
                      </property>
                     </widget>
                    </item>
@@ -1401,7 +1401,7 @@ font: 20pt &quot;Segoe UI&quot;;
 background-color: rgb(179, 179, 179);</string>
                      </property>
                      <property name="text">
-                      <string>#5: Servo Motor</string>
+                      <string/>
                      </property>
                     </widget>
                    </item>
@@ -1445,7 +1445,7 @@ font: 20pt &quot;Segoe UI&quot;;
 background-color: rgb(179, 179, 179);</string>
                      </property>
                      <property name="text">
-                      <string>#3: External Temp Sensor</string>
+                      <string/>
                      </property>
                     </widget>
                    </item>
@@ -1489,7 +1489,7 @@ font: 20pt &quot;Segoe UI&quot;;
 background-color: rgb(179, 179, 179);</string>
                      </property>
                      <property name="text">
-                      <string>#2: Internal Temp Sensor</string>
+                      <string/>
                      </property>
                     </widget>
                    </item>
@@ -1533,7 +1533,7 @@ font: 20pt &quot;Segoe UI&quot;;
 background-color: rgb(179, 179, 179);</string>
                      </property>
                      <property name="text">
-                      <string>#1:Cooling Motor</string>
+                      <string/>
                      </property>
                     </widget>
                    </item>
@@ -1577,7 +1577,7 @@ font: 20pt &quot;Segoe UI&quot;;
 background-color: rgb(179, 179, 179);</string>
                      </property>
                      <property name="text">
-                      <string>#4: Hydraulic Actuator</string>
+                      <string/>
                      </property>
                     </widget>
                    </item>
@@ -1621,7 +1621,7 @@ font: 20pt &quot;Segoe UI&quot;;
 background-color: rgb(179, 179, 179);</string>
                      </property>
                      <property name="text">
-                      <string>#6: Pressure Sensor</string>
+                      <string/>
                      </property>
                     </widget>
                    </item>
@@ -1665,7 +1665,7 @@ font: 20pt &quot;Segoe UI&quot;;
 background-color: rgb(179, 179, 179);</string>
                      </property>
                      <property name="text">
-                      <string>#8</string>
+                      <string/>
                      </property>
                     </widget>
                    </item>

@@ -124,6 +124,8 @@ void CSim::checkConnection(Connection *conn)
             // Extract message id
             SerialMessageIdentifier messageId = static_cast<SerialMessageIdentifier>(QString(message[0]).toInt());
 
+            electrical *elec(new electrical());
+
             // Determine what kind of message this is
             switch (messageId)
             {
@@ -137,6 +139,7 @@ void CSim::checkConnection(Connection *conn)
                 break;
 
             case LISTENING:
+
                 // Log
                 qDebug() << "[CSIM] DDM listening signal received. Serial communication beginning"<< qPrintable("\n");
 
@@ -146,11 +149,11 @@ void CSim::checkConnection(Connection *conn)
                 //store message
                 messagesSent += QString::number(BEGIN) + DELIMETER + '\n';
 
-                //dump electrical data
-                conn->transmit(QString::number(ELECTRICAL) + DELIMETER + '\n');
+                // transmit the electrial signal
+                conn->transmit(QString::number(ELECTRICAL) + DELIMETER + ELECTRICAL_MESSAGES + '\n');
 
                 //store message
-                messagesSent += QString::number(ELECTRICAL) + DELIMETER + '\n';
+                messagesSent += QString::number(ELECTRICAL) + DELIMETER + ELECTRICAL_MESSAGES + '\n';
 
                 //check for existing event dump message
                 if (eventDumpMessage.length() > 0)
