@@ -286,7 +286,7 @@ font: 16pt &quot;Segoe UI&quot;;</string>
             </sizepolicy>
            </property>
            <property name="currentIndex">
-            <number>2</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="Events_page">
             <layout class="QGridLayout" name="gridLayout_3">
@@ -606,7 +606,7 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
                </property>
               </widget>
              </item>
-             <item row="0" column="5">
+             <item row="0" column="5" alignment="Qt::AlignBottom">
               <widget class="QComboBox" name="FilterBox">
                <property name="styleSheet">
                 <string notr="true">color: rgb(255, 255, 255);
