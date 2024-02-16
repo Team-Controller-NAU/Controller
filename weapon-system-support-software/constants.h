@@ -69,7 +69,7 @@ const int NUM_ELECTRIC_DELIMETERS = 2;
 
 const int DATA_NOT_FOUND = -101;
 
-const QString INITIAL_LOGFILE_LOCATION = QDir::tempPath() + "/WSSS_Logfiles";
+const QString INITIAL_LOGFILE_LOCATION = "WSSS_Logfiles";
 
 const QString QDEBUG_OUTPUT_FORMAT = "[%{time h:mm:ss}] %{message}";
 
