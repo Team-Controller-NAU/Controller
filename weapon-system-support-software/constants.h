@@ -5,6 +5,7 @@
 #include <QSerialPortInfo>
 #include <QSerialPort>
 #include <QDir>
+#include <QPixMap>
 
 //this file will define enumerated values and constants used elsewhere in code
 
@@ -12,8 +13,8 @@
 //status enums
 //------------
 //integer length vals are used by csim during random generation
-enum TriggerStatus {DISENGAGED=0, ENGAGED=1};
-const int NUM_TRIGGER_STATUS = 2;
+enum TriggerStatus {DISENGAGED=0, ENGAGED=1, NA=2};
+const int NUM_TRIGGER_STATUS = 3;
 
 enum ControllerState {RUNNING=0, BLOCKED=1, TERMINATED=2, SUSPENDED=3};
 const int NUM_CONTROLLER_STATE = 4;
@@ -33,7 +34,7 @@ enum SerialMessageIdentifier { /*the following identifiers are used to id contro
                                LISTENING = 7, BEGIN = 8, CLOSING_CONNECTION = 9};
 
 //for filtering the event page output
-enum EventFilter {ALL, EVENTS, ERRORS, CLEARED_ERRORS, NON_CLEARED_ERRORS};
+enum EventFilter {ALL=0, EVENTS=1, ERRORS=2, CLEARED_ERRORS=3, NON_CLEARED_ERRORS=4};
 enum Parity {NO_PARITY, EVEN_PARITY, ODD_PARITY};
 enum StopBits {ONE, ONE_AND_A_HALF, TWO};
 
