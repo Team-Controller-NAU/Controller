@@ -2,10 +2,13 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <connection.h>
 #include <QtConcurrent>
+#include <QDesktopServices>
+#include <connection.h>
 #include <csim.h>
 #include <events.h>
+#include <electrical.h>
+
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -30,6 +33,8 @@ public:
     //data classes
     Status *status;
     Events *events;
+    electrical *electricalObject;
+    QSettings userSettings;
 
     // vars
     QString csimPortName;
@@ -38,9 +43,29 @@ public:
     QTimer* lastMessageTimer;
     QDateTime timeLastReceived;
     EventFilter eventFilter;
+    QString logfileName;
 
     //set true to enable automatic handshake once CSim sends closing connection message
     bool reconnect;
+
+    //creates a new connection using currently selected serial port settings
+    void createDDMCon();
+
+    void logEmptyLine();
+
+    // Declare toString methods
+    static QString toString(QSerialPort::BaudRate baudRate);
+    static QString toString(QSerialPort::DataBits dataBits);
+    static QString toString(QSerialPort::Parity parity);
+    static QString toString(QSerialPort::StopBits stopBits);
+    static QString toString(QSerialPort::FlowControl flowControl);
+
+    // Declare fromString methods
+    static QSerialPort::BaudRate fromStringBaudRate(QString baudRateStr);
+    static QSerialPort::DataBits fromStringDataBits(QString dataBitsStr);
+    static QSerialPort::Parity fromStringParity(QString parityStr);
+    static QSerialPort::StopBits fromStringStopBits(QString stopBitsStr);
+    static QSerialPort::FlowControl fromStringFlowControl(QString flowControlStr);
 
 signals:
     //signal to be connected to csim's completeTransmissionRequest() slot
@@ -50,12 +75,16 @@ signals:
     //signal will be connected to csims clearError() slot.
     void clearErrorRequest(int clearedId);
 
+    //signal will be connected to csims outputSessionString() slot.
+    void outputMessagesSentRequest();
+
 private slots:
     //all gui slots go here. Any time an event happens, you may connect to a slot here
     //and the mainwindow class can execute functions based on events.
     void updateTimer();
     void on_CSim_button_clicked();
     void readSerialData();
+    void displaySavedConnectionSettings();
     void on_send_message_button_clicked();
 
     void on_csim_port_selection_currentIndexChanged(int index);
@@ -103,6 +132,18 @@ private slots:
     void enableConnectionChanges();
 
     void on_FilterBox_currentIndexChanged(int index);
+
+    void on_output_messages_sent_button_clicked();
+
+    void on_save_Button_clicked();
+
+    void on_restore_Button_clicked();
+
+    void on_openLogfileFolder_clicked();
+
+    void on_setLogfileFolder_clicked();
+
+    void resetFiringMode();
 
 private:
     Ui::MainWindow *ui;

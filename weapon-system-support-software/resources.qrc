@@ -3,6 +3,7 @@
         <file>Images/greenButton.png</file>
         <file>Images/redButton.png</file>
         <file>Images/blankButton.png</file>
-        <file>Images/TeamControllerLogo.jpg</file>
+        <file>Images/TeamControllerLogo.png</file>
+        <file>Images/downloadLogo.png</file>
     </qresource>
 </RCC>

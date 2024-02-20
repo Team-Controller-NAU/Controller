@@ -4,6 +4,7 @@
 #include <QString>
 #include <QSerialPortInfo>
 #include <QSerialPort>
+#include <QDir>
 
 //this file will define enumerated values and constants used elsewhere in code
 
@@ -60,11 +61,19 @@ const QString EVENT_MESSAGES[NUM_EVENT_MESSAGES] = {"Sample event message 1", "S
 const int NUM_ERROR_MESSAGES = 3;
 const QString ERROR_MESSAGES[NUM_ERROR_MESSAGES] = {"Sample error message 1.22", "Sample error message 2; 5; 0", "Sample error message 3; 677"};
 
+const QString ELECTRICAL_MESSAGES = "Servo Motor, 19, 2,,Pump Cooler, 2, 3,,Internal Temp Sensor, 33, 4";
+
 const int NUM_ERROR_DELIMETERS = 3;
 const int NUM_EVENT_DELIMETERS = 2;
+const int NUM_ELECTRIC_DELIMETERS = 2;
 
 const int DATA_NOT_FOUND = -101;
 
-const QString LOG_FILE_PATH = "/temp/WSSS_LogFiles";
+const QString INITIAL_LOGFILE_LOCATION = "WSSS_Logfiles";
+
+const QString QDEBUG_OUTPUT_FORMAT = "[%{time h:mm:ss}] %{message}";
+
+const QString CRC_VERSION = "1.2.6";
+const QString CONTROLLER_VERSION = "6.7.2";
 
 #endif // CONSTANTS_H

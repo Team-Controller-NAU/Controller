@@ -19,10 +19,12 @@ public:
     electrical();
     ~electrical();
 
-    void addNode(int id, QString name, int voltage, int amps);
+    void addNode(QString name, int voltage, int amps);
     void printNodes();
     void freeLL();
     QString generateElectricalMessage();
+    void loadElecData(QString message);
+    void loadElecDump(QString message);
     void createElectricalLL();
 
     //variables

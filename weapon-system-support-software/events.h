@@ -8,6 +8,7 @@
 #include <QDateTime>
 #include <QFileDialog>
 #include <QFileInfo>
+#include <QSettings>
 
 
 struct EventNode {
@@ -45,6 +46,8 @@ public:
 
     void loadEventDump(QString message);
     void loadErrorDump(QString message);
+
+    void appendToLogfile(QString logfilePath, QString message, bool dump);
 
     int totalEvents;
     int totalErrors;

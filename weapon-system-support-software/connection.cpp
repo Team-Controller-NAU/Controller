@@ -1,21 +1,21 @@
 #include <connection.h>
 
 //connection class constructor
-Connection::Connection(QString portName)
-
-    : portName(portName), connected(false), baudRate(INITIAL_BAUD_RATE),
-    dataBits(INITIAL_DATA_BITS), parity(INITIAL_PARITY), stopBits(INITIAL_STOP_BITS),
-    flowControl(INITIAL_FLOW_CONTROL)
+Connection::Connection(QString portName, QSerialPort::BaudRate baudRate,
+                       QSerialPort::DataBits dataBits, QSerialPort::Parity parity,
+                       QSerialPort::StopBits stopBits, QSerialPort::FlowControl flowControl)
+    : portName(portName),
+    connected(false)
 {
     //configure this connection to the given port name
     serialPort.setPortName(portName);
 
     //configure port settings
-    serialPort.setBaudRate(INITIAL_BAUD_RATE);
-    serialPort.setDataBits(INITIAL_DATA_BITS);
-    serialPort.setParity(INITIAL_PARITY);
-    serialPort.setStopBits(INITIAL_STOP_BITS);
-    serialPort.setFlowControl(INITIAL_FLOW_CONTROL);
+    serialPort.setBaudRate(baudRate);
+    serialPort.setDataBits(dataBits);
+    serialPort.setParity(parity);
+    serialPort.setStopBits(stopBits);
+    serialPort.setFlowControl(flowControl);
 
     //open the port
     serialPort.open(QIODevice::ReadWrite);
@@ -32,6 +32,14 @@ Connection::Connection(QString portName)
         serialPort.clear();
         serialPort.readAll();
     }
+}
+
+// Constructor overload (uses stored settings)
+Connection::Connection(QString portName)
+    : Connection(portName, INITIAL_BAUD_RATE, INITIAL_DATA_BITS,
+                 INITIAL_PARITY, INITIAL_STOP_BITS, INITIAL_FLOW_CONTROL)
+{
+    // This constructor delegates to the first constructor
 }
 
 //sends message through serial port
@@ -68,5 +76,12 @@ Connection::~Connection()
 {
     qDebug() << "Closing connection on port " << portName << qPrintable("\n");
 
+    if (connected)
+    {
+        transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + '\n');
+    }
+
     serialPort.close();
 }
+
+
