@@ -2206,7 +2206,24 @@ border-color: rgb(255, 255, 255);</string>
     </item>
     <item>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="3" alignment="Qt::AlignRight">
+      <item row="1" column="2" alignment="Qt::AlignLeft">
+       <widget class="QLabel" name="crcLabel">
+        <property name="maximumSize">
+         <size>
+          <width>150</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">color: rgb(255, 255, 255);
+font: 10pt &quot;Segoe UI&quot;;</string>
+        </property>
+        <property name="text">
+         <string>CRC Version: </string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="4" alignment="Qt::AlignRight">
        <widget class="QTextEdit" name="DDMTimer">
         <property name="maximumSize">
          <size>
@@ -2245,23 +2262,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
         </property>
        </widget>
       </item>
-      <item row="1" column="1" alignment="Qt::AlignLeft">
-       <widget class="QLabel" name="crcLabel">
-        <property name="maximumSize">
-         <size>
-          <width>150</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">color: rgb(255, 255, 255);
-font: 10pt &quot;Segoe UI&quot;;</string>
-        </property>
-        <property name="text">
-         <string>CRC Version: </string>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="0" alignment="Qt::AlignLeft">
        <widget class="QLabel" name="controllerLabel">
         <property name="sizePolicy">
@@ -2284,6 +2284,35 @@ font: 10pt &quot;Segoe UI&quot;;</string>
          <string>Controller Version: </string>
         </property>
        </widget>
+      </item>
+      <item row="1" column="3">
+       <spacer name="horizontalSpacer_6">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="1" column="1">
+       <spacer name="horizontalSpacer_13">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>10</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
      </layout>
     </item>

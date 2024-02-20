@@ -198,6 +198,26 @@ void MainWindow::readSerialData()
 
                     ui->status_output->setText(message);
 
+                    qDebug() << "fireMode: " << status->firingMode;
+
+                    resetFiringMode();
+
+                    if(status->firingMode == SAFE)
+                    {
+                        ui->safeLabel->setStyleSheet("color: #FF7518;font: 20pt Segoe UI;");
+                    }
+                    else if(status->firingMode == SINGLE)
+                    {
+                        ui->singleLabel->setStyleSheet("color: #FF7518;font: 20pt Segoe UI;");
+                    }
+                    else if(status->firingMode == BURST)
+                    {
+                        ui->burstLabel->setStyleSheet("color: #FF7518;font: 20pt Segoe UI;");
+                    }
+                    else
+                    {
+                        ui->automaticLabel->setStyleSheet("color: #FF7518;font: 20pt Segoe UI;");
+                    }
 
                     break;
 
@@ -992,6 +1012,14 @@ void MainWindow::logEmptyLine()
 
     //enable custom message format
     qSetMessagePattern(QDEBUG_OUTPUT_FORMAT);
+}
+
+void MainWindow::resetFiringMode()
+{
+    ui->automaticLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
+    ui->burstLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
+    ui->safeLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
+    ui->singleLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
 }
 
 

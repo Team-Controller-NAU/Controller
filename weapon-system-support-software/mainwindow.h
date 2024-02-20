@@ -143,6 +143,8 @@ private slots:
 
     void on_setLogfileFolder_clicked();
 
+    void resetFiringMode();
+
 private:
     Ui::MainWindow *ui;
 };
