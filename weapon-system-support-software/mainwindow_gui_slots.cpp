@@ -376,7 +376,7 @@ void MainWindow::on_flow_control_selection_currentIndexChanged(int index)
 //toggles handshake process on and off. Once connected, allow for disconnect (send disconnect message to controller)
 void MainWindow::on_handshake_button_clicked()
 {
-    QPixmap redButton(":/resources/Images/redButton.png");
+   // QPixmap redButton(":/resources/Images/redButton.png");
 
     // Check if the timer is started or ddmCon is not connected
     if ( !handshakeTimer->isActive() && !ddmCon->connected )
@@ -419,7 +419,7 @@ void MainWindow::on_handshake_button_clicked()
         //refreshes connection button/displays
         ui->handshake_button->setText("Connect");
         ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #14AE5C;font: 15pt Segoe UI;");
-        ui->connectionStatus->setPixmap(redButton);
+        ui->connectionStatus->setPixmap(RED_BUTTON);
         ui->ddm_port_selection->setEnabled(true);
 
         //allow user to modify connection settings

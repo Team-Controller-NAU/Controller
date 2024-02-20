@@ -286,7 +286,7 @@ font: 16pt &quot;Segoe UI&quot;;</string>
             </sizepolicy>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>4</number>
            </property>
            <widget class="QWidget" name="Events_page">
             <layout class="QGridLayout" name="gridLayout_3">
@@ -2124,7 +2124,7 @@ border-color: rgb(255, 255, 255);</string>
                 </spacer>
                </item>
                <item>
-                <widget class="QLabel" name="label_2">
+                <widget class="QLabel" name="trigger1">
                  <property name="maximumSize">
                   <size>
                    <width>50</width>
@@ -2159,7 +2159,7 @@ border-color: rgb(255, 255, 255);</string>
                 </spacer>
                </item>
                <item>
-                <widget class="QLabel" name="label_3">
+                <widget class="QLabel" name="trigger2">
                  <property name="maximumSize">
                   <size>
                    <width>50</width>

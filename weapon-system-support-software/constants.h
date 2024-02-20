@@ -5,6 +5,7 @@
 #include <QSerialPortInfo>
 #include <QSerialPort>
 #include <QDir>
+#include <QPixMap>
 
 //this file will define enumerated values and constants used elsewhere in code
 
@@ -33,7 +34,7 @@ enum SerialMessageIdentifier { /*the following identifiers are used to id contro
                                LISTENING = 7, BEGIN = 8, CLOSING_CONNECTION = 9};
 
 //for filtering the event page output
-enum EventFilter {ALL, EVENTS, ERRORS, CLEARED_ERRORS, NON_CLEARED_ERRORS};
+enum EventFilter {ALL=0, EVENTS=1, ERRORS=2, CLEARED_ERRORS=3, NON_CLEARED_ERRORS=4};
 enum Parity {NO_PARITY, EVEN_PARITY, ODD_PARITY};
 enum StopBits {ONE, ONE_AND_A_HALF, TWO};
 

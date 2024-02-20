@@ -4,7 +4,6 @@
 #include "constants.h"
 #include "./ui_mainwindow.h"
 
-
 MainWindow::MainWindow(QWidget *parent)
 
     //initialize imbedded classes/vars
@@ -28,8 +27,13 @@ MainWindow::MainWindow(QWidget *parent)
     lastMessageTimer( new QTimer(this) ),
 
     //init user settings to our organization and project
-    userSettings("Team Controller", "WSSS")
+    userSettings("Team Controller", "WSSS"),
 
+    BLANK_BUTTON(":/resources/Images/blankButton.png"),
+
+    RED_BUTTON(":/resources/Images/redButton.png"),
+
+    GREEN_BUTTON(":/resources/Images/greenButton.png")
 {
 
     //set output settings for qDebug
@@ -41,7 +45,7 @@ MainWindow::MainWindow(QWidget *parent)
     //scan available ports, add port names to port selection combo boxes
     setup_connection_settings();
 
-    //update class port name values
+    //update class port name values ====================================== This might be redundant, check if so
     csimPortName = ui->csim_port_selection->currentText();
     ddmPortName = ui->ddm_port_selection->currentText();
 
@@ -94,6 +98,15 @@ MainWindow::MainWindow(QWidget *parent)
     // set logfile name
     qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
     logfileName = QString::number(secsSinceEpoch);
+
+    //TEMP CODE TO MAKE FEED POSITION RESPONSIVE WITH STATUS UPDATES========
+    ui->feedPosition->setMaximum(360);
+
+    //======================================================================
+
+    //init trigger to grey buttons until updated by serial status updates
+    ui->trigger1->setPixmap(BLANK_BUTTON);
+    ui->trigger2->setPixmap(BLANK_BUTTON);
 
     // ensures that the application will open on the events page
     on_EventsPageButton_clicked();
@@ -163,11 +176,6 @@ void MainWindow::readSerialData()
             QString dumpMessage;
             QStringList messageSet;
 
-
-            //get images for buttons
-            QPixmap greenButton(":/resources/Images/greenButton.png");
-            QPixmap redButton(":/resources/Images/redButton.png");
-
             //get serialized string from port
             QByteArray serializedMessage = ddmCon->serialPort.readLine();
 
@@ -196,7 +204,8 @@ void MainWindow::readSerialData()
                     //update status class with new data
                     status->loadData(message);
 
-                    ui->status_output->setText(message);
+                    //display current values in status class to dev page
+                    ui->status_output->setText(status->generateMessage());
 
                     qDebug() << "fireMode: " << status->firingMode;
 
@@ -218,6 +227,30 @@ void MainWindow::readSerialData()
                     {
                         ui->automaticLabel->setStyleSheet("color: #FF7518;font: 20pt Segoe UI;");
                     }
+
+                    //update feed position
+                    ui->feedPosition->setValue(status->feedPosition);
+
+                    //update the triggers
+                    if (status->trigger1Status == ENGAGED)
+                    {
+                        ui->trigger1->setPixmap(GREEN_BUTTON);
+                    }
+                    else
+                    {
+                         ui->trigger1->setPixmap(RED_BUTTON);
+                    }
+
+                    if (status->trigger2Status == ENGAGED)
+                    {
+                        ui->trigger2->setPixmap(GREEN_BUTTON);
+                    }
+                    else
+                    {
+                        ui->trigger2->setPixmap(RED_BUTTON);
+                    }
+
+
 
                     break;
 
@@ -537,7 +570,7 @@ void MainWindow::readSerialData()
                     // update ui
                     ui->handshake_button->setText("Disconnect");
                     ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #FE1C1C;font: 15pt Segoe UI;");
-                    ui->connectionStatus->setPixmap(greenButton);
+                    ui->connectionStatus->setPixmap(GREEN_BUTTON);
 
                     events->freeLinkedLists();
                     ui->events_output->clear();
@@ -601,7 +634,7 @@ void MainWindow::readSerialData()
                         //refreshes connection button/displays
                         ui->handshake_button->setText("Connect");
                         ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #14AE5C;font: 15pt Segoe UI;");
-                        ui->connectionStatus->setPixmap(redButton);
+                        ui->connectionStatus->setPixmap(RED_BUTTON);
                     }
 
                     break;

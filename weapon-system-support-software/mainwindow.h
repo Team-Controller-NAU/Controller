@@ -147,5 +147,9 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+
+    QPixmap GREEN_BUTTON;
+    QPixmap RED_BUTTON;
+    QPixmap BLANK_BUTTON;
 };
 #endif // MAINWINDOW_H

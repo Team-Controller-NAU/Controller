@@ -31,125 +31,40 @@ void Status::loadData(QString statusMessage)
     //create bool ptr to store result of string->double conversion for fire rate
     bool result = true;
 
-    //locate first comma
-    int commaPosition = statusMessage.indexOf(DELIMETER);
+    QStringList values = statusMessage.split(DELIMETER);
 
     //extract armed value from message
-    armed = (statusMessage.left(commaPosition) == "1");
-
-    //cut statusMessage
-    statusMessage = statusMessage.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = statusMessage.indexOf(DELIMETER);
+    armed = (values[0] == "1");
 
     //extract trigger1 status
-    trigger1Status = static_cast<TriggerStatus>(statusMessage.left(commaPosition).toInt());
-
-    //cut statusMessage
-    statusMessage = statusMessage.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = statusMessage.indexOf(DELIMETER);
+    trigger1Status = static_cast<TriggerStatus>(values[1].toInt());
 
     //extract trigger2
-    trigger1Status = static_cast<TriggerStatus>(statusMessage.left(commaPosition).toInt());
-
-    //cut statusMessage
-    statusMessage = statusMessage.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = statusMessage.indexOf(DELIMETER);
+    trigger1Status = static_cast<TriggerStatus>(values[2].toInt());
 
     //extract controller state
-    controllerState = static_cast<ControllerState>(statusMessage.left(commaPosition).toInt());
-
-    //cut statusMessage
-    statusMessage = statusMessage.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = statusMessage.indexOf(DELIMETER);
+    controllerState = static_cast<ControllerState>(values[3].toInt());
 
     //extract firing mode
-    firingMode = static_cast<FiringMode>(statusMessage.left(commaPosition).toInt());
-
-    //cut statusMessage
-    statusMessage = statusMessage.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = statusMessage.indexOf(DELIMETER);
+    firingMode = static_cast<FiringMode>(values[4].toInt());
 
     //extract feed pos
-    feedPosition = static_cast<FeedPosition>(statusMessage.left(commaPosition).toInt());
-
-    //cut statusMessage
-    statusMessage = statusMessage.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = statusMessage.indexOf(DELIMETER);
+    feedPosition = static_cast<FeedPosition>(values[5].toInt());
 
     //extract total errors
-    totalErrors = statusMessage.left(commaPosition).toInt();
-
-    //cut statusMessage
-    statusMessage = statusMessage.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = statusMessage.indexOf(DELIMETER);
+    totalErrors = values[6].toInt();
 
     //extract
-    totalFiringEvents = statusMessage.left(commaPosition).toInt();
-
-    //cut statusMessage
-    statusMessage = statusMessage.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = statusMessage.indexOf(DELIMETER);
+    totalFiringEvents = values[7].toInt();
 
     //extract
-    totalEvents = statusMessage.left(commaPosition).toInt();
-
-    //cut statusMessage
-    statusMessage = statusMessage.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = statusMessage.indexOf(DELIMETER);
+    totalEvents = values[8].toInt();
 
     //extract
-    burstLength = statusMessage.left(commaPosition).toInt();
-
-    //cut statusMessage
-    statusMessage = statusMessage.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = statusMessage.indexOf(DELIMETER);
+    burstLength = values[9].toInt();
 
     //extract
-    firingRate = statusMessage.left(commaPosition).toDouble(&result);
-
-    //cut statusMessage
-    statusMessage = statusMessage.right(commaPosition);
-
+    firingRate = values[10].toDouble(&result);
 
     //emit signal, new status data is loaded
     emit newDataLoaded(this);
