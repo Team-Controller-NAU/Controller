@@ -23,10 +23,21 @@ public:
     int totalEvents; //count of total non error events
     int burstLength;
     double firingRate;
+    QString version;
+    QString crc;
 
-    //serial communication utilities
+    //serial communication utilities===================================================================
+
+    //reads a status message from controller and updates class variables
     void loadData(QString statusMessage);
+
+    //reads a message containing controller version and crc and updates corresponding class variables
+    void loadVersionData(QString versionMessage);
+
+    //generates a serial message given the current values in the status class
     QString generateMessage();
+
+    //=================================================================================================
 
     //randomization utility, relies heavily on values defined in constants.h, accounts
     //for single or double trigger data generation

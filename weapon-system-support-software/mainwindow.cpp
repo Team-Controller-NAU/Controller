@@ -45,7 +45,7 @@ MainWindow::MainWindow(QWidget *parent)
     //scan available ports, add port names to port selection combo boxes
     setup_connection_settings();
 
-    //update class port name values ====================================== This might be redundant, check if so
+    //update class port name values
     csimPortName = ui->csim_port_selection->currentText();
     ddmPortName = ui->ddm_port_selection->currentText();
 
@@ -101,6 +101,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     //TEMP CODE TO MAKE FEED POSITION RESPONSIVE WITH STATUS UPDATES========
     ui->feedPosition->setMaximum(360);
+    //ui->feedPosition->setReadOnly(true);
 
     //======================================================================
 
@@ -175,6 +176,7 @@ void MainWindow::readSerialData()
             bool printErr;
             QString dumpMessage;
             QStringList messageSet;
+            SerialMessageIdentifier messageId;
 
             //get serialized string from port
             QByteArray serializedMessage = ddmCon->serialPort.readLine();
@@ -187,16 +189,19 @@ void MainWindow::readSerialData()
             //update gui with new message
             ui->stdout_label->setText(message);
 
-            //extract message id
-            SerialMessageIdentifier messageId = static_cast<SerialMessageIdentifier>(QString(message[0]).toInt());
-
-            //remove message id from message
-            message = message.mid(1 + DELIMETER.length());
-
-            //determine what kind of message this is
-            //SerialMessageIdentifier {EVENT_DUMP = 0, ERROR_DUMP = 1, ELECTRICAL = 2, EVENT =3, ERROR =4, STATUS =5};
-            switch (messageId)
+            //check if message is correctly labeled
+            if (message[0].isDigit() && message[1] == DELIMETER)
             {
+                //extract message id
+                messageId = static_cast<SerialMessageIdentifier>(QString(message[0]).toInt());
+
+                //remove message id from message
+                message = message.mid(1 + DELIMETER.length());
+
+                //determine what kind of message this is
+                //SerialMessageIdentifier {EVENT_DUMP = 0, ERROR_DUMP = 1, ELECTRICAL = 2, EVENT =3, ERROR =4, STATUS =5};
+                switch (messageId)
+                {
                 case STATUS:
 
                     qDebug() <<  "Message id: status update" << qPrintable("\n");
@@ -302,10 +307,6 @@ void MainWindow::readSerialData()
                     wkgElecPtr = wkgElecPtr->nextNode;
                     ui->ExternalTemp_Label->setText(wkgElecPtr->name);
                     ui->ExternalTemp_Stats->setText("Voltage: " + QString::number(wkgElecPtr->voltage) + '\n' + "Amps: " + QString::number(wkgElecPtr->amps));
-
-                    // update controller version and crc version
-                    ui->controllerLabel->setText(ui->controllerLabel->text() + CONTROLLER_VERSION);
-                    ui->crcLabel->setText(ui->crcLabel->text() + CRC_VERSION);
 
                     break;
 
@@ -510,6 +511,13 @@ void MainWindow::readSerialData()
 
                 case BEGIN:
 
+                    //load crc and version
+                    status->loadVersionData(message);
+
+                    // update controller version and crc version on gui
+                    ui->controllerLabel->setText("Controller Version: " + status->version);
+                    ui->crcLabel->setText("CRC: " + status->crc);
+
                     //stop handshake protocols
                     handshakeTimer->stop();
 
@@ -527,9 +535,11 @@ void MainWindow::readSerialData()
                     ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #FE1C1C;font: 15pt Segoe UI;");
                     ui->connectionStatus->setPixmap(GREEN_LIGHT);
 
+                    //clear events ll and output box
                     events->freeLinkedLists();
                     ui->events_output->clear();
 
+                    //reset event counters
                     ui->TotalEventsOutput->setText("0");
                     ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
                     ui->statusEventOutput->setText("0");
@@ -546,6 +556,7 @@ void MainWindow::readSerialData()
                     ui->ActiveErrorsOutput->setText("0");
                     ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
 
+                    //set connected
                     ddmCon->connected = true;
 
                     break;
@@ -593,15 +604,16 @@ void MainWindow::readSerialData()
                     }
 
                     break;
-
-                default:
-
-                    //log
-                    qDebug() << "Unrecognized serial message received : " << message;
-
-                    break;
-
                 }
+            }
+            //invalid message id detected
+            else
+            {
+                //log
+                qDebug() << "Unrecognized serial message received : " << message;
+            }
+
+
 
                 //qDebug() << "remaining buffer: " << ddmCon->serialPort.peek(ddmCon->serialPort.bytesAvailable());
         }
