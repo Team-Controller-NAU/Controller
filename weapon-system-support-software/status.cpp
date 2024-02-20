@@ -59,7 +59,17 @@ void Status::loadData(QString statusMessage)
     emit newDataLoaded(this);
 }
 
+//given a message containing the controller version and crc updates corresponding class variables
+void Status::loadVersionData(QString versionMessage)
+{
+    QStringList values = versionMessage.split(DELIMETER);
 
+    version = values[0];
+    crc = values[1];
+
+    //emit signal, new status data is loaded
+    emit newDataLoaded(this);
+}
 
 QString Status::generateMessage()
 {
@@ -123,8 +133,41 @@ void Status::randomize(bool secondTrigger)
 
     firingMode = static_cast<FiringMode>(QRandomGenerator::global()->bounded(0, NUM_FIRING_MODE));
 
-    feedPosition = static_cast<FeedPosition>(QRandomGenerator::global()->bounded(0, NUM_FEED_POSITION)
-                                             * FEED_POSITION_INCREMENT_VALUE);
+    //new randomization method to iterate feed position smoothly
+    switch (feedPosition)
+    {
+    case FEEDING:
+        feedPosition = CHAMBERING;
+        break;
+    case CHAMBERING:
+        feedPosition = LOCKING;
+        break;
+    case LOCKING:
+        feedPosition = FIRING;
+        break;
+    case FIRING:
+        feedPosition = UNLOCKING;
+        break;
+    case UNLOCKING:
+        feedPosition = EXTRACTING;
+        break;
+    case EXTRACTING:
+        feedPosition = EJECTING;
+        break;
+    case EJECTING:
+        feedPosition = COCKING;
+        break;
+    case COCKING:
+        feedPosition = FEEDING; // Cycle back to FEEDING
+        break;
+    default:
+        feedPosition = FEEDING;
+        break;
+    }
+
+    //old randomization method to get random feed position
+    //feedPosition = static_cast<FeedPosition>(QRandomGenerator::global()->bounded(0, NUM_FEED_POSITION)
+    //                                         * FEED_POSITION_INCREMENT_VALUE);
 
     burstLength = QRandomGenerator::global()->bounded(2, 50 +1);
 

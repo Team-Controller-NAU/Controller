@@ -3,7 +3,8 @@
 //constructor
 CSim::CSim(QObject *parent, QString portName)
     : QThread(parent), stop(false), portName(portName),
-    connPtr(nullptr), eventsPtr(nullptr), startupTime(QDateTime::currentMSecsSinceEpoch())
+    connPtr(nullptr), eventsPtr(nullptr), startupTime(QDateTime::currentMSecsSinceEpoch()),
+    secondTrigger(true)
 {
     // Avoid class initialization until thread is running
 }
@@ -143,11 +144,11 @@ void CSim::checkConnection(Connection *conn)
                 // Log
                 qDebug() << "[CSIM] DDM listening signal received. Serial communication beginning"<< qPrintable("\n");
 
-                // Send message to begin serial comm
-                conn->transmit(QString::number(BEGIN) + DELIMETER + '\n');
+                // Send message to begin serial comm (controller version and crc are included in the begin message)
+                conn->transmit(QString::number(BEGIN) + DELIMETER + CONTROLLER_VERSION + DELIMETER + CRC_VERSION + DELIMETER + '\n');
 
                 //store message
-                messagesSent += QString::number(BEGIN) + DELIMETER + '\n';
+                messagesSent += QString::number(BEGIN) + DELIMETER + CONTROLLER_VERSION + DELIMETER + CRC_VERSION + DELIMETER + '\n';
 
                 // transmit the electrial signal
                 conn->transmit(QString::number(ELECTRICAL) + DELIMETER + ELECTRICAL_MESSAGES + '\n');
@@ -241,6 +242,9 @@ void CSim::run()
         //for status use smart pointer for automatic memory management (resources auto free when function exits)
         std::unique_ptr<Status> status(new Status());
 
+        //manually set feed position to starting val
+        status->feedPosition = FEEDING;
+
         // Get time based seed for rng
         qint64 seed = QDateTime::currentMSecsSinceEpoch();
 
@@ -258,7 +262,6 @@ void CSim::run()
         QString timeStamp;
         QString errorMessage;
         int clearedId;
-
 
         conn->connected = false;
 
