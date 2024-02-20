@@ -13,8 +13,8 @@
 //status enums
 //------------
 //integer length vals are used by csim during random generation
-enum TriggerStatus {DISENGAGED=0, ENGAGED=1};
-const int NUM_TRIGGER_STATUS = 2;
+enum TriggerStatus {DISENGAGED=0, ENGAGED=1, NA=2};
+const int NUM_TRIGGER_STATUS = 3;
 
 enum ControllerState {RUNNING=0, BLOCKED=1, TERMINATED=2, SUSPENDED=3};
 const int NUM_CONTROLLER_STATE = 4;

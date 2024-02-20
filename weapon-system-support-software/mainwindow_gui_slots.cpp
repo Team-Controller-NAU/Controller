@@ -419,7 +419,7 @@ void MainWindow::on_handshake_button_clicked()
         //refreshes connection button/displays
         ui->handshake_button->setText("Connect");
         ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #14AE5C;font: 15pt Segoe UI;");
-        ui->connectionStatus->setPixmap(RED_BUTTON);
+        ui->connectionStatus->setPixmap(RED_LIGHT);
         ui->ddm_port_selection->setEnabled(true);
 
         //allow user to modify connection settings
@@ -486,6 +486,8 @@ void MainWindow::on_save_Button_clicked()
     userSettings.setValue("parity", ui->parity_selection->currentText());
     userSettings.setValue("stopBits", ui->stop_bit_selection->currentText());
     userSettings.setValue("flowControl", ui->flow_control_selection->currentText());
+    userSettings.setValue("portName", ui->ddm_port_selection->currentText());
+    userSettings.setValue("csimPortName", ui->csim_port_selection->currentText());
 
     displaySavedConnectionSettings();
 }
@@ -671,4 +673,29 @@ void MainWindow::on_setLogfileFolder_clicked()
 
     //sync user settings
     userSettings.sync();
+}
+
+//toggles csim between accounting for 1 and 2 triggers
+void MainWindow::on_toggle_num_triggers_clicked()
+{
+    //check if secondTrigger is currently enabled
+    if ( csimHandle->secondTrigger )
+    {
+        //disable it
+        csimHandle->secondTrigger = false;
+
+        //update button text
+        ui->toggle_num_triggers->setText("Set to two triggers");
+
+        //empty the trigger status current value
+        status->trigger2 = NA;
+    }
+    //secondTrigger is currently disabled
+    else
+    {
+        //enable it
+        csimHandle->secondTrigger = true;
+        //update button text
+        ui->toggle_num_triggers->setText("Set to single trigger");
+    }
 }

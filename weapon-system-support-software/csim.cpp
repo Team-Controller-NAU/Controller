@@ -272,7 +272,7 @@ void CSim::run()
             qDebug() << "[CSIM] Iteration: " << i;
 
             //replace status values with randomized ones
-            status->randomize();
+            status->randomize(secondTrigger);
 
             //check conn before transmission
             checkConnection(conn);

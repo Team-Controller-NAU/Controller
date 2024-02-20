@@ -3,10 +3,7 @@
 Status::Status(QObject *parent)
     : QObject{parent}
 {
-    totalEvents = 0;
-    totalErrors = 0;
     totalFiringEvents = 0;
-
 }
 
 //given a status message, update status class with new data
@@ -15,15 +12,13 @@ void Status::loadData(QString statusMessage)
     /* the statusMessage contains csv data in the following order
      *
         bool armed;
-        TriggerStatus trigger1Status;
-        TriggerStatus trigger2Status;
+        TriggerStatus trigger1;
+        TriggerStatus trigger2;
         ControllerState controllerState;
         FiringMode firingMode;
         FeedPosition feedPosition;
         //to find total events including errors, add total errors and events
-        int totalErrors;
         int totalFiringEvents;
-        int totalEvents; //count of total non error events
         int burstLength;
         double firingRate;
      *
@@ -37,10 +32,10 @@ void Status::loadData(QString statusMessage)
     armed = (values[0] == "1");
 
     //extract trigger1 status
-    trigger1Status = static_cast<TriggerStatus>(values[1].toInt());
+    trigger1 = static_cast<TriggerStatus>(values[1].toInt());
 
     //extract trigger2
-    trigger1Status = static_cast<TriggerStatus>(values[2].toInt());
+    trigger2 = static_cast<TriggerStatus>(values[2].toInt());
 
     //extract controller state
     controllerState = static_cast<ControllerState>(values[3].toInt());
@@ -51,20 +46,14 @@ void Status::loadData(QString statusMessage)
     //extract feed pos
     feedPosition = static_cast<FeedPosition>(values[5].toInt());
 
-    //extract total errors
-    totalErrors = values[6].toInt();
+    //extract
+    totalFiringEvents = values[6].toInt();
 
     //extract
-    totalFiringEvents = values[7].toInt();
+    burstLength = values[7].toInt();
 
     //extract
-    totalEvents = values[8].toInt();
-
-    //extract
-    burstLength = values[9].toInt();
-
-    //extract
-    firingRate = values[10].toDouble(&result);
+    firingRate = values[8].toDouble(&result);
 
     //emit signal, new status data is loaded
     emit newDataLoaded(this);
@@ -77,15 +66,13 @@ QString Status::generateMessage()
     /* will create a status message that contains csv data in the following order
      *
         bool armed;
-        TriggerStatus trigger1Status;
-        TriggerStatus trigger2Status;
+        TriggerStatus trigger1;
+        TriggerStatus trigger2;
         ControllerState controllerState;
         FiringMode firingMode;
         FeedPosition feedPosition;
         //to find total events including errors, add total errors and events
-        int totalErrors;
         int totalFiringEvents;
-        int totalEvents; //count of total non error events
         int burstLength;
         double firingRate;
      *
@@ -94,9 +81,9 @@ QString Status::generateMessage()
     //add each value and a delimeter to the end of the string, then return the string
     QString message = QString::number(armed) + DELIMETER;
 
-    message += QString::number(trigger1Status) + DELIMETER;
+    message += QString::number(trigger1) + DELIMETER;
 
-    message += QString::number(trigger2Status) + DELIMETER;
+    message += QString::number(trigger2) + DELIMETER;
 
     message += QString::number(controllerState) + DELIMETER;
 
@@ -104,11 +91,7 @@ QString Status::generateMessage()
 
     message += QString::number(feedPosition) + DELIMETER;
 
-    message += QString::number(totalErrors) + DELIMETER;
-
     message += QString::number(totalFiringEvents) + DELIMETER;
-
-    message += QString::number(totalEvents) + DELIMETER;
 
     message += QString::number(burstLength) + DELIMETER;
 
@@ -118,13 +101,23 @@ QString Status::generateMessage()
 }
 
 //generate random values for status
-void Status::randomize()
+void Status::randomize(bool secondTrigger)
 {
     armed = QRandomGenerator::global()->bounded(0, 1 + 1);
 
-    trigger1Status = static_cast<TriggerStatus>(QRandomGenerator::global()->bounded(0, NUM_TRIGGER_STATUS));
+    trigger1 = static_cast<TriggerStatus>(QRandomGenerator::global()->bounded(0, NUM_TRIGGER_STATUS -1));
 
-    trigger2Status = static_cast<TriggerStatus>(QRandomGenerator::global()->bounded(0, NUM_TRIGGER_STATUS));
+    //check if second trigger is enabled
+    if (secondTrigger)
+    {
+        //get random value
+        trigger2 = static_cast<TriggerStatus>(QRandomGenerator::global()->bounded(0, NUM_TRIGGER_STATUS -1));
+    }
+    //disabled, set to NA
+    else
+    {
+        trigger2 = NA;
+    }
 
     controllerState = static_cast<ControllerState>(QRandomGenerator::global()->bounded(0, NUM_CONTROLLER_STATE));
 
@@ -136,4 +129,10 @@ void Status::randomize()
     burstLength = QRandomGenerator::global()->bounded(2, 50 +1);
 
     firingRate = QRandomGenerator::global()->bounded(0, 2000 +1) + QRandomGenerator::global()->generateDouble();
+
+    //1/8 odds of incrementing total firing events
+    if (QRandomGenerator::global()->bounded(0,8 +1) == 4)
+    {
+        totalFiringEvents++;
+    }
 }

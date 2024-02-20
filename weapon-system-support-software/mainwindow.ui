@@ -201,7 +201,7 @@ border-color: rgb(255, 255, 255);
 font: 16pt &quot;Segoe UI&quot;;</string>
          </property>
          <property name="text">
-          <string>Settings</string>
+          <string>Connection</string>
          </property>
         </widget>
        </item>
@@ -286,7 +286,7 @@ font: 16pt &quot;Segoe UI&quot;;</string>
             </sizepolicy>
            </property>
            <property name="currentIndex">
-            <number>4</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="Events_page">
             <layout class="QGridLayout" name="gridLayout_3">
@@ -743,7 +743,7 @@ border-color: rgb(255, 255, 255);</string>
                <x>360</x>
                <y>60</y>
                <width>161</width>
-               <height>111</height>
+               <height>141</height>
               </rect>
              </property>
              <property name="frameShape">
@@ -790,6 +790,13 @@ border-right-color: rgb(255, 255, 255);</string>
                 </property>
                 <property name="text">
                  <string>CSIM port</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QPushButton" name="toggle_num_triggers">
+                <property name="text">
+                 <string>Set to single trigger</string>
                 </property>
                </widget>
               </item>

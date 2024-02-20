@@ -29,11 +29,11 @@ MainWindow::MainWindow(QWidget *parent)
     //init user settings to our organization and project
     userSettings("Team Controller", "WSSS"),
 
-    BLANK_BUTTON(":/resources/Images/blankButton.png"),
+    BLANK_LIGHT(":/resources/Images/blankButton.png"),
 
-    RED_BUTTON(":/resources/Images/redButton.png"),
+    RED_LIGHT(":/resources/Images/redButton.png"),
 
-    GREEN_BUTTON(":/resources/Images/greenButton.png")
+    GREEN_LIGHT(":/resources/Images/greenButton.png")
 {
 
     //set output settings for qDebug
@@ -105,8 +105,8 @@ MainWindow::MainWindow(QWidget *parent)
     //======================================================================
 
     //init trigger to grey buttons until updated by serial status updates
-    ui->trigger1->setPixmap(BLANK_BUTTON);
-    ui->trigger2->setPixmap(BLANK_BUTTON);
+    ui->trigger1->setPixmap(BLANK_LIGHT);
+    ui->trigger2->setPixmap(BLANK_LIGHT);
 
     // ensures that the application will open on the events page
     on_EventsPageButton_clicked();
@@ -204,53 +204,8 @@ void MainWindow::readSerialData()
                     //update status class with new data
                     status->loadData(message);
 
-                    //display current values in status class to dev page
-                    ui->status_output->setText(status->generateMessage());
-
-                    qDebug() << "fireMode: " << status->firingMode;
-
-                    resetFiringMode();
-
-                    if(status->firingMode == SAFE)
-                    {
-                        ui->safeLabel->setStyleSheet("color: #FF7518;font: 20pt Segoe UI;");
-                    }
-                    else if(status->firingMode == SINGLE)
-                    {
-                        ui->singleLabel->setStyleSheet("color: #FF7518;font: 20pt Segoe UI;");
-                    }
-                    else if(status->firingMode == BURST)
-                    {
-                        ui->burstLabel->setStyleSheet("color: #FF7518;font: 20pt Segoe UI;");
-                    }
-                    else
-                    {
-                        ui->automaticLabel->setStyleSheet("color: #FF7518;font: 20pt Segoe UI;");
-                    }
-
-                    //update feed position
-                    ui->feedPosition->setValue(status->feedPosition);
-
-                    //update the triggers
-                    if (status->trigger1Status == ENGAGED)
-                    {
-                        ui->trigger1->setPixmap(GREEN_BUTTON);
-                    }
-                    else
-                    {
-                         ui->trigger1->setPixmap(RED_BUTTON);
-                    }
-
-                    if (status->trigger2Status == ENGAGED)
-                    {
-                        ui->trigger2->setPixmap(GREEN_BUTTON);
-                    }
-                    else
-                    {
-                        ui->trigger2->setPixmap(RED_BUTTON);
-                    }
-
-
+                    //update gui
+                    updateStatusDisplay();
 
                     break;
 
@@ -570,7 +525,7 @@ void MainWindow::readSerialData()
                     // update ui
                     ui->handshake_button->setText("Disconnect");
                     ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #FE1C1C;font: 15pt Segoe UI;");
-                    ui->connectionStatus->setPixmap(GREEN_BUTTON);
+                    ui->connectionStatus->setPixmap(GREEN_LIGHT);
 
                     events->freeLinkedLists();
                     ui->events_output->clear();
@@ -598,7 +553,7 @@ void MainWindow::readSerialData()
                 case CLOSING_CONNECTION:
 
                     //log
-                    qDebug() << "Controller disconnect message received";
+                    qDebug() << "Disconnect message received from Controller";
 
                     // check for not empty
                     // if(events->totalNodes != 0)
@@ -634,7 +589,7 @@ void MainWindow::readSerialData()
                         //refreshes connection button/displays
                         ui->handshake_button->setText("Connect");
                         ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #14AE5C;font: 15pt Segoe UI;");
-                        ui->connectionStatus->setPixmap(RED_BUTTON);
+                        ui->connectionStatus->setPixmap(RED_LIGHT);
                     }
 
                     break;
@@ -655,7 +610,7 @@ void MainWindow::readSerialData()
     }
     else
     {
-        qDebug() << "Serial port is closed, unable to read data";
+        qDebug() << "ERROR: Serial port is closed, unable to read serial data";
     }
 }
 
@@ -847,6 +802,73 @@ void MainWindow::setup_connection_settings()
     case QSerialPort::TwoStop:
         ui->stop_bit_selection->setCurrentIndex(ui->stop_bit_selection->findText(toString(QSerialPort::TwoStop)));
         break;
+    }
+}
+
+//displays the current values of the status class onto the gui status page
+void MainWindow::updateStatusDisplay()
+{
+    //display current values in status class to dev page
+    ui->status_output->setText(status->generateMessage());
+
+    //qDebug() << "fireMode: " << status->firingMode;
+
+    resetFiringMode();
+
+    //update font color of the active firing mode
+    if(status->firingMode == SAFE)
+    {
+        ui->safeLabel->setStyleSheet("color: #FF7518;font: 20pt Segoe UI;");
+    }
+    else if(status->firingMode == SINGLE)
+    {
+        ui->singleLabel->setStyleSheet("color: #FF7518;font: 20pt Segoe UI;");
+    }
+    else if(status->firingMode == BURST)
+    {
+        ui->burstLabel->setStyleSheet("color: #FF7518;font: 20pt Segoe UI;");
+    }
+    else
+    {
+        ui->automaticLabel->setStyleSheet("color: #FF7518;font: 20pt Segoe UI;");
+    }
+
+    //update feed position
+    ui->feedPosition->setValue(status->feedPosition);
+
+    //update trigger 1 light
+    switch (status->trigger1)
+    {
+    case ENGAGED:
+        ui->trigger1->setPixmap(GREEN_LIGHT);
+
+        break;
+
+    case DISENGAGED:
+        ui->trigger1->setPixmap(RED_LIGHT);
+
+        break;
+
+    default:
+        ui->trigger1->setPixmap(BLANK_LIGHT);
+    }
+
+
+    //update trigger 2 light
+    switch (status->trigger2)
+    {
+        case ENGAGED:
+            ui->trigger2->setPixmap(GREEN_LIGHT);
+
+            break;
+
+        case DISENGAGED:
+            ui->trigger2->setPixmap(RED_LIGHT);
+
+            break;
+
+        default:
+            ui->trigger2->setPixmap(BLANK_LIGHT);
     }
 }
 
@@ -1054,8 +1076,3 @@ void MainWindow::resetFiringMode()
     ui->safeLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
     ui->singleLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
 }
-
-
-
-
-
