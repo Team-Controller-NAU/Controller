@@ -73,4 +73,7 @@ const QString INITIAL_LOGFILE_LOCATION = "WSSS_Logfiles";
 
 const QString QDEBUG_OUTPUT_FORMAT = "[%{time h:mm:ss}] %{message}";
 
+const QString CRC_VERSION = "1.2.6";
+const QString CONTROLLER_VERSION = "6.7.2";
+
 #endif // CONSTANTS_H

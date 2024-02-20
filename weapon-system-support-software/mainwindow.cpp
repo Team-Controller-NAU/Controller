@@ -295,6 +295,10 @@ void MainWindow::readSerialData()
                     ui->ExternalTemp_Label->setText(wkgElecPtr->name);
                     ui->ExternalTemp_Stats->setText("Voltage: " + QString::number(wkgElecPtr->voltage) + '\n' + "Amps: " + QString::number(wkgElecPtr->amps));
 
+                    // update controller version and crc version
+                    ui->controllerLabel->setText(ui->controllerLabel->text() + CONTROLLER_VERSION);
+                    ui->crcLabel->setText(ui->crcLabel->text() + CRC_VERSION);
+
                     break;
 
                 case EVENT_DUMP:
@@ -989,6 +993,8 @@ void MainWindow::logEmptyLine()
     //enable custom message format
     qSetMessagePattern(QDEBUG_OUTPUT_FORMAT);
 }
+
+
 
 
 
