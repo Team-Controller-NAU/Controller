@@ -95,6 +95,7 @@ private slots:
     void setup_csim_port_selection(int index);
     void setup_ddm_port_selection(int index);
     void update_non_cleared_error_selection();
+    void setup_logfile_location();
     void setup_connection_settings();
 
     //gui triggered slots (should be declared in mainwindow_gui_slots.cpp)
