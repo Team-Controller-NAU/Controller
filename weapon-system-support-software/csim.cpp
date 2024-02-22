@@ -91,6 +91,9 @@ void CSim::stopSimulation()
     // clear dump messages
     eventDumpMessage = "";
     errorDumpMessage = "";
+
+    // reset startup time
+    startupTime = 0;
 }
 
 //starts csim in seperate thread, messages will be sent through given port
@@ -100,7 +103,11 @@ void CSim::startCSim(QString portNameInput)
 
     if (!isRunning())
     {
+        // notify
         qDebug() << "[CSIM] Starting CSim in seperate thread";
+
+        // reset startup time
+        startupTime = QDateTime::currentMSecsSinceEpoch();
 
         //sets up thread and calls run()
         start();

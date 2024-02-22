@@ -41,6 +41,7 @@ public:
     QString ddmPortName;
     QTimer* handshakeTimer;
     QTimer* lastMessageTimer;
+    QTimer* runningControllerTimer;
     QDateTime timeLastReceived;
     EventFilter eventFilter;
     QString logfileName;
@@ -82,6 +83,7 @@ signals:
 private slots:
     //non-gui triggered slots (should be declared in mainwindow.cpp)
     void updateTimer();
+    void updateElapsedTime();
     void readSerialData();
     void displaySavedConnectionSettings();
     void updateStatusDisplay();

@@ -23,8 +23,11 @@ MainWindow::MainWindow(QWidget *parent)
     //timer is used to repeatedly transmit handshake signals
     handshakeTimer( new QTimer(this) ),
 
-    // timer is used to update the GUI
+    // timer is used to update last message received time
     lastMessageTimer( new QTimer(this) ),
+
+    // timer is used to update controller running time
+    runningControllerTimer( new QTimer(this) ),
 
     //init user settings to our organization and project
     userSettings("Team Controller", "WSSS"),
@@ -86,6 +89,10 @@ MainWindow::MainWindow(QWidget *parent)
     // connect update elapsed time function to a timer
     lastMessageTimer->setInterval(1000);
     connect(lastMessageTimer, &QTimer::timeout, this, &MainWindow::updateTimer);
+
+    // connect running controller timer
+    runningControllerTimer->setInterval(1000);
+    connect(runningControllerTimer, &QTimer::timeout, this, &MainWindow::updateElapsedTime);
 
     //if handshake timeout is enabled, setup signal to timeout
     if (HANDSHAKE_TIMEOUT)
@@ -227,6 +234,24 @@ void MainWindow::readSerialData()
                                             message,
                                             false);
 
+                    // check if timer is running
+                    if(!runningControllerTimer->isActive())
+                    {
+                        // start timer
+                        runningControllerTimer->start();
+                    }
+
+                    // set timestamp if timer is running
+                    if(runningControllerTimer->isActive())
+                    {
+                        // split up message
+                        messageSet = message.split(",", Qt::SkipEmptyParts);
+
+                        // set timestamp
+                        ui->elapsedTime->setText("Elapsed Time: " + messageSet[1]);
+                        ui->elapsedTime->setAlignment(Qt::AlignRight);
+                    }
+
                     // update GUI
                     if (eventFilter == ALL || eventFilter == EVENTS) ui->events_output->append(message);
 
@@ -249,6 +274,24 @@ void MainWindow::readSerialData()
                     events->appendToLogfile(userSettings.value("logfileLocation").toString() + "/" + logfileName + "-logfile-A.txt",
                                             message,
                                             false);
+
+                    // check if timer is running
+                    if(!runningControllerTimer->isActive())
+                    {
+                        // start timer
+                        runningControllerTimer->start();
+                    }
+
+                    // set timestamp if timer is running
+                    if(runningControllerTimer->isActive())
+                    {
+                        // split up message
+                        messageSet = message.split(",", Qt::SkipEmptyParts);
+
+                        // set timestamp
+                        ui->elapsedTime->setText("Elapsed Time: " + messageSet[1]);
+                        ui->elapsedTime->setAlignment(Qt::AlignRight);
+                    }
 
                     // check for any type of error filter, including all
                     if(eventFilter != EVENTS)
@@ -322,6 +365,49 @@ void MainWindow::readSerialData()
                                             message,
                                             true);
 
+                    // check if timer is running
+                    if(!runningControllerTimer->isActive())
+                    {
+                        // start timer
+                        runningControllerTimer->start();
+                    }
+
+                    // set timestamp if timer is running
+                    if(runningControllerTimer->isActive())
+                    {
+                        // set default time
+                        QString timestamp = "0:00:00:00";
+
+                        // check for events & errors
+                        if(events->lastErrorNode && events->lastEventNode)
+                        {
+                            // conditional operator compares the two values and extracts the larger one
+                            timestamp = (events->lastErrorNode->timeStamp > events->lastEventNode->timeStamp) ? events->lastErrorNode->timeStamp : events->lastEventNode->timeStamp;
+                        }
+                        // check for only errors
+                        if(events->lastErrorNode)
+                        {
+                            // get timestamp
+                            timestamp = events->lastErrorNode->timeStamp;
+                        }
+                        // check for only events
+                        else if(events->lastEventNode)
+                        {
+                            // get timestamp
+                            timestamp = events->lastEventNode->timeStamp;
+                        }
+                        // else both linked lists are null
+                        else
+                        {
+                            // how?
+                            qDebug() << "Both linked lists are null still; could not get controller timestamp.";
+                        }
+
+                        // set timestamp
+                        ui->elapsedTime->setText("Elapsed Time: " + timestamp);
+                        ui->elapsedTime->setAlignment(Qt::AlignRight);
+                    }
+
                     // reset dump
                     dumpMessage = "";
                     wkgErrPtr = events->headErrorNode;
@@ -383,6 +469,49 @@ void MainWindow::readSerialData()
                     events->appendToLogfile(userSettings.value("logfileLocation").toString() + "/" + logfileName + "-logfile-A.txt",
                                             message,
                                             true);
+
+                    // check if timer is running
+                    if(!runningControllerTimer->isActive())
+                    {
+                        // start timer
+                        runningControllerTimer->start();
+                    }
+
+                    // set timestamp if timer is running
+                    if(runningControllerTimer->isActive())
+                    {
+                        // set default time
+                        QString timestamp = "0:00:00:00";
+
+                        // check for events & errors
+                        if(events->lastErrorNode && events->lastEventNode)
+                        {
+                            // conditional operator compares the two values and extracts the larger one
+                            timestamp = (events->lastErrorNode->timeStamp > events->lastEventNode->timeStamp) ? events->lastErrorNode->timeStamp : events->lastEventNode->timeStamp;
+                        }
+                        // check for only errors
+                        if(events->lastErrorNode)
+                        {
+                            // get timestamp
+                            timestamp = events->lastErrorNode->timeStamp;
+                        }
+                        // check for only events
+                        else if(events->lastEventNode)
+                        {
+                            // get timestamp
+                            timestamp = events->lastEventNode->timeStamp;
+                        }
+                        // else both linked lists are null
+                        else
+                        {
+                            // how?
+                            qDebug() << "Both linked lists are null still; could not get controller timestamp.";
+                        }
+
+                        // set timestamp
+                        ui->elapsedTime->setText("Elapsed Time: " + timestamp);
+                        ui->elapsedTime->setAlignment(Qt::AlignRight);
+                    }
 
                     // reset dump
                     dumpMessage = "";
@@ -588,6 +717,12 @@ void MainWindow::readSerialData()
                     if(lastMessageTimer->isActive())
                     {
                         lastMessageTimer->stop();
+                    }
+
+                    // stop elapsed timer if still active
+                    if(runningControllerTimer->isActive())
+                    {
+                        runningControllerTimer->stop();
                     }
 
                     if (reconnect)
@@ -882,6 +1017,37 @@ void MainWindow::updateStatusDisplay()
         default:
             ui->trigger2->setPixmap(BLANK_LIGHT);
     }
+}
+
+// method updates the running elapsed controller time
+void MainWindow::updateElapsedTime()
+{
+    // get the current timestamp
+    QString timestamp = ui->elapsedTime->toPlainText();
+
+    // extract the time, remove "ELapsed Time: "
+    timestamp = timestamp.mid(14); // assuming this will always be in position 14, it should never change
+
+    // split up the day and time components
+    // this is required because a QTime object does not support days (more than 24hrs)
+    QStringList timeParts = timestamp.split(":");
+    int days = timeParts.takeFirst().toInt(); // removes the days from the list as well
+
+    // convert to QTime and add one second
+    QTime currentTime = QTime::fromString(timeParts.join(":"), "HH:mm:ss");
+    currentTime = currentTime.addSecs(1);
+
+    // check if the time exceeds 23:59:59
+    // when it does, the entire timestamp will be reset since QTime can not exceed 24 hours
+    if (currentTime.hour() == 0 && currentTime.minute() == 0 && currentTime.second() == 0)
+    {
+        // increment number of days
+        days++;
+    }
+
+    // update the GUI
+    ui->elapsedTime->setText("Elapsed Time: " + QString::number(days) + ":" + currentTime.toString("HH:mm:ss"));
+    ui->elapsedTime->setAlignment(Qt::AlignRight);
 }
 
 // method updates the elapsed time since last message received to DDM
