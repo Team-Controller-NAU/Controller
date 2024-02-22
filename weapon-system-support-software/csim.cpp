@@ -354,7 +354,7 @@ void CSim::run()
 
             //20% chance of generating error
             //TEMPORARILY SET TO GENERATE ERROR EACH ITERATION
-            if ( true )//randomGenerator.bounded(1, 6) == 1)
+            if ( randomGenerator.bounded(1, 6) == 1)
             {
                 //check conn before transmission
                 checkConnection(conn);
@@ -447,7 +447,7 @@ void CSim::run()
         //if connected, add disconnect message to messagesSent (sent in destructor)
         if (conn->connected)
         {
-            messagesSent += QString::number(static_cast<int>(CLOSING_CONNECTION)) + '\n';
+            messagesSent += QString::number(static_cast<int>(CLOSING_CONNECTION)) + DELIMETER + '\n';
         }
 
         //free connection

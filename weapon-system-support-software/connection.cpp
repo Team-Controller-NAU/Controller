@@ -78,7 +78,7 @@ Connection::~Connection()
 
     if (connected)
     {
-        transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + '\n');
+        transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + DELIMETER + '\n');
     }
 
     serialPort.close();
