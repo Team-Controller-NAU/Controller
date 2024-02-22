@@ -44,7 +44,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     //check for empty logfile location and sets to default
     setup_logfile_location();
-    //userSettings.setValue("logfileLocation", "");
 
     //scan available ports, add port names to port selection combo boxes
     setup_connection_settings();
@@ -729,28 +728,37 @@ void MainWindow::displaySavedConnectionSettings()
 
 void MainWindow::setup_logfile_location()
 {
-    QString logfileLocation = userSettings.value("logfileLocation").toString();
+    QString appPath = QCoreApplication::applicationDirPath();
+    QString logfileLocation = appPath + "/" + INITIAL_LOGFILE_LOCATION;
+
     // check if logfile setting is empty
-    if(logfileLocation.isEmpty())
+    if(userSettings.value("logfileLocation").toString().isEmpty())
     {
         // set logfile location to default location
-        logfileLocation = INITIAL_LOGFILE_LOCATION;
         userSettings.setValue("logfileLocation", logfileLocation);
     }
+    //qDebug() << "Initial logfile" << logfileLocation;
 
     QDir dir(logfileLocation);
     if(!dir.exists())
     {
         if(!dir.mkpath(logfileLocation))
         {
-            qDebug() << "Failed to create logfile folder on startup";
+            qDebug() << "Failed to create logfile folder on startup" << logfileLocation;
             return;
         }
     }
+    if(dir.exists())
+    {
+        qDebug() << "Folder already exists";
+        return;
+    }
     else
     {
-        qDebug() << "Successful logfile folder creation on startup" << dir;
+        qDebug() << "Successful logfile folder creation on startup" << logfileLocation;
     }
+
+    //qDebug() << "Final logfile location" << logfileLocation;
 }
 
 void MainWindow::setup_connection_settings()
