@@ -64,6 +64,7 @@ const int NUM_ERROR_MESSAGES = 3;
 const QString ERROR_MESSAGES[NUM_ERROR_MESSAGES] = {"Sample error message 1.22", "Sample error message 2; 5; 0", "Sample error message 3; 677"};
 
 const QString ELECTRICAL_MESSAGES = "Servo Motor, 19, 2,,Pump Cooler, 2, 3,,Internal Temp Sensor, 33, 4";
+const int MAX_ELECTRICAL_COMPONENTS = 8; // the max number of electrical componenets to expect from a weapon
 
 const int NUM_ERROR_DELIMETERS = 3;
 const int NUM_EVENT_DELIMETERS = 2;

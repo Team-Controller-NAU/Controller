@@ -289,7 +289,7 @@ font: 16pt &quot;Segoe UI&quot;;</string>
             </sizepolicy>
            </property>
            <property name="currentIndex">
-            <number>2</number>
+            <number>3</number>
            </property>
            <widget class="QWidget" name="Events_page">
             <layout class="QGridLayout" name="gridLayout_3">
@@ -1551,304 +1551,65 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
                     <number>0</number>
                    </property>
                    <item>
-                    <widget class="QLabel" name="Label_7">
+                    <widget class="QWidget" name="box7_widget" native="true">
                      <property name="minimumSize">
                       <size>
                        <width>0</width>
-                       <height>75</height>
+                       <height>175</height>
                       </size>
                      </property>
-                     <property name="styleSheet">
-                      <string notr="true">color: rgb(30, 30, 30);
-font: 20pt &quot;Segoe UI&quot;;
-background-color: rgb(179, 179, 179);</string>
-                     </property>
-                     <property name="text">
-                      <string/>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QTextEdit" name="Stats_7">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>100</height>
-                      </size>
-                     </property>
-                     <property name="contextMenuPolicy">
-                      <enum>Qt::NoContextMenu</enum>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">font: 20pt &quot;Segoe UI&quot;;
+                     <widget class="QTextEdit" name="box7_stats">
+                      <property name="geometry">
+                       <rect>
+                        <x>0</x>
+                        <y>75</y>
+                        <width>434</width>
+                        <height>100</height>
+                       </rect>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>100</height>
+                       </size>
+                      </property>
+                      <property name="contextMenuPolicy">
+                       <enum>Qt::NoContextMenu</enum>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">font: 20pt &quot;Segoe UI&quot;;
 background-color: rgb(117, 117, 117);
 color: rgb(255, 255, 255);
 </string>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </item>
-                 <item row="2" column="0">
-                  <layout class="QVBoxLayout" name="Box_5">
-                   <property name="spacing">
-                    <number>0</number>
-                   </property>
-                   <item>
-                    <widget class="QLabel" name="Servo_Label">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>75</height>
-                      </size>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">color: rgb(30, 30, 30);
+                      </property>
+                      <property name="readOnly">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                     <widget class="QLabel" name="box7_label">
+                      <property name="geometry">
+                       <rect>
+                        <x>0</x>
+                        <y>0</y>
+                        <width>434</width>
+                        <height>75</height>
+                       </rect>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>75</height>
+                       </size>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">color: rgb(30, 30, 30);
 font: 20pt &quot;Segoe UI&quot;;
 background-color: rgb(179, 179, 179);</string>
-                     </property>
-                     <property name="text">
-                      <string/>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QTextEdit" name="Servo_Stats">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>100</height>
-                      </size>
-                     </property>
-                     <property name="contextMenuPolicy">
-                      <enum>Qt::NoContextMenu</enum>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">font: 20pt &quot;Segoe UI&quot;;
-background-color: rgb(117, 117, 117);
-color: rgb(255, 255, 255);
-</string>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </item>
-                 <item row="1" column="0">
-                  <layout class="QVBoxLayout" name="Box_3">
-                   <property name="spacing">
-                    <number>0</number>
-                   </property>
-                   <item>
-                    <widget class="QLabel" name="ExternalTemp_Label">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>75</height>
-                      </size>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">color: rgb(30, 30, 30);
-font: 20pt &quot;Segoe UI&quot;;
-background-color: rgb(179, 179, 179);</string>
-                     </property>
-                     <property name="text">
-                      <string/>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QTextEdit" name="ExternalTemp_Stats">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>100</height>
-                      </size>
-                     </property>
-                     <property name="contextMenuPolicy">
-                      <enum>Qt::NoContextMenu</enum>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">font: 20pt &quot;Segoe UI&quot;;
-background-color: rgb(117, 117, 117);
-color: rgb(255, 255, 255);
-</string>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </item>
-                 <item row="0" column="1">
-                  <layout class="QVBoxLayout" name="Box_2">
-                   <property name="spacing">
-                    <number>0</number>
-                   </property>
-                   <item>
-                    <widget class="QLabel" name="InternalTemp_Label">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>75</height>
-                      </size>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">color: rgb(30, 30, 30);
-font: 20pt &quot;Segoe UI&quot;;
-background-color: rgb(179, 179, 179);</string>
-                     </property>
-                     <property name="text">
-                      <string/>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QTextEdit" name="InternalTemp_Stats">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>100</height>
-                      </size>
-                     </property>
-                     <property name="contextMenuPolicy">
-                      <enum>Qt::NoContextMenu</enum>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">font: 20pt &quot;Segoe UI&quot;;
-background-color: rgb(117, 117, 117);
-color: rgb(255, 255, 255);
-</string>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </item>
-                 <item row="0" column="0">
-                  <layout class="QVBoxLayout" name="Box_1">
-                   <property name="spacing">
-                    <number>0</number>
-                   </property>
-                   <item>
-                    <widget class="QLabel" name="Cooling_Label">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>75</height>
-                      </size>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">color: rgb(30, 30, 30);
-font: 20pt &quot;Segoe UI&quot;;
-background-color: rgb(179, 179, 179);</string>
-                     </property>
-                     <property name="text">
-                      <string/>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QTextEdit" name="Cooling_Stats">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>100</height>
-                      </size>
-                     </property>
-                     <property name="contextMenuPolicy">
-                      <enum>Qt::NoContextMenu</enum>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">font: 20pt &quot;Segoe UI&quot;;
-background-color: rgb(117, 117, 117);
-color: rgb(255, 255, 255);
-</string>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </item>
-                 <item row="1" column="1">
-                  <layout class="QVBoxLayout" name="Box_4">
-                   <property name="spacing">
-                    <number>0</number>
-                   </property>
-                   <item>
-                    <widget class="QLabel" name="Hydraulic_Label">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>75</height>
-                      </size>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">color: rgb(30, 30, 30);
-font: 20pt &quot;Segoe UI&quot;;
-background-color: rgb(179, 179, 179);</string>
-                     </property>
-                     <property name="text">
-                      <string/>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QTextEdit" name="Hydraulic_Stats">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>100</height>
-                      </size>
-                     </property>
-                     <property name="contextMenuPolicy">
-                      <enum>Qt::NoContextMenu</enum>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">font: 20pt &quot;Segoe UI&quot;;
-background-color: rgb(117, 117, 117);
-color: rgb(255, 255, 255);
-</string>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </item>
-                 <item row="2" column="1">
-                  <layout class="QVBoxLayout" name="Box_6">
-                   <property name="spacing">
-                    <number>0</number>
-                   </property>
-                   <item>
-                    <widget class="QLabel" name="Pressure_Label">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>75</height>
-                      </size>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">color: rgb(30, 30, 30);
-font: 20pt &quot;Segoe UI&quot;;
-background-color: rgb(179, 179, 179);</string>
-                     </property>
-                     <property name="text">
-                      <string/>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QTextEdit" name="Pressure_Stats">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>100</height>
-                      </size>
-                     </property>
-                     <property name="contextMenuPolicy">
-                      <enum>Qt::NoContextMenu</enum>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">font: 20pt &quot;Segoe UI&quot;;
-background-color: rgb(117, 117, 117);
-color: rgb(255, 255, 255);
-</string>
-                     </property>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                     </widget>
                     </widget>
                    </item>
                   </layout>
@@ -1859,40 +1620,476 @@ color: rgb(255, 255, 255);
                     <number>0</number>
                    </property>
                    <item>
-                    <widget class="QLabel" name="Label_8">
+                    <widget class="QWidget" name="box8_widget" native="true">
                      <property name="minimumSize">
                       <size>
                        <width>0</width>
-                       <height>75</height>
+                       <height>175</height>
                       </size>
                      </property>
-                     <property name="styleSheet">
-                      <string notr="true">color: rgb(30, 30, 30);
-font: 20pt &quot;Segoe UI&quot;;
-background-color: rgb(179, 179, 179);</string>
-                     </property>
-                     <property name="text">
-                      <string/>
-                     </property>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QTextEdit" name="Stats_8">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>100</height>
-                      </size>
-                     </property>
-                     <property name="contextMenuPolicy">
-                      <enum>Qt::NoContextMenu</enum>
-                     </property>
-                     <property name="styleSheet">
-                      <string notr="true">font: 20pt &quot;Segoe UI&quot;;
+                     <widget class="QTextEdit" name="box8_stats">
+                      <property name="geometry">
+                       <rect>
+                        <x>0</x>
+                        <y>75</y>
+                        <width>434</width>
+                        <height>100</height>
+                       </rect>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>100</height>
+                       </size>
+                      </property>
+                      <property name="contextMenuPolicy">
+                       <enum>Qt::NoContextMenu</enum>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">font: 20pt &quot;Segoe UI&quot;;
 background-color: rgb(117, 117, 117);
 color: rgb(255, 255, 255);
 </string>
+                      </property>
+                      <property name="readOnly">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                     <widget class="QLabel" name="box8_label">
+                      <property name="geometry">
+                       <rect>
+                        <x>0</x>
+                        <y>0</y>
+                        <width>434</width>
+                        <height>75</height>
+                       </rect>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>75</height>
+                       </size>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">color: rgb(30, 30, 30);
+font: 20pt &quot;Segoe UI&quot;;
+background-color: rgb(179, 179, 179);</string>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                     </widget>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item row="0" column="0">
+                  <layout class="QVBoxLayout" name="Box_1">
+                   <property name="spacing">
+                    <number>0</number>
+                   </property>
+                   <item>
+                    <widget class="QWidget" name="box1_widget" native="true">
+                     <property name="minimumSize">
+                      <size>
+                       <width>0</width>
+                       <height>175</height>
+                      </size>
                      </property>
+                     <widget class="QLabel" name="box1_label">
+                      <property name="enabled">
+                       <bool>true</bool>
+                      </property>
+                      <property name="geometry">
+                       <rect>
+                        <x>0</x>
+                        <y>0</y>
+                        <width>434</width>
+                        <height>75</height>
+                       </rect>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>75</height>
+                       </size>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">color: rgb(30, 30, 30);
+font: 20pt &quot;Segoe UI&quot;;
+background-color: rgb(179, 179, 179);</string>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                     </widget>
+                     <widget class="QTextEdit" name="box1_stats">
+                      <property name="geometry">
+                       <rect>
+                        <x>0</x>
+                        <y>75</y>
+                        <width>434</width>
+                        <height>100</height>
+                       </rect>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>100</width>
+                        <height>100</height>
+                       </size>
+                      </property>
+                      <property name="contextMenuPolicy">
+                       <enum>Qt::NoContextMenu</enum>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">font: 20pt &quot;Segoe UI&quot;;
+background-color: rgb(117, 117, 117);
+color: rgb(255, 255, 255);
+</string>
+                      </property>
+                      <property name="readOnly">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item row="1" column="1">
+                  <layout class="QVBoxLayout" name="Box_4">
+                   <property name="spacing">
+                    <number>0</number>
+                   </property>
+                   <item>
+                    <widget class="QWidget" name="box4_widget" native="true">
+                     <property name="minimumSize">
+                      <size>
+                       <width>0</width>
+                       <height>175</height>
+                      </size>
+                     </property>
+                     <widget class="QLabel" name="box4_label">
+                      <property name="geometry">
+                       <rect>
+                        <x>0</x>
+                        <y>0</y>
+                        <width>434</width>
+                        <height>75</height>
+                       </rect>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>75</height>
+                       </size>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">color: rgb(30, 30, 30);
+font: 20pt &quot;Segoe UI&quot;;
+background-color: rgb(179, 179, 179);</string>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                     </widget>
+                     <widget class="QTextEdit" name="box4_stats">
+                      <property name="geometry">
+                       <rect>
+                        <x>0</x>
+                        <y>75</y>
+                        <width>434</width>
+                        <height>100</height>
+                       </rect>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>100</height>
+                       </size>
+                      </property>
+                      <property name="contextMenuPolicy">
+                       <enum>Qt::NoContextMenu</enum>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">font: 20pt &quot;Segoe UI&quot;;
+background-color: rgb(117, 117, 117);
+color: rgb(255, 255, 255);
+</string>
+                      </property>
+                      <property name="readOnly">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item row="2" column="0">
+                  <layout class="QVBoxLayout" name="Box_5">
+                   <property name="spacing">
+                    <number>0</number>
+                   </property>
+                   <item>
+                    <widget class="QWidget" name="box5_widget" native="true">
+                     <property name="minimumSize">
+                      <size>
+                       <width>0</width>
+                       <height>175</height>
+                      </size>
+                     </property>
+                     <widget class="QTextEdit" name="box5_stats">
+                      <property name="geometry">
+                       <rect>
+                        <x>0</x>
+                        <y>75</y>
+                        <width>434</width>
+                        <height>100</height>
+                       </rect>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>100</height>
+                       </size>
+                      </property>
+                      <property name="contextMenuPolicy">
+                       <enum>Qt::NoContextMenu</enum>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">font: 20pt &quot;Segoe UI&quot;;
+background-color: rgb(117, 117, 117);
+color: rgb(255, 255, 255);
+</string>
+                      </property>
+                      <property name="readOnly">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                     <widget class="QLabel" name="box5_label">
+                      <property name="geometry">
+                       <rect>
+                        <x>0</x>
+                        <y>0</y>
+                        <width>434</width>
+                        <height>75</height>
+                       </rect>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>75</height>
+                       </size>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">color: rgb(30, 30, 30);
+font: 20pt &quot;Segoe UI&quot;;
+background-color: rgb(179, 179, 179);</string>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                     </widget>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item row="1" column="0">
+                  <layout class="QVBoxLayout" name="Box_3">
+                   <property name="spacing">
+                    <number>0</number>
+                   </property>
+                   <item>
+                    <widget class="QWidget" name="box3_widget" native="true">
+                     <property name="minimumSize">
+                      <size>
+                       <width>0</width>
+                       <height>175</height>
+                      </size>
+                     </property>
+                     <widget class="QTextEdit" name="box3_stats">
+                      <property name="geometry">
+                       <rect>
+                        <x>0</x>
+                        <y>75</y>
+                        <width>434</width>
+                        <height>100</height>
+                       </rect>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>100</height>
+                       </size>
+                      </property>
+                      <property name="contextMenuPolicy">
+                       <enum>Qt::NoContextMenu</enum>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">font: 20pt &quot;Segoe UI&quot;;
+background-color: rgb(117, 117, 117);
+color: rgb(255, 255, 255);
+</string>
+                      </property>
+                      <property name="readOnly">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                     <widget class="QLabel" name="box3_label">
+                      <property name="geometry">
+                       <rect>
+                        <x>0</x>
+                        <y>0</y>
+                        <width>434</width>
+                        <height>75</height>
+                       </rect>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>75</height>
+                       </size>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">color: rgb(30, 30, 30);
+font: 20pt &quot;Segoe UI&quot;;
+background-color: rgb(179, 179, 179);</string>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                     </widget>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item row="2" column="1">
+                  <layout class="QVBoxLayout" name="Box_6">
+                   <property name="spacing">
+                    <number>0</number>
+                   </property>
+                   <item>
+                    <widget class="QWidget" name="box6_widget" native="true">
+                     <property name="minimumSize">
+                      <size>
+                       <width>0</width>
+                       <height>175</height>
+                      </size>
+                     </property>
+                     <widget class="QTextEdit" name="box6_stats">
+                      <property name="geometry">
+                       <rect>
+                        <x>0</x>
+                        <y>75</y>
+                        <width>434</width>
+                        <height>100</height>
+                       </rect>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>100</height>
+                       </size>
+                      </property>
+                      <property name="contextMenuPolicy">
+                       <enum>Qt::NoContextMenu</enum>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">font: 20pt &quot;Segoe UI&quot;;
+background-color: rgb(117, 117, 117);
+color: rgb(255, 255, 255);
+</string>
+                      </property>
+                      <property name="readOnly">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                     <widget class="QLabel" name="box6_label">
+                      <property name="geometry">
+                       <rect>
+                        <x>0</x>
+                        <y>0</y>
+                        <width>434</width>
+                        <height>75</height>
+                       </rect>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>75</height>
+                       </size>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">color: rgb(30, 30, 30);
+font: 20pt &quot;Segoe UI&quot;;
+background-color: rgb(179, 179, 179);</string>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                     </widget>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item row="0" column="1">
+                  <layout class="QVBoxLayout" name="Box_2">
+                   <property name="spacing">
+                    <number>0</number>
+                   </property>
+                   <item>
+                    <widget class="QWidget" name="box2_widget" native="true">
+                     <widget class="QLabel" name="box2_label">
+                      <property name="geometry">
+                       <rect>
+                        <x>0</x>
+                        <y>0</y>
+                        <width>868</width>
+                        <height>75</height>
+                       </rect>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>75</height>
+                       </size>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">color: rgb(30, 30, 30);
+font: 20pt &quot;Segoe UI&quot;;
+background-color: rgb(179, 179, 179);</string>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                     </widget>
+                     <widget class="QTextEdit" name="box2_stats">
+                      <property name="geometry">
+                       <rect>
+                        <x>0</x>
+                        <y>75</y>
+                        <width>868</width>
+                        <height>100</height>
+                       </rect>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>100</height>
+                       </size>
+                      </property>
+                      <property name="contextMenuPolicy">
+                       <enum>Qt::NoContextMenu</enum>
+                      </property>
+                      <property name="styleSheet">
+                       <string notr="true">font: 20pt &quot;Segoe UI&quot;;
+background-color: rgb(117, 117, 117);
+color: rgb(255, 255, 255);
+</string>
+                      </property>
+                      <property name="readOnly">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
                     </widget>
                    </item>
                   </layout>

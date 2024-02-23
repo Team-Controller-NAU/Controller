@@ -8,6 +8,10 @@
 #include <csim.h>
 #include <events.h>
 #include <electrical.h>
+#include <QShortcut>
+#include <QTextCursor>
+#include <QMessageBox>
+#include <QInputDialog>
 
 
 QT_BEGIN_NAMESPACE
@@ -100,6 +104,7 @@ private slots:
     void setup_connection_settings();
 
     //gui triggered slots (should be declared in mainwindow_gui_slots.cpp)
+    void findText();
     void on_send_message_button_clicked();
     void on_csim_port_selection_currentIndexChanged(int index);
     void on_CSim_button_clicked();

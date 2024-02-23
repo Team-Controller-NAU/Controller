@@ -116,8 +116,25 @@ MainWindow::MainWindow(QWidget *parent)
     ui->trigger1->setPixmap(BLANK_LIGHT);
     ui->trigger2->setPixmap(BLANK_LIGHT);
 
+    // create a shortcut for ctrl + f
+    QShortcut *find = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_F), this);
+    connect(find, &QShortcut::activated, this, &MainWindow::findText);
+
     // ensures that the application will open on the events page
     on_EventsPageButton_clicked();
+
+    // hide electrical data boxes until the data is filled in
+    for(int index = 1; index <= MAX_ELECTRICAL_COMPONENTS; index++)
+    {
+        // get the current box name
+        QString widgetName = QString("box%1_widget").arg(index);
+
+        // get the current box based off name
+        QWidget *widget = findChild<QWidget *>(widgetName);
+
+        // check if widget exists, and hide it
+        if(widget) widget->hide();
+    }
 }
 
 //destructor
@@ -180,11 +197,12 @@ void MainWindow::readSerialData()
             EventNode* wkgErrPtr;
             EventNode* wkgEventPtr;
             electricalNode* wkgElecPtr;
-            bool printErr;
             QString dumpMessage;
             QString formattedMessage;
             QStringList messageSet;
             SerialMessageIdentifier messageId;
+            int boxIndex;
+            bool printErr;
 
             //get serialized string from port
             QByteArray serializedMessage = ddmCon->serialPort.readLine();
@@ -309,22 +327,53 @@ void MainWindow::readSerialData()
                 case ELECTRICAL:
 
                     qDebug() <<  "Message id: electrical" << qPrintable("\n");
-                    //dump electrical data
-                    electricalObject->loadElecDump(message);
 
+                    // dump electrical data
+                    electricalObject->loadElecDump(message);
                     wkgElecPtr = electricalObject->headNode;
 
-                    ui->Cooling_Label->setText(wkgElecPtr->name);
-                    ui->Cooling_Stats->setText("Voltage: " + QString::number(wkgElecPtr->voltage) + '\n' + "Amps: " +  QString::number(wkgElecPtr->amps));
+                    // loop through each electrical data box
+                    for (boxIndex = 1; boxIndex <= MAX_ELECTRICAL_COMPONENTS; boxIndex++)
+                    {
+                        // get the current box name
+                        QString widgetName = "box" + QString::number(boxIndex) + "_widget";
 
-                    wkgElecPtr = wkgElecPtr->nextNode;
-                    ui->InternalTemp_Label->setText(wkgElecPtr->name);
-                    ui->InternalTemp_Stats->setText("Voltage: " + QString::number(wkgElecPtr->voltage) + '\n' + "Amps: " + QString::number(wkgElecPtr->amps));
+                        // get the names of the labels for this box
+                        QString labelName = "box" + QString::number(boxIndex) + "_label";
+                        QString statsName = "box" + QString::number(boxIndex) + "_stats";
 
-                    wkgElecPtr = wkgElecPtr->nextNode;
-                    ui->ExternalTemp_Label->setText(wkgElecPtr->name);
-                    ui->ExternalTemp_Stats->setText("Voltage: " + QString::number(wkgElecPtr->voltage) + '\n' + "Amps: " + QString::number(wkgElecPtr->amps));
+                        // get the current box based off name
+                        QWidget *widget = findChild<QWidget *>(widgetName);
 
+                        // find the label objects with findChild
+                        QLabel *boxLabel = findChild<QLabel *>(labelName);
+                        QTextEdit *boxStats = findChild<QTextEdit *>(statsName);
+
+                        // check if the current electrical node exists
+                        if (wkgElecPtr != nullptr)
+                        {
+                            // update label with name if it exists
+                            if (boxLabel) boxLabel->setText(" " + wkgElecPtr->name);
+
+                            // update stats with voltage and amps if it exists
+                            if (boxStats) boxStats->setPlainText("Voltage: " + QString::number(wkgElecPtr->voltage) +
+                                                  '\n' + "Amps: " + QString::number(wkgElecPtr->amps));
+
+                            // check if the box exists, and show it
+                            if(widget) widget->show();
+
+                            // move to next electrical node
+                            wkgElecPtr = wkgElecPtr->nextNode;
+                        }
+                        // else, there are no more electrical nodes
+                        else
+                        {
+                            // break once we are done
+                            break;
+                        }
+                    }
+
+                    // break if we have reached the max number of electrical boxes to fill
                     break;
 
                 case EVENT_DUMP:
