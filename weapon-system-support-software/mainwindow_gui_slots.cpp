@@ -221,9 +221,8 @@ void MainWindow::on_FilterBox_currentIndexChanged(int index)
 
             // set dump message
             if (dumpMessage != "") dumpMessage += '\n';
-            dumpMessage += QString::number(nextPrintPtr->id) + ',' + nextPrintPtr->timeStamp + ',' + nextPrintPtr->eventString + ',';
-            if (printErr) dumpMessage += (nextPrintPtr->cleared ? "1," : "0,");
-            dumpMessage += "\n";
+            dumpMessage += (" ID: " + QString::number(nextPrintPtr->id) + " " + nextPrintPtr->timeStamp + " " + nextPrintPtr->eventString);
+            if (printErr) dumpMessage += (nextPrintPtr->cleared ? ", CLEARED" : ", NOT CLEARED");
         }
 
         // update ui
@@ -246,8 +245,7 @@ void MainWindow::on_FilterBox_currentIndexChanged(int index)
         {
             // set dump message
             if (dumpMessage != "") dumpMessage += '\n';
-            dumpMessage += QString::number(wkgEventPtr->id) + ',' + wkgEventPtr->timeStamp + ',' + wkgEventPtr->eventString + ',';
-            dumpMessage += "\n";
+            dumpMessage += (" ID: " + QString::number(wkgEventPtr->id) + " " + wkgEventPtr->timeStamp + " " + wkgEventPtr->eventString);
             wkgEventPtr = wkgEventPtr->nextPtr;
         }
 
@@ -271,9 +269,8 @@ void MainWindow::on_FilterBox_currentIndexChanged(int index)
         {
             // set dump message
             if (dumpMessage != "") dumpMessage += '\n';
-            dumpMessage += QString::number(wkgErrPtr->id) + ',' + wkgErrPtr->timeStamp + ',' + wkgErrPtr->eventString + ',';
-            dumpMessage += (wkgErrPtr->cleared ? "1," : "0,");
-            dumpMessage += "\n";
+            dumpMessage += (" ID: " + QString::number(wkgErrPtr->id) + " " + wkgErrPtr->timeStamp + " " + wkgErrPtr->eventString);
+            dumpMessage += (wkgErrPtr->cleared ? ", CLEARED" : ", NOT CLEARED");
             wkgErrPtr = wkgErrPtr->nextPtr;
         }
 
@@ -300,9 +297,8 @@ void MainWindow::on_FilterBox_currentIndexChanged(int index)
             {
                 // set dump message
                 if (dumpMessage != "") dumpMessage += '\n';
-                dumpMessage += QString::number(wkgErrPtr->id) + ',' + wkgErrPtr->timeStamp + ',' + wkgErrPtr->eventString + ',';
-                dumpMessage += (wkgErrPtr->cleared ? "1," : "0,");
-                dumpMessage += "\n";
+                dumpMessage += (" ID: " + QString::number(wkgErrPtr->id) + " " + wkgErrPtr->timeStamp + " " + wkgErrPtr->eventString);
+                dumpMessage += (wkgErrPtr->cleared ? ", CLEARED" : ", NOT CLEARED");
             }
             wkgErrPtr = wkgErrPtr->nextPtr;
         }
@@ -330,9 +326,8 @@ void MainWindow::on_FilterBox_currentIndexChanged(int index)
             {
                 // set dump message
                 if (dumpMessage != "") dumpMessage += '\n';
-                dumpMessage += QString::number(wkgErrPtr->id) + ',' + wkgErrPtr->timeStamp + ',' + wkgErrPtr->eventString + ',';
-                dumpMessage += (wkgErrPtr->cleared ? "1," : "0,");
-                dumpMessage += "\n";
+                dumpMessage += (" ID: " + QString::number(wkgErrPtr->id) + " " + wkgErrPtr->timeStamp + " " + wkgErrPtr->eventString);
+                dumpMessage += (wkgErrPtr->cleared ? ", CLEARED" : ", NOT CLEARED");
             }
             wkgErrPtr = wkgErrPtr->nextPtr;
         }
@@ -394,7 +389,9 @@ void MainWindow::on_handshake_button_clicked()
 
         //refreshes connection button/displays
         ui->handshake_button->setText("Connecting");
-        ui->handshake_button->setStyleSheet("color: #FFFFFF;border-color: rgb(255, 255, 255);background-color: #FF7518;font: 15pt Segoe UI;");
+        ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #FF7518; border: 1px solid; border-color: #e65c00; font: 15pt 'Segoe UI'; } "
+                                            "QPushButton::hover { background-color: #ff8533; } "
+                                            "QPushButton::pressed { background-color: #ffa366;}");
         ui->ddm_port_selection->setEnabled(false);
 
         //disable changes to connection settings
@@ -418,8 +415,11 @@ void MainWindow::on_handshake_button_clicked()
 
         //refreshes connection button/displays
         ui->handshake_button->setText("Connect");
-        ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #14AE5C;font: 15pt Segoe UI;");
+        ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #14AE5C; border: 1px solid; border-color: #0d723c; font: 15pt 'Segoe UI'; } "
+                                            "QPushButton::hover { background-color: #1be479; } "
+                                            "QPushButton::pressed { background-color: #76efae;}");
         ui->connectionStatus->setPixmap(RED_LIGHT);
+        ui->connectionLabel->setText("Disconnected ");
         ui->ddm_port_selection->setEnabled(true);
 
         //allow user to modify connection settings

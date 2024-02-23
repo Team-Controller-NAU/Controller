@@ -182,6 +182,7 @@ void MainWindow::readSerialData()
             electricalNode* wkgElecPtr;
             bool printErr;
             QString dumpMessage;
+            QString formattedMessage;
             QStringList messageSet;
             SerialMessageIdentifier messageId;
 
@@ -234,26 +235,12 @@ void MainWindow::readSerialData()
                                             message,
                                             false);
 
-                    // check if timer is running
-                    if(!runningControllerTimer->isActive())
-                    {
-                        // start timer
-                        runningControllerTimer->start();
-                    }
-
-                    // set timestamp if timer is running
-                    if(runningControllerTimer->isActive())
-                    {
-                        // split up message
-                        messageSet = message.split(",", Qt::SkipEmptyParts);
-
-                        // set timestamp
-                        ui->elapsedTime->setText("Elapsed Time: " + messageSet[1]);
-                        ui->elapsedTime->setAlignment(Qt::AlignRight);
-                    }
+                    // get formatted message
+                    messageSet = message.split(",", Qt::SkipEmptyParts);
+                    formattedMessage = " ID: " + messageSet[0] + " " + messageSet[1] + " " + messageSet[2];
 
                     // update GUI
-                    if (eventFilter == ALL || eventFilter == EVENTS) ui->events_output->append(message);
+                    if (eventFilter == ALL || eventFilter == EVENTS) ui->events_output->append(formattedMessage);
 
                     // update total events gui
                     ui->TotalEventsOutput->setText(QString::number(events->totalEvents));
@@ -275,23 +262,10 @@ void MainWindow::readSerialData()
                                             message,
                                             false);
 
-                    // check if timer is running
-                    if(!runningControllerTimer->isActive())
-                    {
-                        // start timer
-                        runningControllerTimer->start();
-                    }
-
-                    // set timestamp if timer is running
-                    if(runningControllerTimer->isActive())
-                    {
-                        // split up message
-                        messageSet = message.split(",", Qt::SkipEmptyParts);
-
-                        // set timestamp
-                        ui->elapsedTime->setText("Elapsed Time: " + messageSet[1]);
-                        ui->elapsedTime->setAlignment(Qt::AlignRight);
-                    }
+                    // get formatted message
+                    messageSet = message.split(",", Qt::SkipEmptyParts);
+                    formattedMessage = " ID: " + messageSet[0] + " " + messageSet[1] + " " + messageSet[2];
+                    formattedMessage += (messageSet[3] == "1" ? ", CLEARED" : ", NOT CLEARED");
 
                     // check for any type of error filter, including all
                     if(eventFilter != EVENTS)
@@ -299,17 +273,17 @@ void MainWindow::readSerialData()
                         // check for cleared filter
                         if(eventFilter == CLEARED_ERRORS && events->lastErrorNode->cleared)
                         {
-                            ui->events_output->append(message);
+                            ui->events_output->append(formattedMessage);
                         }
                         // check for non-cleared filter
                         else if (eventFilter == NON_CLEARED_ERRORS && !events->lastErrorNode->cleared)
                         {
-                            ui->events_output->append(message);
+                            ui->events_output->append(formattedMessage);
                         }
                         // check for all or errors filter
                         else if (eventFilter == ALL || eventFilter == ERRORS)
                         {
-                            ui->events_output->append(message);
+                            ui->events_output->append(formattedMessage);
                         }
                     }
                     // otherwise do nothing
@@ -365,49 +339,6 @@ void MainWindow::readSerialData()
                                             message,
                                             true);
 
-                    // check if timer is running
-                    if(!runningControllerTimer->isActive())
-                    {
-                        // start timer
-                        runningControllerTimer->start();
-                    }
-
-                    // set timestamp if timer is running
-                    if(runningControllerTimer->isActive())
-                    {
-                        // set default time
-                        QString timestamp = "0:00:00:00";
-
-                        // check for events & errors
-                        if(events->lastErrorNode && events->lastEventNode)
-                        {
-                            // conditional operator compares the two values and extracts the larger one
-                            timestamp = (events->lastErrorNode->timeStamp > events->lastEventNode->timeStamp) ? events->lastErrorNode->timeStamp : events->lastEventNode->timeStamp;
-                        }
-                        // check for only errors
-                        if(events->lastErrorNode)
-                        {
-                            // get timestamp
-                            timestamp = events->lastErrorNode->timeStamp;
-                        }
-                        // check for only events
-                        else if(events->lastEventNode)
-                        {
-                            // get timestamp
-                            timestamp = events->lastEventNode->timeStamp;
-                        }
-                        // else both linked lists are null
-                        else
-                        {
-                            // how?
-                            qDebug() << "Both linked lists are null still; could not get controller timestamp.";
-                        }
-
-                        // set timestamp
-                        ui->elapsedTime->setText("Elapsed Time: " + timestamp);
-                        ui->elapsedTime->setAlignment(Qt::AlignRight);
-                    }
-
                     // reset dump
                     dumpMessage = "";
                     wkgErrPtr = events->headErrorNode;
@@ -424,9 +355,8 @@ void MainWindow::readSerialData()
 
                             // set dump message
                             if (dumpMessage != "") dumpMessage += '\n';
-                            dumpMessage += QString::number(nextPrintPtr->id) + ',' + nextPrintPtr->timeStamp + ',' + nextPrintPtr->eventString + ',';
-                            if (printErr) dumpMessage += (nextPrintPtr->cleared ? "1," : "0,");
-                            dumpMessage += "\n";
+                            dumpMessage += (" ID: " + QString::number(nextPrintPtr->id) + " " + nextPrintPtr->timeStamp + " " + nextPrintPtr->eventString);
+                            if (printErr) dumpMessage += (nextPrintPtr->cleared ? ", CLEARED" : ", NOT CLEARED");
                         }
 
                         // update gui
@@ -444,8 +374,12 @@ void MainWindow::readSerialData()
                             // check for empty
                             if(!messageSet.isEmpty() && event != "\n")
                             {
+                                // get formatted message
+                                QStringList eventSet = event.split(",", Qt::SkipEmptyParts);
+                                formattedMessage = "> ID: " + eventSet[0] + " " + eventSet[1] + " " + eventSet[2];
+
                                 // update gui
-                                ui->events_output->append(event + ",\n");
+                                ui->events_output->append(formattedMessage);
                             }
                         }
                     }
@@ -470,49 +404,6 @@ void MainWindow::readSerialData()
                                             message,
                                             true);
 
-                    // check if timer is running
-                    if(!runningControllerTimer->isActive())
-                    {
-                        // start timer
-                        runningControllerTimer->start();
-                    }
-
-                    // set timestamp if timer is running
-                    if(runningControllerTimer->isActive())
-                    {
-                        // set default time
-                        QString timestamp = "0:00:00:00";
-
-                        // check for events & errors
-                        if(events->lastErrorNode && events->lastEventNode)
-                        {
-                            // conditional operator compares the two values and extracts the larger one
-                            timestamp = (events->lastErrorNode->timeStamp > events->lastEventNode->timeStamp) ? events->lastErrorNode->timeStamp : events->lastEventNode->timeStamp;
-                        }
-                        // check for only errors
-                        if(events->lastErrorNode)
-                        {
-                            // get timestamp
-                            timestamp = events->lastErrorNode->timeStamp;
-                        }
-                        // check for only events
-                        else if(events->lastEventNode)
-                        {
-                            // get timestamp
-                            timestamp = events->lastEventNode->timeStamp;
-                        }
-                        // else both linked lists are null
-                        else
-                        {
-                            // how?
-                            qDebug() << "Both linked lists are null still; could not get controller timestamp.";
-                        }
-
-                        // set timestamp
-                        ui->elapsedTime->setText("Elapsed Time: " + timestamp);
-                        ui->elapsedTime->setAlignment(Qt::AlignRight);
-                    }
-
                     // reset dump
                     dumpMessage = "";
                     wkgErrPtr = events->headErrorNode;
@@ -529,9 +420,8 @@ void MainWindow::readSerialData()
 
                             // set dump message
                             if (dumpMessage != "") dumpMessage += '\n';
-                            dumpMessage += QString::number(nextPrintPtr->id) + ',' + nextPrintPtr->timeStamp + ',' + nextPrintPtr->eventString + ',';
-                            if (printErr) dumpMessage += (nextPrintPtr->cleared ? "1," : "0,");
-                            dumpMessage += "\n";
+                            dumpMessage += (" ID: " + QString::number(nextPrintPtr->id) + " " + nextPrintPtr->timeStamp + " " + nextPrintPtr->eventString);
+                            if (printErr) dumpMessage += (nextPrintPtr->cleared ? ", CLEARED" : ", NOT CLEARED");
                         }
 
                         // update gui
@@ -551,9 +441,8 @@ void MainWindow::readSerialData()
                                 {
                                     // set dump message
                                     if (dumpMessage != "") dumpMessage += '\n';
-                                    dumpMessage += QString::number(wkgErrPtr->id) + ',' + wkgErrPtr->timeStamp + ',' + wkgErrPtr->eventString + ',';
-                                    dumpMessage += (wkgErrPtr->cleared ? "1," : "0,");
-                                    dumpMessage += "\n";
+                                    dumpMessage += (" ID: " + QString::number(wkgErrPtr->id) + " " + wkgErrPtr->timeStamp + " " + wkgErrPtr->eventString);
+                                    dumpMessage += (wkgErrPtr->cleared ? ", CLEARED" : ", NOT CLEARED");
                                 }
                                 wkgErrPtr = wkgErrPtr->nextPtr;
                             }
@@ -571,9 +460,8 @@ void MainWindow::readSerialData()
                                 {
                                     // set dump message
                                     if (dumpMessage != "") dumpMessage += '\n';
-                                    dumpMessage += QString::number(wkgErrPtr->id) + ',' + wkgErrPtr->timeStamp + ',' + wkgErrPtr->eventString + ',';
-                                    dumpMessage += (wkgErrPtr->cleared ? "1," : "0,");
-                                    dumpMessage += "\n";
+                                    dumpMessage += (" ID: " + QString::number(wkgErrPtr->id) + " " + wkgErrPtr->timeStamp + " " + wkgErrPtr->eventString);
+                                    dumpMessage += (wkgErrPtr->cleared ? ", CLEARED" : ", NOT CLEARED");
                                 }
                                 wkgErrPtr = wkgErrPtr->nextPtr;
                             }
@@ -592,8 +480,13 @@ void MainWindow::readSerialData()
                                 // check for empty
                                 if(!messageSet.isEmpty() && error != "\n")
                                 {
+                                    // get formatted message
+                                    QStringList errorSet = error.split(",", Qt::SkipEmptyParts);
+                                    formattedMessage = " ID: " + errorSet[0] + " " + errorSet[1] + " " + errorSet[2];
+                                    formattedMessage += (errorSet[3] == "1" ? ", CLEARED" : ", NOT CLEARED");
+
                                     // update gui
-                                    ui->events_output->append(error + ",\n");
+                                    ui->events_output->append(formattedMessage);
                                 }
                             }
                         }
@@ -647,6 +540,17 @@ void MainWindow::readSerialData()
                     ui->controllerLabel->setText("Controller Version: " + status->version);
                     ui->crcLabel->setText("CRC: " + status->crc);
 
+                    // check if controller timer is running
+                    if(!runningControllerTimer->isActive())
+                    {
+                        // start it
+                        runningControllerTimer->start();
+
+                        // update elapsed time
+                        ui->elapsedTime->setText("Elapsed Time: " + status->elapsedControllerTime);
+                        ui->elapsedTime->setAlignment(Qt::AlignRight);
+                    }
+
                     //stop handshake protocols
                     handshakeTimer->stop();
 
@@ -661,7 +565,10 @@ void MainWindow::readSerialData()
 
                     // update ui
                     ui->handshake_button->setText("Disconnect");
-                    ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #FE1C1C;font: 15pt Segoe UI;");
+                    ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #FE1C1C; border: 1px solid; border-color: #cb0101; font: 15pt 'Segoe UI'; } "
+                                                        "QPushButton::hover { background-color: #fe3434; } "
+                                                        "QPushButton::pressed { background-color: #fe8080;}");
+                    ui->connectionLabel->setText("Connected ");
                     ui->connectionStatus->setPixmap(GREEN_LIGHT);
 
                     //clear events ll and output box
@@ -734,8 +641,11 @@ void MainWindow::readSerialData()
                     {
                         //refreshes connection button/displays
                         ui->handshake_button->setText("Connect");
-                        ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #14AE5C;font: 15pt Segoe UI;");
+                        ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #14AE5C; border: 1px solid; border-color: #0d723c; font: 15pt 'Segoe UI'; } "
+                                                            "QPushButton::hover { background-color: #1be479; } "
+                                                            "QPushButton::pressed { background-color: #76efae;}");
                         ui->connectionStatus->setPixmap(RED_LIGHT);
+                        ui->connectionLabel->setText("Disconnected ");
                     }
 
                     break;
@@ -1046,6 +956,7 @@ void MainWindow::updateElapsedTime()
     }
 
     // update the GUI
+    status->elapsedControllerTime = QString::number(days) + ":" + currentTime.toString("HH:mm:ss");
     ui->elapsedTime->setText("Elapsed Time: " + QString::number(days) + ":" + currentTime.toString("HH:mm:ss"));
     ui->elapsedTime->setAlignment(Qt::AlignRight);
 }

@@ -237,7 +237,7 @@ font: 16pt &quot;Segoe UI&quot;;</string>
 font: 16pt &quot;Segoe UI&quot;;</string>
          </property>
          <property name="text">
-          <string>Connection Status</string>
+          <string>Disconnected </string>
          </property>
         </widget>
        </item>
@@ -289,7 +289,7 @@ font: 16pt &quot;Segoe UI&quot;;</string>
             </sizepolicy>
            </property>
            <property name="currentIndex">
-            <number>4</number>
+            <number>2</number>
            </property>
            <widget class="QWidget" name="Events_page">
             <layout class="QGridLayout" name="gridLayout_3">
@@ -331,6 +331,12 @@ border-color: rgb(255, 255, 255);</string>
                  <property name="enabled">
                   <bool>true</bool>
                  </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>30</height>
+                  </size>
+                 </property>
                  <property name="baseSize">
                   <size>
                    <width>0</width>
@@ -350,9 +356,22 @@ border-color: rgb(255, 255, 255);</string>
                   <enum>Qt::LeftToRight</enum>
                  </property>
                  <property name="styleSheet">
-                  <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(39, 39, 39);
-font: 12pt &quot;Segoe UI&quot;;</string>
+                  <string notr="true">QPushButton {
+	padding-bottom: 3px;
+	color: rgb(255, 255, 255);
+	background-color: rgb(47, 47, 47);
+	border: 1px solid;
+	border-color: rgb(64, 64, 64);
+	font: 12pt &quot;Segoe UI&quot;;
+}
+
+QPushButton::hover {
+	background-color: rgb(117, 117, 117);
+}
+
+QPushButton::pressed {
+	background-color: rgb(45, 45, 45);
+}</string>
                  </property>
                  <property name="text">
                   <string>Download</string>
@@ -567,10 +586,29 @@ li.checked::marker { content: &quot;\2612&quot;; }
                </item>
                <item row="2" column="0">
                 <widget class="QPushButton" name="openLogfileFolder">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>30</height>
+                  </size>
+                 </property>
                  <property name="styleSheet">
-                  <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(39, 39, 39);
-font: 12pt &quot;Segoe UI&quot;;</string>
+                  <string notr="true">QPushButton {
+	padding-bottom: 3px;
+	color: rgb(255, 255, 255);
+	background-color: rgb(47, 47, 47);
+	border: 1px solid;
+	border-color: rgb(64, 64, 64);
+	font: 12pt &quot;Segoe UI&quot;;
+}
+
+QPushButton::hover {
+	background-color: rgb(117, 117, 117);
+}
+
+QPushButton::pressed {
+	background-color: rgb(45, 45, 45);
+}</string>
                  </property>
                  <property name="text">
                   <string>Open Logfile Folder</string>
@@ -579,10 +617,29 @@ font: 12pt &quot;Segoe UI&quot;;</string>
                </item>
                <item row="2" column="1">
                 <widget class="QPushButton" name="setLogfileFolder">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>30</height>
+                  </size>
+                 </property>
                  <property name="styleSheet">
-                  <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(39, 39, 39);
-font: 12pt &quot;Segoe UI&quot;;</string>
+                  <string notr="true">QPushButton {
+	padding-bottom: 3px;
+	color: rgb(255, 255, 255);
+	background-color: rgb(47, 47, 47);
+	border: 1px solid;
+	border-color: rgb(64, 64, 64);
+	font: 12pt &quot;Segoe UI&quot;;
+}
+
+QPushButton::hover {
+	background-color: rgb(117, 117, 117);
+}
+
+QPushButton::pressed {
+	background-color: rgb(45, 45, 45);
+}</string>
                  </property>
                  <property name="text">
                   <string>Set Logfile Folder</string>
@@ -622,39 +679,52 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
              <item row="0" column="5" alignment="Qt::AlignBottom">
               <widget class="QComboBox" name="FilterBox">
                <property name="styleSheet">
-                <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(39, 39, 39);
-border-color: rgb(255, 255, 255);</string>
+                <string notr="true">QComboBox {
+	padding-bottom: 3px;
+	color: rgb(255, 255, 255);
+	background-color: rgb(47, 47, 47);
+	border: 1px solid;
+	border-color: rgb(64, 64, 64);
+	font: 8pt &quot;Segoe UI&quot;;
+}
+
+QComboBox::items {
+	color: rgb(255, 255, 255);
+}
+
+QListView {
+	color: rgb(255, 255, 255);
+}</string>
                </property>
                <property name="editable">
                 <bool>false</bool>
                </property>
                <property name="currentText">
-                <string>Default</string>
+                <string> Default</string>
                </property>
                <item>
                 <property name="text">
-                 <string>Default</string>
+                 <string> Default</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>All Events</string>
+                 <string> All Events</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>All Errors</string>
+                 <string> All Errors</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>Cleared Errors</string>
+                 <string> Cleared Errors</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>Active Errors</string>
+                 <string> Active Errors</string>
                 </property>
                </item>
               </widget>
@@ -798,6 +868,9 @@ border-right-color: rgb(255, 255, 255);</string>
               </item>
               <item row="3" column="1">
                <widget class="QPushButton" name="toggle_num_triggers">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(255, 255, 255);</string>
+                </property>
                 <property name="text">
                  <string>Set to single trigger</string>
                 </property>
@@ -1001,7 +1074,7 @@ border-color: rgb(255, 255, 255);</string>
               <widget class="QPushButton" name="handshake_button">
                <property name="minimumSize">
                 <size>
-                 <width>250</width>
+                 <width>304</width>
                  <height>0</height>
                 </size>
                </property>
@@ -1012,10 +1085,22 @@ border-color: rgb(255, 255, 255);</string>
                 </size>
                </property>
                <property name="styleSheet">
-                <string notr="true">color: rgb(255, 255, 255);
-border-color: rgb(255, 255, 255);
-background-color: #14AE5C;
-font: 15pt &quot;Segoe UI&quot;;</string>
+                <string notr="true">QPushButton {
+	padding-bottom: 3px;
+	color: rgb(255, 255, 255);
+	background-color: #14AE5C;
+	border: 1px solid;
+	border-color: #0d723c;
+	font: 15pt &quot;Segoe UI&quot;;
+}
+
+QPushButton::hover {
+	background-color: #1be479;
+}
+
+QPushButton::pressed {
+	background-color: #76efae;
+}</string>
                </property>
                <property name="text">
                 <string>Connect</string>
@@ -1031,10 +1116,23 @@ font: 15pt &quot;Segoe UI&quot;;</string>
                 </sizepolicy>
                </property>
                <property name="styleSheet">
-                <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(117, 117, 117);
-border:none;
-font: 20pt &quot;Segoe UI&quot;;</string>
+                <string notr="true">QComboBox {
+	padding-bottom: 3px;
+	color: rgb(255, 255, 255);
+	background-color: rgb(47, 47, 47);
+	border: 1px solid;
+	border-color: rgb(64, 64, 64);
+	font: 20pt &quot;Segoe UI&quot;;
+	padding-left: 5px;
+}
+
+QComboBox::items {
+	color: rgb(255, 255, 255);
+}
+
+QListView {
+	color: rgb(255, 255, 255);
+}</string>
                </property>
               </widget>
              </item>
@@ -1070,20 +1168,46 @@ font: 20pt &quot;Segoe UI&quot;;</string>
                 </sizepolicy>
                </property>
                <property name="styleSheet">
-                <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(117, 117, 117);
-border:none;
-font: 20pt &quot;Segoe UI&quot;;</string>
+                <string notr="true">QComboBox {
+	padding-bottom: 3px;
+	color: rgb(255, 255, 255);
+	background-color: rgb(47, 47, 47);
+	border: 1px solid;
+	border-color: rgb(64, 64, 64);
+	font: 20pt &quot;Segoe UI&quot;;
+	padding-left: 5px;
+}
+
+QComboBox::items {
+	color: rgb(255, 255, 255);
+}
+
+QListView {
+	color: rgb(255, 255, 255);
+}</string>
                </property>
               </widget>
              </item>
              <item row="2" column="1">
               <widget class="QComboBox" name="baud_rate_selection">
                <property name="styleSheet">
-                <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(117, 117, 117);
-border:none;
-font: 20pt &quot;Segoe UI&quot;;</string>
+                <string notr="true">QComboBox {
+	padding-bottom: 3px;
+	color: rgb(255, 255, 255);
+	background-color: rgb(47, 47, 47);
+	border: 1px solid;
+	border-color: rgb(64, 64, 64);
+	font: 20pt &quot;Segoe UI&quot;;
+	padding-left: 5px;
+}
+
+QComboBox::items {
+	color: rgb(255, 255, 255);
+}
+
+QListView {
+	color: rgb(255, 255, 255);
+}</string>
                </property>
               </widget>
              </item>
@@ -1136,10 +1260,23 @@ font: 20pt &quot;Segoe UI&quot;;</string>
              <item row="4" column="3">
               <widget class="QComboBox" name="data_bits_selection">
                <property name="styleSheet">
-                <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(117, 117, 117);
-border:none;
-font: 20pt &quot;Segoe UI&quot;;</string>
+                <string notr="true">QComboBox {
+	padding-bottom: 3px;
+	color: rgb(255, 255, 255);
+	background-color: rgb(47, 47, 47);
+	border: 1px solid;
+	border-color: rgb(64, 64, 64);
+	font: 20pt &quot;Segoe UI&quot;;
+	padding-left: 5px;
+}
+
+QComboBox::items {
+	color: rgb(255, 255, 255);
+}
+
+QListView {
+	color: rgb(255, 255, 255);
+}</string>
                </property>
               </widget>
              </item>
@@ -1175,10 +1312,23 @@ font: 20pt &quot;Segoe UI&quot;;</string>
                 </sizepolicy>
                </property>
                <property name="styleSheet">
-                <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(117, 117, 117);
-border:none;
-font: 20pt &quot;Segoe UI&quot;;</string>
+                <string notr="true">QComboBox {
+	padding-bottom: 3px;
+	color: rgb(255, 255, 255);
+	background-color: rgb(47, 47, 47);
+	border: 1px solid;
+	border-color: rgb(64, 64, 64);
+	font: 20pt &quot;Segoe UI&quot;;
+	padding-left: 5px;
+}
+
+QComboBox::items {
+	color: rgb(255, 255, 255);
+}
+
+QListView {
+	color: rgb(255, 255, 255);
+}</string>
                </property>
               </widget>
              </item>
@@ -1208,10 +1358,23 @@ font: 20pt &quot;Segoe UI&quot;;</string>
              <item row="4" column="1">
               <widget class="QComboBox" name="stop_bit_selection">
                <property name="styleSheet">
-                <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(117, 117, 117);
-border:none;
-font: 20pt &quot;Segoe UI&quot;;</string>
+                <string notr="true">QComboBox {
+	padding-bottom: 3px;
+	color: rgb(255, 255, 255);
+	background-color: rgb(47, 47, 47);
+	border: 1px solid;
+	border-color: rgb(64, 64, 64);
+	font: 20pt &quot;Segoe UI&quot;;
+	padding-left: 5px;
+}
+
+QComboBox::items {
+	color: rgb(255, 255, 255);
+}
+
+QListView {
+	color: rgb(255, 255, 255);
+}</string>
                </property>
               </widget>
              </item>
@@ -1224,10 +1387,22 @@ font: 20pt &quot;Segoe UI&quot;;</string>
                 </sizepolicy>
                </property>
                <property name="styleSheet">
-                <string notr="true">color: rgb(255, 255, 255);
-border-color: rgb(255, 255, 255);
-background-color: rgb(117, 117, 117);
-font: 15pt &quot;Segoe UI&quot;;</string>
+                <string notr="true">QPushButton {
+	padding-bottom: 3px;
+	color: rgb(255, 255, 255);
+	background-color: rgb(47, 47, 47);
+	border: 1px solid;
+	border-color: rgb(64, 64, 64);
+	font: 15pt &quot;Segoe UI&quot;;
+}
+
+QPushButton::hover {
+	background-color: rgb(117, 117, 117);
+}
+
+QPushButton::pressed {
+	background-color: rgb(45, 45, 45);
+}</string>
                </property>
                <property name="text">
                 <string> Save as Default</string>
@@ -1243,10 +1418,22 @@ font: 15pt &quot;Segoe UI&quot;;</string>
                 </sizepolicy>
                </property>
                <property name="styleSheet">
-                <string notr="true">color: rgb(255, 255, 255);
-border-color: rgb(255, 255, 255);
-background-color: rgb(117, 117, 117);
-font: 15pt &quot;Segoe UI&quot;;</string>
+                <string notr="true">QPushButton {
+	padding-bottom: 3px;
+	color: rgb(255, 255, 255);
+	background-color: rgb(47, 47, 47);
+	border: 1px solid;
+	border-color: rgb(64, 64, 64);
+	font: 15pt &quot;Segoe UI&quot;;
+}
+
+QPushButton::hover {
+	background-color: rgb(117, 117, 117);
+}
+
+QPushButton::pressed {
+	background-color: rgb(45, 45, 45);
+}</string>
                </property>
                <property name="text">
                 <string> Restore Default</string>
@@ -1353,7 +1540,7 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>168</width>
+                  <width>896</width>
                   <height>744</height>
                  </rect>
                 </property>
@@ -2223,37 +2410,6 @@ font: 20pt &quot;Segoe UI&quot;;</string>
                </item>
               </layout>
              </item>
-             <item row="8" column="4">
-              <widget class="QTextEdit" name="elapsedTime">
-               <property name="maximumSize">
-                <size>
-                 <width>1000</width>
-                 <height>25</height>
-                </size>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">color: rgb(255, 255, 255);
-border:none;
-font: 9pt &quot;Segoe UI&quot;;
-</string>
-               </property>
-               <property name="markdown">
-                <string>Elapsed Time: 0:00:00:00
-
-</string>
-               </property>
-               <property name="html">
-                <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;right&quot; style=&quot; margin-top:6px; margin-bottom:6px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Elapsed Time: 0:00:00:00&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-              </widget>
-             </item>
             </layout>
            </widget>
           </widget>
@@ -2265,29 +2421,28 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </item>
     <item>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="2" alignment="Qt::AlignLeft">
-       <widget class="QLabel" name="crcLabel">
-        <property name="maximumSize">
+      <item row="1" column="1">
+       <spacer name="horizontalSpacer_13">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
          <size>
-          <width>150</width>
-          <height>16777215</height>
+          <width>10</width>
+          <height>20</height>
          </size>
         </property>
-        <property name="styleSheet">
-         <string notr="true">color: rgb(255, 255, 255);
-font: 10pt &quot;Segoe UI&quot;;</string>
-        </property>
-        <property name="text">
-         <string>CRC : </string>
-        </property>
-       </widget>
+       </spacer>
       </item>
-      <item row="1" column="4" alignment="Qt::AlignRight">
+      <item row="1" column="5" alignment="Qt::AlignRight">
        <widget class="QTextEdit" name="DDMTimer">
         <property name="maximumSize">
          <size>
-          <width>250</width>
-          <height>20</height>
+          <width>189</width>
+          <height>25</height>
          </size>
         </property>
         <property name="styleSheet">
@@ -2321,6 +2476,36 @@ li.checked::marker { content: &quot;\2612&quot;; }
         </property>
        </widget>
       </item>
+      <item row="1" column="3">
+       <spacer name="horizontalSpacer_6">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="1" column="2" alignment="Qt::AlignLeft">
+       <widget class="QLabel" name="crcLabel">
+        <property name="maximumSize">
+         <size>
+          <width>150</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">color: rgb(255, 255, 255);
+font: 10pt &quot;Segoe UI&quot;;</string>
+        </property>
+        <property name="text">
+         <string>CRC : </string>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="0" alignment="Qt::AlignLeft">
        <widget class="QLabel" name="controllerLabel">
         <property name="sizePolicy">
@@ -2344,34 +2529,40 @@ font: 10pt &quot;Segoe UI&quot;;</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="3">
-       <spacer name="horizontalSpacer_6">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
+      <item row="1" column="4">
+       <widget class="QTextEdit" name="elapsedTime">
+        <property name="maximumSize">
          <size>
-          <width>40</width>
-          <height>20</height>
+          <width>175</width>
+          <height>25</height>
          </size>
         </property>
-       </spacer>
-      </item>
-      <item row="1" column="1">
-       <spacer name="horizontalSpacer_13">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+        <property name="styleSheet">
+         <string notr="true">color: rgb(255, 255, 255);
+background-color: rgb(47, 47, 47);
+border:none;
+font: 9pt &quot;Segoe UI&quot;;
+</string>
         </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
+        <property name="readOnly">
+         <bool>true</bool>
         </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>10</width>
-          <height>20</height>
-         </size>
+        <property name="markdown">
+         <string>Elapsed Time: 0:00:00:00
+
+</string>
         </property>
-       </spacer>
+        <property name="html">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p align=&quot;right&quot; style=&quot; margin-top:6px; margin-bottom:6px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Elapsed Time: 0:00:00:00&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>
