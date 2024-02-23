@@ -25,6 +25,7 @@ public:
     double firingRate;
     QString version;
     QString crc;
+    QString elapsedControllerTime;
 
     //serial communication utilities===================================================================
 

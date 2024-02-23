@@ -30,6 +30,7 @@ void electrical::addNode(QString name, int voltage, int amps)
     wkgNode->name = name;
     wkgNode->voltage = voltage;
     wkgNode->amps = amps;
+    wkgNode->nextNode = nullptr;
 
     //add node to ll, check if ll is empty
     if (headNode == nullptr)

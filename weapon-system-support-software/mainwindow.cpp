@@ -23,8 +23,11 @@ MainWindow::MainWindow(QWidget *parent)
     //timer is used to repeatedly transmit handshake signals
     handshakeTimer( new QTimer(this) ),
 
-    // timer is used to update the GUI
+    // timer is used to update last message received time
     lastMessageTimer( new QTimer(this) ),
+
+    // timer is used to update controller running time
+    runningControllerTimer( new QTimer(this) ),
 
     //init user settings to our organization and project
     userSettings("Team Controller", "WSSS"),
@@ -87,6 +90,10 @@ MainWindow::MainWindow(QWidget *parent)
     lastMessageTimer->setInterval(1000);
     connect(lastMessageTimer, &QTimer::timeout, this, &MainWindow::updateTimer);
 
+    // connect running controller timer
+    runningControllerTimer->setInterval(1000);
+    connect(runningControllerTimer, &QTimer::timeout, this, &MainWindow::updateElapsedTime);
+
     //if handshake timeout is enabled, setup signal to timeout
     if (HANDSHAKE_TIMEOUT)
     {
@@ -109,8 +116,25 @@ MainWindow::MainWindow(QWidget *parent)
     ui->trigger1->setPixmap(BLANK_LIGHT);
     ui->trigger2->setPixmap(BLANK_LIGHT);
 
+    // create a shortcut for ctrl + f
+    QShortcut *find = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_F), this);
+    connect(find, &QShortcut::activated, this, &MainWindow::findText);
+
     // ensures that the application will open on the events page
     on_EventsPageButton_clicked();
+
+    // hide electrical data boxes until the data is filled in
+    for(int index = 1; index <= MAX_ELECTRICAL_COMPONENTS; index++)
+    {
+        // get the current box name
+        QString widgetName = QString("box%1_widget").arg(index);
+
+        // get the current box based off name
+        QWidget *widget = findChild<QWidget *>(widgetName);
+
+        // check if widget exists, and hide it
+        if(widget) widget->hide();
+    }
 }
 
 //destructor
@@ -173,10 +197,12 @@ void MainWindow::readSerialData()
             EventNode* wkgErrPtr;
             EventNode* wkgEventPtr;
             electricalNode* wkgElecPtr;
-            bool printErr;
             QString dumpMessage;
+            QString formattedMessage;
             QStringList messageSet;
             SerialMessageIdentifier messageId;
+            int boxIndex;
+            bool printErr;
 
             //get serialized string from port
             QByteArray serializedMessage = ddmCon->serialPort.readLine();
@@ -227,8 +253,12 @@ void MainWindow::readSerialData()
                                             message,
                                             false);
 
+                    // get formatted message
+                    messageSet = message.split(",", Qt::SkipEmptyParts);
+                    formattedMessage = " ID: " + messageSet[0] + " " + messageSet[1] + " " + messageSet[2];
+
                     // update GUI
-                    if (eventFilter == ALL || eventFilter == EVENTS) ui->events_output->append(message);
+                    if (eventFilter == ALL || eventFilter == EVENTS) ui->events_output->append(formattedMessage);
 
                     // update total events gui
                     ui->TotalEventsOutput->setText(QString::number(events->totalEvents));
@@ -250,23 +280,28 @@ void MainWindow::readSerialData()
                                             message,
                                             false);
 
+                    // get formatted message
+                    messageSet = message.split(",", Qt::SkipEmptyParts);
+                    formattedMessage = " ID: " + messageSet[0] + " " + messageSet[1] + " " + messageSet[2];
+                    formattedMessage += (messageSet[3] == "1" ? ", CLEARED" : ", NOT CLEARED");
+
                     // check for any type of error filter, including all
                     if(eventFilter != EVENTS)
                     {
                         // check for cleared filter
                         if(eventFilter == CLEARED_ERRORS && events->lastErrorNode->cleared)
                         {
-                            ui->events_output->append(message);
+                            ui->events_output->append(formattedMessage);
                         }
                         // check for non-cleared filter
                         else if (eventFilter == NON_CLEARED_ERRORS && !events->lastErrorNode->cleared)
                         {
-                            ui->events_output->append(message);
+                            ui->events_output->append(formattedMessage);
                         }
                         // check for all or errors filter
                         else if (eventFilter == ALL || eventFilter == ERRORS)
                         {
-                            ui->events_output->append(message);
+                            ui->events_output->append(formattedMessage);
                         }
                     }
                     // otherwise do nothing
@@ -292,22 +327,53 @@ void MainWindow::readSerialData()
                 case ELECTRICAL:
 
                     qDebug() <<  "Message id: electrical" << qPrintable("\n");
-                    //dump electrical data
-                    electricalObject->loadElecDump(message);
 
+                    // dump electrical data
+                    electricalObject->loadElecDump(message);
                     wkgElecPtr = electricalObject->headNode;
 
-                    ui->Cooling_Label->setText(wkgElecPtr->name);
-                    ui->Cooling_Stats->setText("Voltage: " + QString::number(wkgElecPtr->voltage) + '\n' + "Amps: " +  QString::number(wkgElecPtr->amps));
+                    // loop through each electrical data box
+                    for (boxIndex = 1; boxIndex <= MAX_ELECTRICAL_COMPONENTS; boxIndex++)
+                    {
+                        // get the current box name
+                        QString widgetName = "box" + QString::number(boxIndex) + "_widget";
 
-                    wkgElecPtr = wkgElecPtr->nextNode;
-                    ui->InternalTemp_Label->setText(wkgElecPtr->name);
-                    ui->InternalTemp_Stats->setText("Voltage: " + QString::number(wkgElecPtr->voltage) + '\n' + "Amps: " + QString::number(wkgElecPtr->amps));
+                        // get the names of the labels for this box
+                        QString labelName = "box" + QString::number(boxIndex) + "_label";
+                        QString statsName = "box" + QString::number(boxIndex) + "_stats";
 
-                    wkgElecPtr = wkgElecPtr->nextNode;
-                    ui->ExternalTemp_Label->setText(wkgElecPtr->name);
-                    ui->ExternalTemp_Stats->setText("Voltage: " + QString::number(wkgElecPtr->voltage) + '\n' + "Amps: " + QString::number(wkgElecPtr->amps));
+                        // get the current box based off name
+                        QWidget *widget = findChild<QWidget *>(widgetName);
 
+                        // find the label objects with findChild
+                        QLabel *boxLabel = findChild<QLabel *>(labelName);
+                        QTextEdit *boxStats = findChild<QTextEdit *>(statsName);
+
+                        // check if the current electrical node exists
+                        if (wkgElecPtr != nullptr)
+                        {
+                            // update label with name if it exists
+                            if (boxLabel) boxLabel->setText(" " + wkgElecPtr->name);
+
+                            // update stats with voltage and amps if it exists
+                            if (boxStats) boxStats->setPlainText("Voltage: " + QString::number(wkgElecPtr->voltage) +
+                                                  '\n' + "Amps: " + QString::number(wkgElecPtr->amps));
+
+                            // check if the box exists, and show it
+                            if(widget) widget->show();
+
+                            // move to next electrical node
+                            wkgElecPtr = wkgElecPtr->nextNode;
+                        }
+                        // else, there are no more electrical nodes
+                        else
+                        {
+                            // break once we are done
+                            break;
+                        }
+                    }
+
+                    // break if we have reached the max number of electrical boxes to fill
                     break;
 
                 case EVENT_DUMP:
@@ -338,9 +404,8 @@ void MainWindow::readSerialData()
 
                             // set dump message
                             if (dumpMessage != "") dumpMessage += '\n';
-                            dumpMessage += QString::number(nextPrintPtr->id) + ',' + nextPrintPtr->timeStamp + ',' + nextPrintPtr->eventString + ',';
-                            if (printErr) dumpMessage += (nextPrintPtr->cleared ? "1," : "0,");
-                            dumpMessage += "\n";
+                            dumpMessage += (" ID: " + QString::number(nextPrintPtr->id) + " " + nextPrintPtr->timeStamp + " " + nextPrintPtr->eventString);
+                            if (printErr) dumpMessage += (nextPrintPtr->cleared ? ", CLEARED" : ", NOT CLEARED");
                         }
 
                         // update gui
@@ -358,8 +423,12 @@ void MainWindow::readSerialData()
                             // check for empty
                             if(!messageSet.isEmpty() && event != "\n")
                             {
+                                // get formatted message
+                                QStringList eventSet = event.split(",", Qt::SkipEmptyParts);
+                                formattedMessage = "> ID: " + eventSet[0] + " " + eventSet[1] + " " + eventSet[2];
+
                                 // update gui
-                                ui->events_output->append(event + ",\n");
+                                ui->events_output->append(formattedMessage);
                             }
                         }
                     }
@@ -400,9 +469,8 @@ void MainWindow::readSerialData()
 
                             // set dump message
                             if (dumpMessage != "") dumpMessage += '\n';
-                            dumpMessage += QString::number(nextPrintPtr->id) + ',' + nextPrintPtr->timeStamp + ',' + nextPrintPtr->eventString + ',';
-                            if (printErr) dumpMessage += (nextPrintPtr->cleared ? "1," : "0,");
-                            dumpMessage += "\n";
+                            dumpMessage += (" ID: " + QString::number(nextPrintPtr->id) + " " + nextPrintPtr->timeStamp + " " + nextPrintPtr->eventString);
+                            if (printErr) dumpMessage += (nextPrintPtr->cleared ? ", CLEARED" : ", NOT CLEARED");
                         }
 
                         // update gui
@@ -422,9 +490,8 @@ void MainWindow::readSerialData()
                                 {
                                     // set dump message
                                     if (dumpMessage != "") dumpMessage += '\n';
-                                    dumpMessage += QString::number(wkgErrPtr->id) + ',' + wkgErrPtr->timeStamp + ',' + wkgErrPtr->eventString + ',';
-                                    dumpMessage += (wkgErrPtr->cleared ? "1," : "0,");
-                                    dumpMessage += "\n";
+                                    dumpMessage += (" ID: " + QString::number(wkgErrPtr->id) + " " + wkgErrPtr->timeStamp + " " + wkgErrPtr->eventString);
+                                    dumpMessage += (wkgErrPtr->cleared ? ", CLEARED" : ", NOT CLEARED");
                                 }
                                 wkgErrPtr = wkgErrPtr->nextPtr;
                             }
@@ -442,9 +509,8 @@ void MainWindow::readSerialData()
                                 {
                                     // set dump message
                                     if (dumpMessage != "") dumpMessage += '\n';
-                                    dumpMessage += QString::number(wkgErrPtr->id) + ',' + wkgErrPtr->timeStamp + ',' + wkgErrPtr->eventString + ',';
-                                    dumpMessage += (wkgErrPtr->cleared ? "1," : "0,");
-                                    dumpMessage += "\n";
+                                    dumpMessage += (" ID: " + QString::number(wkgErrPtr->id) + " " + wkgErrPtr->timeStamp + " " + wkgErrPtr->eventString);
+                                    dumpMessage += (wkgErrPtr->cleared ? ", CLEARED" : ", NOT CLEARED");
                                 }
                                 wkgErrPtr = wkgErrPtr->nextPtr;
                             }
@@ -463,8 +529,13 @@ void MainWindow::readSerialData()
                                 // check for empty
                                 if(!messageSet.isEmpty() && error != "\n")
                                 {
+                                    // get formatted message
+                                    QStringList errorSet = error.split(",", Qt::SkipEmptyParts);
+                                    formattedMessage = " ID: " + errorSet[0] + " " + errorSet[1] + " " + errorSet[2];
+                                    formattedMessage += (errorSet[3] == "1" ? ", CLEARED" : ", NOT CLEARED");
+
                                     // update gui
-                                    ui->events_output->append(error + ",\n");
+                                    ui->events_output->append(formattedMessage);
                                 }
                             }
                         }
@@ -518,6 +589,17 @@ void MainWindow::readSerialData()
                     ui->controllerLabel->setText("Controller Version: " + status->version);
                     ui->crcLabel->setText("CRC: " + status->crc);
 
+                    // check if controller timer is running
+                    if(!runningControllerTimer->isActive())
+                    {
+                        // start it
+                        runningControllerTimer->start();
+
+                        // update elapsed time
+                        ui->elapsedTime->setText("Elapsed Time: " + status->elapsedControllerTime);
+                        ui->elapsedTime->setAlignment(Qt::AlignRight);
+                    }
+
                     //stop handshake protocols
                     handshakeTimer->stop();
 
@@ -532,7 +614,10 @@ void MainWindow::readSerialData()
 
                     // update ui
                     ui->handshake_button->setText("Disconnect");
-                    ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #FE1C1C;font: 15pt Segoe UI;");
+                    ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #FE1C1C; border: 1px solid; border-color: #cb0101; font: 15pt 'Segoe UI'; } "
+                                                        "QPushButton::hover { background-color: #fe3434; } "
+                                                        "QPushButton::pressed { background-color: #fe8080;}");
+                    ui->connectionLabel->setText("Connected ");
                     ui->connectionStatus->setPixmap(GREEN_LIGHT);
 
                     //clear events ll and output box
@@ -590,6 +675,12 @@ void MainWindow::readSerialData()
                         lastMessageTimer->stop();
                     }
 
+                    // stop elapsed timer if still active
+                    if(runningControllerTimer->isActive())
+                    {
+                        runningControllerTimer->stop();
+                    }
+
                     if (reconnect)
                     {
                         //attempt handshake to reconnect, (optional setting)
@@ -599,8 +690,11 @@ void MainWindow::readSerialData()
                     {
                         //refreshes connection button/displays
                         ui->handshake_button->setText("Connect");
-                        ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #14AE5C;font: 15pt Segoe UI;");
+                        ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #14AE5C; border: 1px solid; border-color: #0d723c; font: 15pt 'Segoe UI'; } "
+                                                            "QPushButton::hover { background-color: #1be479; } "
+                                                            "QPushButton::pressed { background-color: #76efae;}");
                         ui->connectionStatus->setPixmap(RED_LIGHT);
+                        ui->connectionLabel->setText("Disconnected ");
                     }
 
                     break;
@@ -882,6 +976,38 @@ void MainWindow::updateStatusDisplay()
         default:
             ui->trigger2->setPixmap(BLANK_LIGHT);
     }
+}
+
+// method updates the running elapsed controller time
+void MainWindow::updateElapsedTime()
+{
+    // get the current timestamp
+    QString timestamp = ui->elapsedTime->toPlainText();
+
+    // extract the time, remove "ELapsed Time: "
+    timestamp = timestamp.mid(14); // assuming this will always be in position 14, it should never change
+
+    // split up the day and time components
+    // this is required because a QTime object does not support days (more than 24hrs)
+    QStringList timeParts = timestamp.split(":");
+    int days = timeParts.takeFirst().toInt(); // removes the days from the list as well
+
+    // convert to QTime and add one second
+    QTime currentTime = QTime::fromString(timeParts.join(":"), "HH:mm:ss");
+    currentTime = currentTime.addSecs(1);
+
+    // check if the time exceeds 23:59:59
+    // when it does, the entire timestamp will be reset since QTime can not exceed 24 hours
+    if (currentTime.hour() == 0 && currentTime.minute() == 0 && currentTime.second() == 0)
+    {
+        // increment number of days
+        days++;
+    }
+
+    // update the GUI
+    status->elapsedControllerTime = QString::number(days) + ":" + currentTime.toString("HH:mm:ss");
+    ui->elapsedTime->setText("Elapsed Time: " + QString::number(days) + ":" + currentTime.toString("HH:mm:ss"));
+    ui->elapsedTime->setAlignment(Qt::AlignRight);
 }
 
 // method updates the elapsed time since last message received to DDM

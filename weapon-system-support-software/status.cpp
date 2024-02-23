@@ -64,8 +64,9 @@ void Status::loadVersionData(QString versionMessage)
 {
     QStringList values = versionMessage.split(DELIMETER);
 
-    version = values[0];
-    crc = values[1];
+    elapsedControllerTime = values[0];
+    version = values[1];
+    crc = values[2];
 
     //emit signal, new status data is loaded
     emit newDataLoaded(this);
