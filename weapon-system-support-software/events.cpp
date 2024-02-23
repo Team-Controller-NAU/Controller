@@ -576,10 +576,7 @@ void Events::appendToLogfile(QString logfilePath, QString message, bool dump)
     EventNode* wkgErrPtr;
     EventNode* wkgEventPtr;
     QSettings userSettings("Team Controller", "WSSS");
-
-    // will change with user settings
     QString userSetPath = userSettings.value("logfileLocation").toString();
-    //QString tempPath = QDir::tempPath();
     QDir path(userSetPath);
 
     int id;
@@ -592,7 +589,7 @@ void Events::appendToLogfile(QString logfilePath, QString message, bool dump)
         if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
         {
             // failed to create the file
-            qDebug() << "Unable to create running logfile";
+            qDebug() << "Unable to create running logfile" << file.errorString();
             return;
         }
         file.close();
