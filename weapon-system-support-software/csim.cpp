@@ -134,6 +134,12 @@ void CSim::checkConnection(Connection *conn)
 
             electrical *elec(new electrical());
 
+            // initalize a random number generator with null time seed
+            std::srand(std::time(nullptr));
+
+            // get a random number between 0 and 3
+            int randNum = std::rand() % 4;
+
             // Determine what kind of message this is
             switch (messageId)
             {
@@ -157,11 +163,11 @@ void CSim::checkConnection(Connection *conn)
                 //store message
                 messagesSent += QString::number(BEGIN) + DELIMETER + getTimeStamp() + DELIMETER + CONTROLLER_VERSION + DELIMETER + CRC_VERSION + DELIMETER + '\n';
 
-                // transmit the electrial signal
-                conn->transmit(QString::number(ELECTRICAL) + DELIMETER + ELECTRICAL_MESSAGES + '\n');
+                // transmit a random electrical message
+                conn->transmit(QString::number(ELECTRICAL) + DELIMETER + ELECTRICAL_MESSAGES[randNum] + '\n');
 
                 //store message
-                messagesSent += QString::number(ELECTRICAL) + DELIMETER + ELECTRICAL_MESSAGES + '\n';
+                messagesSent += QString::number(ELECTRICAL) + DELIMETER + ELECTRICAL_MESSAGES[randNum] + '\n';
 
                 //check for existing event dump message
                 if (eventDumpMessage.length() > 0)

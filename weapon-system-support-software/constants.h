@@ -63,7 +63,11 @@ const QString EVENT_MESSAGES[NUM_EVENT_MESSAGES] = {"Sample event message 1", "S
 const int NUM_ERROR_MESSAGES = 3;
 const QString ERROR_MESSAGES[NUM_ERROR_MESSAGES] = {"Sample error message 1.22", "Sample error message 2; 5; 0", "Sample error message 3; 677"};
 
-const QString ELECTRICAL_MESSAGES = "Servo Motor, 19, 2,,Pump Cooler, 2, 3,,Internal Temp Sensor, 33, 4";
+const int NUM_ELECTRICAL_MESSAGES = 4;
+const QString ELECTRICAL_MESSAGES[NUM_ELECTRICAL_MESSAGES] = {"Servo Motor, 20, 4",
+                                                              "Piston, 14, 29,,Alternator, 96, 3",
+                                                              "Servo Motor, 19, 2,,Pump Cooler, 2, 3,,Internal Temp Sensor, 33, 4",
+                                                              "Fuel Injector, 27, 1,,Voltage Regulator, 19, 3,,Rotor 1, 9, 13,,Rotor 3, 9, 9,,Exciter Stator, 19, 2"};
 const int MAX_ELECTRICAL_COMPONENTS = 8; // the max number of electrical componenets to expect from a weapon
 
 const int NUM_ERROR_DELIMETERS = 3;
