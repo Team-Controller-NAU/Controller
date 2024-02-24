@@ -132,8 +132,6 @@ void CSim::checkConnection(Connection *conn)
             // Extract message id
             SerialMessageIdentifier messageId = static_cast<SerialMessageIdentifier>(QString(message[0]).toInt());
 
-            electrical *elec(new electrical());
-
             // initalize a random number generator with null time seed
             std::srand(std::time(nullptr));
 
