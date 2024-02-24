@@ -132,11 +132,7 @@ void CSim::checkConnection(Connection *conn)
             // Extract message id
             SerialMessageIdentifier messageId = static_cast<SerialMessageIdentifier>(QString(message[0]).toInt());
 
-            // initalize a random number generator with null time seed
-            std::srand(std::time(nullptr));
-
-            // get a random number between 0 and 3
-            int randNum = std::rand() % 4;
+            int randNum;
 
             // Determine what kind of message this is
             switch (messageId)
@@ -151,6 +147,11 @@ void CSim::checkConnection(Connection *conn)
                 break;
 
             case LISTENING:
+                // initalize a random number generator with null time seed
+                std::srand(std::time(nullptr));
+
+                // get a random number between 0 and 3
+                randNum = std::rand() % 4;
 
                 // Log
                 qDebug() << "[CSIM] DDM listening signal received. Serial communication beginning"<< qPrintable("\n");
