@@ -262,7 +262,7 @@ void MainWindow::readSerialData()
                     formattedMessage = " ID: " + messageSet[0] + " " + messageSet[1] + " " + messageSet[2];
 
                     // update GUI
-                    if (eventFilter == ALL || eventFilter == EVENTS) updateEventsOutput(events->lastEventNode,messageId);
+                    if (eventFilter == ALL || eventFilter == EVENTS) updateEventsOutput(events->lastEventNode,false);
 
                     // update total events gui
                     ui->TotalEventsOutput->setText(QString::number(events->totalEvents));
@@ -295,17 +295,17 @@ void MainWindow::readSerialData()
                         // check for cleared filter
                         if(eventFilter == CLEARED_ERRORS && events->lastErrorNode->cleared)
                         {
-                            updateEventsOutput(events->lastEventNode,messageId);
+                            updateEventsOutput(events->lastErrorNode,true);
                         }
                         // check for non-cleared filter
                         else if (eventFilter == NON_CLEARED_ERRORS && !events->lastErrorNode->cleared)
                         {
-                            updateEventsOutput(events->lastEventNode,messageId);
+                            updateEventsOutput(events->lastErrorNode,true);
                         }
                         // check for all or errors filter
                         else if (eventFilter == ALL || eventFilter == ERRORS)
                         {
-                            updateEventsOutput(events->lastEventNode,messageId);
+                            updateEventsOutput(events->lastErrorNode,true);
                         }
                     }
                     // otherwise do nothing
@@ -384,6 +384,8 @@ void MainWindow::readSerialData()
 
                     qDebug() <<  "Message id: event dump" << qPrintable("\n");
 
+                    EventNode* nextPrintPtr;
+
                     // load all events to event linked list
                     events->loadEventDump(message);
 
@@ -404,16 +406,10 @@ void MainWindow::readSerialData()
                         while (wkgErrPtr != nullptr || wkgEventPtr != nullptr)
                         {
                             // get next to print by ID
-                            EventNode* nextPrintPtr = events->getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
+                            nextPrintPtr = events->getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
 
-                            // set dump message
-                            if (dumpMessage != "") dumpMessage += '\n';
-                            dumpMessage += (" ID: " + QString::number(nextPrintPtr->id) + " " + nextPrintPtr->timeStamp + " " + nextPrintPtr->eventString);
-                            if (printErr) dumpMessage += (nextPrintPtr->cleared ? ", CLEARED" : ", NOT CLEARED");
+                            updateEventsOutput(events->lastEventNode,printErr);
                         }
-
-                        // update gui
-                        ui->events_output->setText(dumpMessage);
                     }
                     // check for events filter
                     else if(eventFilter == EVENTS)
@@ -432,7 +428,7 @@ void MainWindow::readSerialData()
                                 formattedMessage = "> ID: " + eventSet[0] + " " + eventSet[1] + " " + eventSet[2];
 
                                 // update gui
-                                ui->events_output->append(formattedMessage);
+                                updateEventsOutput(events->lastEventNode,true);
                             }
                         }
                     }
@@ -1254,7 +1250,7 @@ void MainWindow::resetFiringMode()
     ui->singleLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
 }
 
-void MainWindow::updateEventsOutput(EventNode *event, SerialMessageIdentifier id)
+void MainWindow::updateEventsOutput(EventNode *event, bool printErr)
 {
     QString currentString;
 
@@ -1266,34 +1262,35 @@ void MainWindow::updateEventsOutput(EventNode *event, SerialMessageIdentifier id
 
     if(event == nullptr)
     {
-        ui->events_output->append("crash");
+        qDebug() << "Invalid input to updateEventsOutput()";
         return;
     }
 
-    currentString = events->nodeToString(event, id!=EVENT);
+    currentString = events->nodeToString(event, printErr);
 
-    switch(id)
+    //check if we have an event as input
+    if (!printErr)
+    {
+        //change output text color to white
+        richText = "<font color='#FFFFFF'>"+currentString + "</font>";
+        //ui->events_output->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(30, 30, 30);border-color: rgb(255, 255, 255);");
+    }
+    //otherwise check for cleared error
+    else if (event->cleared)
     {
 
-        case EVENT:
-            //change output text color to white
-            richText = "<font color='#FFFFFF'>"+currentString + "</font>";
-            //ui->events_output->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(30, 30, 30);border-color: rgb(255, 255, 255);");
-            break;
-        case ERROR:
-            if(event->cleared)
-            {
-                //change output text color to green
-                richText = "<font color='#14AE5C'>"+currentString + "</font>";
-                //ui->events_output->setStyleSheet("color: #14AE5C;background-color: rgb(30, 30, 30);border-color: rgb(255, 255, 255);");
-            }
-            else
-            {
-                //change output text color to red
-                richText = "<font color='#FE1C1C'>"+currentString + "</font>";
-                //ui->events_output->setStyleSheet("color: #FE1C1C;background-color: rgb(30, 30, 30);border-color: rgb(255, 255, 255);");
-            }
+       //change output text color to green
+       richText = "<font color='#14AE5C'>"+currentString + "</font>";
+       //ui->events_output->setStyleSheet("color: #14AE5C;background-color: rgb(30, 30, 30);border-color: rgb(255, 255, 255);");
     }
+    //otherwise this is a non-cleared error
+    else
+    {
+       //change output text color to red
+       richText = "<font color='#FE1C1C'>"+currentString + "</font>";
+       //ui->events_output->setStyleSheet("color: #FE1C1C;background-color: rgb(30, 30, 30);border-color: rgb(255, 255, 255);");
+    }
+
     document.setHtml(richText);
 
     ui->events_output->append(document.toHtml()); // Append HTML content
