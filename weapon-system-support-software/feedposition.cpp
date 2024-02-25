@@ -77,7 +77,7 @@ void feedposition::paintEvent(QPaintEvent*)
     painter.drawEllipse(QPointF(QDial::height()/2,QDial::height()/2),QDial::height()/20,QDial::height()/20);
 
     //draws the pointer line
-    painter.drawPie(positionLine, value*16, 3*16);
+    painter.drawPie(positionLine, -value*16, 3*16);
 
     //setting text
     painter.setPen(text);

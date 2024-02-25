@@ -96,6 +96,7 @@ private slots:
     void disableConnectionChanges();
     void enableConnectionChanges();
     void resetFiringMode();
+    void updateEventsOutput(EventNode *event, SerialMessageIdentifier id);
 
     //non-gui triggered slots relating exclusively to managing gui (should be declared in mainwindow.cpp)
     void setup_csim_port_selection(int index);

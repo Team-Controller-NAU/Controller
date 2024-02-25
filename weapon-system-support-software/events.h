@@ -49,6 +49,8 @@ public:
 
     void appendToLogfile(QString logfilePath, QString message, bool dump);
 
+    QString nodeToString(EventNode *event, bool error);
+
     int totalEvents;
     int totalErrors;
     int totalNodes;

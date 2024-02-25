@@ -313,14 +313,7 @@ void Events::outputToLogFile(std::string logFileName)
             EventNode* nextPrintPtr = getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
 
             // print data of chosen node
-            logFile << "ID: " << nextPrintPtr->id << " " << nextPrintPtr->timeStamp.toStdString() << " " << nextPrintPtr->eventString.toStdString();
-
-            // check if chosen node is an error node
-            if (printErr)
-            {
-                // print cleared status
-                logFile << (nextPrintPtr->cleared ? ", CLEARED" : ", NOT CLEARED");
-            }
+            logFile << nodeToString(nextPrintPtr, printErr).toStdString();
 
             // end the current line
             logFile << std::endl;
@@ -730,4 +723,21 @@ void Events::appendToLogfile(QString logfilePath, QString message, bool dump)
 
     // Close the file
     file.close();
+}
+
+QString Events::nodeToString(EventNode *event, bool error)
+{
+    QString nodeString;
+
+    // Concatenate QStrings
+    nodeString = "ID: " + QString::number(event->id) + " " + event->timeStamp + " " + event->eventString;
+
+    // Check if chosen node is an error node
+    if (error)
+    {
+        // Print cleared status
+        nodeString += (event->cleared ? ", CLEARED" : ", NOT CLEARED");
+    }
+
+    return nodeString; // Return the concatenated QString
 }

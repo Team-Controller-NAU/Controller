@@ -262,7 +262,7 @@ void MainWindow::readSerialData()
                     formattedMessage = " ID: " + messageSet[0] + " " + messageSet[1] + " " + messageSet[2];
 
                     // update GUI
-                    if (eventFilter == ALL || eventFilter == EVENTS) ui->events_output->append(formattedMessage);
+                    if (eventFilter == ALL || eventFilter == EVENTS) updateEventsOutput(events->lastEventNode,messageId);
 
                     // update total events gui
                     ui->TotalEventsOutput->setText(QString::number(events->totalEvents));
@@ -295,17 +295,17 @@ void MainWindow::readSerialData()
                         // check for cleared filter
                         if(eventFilter == CLEARED_ERRORS && events->lastErrorNode->cleared)
                         {
-                            ui->events_output->append(formattedMessage);
+                            updateEventsOutput(events->lastEventNode,messageId);
                         }
                         // check for non-cleared filter
                         else if (eventFilter == NON_CLEARED_ERRORS && !events->lastErrorNode->cleared)
                         {
-                            ui->events_output->append(formattedMessage);
+                            updateEventsOutput(events->lastEventNode,messageId);
                         }
                         // check for all or errors filter
                         else if (eventFilter == ALL || eventFilter == ERRORS)
                         {
-                            ui->events_output->append(formattedMessage);
+                            updateEventsOutput(events->lastEventNode,messageId);
                         }
                     }
                     // otherwise do nothing
@@ -1252,4 +1252,50 @@ void MainWindow::resetFiringMode()
     ui->burstLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
     ui->safeLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
     ui->singleLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
+}
+
+void MainWindow::updateEventsOutput(EventNode *event, SerialMessageIdentifier id)
+{
+    QString currentString;
+
+    // Create a QTextDocument
+    QTextDocument document;
+
+    // Insert text with rich text formatting
+    QString richText;
+
+    if(event == nullptr)
+    {
+        ui->events_output->append("crash");
+        return;
+    }
+
+    currentString = events->nodeToString(event, id!=EVENT);
+
+    switch(id)
+    {
+
+        case EVENT:
+            //change output text color to white
+            richText = "<font color='#FFFFFF'>"+currentString + "</font>";
+            //ui->events_output->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(30, 30, 30);border-color: rgb(255, 255, 255);");
+            break;
+        case ERROR:
+            if(event->cleared)
+            {
+                //change output text color to green
+                richText = "<font color='#14AE5C'>"+currentString + "</font>";
+                //ui->events_output->setStyleSheet("color: #14AE5C;background-color: rgb(30, 30, 30);border-color: rgb(255, 255, 255);");
+            }
+            else
+            {
+                //change output text color to red
+                richText = "<font color='#FE1C1C'>"+currentString + "</font>";
+                //ui->events_output->setStyleSheet("color: #FE1C1C;background-color: rgb(30, 30, 30);border-color: rgb(255, 255, 255);");
+            }
+    }
+    document.setHtml(richText);
+
+    ui->events_output->append(document.toHtml()); // Append HTML content
+    //ui->events_output->append(currentString);
 }
