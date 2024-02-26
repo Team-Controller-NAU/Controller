@@ -15,6 +15,7 @@ struct EventNode {
     int id;
     QString timeStamp;
     QString eventString;
+    bool error;
     bool cleared;
     struct EventNode *nextPtr;
 };
@@ -49,7 +50,7 @@ public:
 
     void appendToLogfile(QString logfilePath, QString message, bool dump);
 
-    QString nodeToString(EventNode *event, bool error);
+    QString nodeToString(EventNode *event);
 
     int totalEvents;
     int totalErrors;

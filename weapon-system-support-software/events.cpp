@@ -35,6 +35,7 @@ void Events::addEvent(int id, QString timeStamp, QString eventString)
     newNode->eventString = eventString;
     newNode->nextPtr = nullptr;
     newNode->id = id;
+    newNode->error = false;
 
     //increment counters
     totalNodes++;
@@ -74,6 +75,7 @@ void Events::addError(int id, QString timeStamp, QString eventString, bool clear
     newNode->eventString = eventString;
     newNode->cleared = cleared;
     newNode->nextPtr = nullptr;
+    newNode->error = true;
 
     //increment counters
     totalNodes++;
@@ -313,7 +315,7 @@ void Events::outputToLogFile(std::string logFileName)
             EventNode* nextPrintPtr = getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
 
             // print data of chosen node
-            logFile << nodeToString(nextPrintPtr, printErr).toStdString();
+            logFile << nodeToString(nextPrintPtr).toStdString();
 
             // end the current line
             logFile << std::endl;
@@ -725,7 +727,8 @@ void Events::appendToLogfile(QString logfilePath, QString message, bool dump)
     file.close();
 }
 
-QString Events::nodeToString(EventNode *event, bool error)
+
+QString Events::nodeToString(EventNode *event)
 {
     QString nodeString;
 
@@ -733,7 +736,7 @@ QString Events::nodeToString(EventNode *event, bool error)
     nodeString = "ID: " + QString::number(event->id) + " " + event->timeStamp + " " + event->eventString;
 
     // Check if chosen node is an error node
-    if (error)
+    if (event->error)
     {
         // Print cleared status
         nodeString += (event->cleared ? ", CLEARED" : ", NOT CLEARED");
