@@ -259,10 +259,14 @@ font: 16pt &quot;Segoe UI&quot;;</string>
           <enum>Qt::DefaultContextMenu</enum>
          </property>
          <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Connection Status&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="styleSheet">
-          <string notr="true"/>
+          <string notr="true">QToolTip{
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid black;
+}</string>
          </property>
          <property name="text">
           <string/>
@@ -298,7 +302,7 @@ font: 16pt &quot;Segoe UI&quot;;</string>
             </sizepolicy>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>2</number>
            </property>
            <widget class="QWidget" name="Events_page">
             <layout class="QGridLayout" name="gridLayout_3">
@@ -688,7 +692,7 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
              <item row="0" column="5" alignment="Qt::AlignBottom">
               <widget class="QComboBox" name="FilterBox">
                <property name="toolTip">
-                <string/>
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Filter the events output&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="styleSheet">
                 <string notr="true">QComboBox {
@@ -706,6 +710,12 @@ QComboBox::items {
 
 QListView {
 	color: rgb(255, 255, 255);
+}
+
+QToolTip{
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid black;
 }</string>
                </property>
                <property name="editable">
@@ -1398,6 +1408,9 @@ QListView {
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Save these settings for next login&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="styleSheet">
                 <string notr="true">QPushButton {
 	padding-bottom: 3px;
@@ -1414,6 +1427,12 @@ QPushButton::hover {
 
 QPushButton::pressed {
 	background-color: rgb(45, 45, 45);
+}
+
+QToolTip{
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid black;
 }</string>
                </property>
                <property name="text">
@@ -1429,6 +1448,9 @@ QPushButton::pressed {
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Revert settings to default settings&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="styleSheet">
                 <string notr="true">QPushButton {
 	padding-bottom: 3px;
@@ -1445,6 +1467,12 @@ QPushButton::hover {
 
 QPushButton::pressed {
 	background-color: rgb(45, 45, 45);
+}
+
+QToolTip{
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid black;
 }</string>
                </property>
                <property name="text">
@@ -1552,7 +1580,7 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>66</width>
+                  <width>896</width>
                   <height>744</height>
                  </rect>
                 </property>
@@ -2265,7 +2293,7 @@ font: 20pt &quot;Segoe UI&quot;;</string>
                 </size>
                </property>
                <property name="toolTip">
-                <string extracomment="The weapons current state in its operating cycle (depicted by degrees out of 360)"/>
+                <string extracomment="The weapons current state in its operating cycle (depicted by degrees out of 360)">&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Feed position display&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="toolTipDuration">
                 <number>1</number>
@@ -2325,6 +2353,16 @@ border-color: rgb(255, 255, 255);</string>
                    <height>50</height>
                   </size>
                  </property>
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Trigger 1&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">QToolTip{
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid black;
+}</string>
+                 </property>
                  <property name="text">
                   <string/>
                  </property>
@@ -2359,6 +2397,16 @@ border-color: rgb(255, 255, 255);</string>
                    <width>50</width>
                    <height>50</height>
                   </size>
+                 </property>
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Trigger 2&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">QToolTip{
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid black;
+}</string>
                  </property>
                  <property name="text">
                   <string/>
@@ -2654,11 +2702,22 @@ font: 20pt &quot;Segoe UI&quot;;</string>
           <height>25</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Time since last message received from controller&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
         <property name="styleSheet">
-         <string notr="true">color: rgb(255, 255, 255);
+         <string notr="true">QTextEdit {
+color: rgb(255, 255, 255);
 background-color: rgb(47, 47, 47);
 border:none;
 font: 9pt &quot;Segoe UI&quot;;
+}
+
+QToolTip{
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid black;
+}
 </string>
         </property>
         <property name="verticalScrollBarPolicy">
@@ -2678,7 +2737,7 @@ hr { height: 1px; border-width: 0; }
 li.unchecked::marker { content: &quot;\2610&quot;; }
 li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;right&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Time Since Last Message: 00:00:00&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p align=&quot;right&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="placeholderText">
          <string/>
@@ -2706,12 +2765,23 @@ li.checked::marker { content: &quot;\2612&quot;; }
           <height>16777215</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Controller's CRC&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
         <property name="styleSheet">
-         <string notr="true">color: rgb(255, 255, 255);
-font: 10pt &quot;Segoe UI&quot;;</string>
+         <string notr="true">QLabel {
+color: rgb(255, 255, 255);
+font: 10pt &quot;Segoe UI&quot;;
+}
+
+QToolTip{
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid black;
+}</string>
         </property>
         <property name="text">
-         <string>CRC : </string>
+         <string/>
         </property>
        </widget>
       </item>
@@ -2729,12 +2799,23 @@ font: 10pt &quot;Segoe UI&quot;;</string>
           <height>20</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Controller's version&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
         <property name="styleSheet">
-         <string notr="true">color: rgb(255, 255, 255);
-font: 10pt &quot;Segoe UI&quot;;</string>
+         <string notr="true">QLabel {
+color: rgb(255, 255, 255);
+font: 10pt &quot;Segoe UI&quot;;
+}
+
+QToolTip{
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid black;
+}</string>
         </property>
         <property name="text">
-         <string>Controller Version : </string>
+         <string/>
         </property>
        </widget>
       </item>
@@ -2746,20 +2827,28 @@ font: 10pt &quot;Segoe UI&quot;;</string>
           <height>25</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Controllers session duration&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
         <property name="styleSheet">
-         <string notr="true">color: rgb(255, 255, 255);
+         <string notr="true">QTextEdit {
+color: rgb(255, 255, 255);
 background-color: rgb(47, 47, 47);
 border:none;
 font: 9pt &quot;Segoe UI&quot;;
-</string>
+}
+
+QToolTip{
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid black;
+}</string>
         </property>
         <property name="readOnly">
          <bool>true</bool>
         </property>
         <property name="markdown">
-         <string>Elapsed Time: 0:00:00:00
-
-</string>
+         <string/>
         </property>
         <property name="html">
          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
@@ -2769,7 +2858,7 @@ hr { height: 1px; border-width: 0; }
 li.unchecked::marker { content: &quot;\2610&quot;; }
 li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;right&quot; style=&quot; margin-top:6px; margin-bottom:6px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Elapsed Time: 0:00:00:00&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p align=&quot;right&quot; style=&quot;-qt-paragraph-type:empty; margin-top:6px; margin-bottom:6px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
       </item>

@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
     reconnect(false),
 
     //setting toggles color coded events page output
-    coloredEventOutput(false),
+    coloredEventOutput(true),
 
     //this determines what will be shown on the events page
     eventFilter(ALL),
