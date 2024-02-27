@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
     reconnect(false),
 
     //setting toggles color coded events page output
-    coloredEventOutput(false),
+    coloredEventOutput(true),
 
     //this determines what will be shown on the events page
     eventFilter(ALL),
@@ -285,9 +285,23 @@ void MainWindow::readSerialData()
 
                     qDebug() <<  "Message id: electrical" << qPrintable("\n");
 
-                    // dump electrical data
+                    // dump electrical data, clearing linked list first
+                    electricalObject->freeLL();
                     electricalObject->loadElecDump(message);
                     wkgElecPtr = electricalObject->headNode;
+
+                    // loop through each electrical data box
+                    for (boxIndex = 1; boxIndex <= MAX_ELECTRICAL_COMPONENTS; boxIndex++)
+                    {
+                        // get the current box name
+                        QString widgetName = "box" + QString::number(boxIndex) + "_widget";
+
+                        // get the current box based off name
+                        QWidget *widget = findChild<QWidget *>(widgetName);
+
+                        // check if widget exists, and hide it
+                        if(widget) widget->hide();
+                    }
 
                     // loop through each electrical data box
                     for (boxIndex = 1; boxIndex <= MAX_ELECTRICAL_COMPONENTS; boxIndex++)
