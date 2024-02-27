@@ -49,6 +49,7 @@ public:
     QDateTime timeLastReceived;
     EventFilter eventFilter;
     QString logfileName;
+    bool coloredEventOutput;
 
     //set true to enable automatic handshake once CSim sends closing connection message
     bool reconnect;

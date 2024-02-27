@@ -17,6 +17,9 @@ MainWindow::MainWindow(QWidget *parent)
     //setting determines if automatic handshake starts after csim disconnects
     reconnect(false),
 
+    //setting toggles color coded events page output
+    coloredEventOutput(false),
+
     //this determines what will be shown on the events page
     eventFilter(ALL),
 
@@ -368,20 +371,6 @@ void MainWindow::readSerialData()
                     //refresh the events output with dumped error data
                     refreshEventsOutput();
 
-                    // update total errors gui
-                    ui->TotalErrorsOutput->setText(QString::number(events->totalErrors));
-                    ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
-                    ui->statusErrorOutput->setText(QString::number(events->totalErrors));
-                    ui->statusErrorOutput->setAlignment(Qt::AlignCenter);
-
-                    // update cleared errors gui
-                    ui->ClearedErrorsOutput->setText(QString::number(events->totalCleared));
-                    ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
-
-                    // update active errors gui
-                    ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
-                    ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
-
                     break;
 
                 case CLEAR_ERROR:
@@ -395,14 +384,6 @@ void MainWindow::readSerialData()
 
                     //refresh the events output with newly cleared error
                     refreshEventsOutput();
-
-                    // update cleared errors gui
-                    ui->ClearedErrorsOutput->setText(QString::number(events->totalCleared));
-                    ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
-
-                    // update active errors gui
-                    ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
-                    ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
 
                     break;
 
@@ -1092,34 +1073,56 @@ void MainWindow::updateEventsOutput(QString outString, bool error, bool cleared)
     QString richText;
 
     //check if we have an event as input and filter allows printing events
-    if (!error && (eventFilter == EVENTS || eventFilter == ALL))
+    if (!error )
     {
-        //change output text color to white
-        richText = "<font color='#FFFFFF'>"+ outString + "</font>";
+        if (eventFilter == EVENTS || eventFilter == ALL)
+        {
+           //change output text color to white
+           richText = "<p style='color: #FFFFFF; font-size: 16px'>"+ outString + "</p>";
 
-        //activate html for the output
-        document.setHtml(richText);
+           //activate html for the output
+           document.setHtml(richText);
 
-        //append styled string to the events output
-        ui->events_output->append(document.toHtml());
+           //append styled string to the events output
+           ui->events_output->append(document.toHtml());
+        }
     }
     //otherwise check for cleared error and if filter allows printing cleared errors
-    else if (cleared && (eventFilter == ALL || eventFilter == ERRORS || eventFilter == CLEARED_ERRORS))
+    else if (cleared)
     {
-       //change output text color to green
-       richText = "<font color='#14AE5C'>"+ outString + "</font>";
+        if (eventFilter == ALL || eventFilter == ERRORS || eventFilter == CLEARED_ERRORS)
+        {
+            if (coloredEventOutput)
+            {
+                //change output text color to green
+                richText = "<p style='color: #14AE5C; font-size: 16px'>"+ outString + "</p>";
+            }
+            else
+            {
+                //change output text color to white
+                richText = "<p style='color: #FFFFFF; font-size: 16px'>"+ outString + "</p>";
+            }
 
-       //activate html for the output
-       document.setHtml(richText);
+            //activate html for the output
+            document.setHtml(richText);
 
-       //append styled string to the events output
-       ui->events_output->append(document.toHtml());
+            //append styled string to the events output
+            ui->events_output->append(document.toHtml());
+        }
     }
     //otherwise this is a non-cleared error check if filtering allows printing non-cleared errors
     else if (eventFilter == ALL || eventFilter == NON_CLEARED_ERRORS || eventFilter == ERRORS)
     {
-       //change output text color to red
-       richText = "<font color='#FE1C1C'>"+ outString + "</font>";
+        if (coloredEventOutput)
+        {
+            //change output text color to red
+            richText = "<p style='color: #FE1C1C; font-size: 16px'>"+ outString + "</p>";
+        }
+        else
+        {
+            //change output text color to white
+            richText = "<p style='color: #FFFFFF; font-size: 16px'>"+ outString + "</p>";
+        }
 
        //activate html for the output
        document.setHtml(richText);
