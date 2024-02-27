@@ -68,6 +68,7 @@ const QString ELECTRICAL_MESSAGES[NUM_ELECTRICAL_MESSAGES] = {"Servo Motor, 20, 
                                                               "Piston, 14, 29,,Alternator, 96, 3",
                                                               "Servo Motor, 19, 2,,Pump Cooler, 2, 3,,Internal Temp Sensor, 33, 4",
                                                               "Fuel Injector, 27, 1,,Voltage Regulator, 19, 3,,Rotor 1, 9, 13,,Rotor 3, 9, 9,,Exciter Stator, 19, 2"};
+
 const int MAX_ELECTRICAL_COMPONENTS = 8; // the max number of electrical componenets to expect from a weapon
 
 const int NUM_ERROR_DELIMETERS = 3;
