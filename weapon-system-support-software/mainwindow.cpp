@@ -1096,12 +1096,24 @@ void MainWindow::updateEventsOutput(QString outString, bool error, bool cleared)
     {
         //change output text color to white
         richText = "<font color='#FFFFFF'>"+ outString + "</font>";
+
+        //activate html for the output
+        document.setHtml(richText);
+
+        //append styled string to the events output
+        ui->events_output->append(document.toHtml());
     }
     //otherwise check for cleared error and if filter allows printing cleared errors
     else if (cleared && (eventFilter == ALL || eventFilter == ERRORS || eventFilter == CLEARED_ERRORS))
     {
        //change output text color to green
        richText = "<font color='#14AE5C'>"+ outString + "</font>";
+
+       //activate html for the output
+       document.setHtml(richText);
+
+       //append styled string to the events output
+       ui->events_output->append(document.toHtml());
     }
     //otherwise this is a non-cleared error check if filtering allows printing non-cleared errors
     else if (eventFilter == ALL || eventFilter == NON_CLEARED_ERRORS || eventFilter == ERRORS)
@@ -1109,16 +1121,12 @@ void MainWindow::updateEventsOutput(QString outString, bool error, bool cleared)
        //change output text color to red
        richText = "<font color='#FE1C1C'>"+ outString + "</font>";
 
-       // update active errors gui
-       ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
-       ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
+       //activate html for the output
+       document.setHtml(richText);
+
+       //append styled string to the events output
+       ui->events_output->append(document.toHtml());
     }
-
-    //activate html for the output
-    document.setHtml(richText);
-
-    //append styled string to the events output
-    ui->events_output->append(document.toHtml());
 
     // update total events gui
     ui->TotalEventsOutput->setText(QString::number(events->totalEvents));
@@ -1126,19 +1134,25 @@ void MainWindow::updateEventsOutput(QString outString, bool error, bool cleared)
     ui->statusEventOutput->setText(QString::number(events->totalEvents));
     ui->statusEventOutput->setAlignment(Qt::AlignCenter);
 
-    if (error)
-    {
-        // update total errors gui
-        ui->TotalErrorsOutput->setText(QString::number(events->totalErrors));
-        ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
-        ui->statusErrorOutput->setText(QString::number(events->totalErrors));
-        ui->statusErrorOutput->setAlignment(Qt::AlignCenter);
-    }
-    else if ()
+    if (!error) return;
+
+    // update total errors gui
+    ui->TotalErrorsOutput->setText(QString::number(events->totalErrors));
+    ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
+    ui->statusErrorOutput->setText(QString::number(events->totalErrors));
+    ui->statusErrorOutput->setAlignment(Qt::AlignCenter);
+
+    if ( cleared )
     {
         // update cleared errors gui
         ui->ClearedErrorsOutput->setText(QString::number(events->totalCleared));
         ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
+    }
+    else
+    {
+        // update active errors gui
+        ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
+        ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
     }
 }
 
