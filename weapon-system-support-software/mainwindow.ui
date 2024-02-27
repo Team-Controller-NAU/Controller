@@ -255,6 +255,15 @@ font: 16pt &quot;Segoe UI&quot;;</string>
            <height>0</height>
           </size>
          </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::DefaultContextMenu</enum>
+         </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
+         </property>
          <property name="text">
           <string/>
          </property>
@@ -289,7 +298,7 @@ font: 16pt &quot;Segoe UI&quot;;</string>
             </sizepolicy>
            </property>
            <property name="currentIndex">
-            <number>3</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="Events_page">
             <layout class="QGridLayout" name="gridLayout_3">
@@ -678,6 +687,9 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
              </item>
              <item row="0" column="5" alignment="Qt::AlignBottom">
               <widget class="QComboBox" name="FilterBox">
+               <property name="toolTip">
+                <string/>
+               </property>
                <property name="styleSheet">
                 <string notr="true">QComboBox {
 	padding-bottom: 3px;
@@ -1540,7 +1552,7 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>896</width>
+                  <width>66</width>
                   <height>744</height>
                  </rect>
                 </property>
@@ -2236,7 +2248,7 @@ font: 20pt &quot;Segoe UI&quot;;</string>
               </widget>
              </item>
              <item row="4" column="2">
-              <widget class="QDial" name="feedPosition">
+              <widget class="feedposition" name="feedPosition">
                <property name="enabled">
                 <bool>true</bool>
                </property>
@@ -2776,6 +2788,13 @@ li.checked::marker { content: &quot;\2612&quot;; }
    </property>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>feedposition</class>
+   <extends>QDial</extends>
+   <header location="global">feedposition.h</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="resources.qrc"/>
  </resources>

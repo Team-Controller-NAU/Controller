@@ -312,7 +312,7 @@ void CSim::run()
             message = "";
 
             //20% chance of generating event
-            if ( randomGenerator.bounded(1, 6) == 1)
+            if (true) //randomGenerator.bounded(1, 6) == 1)
             {
                 //check conn before transmission
                 checkConnection(conn);
@@ -366,7 +366,7 @@ void CSim::run()
 
             //20% chance of generating error
             //TEMPORARILY SET TO GENERATE ERROR EACH ITERATION
-            if ( randomGenerator.bounded(1, 6) == 1)
+            if (true)//randomGenerator.bounded(1, 6) == 1)
             {
                 //check conn before transmission
                 checkConnection(conn);

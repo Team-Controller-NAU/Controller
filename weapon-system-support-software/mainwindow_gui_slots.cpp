@@ -282,146 +282,51 @@ void MainWindow::on_EventsPageButton_clicked()
 
 void MainWindow::on_FilterBox_currentIndexChanged(int index)
 {
-    // initialize slot
-    EventNode* wkgErrPtr = events->headErrorNode;
-    EventNode* wkgEventPtr = events->headEventNode;
-    QString dumpMessage;
-    bool printErr;
-
-    // check for which filter
+    // check for which filter the user selected
     switch(index)
     {
-    case 0:
+    case ALL:
 
         qDebug() << "All filter selected";
 
         // set filter
         eventFilter = ALL;
 
-        // reset dump
-        dumpMessage = "";
-
-        // loop through all errors and events
-        while (wkgErrPtr != nullptr || wkgEventPtr != nullptr)
-        {
-            // get next to print by ID
-            EventNode* nextPrintPtr = events->getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
-
-            // set dump message
-            if (dumpMessage != "") dumpMessage += '\n';
-            dumpMessage += (" ID: " + QString::number(nextPrintPtr->id) + " " + nextPrintPtr->timeStamp + " " + nextPrintPtr->eventString);
-            if (printErr) dumpMessage += (nextPrintPtr->cleared ? ", CLEARED" : ", NOT CLEARED");
-        }
-
-        // update ui
-        ui->events_output->setText(dumpMessage);
-
         break;
 
-    case 1:
+    case EVENTS:
 
         qDebug() << "All events filter selected";
 
         // set filter
         eventFilter = EVENTS;
 
-        // reset dump
-        dumpMessage = "";
-
-        // loop through all events
-        while (wkgEventPtr != nullptr)
-        {
-            // set dump message
-            if (dumpMessage != "") dumpMessage += '\n';
-            dumpMessage += (" ID: " + QString::number(wkgEventPtr->id) + " " + wkgEventPtr->timeStamp + " " + wkgEventPtr->eventString);
-            wkgEventPtr = wkgEventPtr->nextPtr;
-        }
-
-        // update ui
-        ui->events_output->setText(dumpMessage);
-
         break;
 
-    case 2:
+    case ERRORS:
 
         qDebug() << "All errors filter selected";
 
         //set filter
         eventFilter = ERRORS;
 
-        // reset dump
-        dumpMessage = "";
-
-        // loop through all errors
-        while (wkgErrPtr != nullptr)
-        {
-            // set dump message
-            if (dumpMessage != "") dumpMessage += '\n';
-            dumpMessage += (" ID: " + QString::number(wkgErrPtr->id) + " " + wkgErrPtr->timeStamp + " " + wkgErrPtr->eventString);
-            dumpMessage += (wkgErrPtr->cleared ? ", CLEARED" : ", NOT CLEARED");
-            wkgErrPtr = wkgErrPtr->nextPtr;
-        }
-
-        // update ui
-        ui->events_output->setText(dumpMessage);
-
         break;
 
-    case 3:
+    case CLEARED_ERRORS:
 
         qDebug() << "All cleared errors filter selected";
 
         // set filter
         eventFilter = CLEARED_ERRORS;
 
-        // reset dump
-        dumpMessage = "";
-
-        // loop through all errors
-        while (wkgErrPtr != nullptr)
-        {
-            // check for cleared
-            if (wkgErrPtr->cleared)
-            {
-                // set dump message
-                if (dumpMessage != "") dumpMessage += '\n';
-                dumpMessage += (" ID: " + QString::number(wkgErrPtr->id) + " " + wkgErrPtr->timeStamp + " " + wkgErrPtr->eventString);
-                dumpMessage += (wkgErrPtr->cleared ? ", CLEARED" : ", NOT CLEARED");
-            }
-            wkgErrPtr = wkgErrPtr->nextPtr;
-        }
-
-        // update ui
-        ui->events_output->setText(dumpMessage);
-
         break;
 
-    case 4:
+    case NON_CLEARED_ERRORS:
 
         qDebug() << "All non-cleared errors filter selected";
 
         // set filter
         eventFilter = NON_CLEARED_ERRORS;
-
-        // reset dump
-        dumpMessage = "";
-
-        // loop through all errors
-        while (wkgErrPtr != nullptr)
-        {
-            // check for non-cleared
-            if (!wkgErrPtr->cleared)
-            {
-                // set dump message
-                if (dumpMessage != "") dumpMessage += '\n';
-                dumpMessage += (" ID: " + QString::number(wkgErrPtr->id) + " " + wkgErrPtr->timeStamp + " " + wkgErrPtr->eventString);
-                dumpMessage += (wkgErrPtr->cleared ? ", CLEARED" : ", NOT CLEARED");
-            }
-            wkgErrPtr = wkgErrPtr->nextPtr;
-        }
-
-        // update ui
-        ui->events_output->setText(dumpMessage);
 
         break;
 
@@ -430,6 +335,8 @@ void MainWindow::on_FilterBox_currentIndexChanged(int index)
         // do nothing
         qDebug() << "Error: Unrecognized filter index.";
     }
+
+    refreshEventsOutput();
 }
 
 void MainWindow::on_flow_control_selection_currentIndexChanged(int index)

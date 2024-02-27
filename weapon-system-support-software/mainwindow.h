@@ -49,6 +49,7 @@ public:
     QDateTime timeLastReceived;
     EventFilter eventFilter;
     QString logfileName;
+    bool coloredEventOutput;
 
     //set true to enable automatic handshake once CSim sends closing connection message
     bool reconnect;
@@ -96,6 +97,12 @@ private slots:
     void disableConnectionChanges();
     void enableConnectionChanges();
     void resetFiringMode();
+    void updateEventsOutput(QString outString, bool error, bool cleared);
+    //overloaded function
+    void updateEventsOutput(EventNode *event);
+    //clears current content of the events page text output and replaces
+    //it with freshly generated data based on current contents of events class
+    void refreshEventsOutput();
 
     //non-gui triggered slots relating exclusively to managing gui (should be declared in mainwindow.cpp)
     void setup_csim_port_selection(int index);
