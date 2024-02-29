@@ -197,12 +197,9 @@ void MainWindow::readSerialData()
     while (ddmCon->checkForValidMessage())
     {
         // declare variables
-        EventNode* wkgErrPtr;
-        EventNode* wkgEventPtr;
         electricalNode* wkgElecPtr;
         SerialMessageIdentifier messageId;
         int boxIndex;
-        bool printErr;
 
         //get serialized string from port
         QByteArray serializedMessage = ddmCon->serialPort.readLine();
@@ -248,8 +245,7 @@ void MainWindow::readSerialData()
 
                 // update log file (false for not dump)
                 events->appendToLogfile(userSettings.value("logfileLocation").toString() + "/" + logfileName + "-logfile-A.txt",
-                                        message,
-                                        false);
+                                        message,false);
 
                 // update GUI elements
                 updateEventsOutput(events->lastEventNode);
@@ -266,8 +262,7 @@ void MainWindow::readSerialData()
 
                 // update log file (false for not dump)
                 events->appendToLogfile(userSettings.value("logfileLocation").toString() + "/" + logfileName + "-logfile-A.txt",
-                                        message,
-                                        false);
+                                        message,false);
 
                 //update gui elements
                 updateEventsOutput(events->lastErrorNode);
@@ -282,9 +277,13 @@ void MainWindow::readSerialData()
 
                 qDebug() <<  "Message id: electrical" << qPrintable("\n");
 
-                // dump electrical data, clearing linked list first
+                // clear electrical ll
                 electricalObject->freeLL();
+
+                //load new data into electrical ll
                 electricalObject->loadElecDump(message);
+
+                //get head node into wkg ptr
                 wkgElecPtr = electricalObject->headNode;
 
                 // loop through each electrical data box
@@ -353,17 +352,11 @@ void MainWindow::readSerialData()
 
                 // update log file (true for dump)
                 events->appendToLogfile(userSettings.value("logfileLocation").toString() + "/" + logfileName + "-logfile-A.txt",
-                                        message,
-                                        true);
+                                        message,true);
 
                 //refresh the events output with dumped event data
                 refreshEventsOutput();
 
-                // update total events gui
-                ui->TotalEventsOutput->setText(QString::number(events->totalEvents));
-                ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
-                ui->statusEventOutput->setText(QString::number(events->totalEvents));
-                ui->statusEventOutput->setAlignment(Qt::AlignCenter);
                 break;
 
             case ERROR_DUMP:
@@ -376,8 +369,7 @@ void MainWindow::readSerialData()
 
                 // update log file (true for dump)
                 events->appendToLogfile(userSettings.value("logfileLocation").toString() + "/" + logfileName + "-logfile-A.txt",
-                                        message,
-                                        true);
+                                        message,true);
 
                 //refresh the events output with dumped error data
                 refreshEventsOutput();
