@@ -18,11 +18,14 @@ public:
     Connection(QString portName, QSerialPort::BaudRate baudRate,
                QSerialPort::DataBits dataBits, QSerialPort::Parity parity,
                QSerialPort::StopBits stopBits, QSerialPort::FlowControl flowControl);
+
     //overloaded constructor uses initial serail setting constants
     Connection(QString portName);
 
     //destructor, sends closing message to port then closes port
     ~Connection();
+
+    bool checkForValidMessage();
 
     //stores name of port given upon initialization
     QString portName;
