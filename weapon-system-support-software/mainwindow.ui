@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>968</width>
-    <height>596</height>
+    <width>994</width>
+    <height>545</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -302,7 +302,7 @@ font: 16pt &quot;Segoe UI&quot;;</string>
             </sizepolicy>
            </property>
            <property name="currentIndex">
-            <number>2</number>
+            <number>3</number>
            </property>
            <widget class="QWidget" name="Events_page">
             <layout class="QGridLayout" name="gridLayout_3">
@@ -1555,7 +1555,7 @@ font: 20pt &quot;Segoe UI&quot;;</string>
             </layout>
            </widget>
            <widget class="QWidget" name="Electrial_Page">
-            <layout class="QVBoxLayout" name="verticalLayout">
+            <layout class="QVBoxLayout" name="verticalLayout_11">
              <item>
               <widget class="QLabel" name="label">
                <property name="styleSheet">
@@ -1569,570 +1569,851 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
              </item>
              <item>
               <widget class="QScrollArea" name="scrollArea">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
                <property name="styleSheet">
                 <string notr="true">background-color: rgb(30, 30, 30);</string>
                </property>
+               <property name="horizontalScrollBarPolicy">
+                <enum>Qt::ScrollBarAsNeeded</enum>
+               </property>
+               <property name="sizeAdjustPolicy">
+                <enum>QAbstractScrollArea::AdjustIgnored</enum>
+               </property>
                <property name="widgetResizable">
                 <bool>true</bool>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignCenter</set>
                </property>
                <widget class="QWidget" name="scrollAreaWidgetContents">
                 <property name="geometry">
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>896</width>
-                  <height>744</height>
+                  <width>922</width>
+                  <height>736</height>
                  </rect>
                 </property>
-                <layout class="QGridLayout" name="gridLayout_5">
-                 <item row="3" column="0">
-                  <layout class="QVBoxLayout" name="Box_7">
-                   <property name="spacing">
-                    <number>0</number>
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_12">
+                 <item>
+                  <widget class="QWidget" name="horizontalBox1" native="true">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                     <horstretch>0</horstretch>
+                     <verstretch>0</verstretch>
+                    </sizepolicy>
                    </property>
-                   <item>
-                    <widget class="QWidget" name="box7_widget" native="true">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>175</height>
-                      </size>
-                     </property>
-                     <widget class="QTextEdit" name="box7_stats">
-                      <property name="geometry">
-                       <rect>
-                        <x>0</x>
-                        <y>75</y>
-                        <width>434</width>
-                        <height>100</height>
-                       </rect>
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>0</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>175</height>
+                    </size>
+                   </property>
+                   <layout class="QHBoxLayout" name="horizontalLayout_7">
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QWidget" name="box1_widget" native="true">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
                       </property>
                       <property name="minimumSize">
                        <size>
-                        <width>0</width>
-                        <height>100</height>
+                        <width>434</width>
+                        <height>175</height>
                        </size>
                       </property>
-                      <property name="contextMenuPolicy">
-                       <enum>Qt::NoContextMenu</enum>
+                      <property name="maximumSize">
+                       <size>
+                        <width>16777215</width>
+                        <height>175</height>
+                       </size>
                       </property>
-                      <property name="styleSheet">
-                       <string notr="true">font: 20pt &quot;Segoe UI&quot;;
+                      <layout class="QVBoxLayout" name="verticalLayout_3">
+                       <property name="spacing">
+                        <number>0</number>
+                       </property>
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                       <item>
+                        <widget class="QLabel" name="box1_label">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>75</height>
+                          </size>
+                         </property>
+                         <property name="styleSheet">
+                          <string notr="true">color: rgb(30, 30, 30);
+font: 20pt &quot;Segoe UI&quot;;
+background-color: rgb(179, 179, 179);</string>
+                         </property>
+                         <property name="text">
+                          <string/>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QTextEdit" name="box1_stats">
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>100</height>
+                          </size>
+                         </property>
+                         <property name="contextMenuPolicy">
+                          <enum>Qt::NoContextMenu</enum>
+                         </property>
+                         <property name="styleSheet">
+                          <string notr="true">font: 20pt &quot;Segoe UI&quot;;
 background-color: rgb(117, 117, 117);
 color: rgb(255, 255, 255);
 </string>
-                      </property>
-                      <property name="readOnly">
-                       <bool>true</bool>
-                      </property>
+                         </property>
+                         <property name="readOnly">
+                          <bool>true</bool>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
                      </widget>
-                     <widget class="QLabel" name="box7_label">
-                      <property name="geometry">
-                       <rect>
-                        <x>0</x>
-                        <y>0</y>
-                        <width>434</width>
-                        <height>75</height>
-                       </rect>
+                    </item>
+                    <item>
+                     <widget class="QWidget" name="box2_widget" native="true">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
                       </property>
                       <property name="minimumSize">
                        <size>
-                        <width>0</width>
-                        <height>75</height>
+                        <width>434</width>
+                        <height>175</height>
                        </size>
                       </property>
-                      <property name="styleSheet">
-                       <string notr="true">color: rgb(30, 30, 30);
+                      <property name="maximumSize">
+                       <size>
+                        <width>16777215</width>
+                        <height>175</height>
+                       </size>
+                      </property>
+                      <layout class="QVBoxLayout" name="verticalLayout">
+                       <property name="spacing">
+                        <number>0</number>
+                       </property>
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                       <item>
+                        <widget class="QLabel" name="box2_label">
+                         <property name="enabled">
+                          <bool>true</bool>
+                         </property>
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>75</height>
+                          </size>
+                         </property>
+                         <property name="styleSheet">
+                          <string notr="true">color: rgb(30, 30, 30);
 font: 20pt &quot;Segoe UI&quot;;
 background-color: rgb(179, 179, 179);</string>
-                      </property>
-                      <property name="text">
-                       <string/>
-                      </property>
+                         </property>
+                         <property name="text">
+                          <string/>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QTextEdit" name="box2_stats">
+                         <property name="minimumSize">
+                          <size>
+                           <width>100</width>
+                           <height>100</height>
+                          </size>
+                         </property>
+                         <property name="contextMenuPolicy">
+                          <enum>Qt::NoContextMenu</enum>
+                         </property>
+                         <property name="styleSheet">
+                          <string notr="true">font: 20pt &quot;Segoe UI&quot;;
+background-color: rgb(117, 117, 117);
+color: rgb(255, 255, 255);
+</string>
+                         </property>
+                         <property name="readOnly">
+                          <bool>true</bool>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
                      </widget>
-                    </widget>
-                   </item>
-                  </layout>
+                    </item>
+                   </layout>
+                  </widget>
                  </item>
-                 <item row="3" column="1">
-                  <layout class="QVBoxLayout" name="Box_8">
-                   <property name="spacing">
-                    <number>0</number>
+                 <item>
+                  <widget class="QWidget" name="horizontalBox2" native="true">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>0</height>
+                    </size>
                    </property>
-                   <item>
-                    <widget class="QWidget" name="box8_widget" native="true">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>175</height>
-                      </size>
-                     </property>
-                     <widget class="QTextEdit" name="box8_stats">
-                      <property name="geometry">
-                       <rect>
-                        <x>0</x>
-                        <y>75</y>
-                        <width>434</width>
-                        <height>100</height>
-                       </rect>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>175</height>
+                    </size>
+                   </property>
+                   <layout class="QHBoxLayout" name="horizontalLayout_6">
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QWidget" name="box3_widget" native="true">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
                       </property>
                       <property name="minimumSize">
                        <size>
-                        <width>0</width>
-                        <height>100</height>
+                        <width>434</width>
+                        <height>175</height>
                        </size>
                       </property>
-                      <property name="contextMenuPolicy">
-                       <enum>Qt::NoContextMenu</enum>
+                      <property name="maximumSize">
+                       <size>
+                        <width>16777215</width>
+                        <height>175</height>
+                       </size>
                       </property>
-                      <property name="styleSheet">
-                       <string notr="true">font: 20pt &quot;Segoe UI&quot;;
+                      <layout class="QVBoxLayout" name="verticalLayout_5">
+                       <property name="spacing">
+                        <number>0</number>
+                       </property>
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                       <item>
+                        <widget class="QLabel" name="box3_label">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>75</height>
+                          </size>
+                         </property>
+                         <property name="styleSheet">
+                          <string notr="true">color: rgb(30, 30, 30);
+font: 20pt &quot;Segoe UI&quot;;
+background-color: rgb(179, 179, 179);</string>
+                         </property>
+                         <property name="text">
+                          <string/>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QTextEdit" name="box3_stats">
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>100</height>
+                          </size>
+                         </property>
+                         <property name="contextMenuPolicy">
+                          <enum>Qt::NoContextMenu</enum>
+                         </property>
+                         <property name="styleSheet">
+                          <string notr="true">font: 20pt &quot;Segoe UI&quot;;
 background-color: rgb(117, 117, 117);
 color: rgb(255, 255, 255);
 </string>
-                      </property>
-                      <property name="readOnly">
-                       <bool>true</bool>
-                      </property>
+                         </property>
+                         <property name="readOnly">
+                          <bool>true</bool>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
                      </widget>
-                     <widget class="QLabel" name="box8_label">
-                      <property name="geometry">
-                       <rect>
-                        <x>0</x>
-                        <y>0</y>
-                        <width>434</width>
-                        <height>75</height>
-                       </rect>
+                    </item>
+                    <item>
+                     <widget class="QWidget" name="box4_widget" native="true">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
                       </property>
                       <property name="minimumSize">
                        <size>
-                        <width>0</width>
-                        <height>75</height>
+                        <width>434</width>
+                        <height>175</height>
                        </size>
                       </property>
-                      <property name="styleSheet">
-                       <string notr="true">color: rgb(30, 30, 30);
+                      <property name="maximumSize">
+                       <size>
+                        <width>16777215</width>
+                        <height>175</height>
+                       </size>
+                      </property>
+                      <layout class="QVBoxLayout" name="verticalLayout_6">
+                       <property name="spacing">
+                        <number>0</number>
+                       </property>
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                       <item>
+                        <widget class="QLabel" name="box4_label">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>75</height>
+                          </size>
+                         </property>
+                         <property name="styleSheet">
+                          <string notr="true">color: rgb(30, 30, 30);
 font: 20pt &quot;Segoe UI&quot;;
 background-color: rgb(179, 179, 179);</string>
-                      </property>
-                      <property name="text">
-                       <string/>
-                      </property>
+                         </property>
+                         <property name="text">
+                          <string/>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QTextEdit" name="box4_stats">
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>100</height>
+                          </size>
+                         </property>
+                         <property name="contextMenuPolicy">
+                          <enum>Qt::NoContextMenu</enum>
+                         </property>
+                         <property name="styleSheet">
+                          <string notr="true">font: 20pt &quot;Segoe UI&quot;;
+background-color: rgb(117, 117, 117);
+color: rgb(255, 255, 255);
+</string>
+                         </property>
+                         <property name="readOnly">
+                          <bool>true</bool>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
                      </widget>
-                    </widget>
-                   </item>
-                  </layout>
+                    </item>
+                   </layout>
+                  </widget>
                  </item>
-                 <item row="0" column="0">
-                  <layout class="QVBoxLayout" name="Box_1">
-                   <property name="spacing">
-                    <number>0</number>
+                 <item>
+                  <widget class="QWidget" name="horizontalBox3" native="true">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>0</height>
+                    </size>
                    </property>
-                   <item>
-                    <widget class="QWidget" name="box1_widget" native="true">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>175</height>
-                      </size>
-                     </property>
-                     <widget class="QLabel" name="box1_label">
-                      <property name="enabled">
-                       <bool>true</bool>
-                      </property>
-                      <property name="geometry">
-                       <rect>
-                        <x>0</x>
-                        <y>0</y>
-                        <width>434</width>
-                        <height>75</height>
-                       </rect>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>175</height>
+                    </size>
+                   </property>
+                   <layout class="QHBoxLayout" name="horizontalLayout_5">
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QWidget" name="box5_widget" native="true">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
                       </property>
                       <property name="minimumSize">
                        <size>
-                        <width>0</width>
-                        <height>75</height>
+                        <width>434</width>
+                        <height>175</height>
                        </size>
                       </property>
-                      <property name="styleSheet">
-                       <string notr="true">color: rgb(30, 30, 30);
+                      <property name="maximumSize">
+                       <size>
+                        <width>16777215</width>
+                        <height>175</height>
+                       </size>
+                      </property>
+                      <layout class="QVBoxLayout" name="verticalLayout_8">
+                       <property name="spacing">
+                        <number>0</number>
+                       </property>
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                       <item>
+                        <widget class="QLabel" name="box5_label">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>75</height>
+                          </size>
+                         </property>
+                         <property name="styleSheet">
+                          <string notr="true">color: rgb(30, 30, 30);
 font: 20pt &quot;Segoe UI&quot;;
 background-color: rgb(179, 179, 179);</string>
-                      </property>
-                      <property name="text">
-                       <string/>
-                      </property>
-                     </widget>
-                     <widget class="QTextEdit" name="box1_stats">
-                      <property name="geometry">
-                       <rect>
-                        <x>0</x>
-                        <y>75</y>
-                        <width>434</width>
-                        <height>100</height>
-                       </rect>
-                      </property>
-                      <property name="minimumSize">
-                       <size>
-                        <width>100</width>
-                        <height>100</height>
-                       </size>
-                      </property>
-                      <property name="contextMenuPolicy">
-                       <enum>Qt::NoContextMenu</enum>
-                      </property>
-                      <property name="styleSheet">
-                       <string notr="true">font: 20pt &quot;Segoe UI&quot;;
+                         </property>
+                         <property name="text">
+                          <string/>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QTextEdit" name="box5_stats">
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>100</height>
+                          </size>
+                         </property>
+                         <property name="contextMenuPolicy">
+                          <enum>Qt::NoContextMenu</enum>
+                         </property>
+                         <property name="styleSheet">
+                          <string notr="true">font: 20pt &quot;Segoe UI&quot;;
 background-color: rgb(117, 117, 117);
 color: rgb(255, 255, 255);
 </string>
-                      </property>
-                      <property name="readOnly">
-                       <bool>true</bool>
-                      </property>
+                         </property>
+                         <property name="readOnly">
+                          <bool>true</bool>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
                      </widget>
-                    </widget>
-                   </item>
-                  </layout>
+                    </item>
+                    <item>
+                     <widget class="QWidget" name="box6_widget" native="true">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>434</width>
+                        <height>175</height>
+                       </size>
+                      </property>
+                      <property name="maximumSize">
+                       <size>
+                        <width>16777215</width>
+                        <height>175</height>
+                       </size>
+                      </property>
+                      <layout class="QVBoxLayout" name="verticalLayout_7">
+                       <property name="spacing">
+                        <number>0</number>
+                       </property>
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                       <item>
+                        <widget class="QLabel" name="box6_label">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>75</height>
+                          </size>
+                         </property>
+                         <property name="styleSheet">
+                          <string notr="true">color: rgb(30, 30, 30);
+font: 20pt &quot;Segoe UI&quot;;
+background-color: rgb(179, 179, 179);</string>
+                         </property>
+                         <property name="text">
+                          <string/>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QTextEdit" name="box6_stats">
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>100</height>
+                          </size>
+                         </property>
+                         <property name="contextMenuPolicy">
+                          <enum>Qt::NoContextMenu</enum>
+                         </property>
+                         <property name="styleSheet">
+                          <string notr="true">font: 20pt &quot;Segoe UI&quot;;
+background-color: rgb(117, 117, 117);
+color: rgb(255, 255, 255);
+</string>
+                         </property>
+                         <property name="readOnly">
+                          <bool>true</bool>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
                  </item>
-                 <item row="1" column="1">
-                  <layout class="QVBoxLayout" name="Box_4">
-                   <property name="spacing">
-                    <number>0</number>
+                 <item alignment="Qt::AlignTop">
+                  <widget class="QWidget" name="horizontalBox4" native="true">
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>0</height>
+                    </size>
                    </property>
-                   <item>
-                    <widget class="QWidget" name="box4_widget" native="true">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>175</height>
-                      </size>
-                     </property>
-                     <widget class="QLabel" name="box4_label">
-                      <property name="geometry">
-                       <rect>
-                        <x>0</x>
-                        <y>0</y>
-                        <width>434</width>
-                        <height>75</height>
-                       </rect>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>175</height>
+                    </size>
+                   </property>
+                   <layout class="QHBoxLayout" name="horizontalLayout">
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QWidget" name="box7_widget" native="true">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
                       </property>
                       <property name="minimumSize">
                        <size>
-                        <width>0</width>
-                        <height>75</height>
+                        <width>434</width>
+                        <height>175</height>
                        </size>
                       </property>
-                      <property name="styleSheet">
-                       <string notr="true">color: rgb(30, 30, 30);
+                      <property name="maximumSize">
+                       <size>
+                        <width>16777215</width>
+                        <height>175</height>
+                       </size>
+                      </property>
+                      <layout class="QVBoxLayout" name="verticalLayout_10">
+                       <property name="spacing">
+                        <number>0</number>
+                       </property>
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                       <item>
+                        <widget class="QLabel" name="box7_label">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>75</height>
+                          </size>
+                         </property>
+                         <property name="styleSheet">
+                          <string notr="true">color: rgb(30, 30, 30);
 font: 20pt &quot;Segoe UI&quot;;
 background-color: rgb(179, 179, 179);</string>
-                      </property>
-                      <property name="text">
-                       <string/>
-                      </property>
-                     </widget>
-                     <widget class="QTextEdit" name="box4_stats">
-                      <property name="geometry">
-                       <rect>
-                        <x>0</x>
-                        <y>75</y>
-                        <width>434</width>
-                        <height>100</height>
-                       </rect>
-                      </property>
-                      <property name="minimumSize">
-                       <size>
-                        <width>0</width>
-                        <height>100</height>
-                       </size>
-                      </property>
-                      <property name="contextMenuPolicy">
-                       <enum>Qt::NoContextMenu</enum>
-                      </property>
-                      <property name="styleSheet">
-                       <string notr="true">font: 20pt &quot;Segoe UI&quot;;
+                         </property>
+                         <property name="text">
+                          <string/>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QTextEdit" name="box7_stats">
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>100</height>
+                          </size>
+                         </property>
+                         <property name="contextMenuPolicy">
+                          <enum>Qt::NoContextMenu</enum>
+                         </property>
+                         <property name="styleSheet">
+                          <string notr="true">font: 20pt &quot;Segoe UI&quot;;
 background-color: rgb(117, 117, 117);
 color: rgb(255, 255, 255);
 </string>
-                      </property>
-                      <property name="readOnly">
-                       <bool>true</bool>
-                      </property>
+                         </property>
+                         <property name="readOnly">
+                          <bool>true</bool>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
                      </widget>
-                    </widget>
-                   </item>
-                  </layout>
-                 </item>
-                 <item row="2" column="0">
-                  <layout class="QVBoxLayout" name="Box_5">
-                   <property name="spacing">
-                    <number>0</number>
-                   </property>
-                   <item>
-                    <widget class="QWidget" name="box5_widget" native="true">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>175</height>
-                      </size>
-                     </property>
-                     <widget class="QTextEdit" name="box5_stats">
-                      <property name="geometry">
-                       <rect>
-                        <x>0</x>
-                        <y>75</y>
-                        <width>434</width>
-                        <height>100</height>
-                       </rect>
+                    </item>
+                    <item>
+                     <widget class="QWidget" name="box8_widget" native="true">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
                       </property>
                       <property name="minimumSize">
                        <size>
-                        <width>0</width>
-                        <height>100</height>
+                        <width>434</width>
+                        <height>175</height>
                        </size>
                       </property>
-                      <property name="contextMenuPolicy">
-                       <enum>Qt::NoContextMenu</enum>
+                      <property name="maximumSize">
+                       <size>
+                        <width>16777215</width>
+                        <height>175</height>
+                       </size>
                       </property>
-                      <property name="styleSheet">
-                       <string notr="true">font: 20pt &quot;Segoe UI&quot;;
+                      <layout class="QVBoxLayout" name="verticalLayout_9">
+                       <property name="spacing">
+                        <number>0</number>
+                       </property>
+                       <property name="leftMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="topMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="rightMargin">
+                        <number>0</number>
+                       </property>
+                       <property name="bottomMargin">
+                        <number>0</number>
+                       </property>
+                       <item>
+                        <widget class="QLabel" name="box8_label">
+                         <property name="sizePolicy">
+                          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                           <horstretch>0</horstretch>
+                           <verstretch>0</verstretch>
+                          </sizepolicy>
+                         </property>
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>75</height>
+                          </size>
+                         </property>
+                         <property name="styleSheet">
+                          <string notr="true">color: rgb(30, 30, 30);
+font: 20pt &quot;Segoe UI&quot;;
+background-color: rgb(179, 179, 179);</string>
+                         </property>
+                         <property name="text">
+                          <string/>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QTextEdit" name="box8_stats">
+                         <property name="minimumSize">
+                          <size>
+                           <width>0</width>
+                           <height>100</height>
+                          </size>
+                         </property>
+                         <property name="contextMenuPolicy">
+                          <enum>Qt::NoContextMenu</enum>
+                         </property>
+                         <property name="styleSheet">
+                          <string notr="true">font: 20pt &quot;Segoe UI&quot;;
 background-color: rgb(117, 117, 117);
 color: rgb(255, 255, 255);
 </string>
-                      </property>
-                      <property name="readOnly">
-                       <bool>true</bool>
-                      </property>
+                         </property>
+                         <property name="readOnly">
+                          <bool>true</bool>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
                      </widget>
-                     <widget class="QLabel" name="box5_label">
-                      <property name="geometry">
-                       <rect>
-                        <x>0</x>
-                        <y>0</y>
-                        <width>434</width>
-                        <height>75</height>
-                       </rect>
-                      </property>
-                      <property name="minimumSize">
-                       <size>
-                        <width>0</width>
-                        <height>75</height>
-                       </size>
-                      </property>
-                      <property name="styleSheet">
-                       <string notr="true">color: rgb(30, 30, 30);
-font: 20pt &quot;Segoe UI&quot;;
-background-color: rgb(179, 179, 179);</string>
-                      </property>
-                      <property name="text">
-                       <string/>
-                      </property>
-                     </widget>
-                    </widget>
-                   </item>
-                  </layout>
-                 </item>
-                 <item row="1" column="0">
-                  <layout class="QVBoxLayout" name="Box_3">
-                   <property name="spacing">
-                    <number>0</number>
-                   </property>
-                   <item>
-                    <widget class="QWidget" name="box3_widget" native="true">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>175</height>
-                      </size>
-                     </property>
-                     <widget class="QTextEdit" name="box3_stats">
-                      <property name="geometry">
-                       <rect>
-                        <x>0</x>
-                        <y>75</y>
-                        <width>434</width>
-                        <height>100</height>
-                       </rect>
-                      </property>
-                      <property name="minimumSize">
-                       <size>
-                        <width>0</width>
-                        <height>100</height>
-                       </size>
-                      </property>
-                      <property name="contextMenuPolicy">
-                       <enum>Qt::NoContextMenu</enum>
-                      </property>
-                      <property name="styleSheet">
-                       <string notr="true">font: 20pt &quot;Segoe UI&quot;;
-background-color: rgb(117, 117, 117);
-color: rgb(255, 255, 255);
-</string>
-                      </property>
-                      <property name="readOnly">
-                       <bool>true</bool>
-                      </property>
-                     </widget>
-                     <widget class="QLabel" name="box3_label">
-                      <property name="geometry">
-                       <rect>
-                        <x>0</x>
-                        <y>0</y>
-                        <width>434</width>
-                        <height>75</height>
-                       </rect>
-                      </property>
-                      <property name="minimumSize">
-                       <size>
-                        <width>0</width>
-                        <height>75</height>
-                       </size>
-                      </property>
-                      <property name="styleSheet">
-                       <string notr="true">color: rgb(30, 30, 30);
-font: 20pt &quot;Segoe UI&quot;;
-background-color: rgb(179, 179, 179);</string>
-                      </property>
-                      <property name="text">
-                       <string/>
-                      </property>
-                     </widget>
-                    </widget>
-                   </item>
-                  </layout>
-                 </item>
-                 <item row="2" column="1">
-                  <layout class="QVBoxLayout" name="Box_6">
-                   <property name="spacing">
-                    <number>0</number>
-                   </property>
-                   <item>
-                    <widget class="QWidget" name="box6_widget" native="true">
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>175</height>
-                      </size>
-                     </property>
-                     <widget class="QTextEdit" name="box6_stats">
-                      <property name="geometry">
-                       <rect>
-                        <x>0</x>
-                        <y>75</y>
-                        <width>434</width>
-                        <height>100</height>
-                       </rect>
-                      </property>
-                      <property name="minimumSize">
-                       <size>
-                        <width>0</width>
-                        <height>100</height>
-                       </size>
-                      </property>
-                      <property name="contextMenuPolicy">
-                       <enum>Qt::NoContextMenu</enum>
-                      </property>
-                      <property name="styleSheet">
-                       <string notr="true">font: 20pt &quot;Segoe UI&quot;;
-background-color: rgb(117, 117, 117);
-color: rgb(255, 255, 255);
-</string>
-                      </property>
-                      <property name="readOnly">
-                       <bool>true</bool>
-                      </property>
-                     </widget>
-                     <widget class="QLabel" name="box6_label">
-                      <property name="geometry">
-                       <rect>
-                        <x>0</x>
-                        <y>0</y>
-                        <width>434</width>
-                        <height>75</height>
-                       </rect>
-                      </property>
-                      <property name="minimumSize">
-                       <size>
-                        <width>0</width>
-                        <height>75</height>
-                       </size>
-                      </property>
-                      <property name="styleSheet">
-                       <string notr="true">color: rgb(30, 30, 30);
-font: 20pt &quot;Segoe UI&quot;;
-background-color: rgb(179, 179, 179);</string>
-                      </property>
-                      <property name="text">
-                       <string/>
-                      </property>
-                     </widget>
-                    </widget>
-                   </item>
-                  </layout>
-                 </item>
-                 <item row="0" column="1">
-                  <layout class="QVBoxLayout" name="Box_2">
-                   <property name="spacing">
-                    <number>0</number>
-                   </property>
-                   <item>
-                    <widget class="QWidget" name="box2_widget" native="true">
-                     <widget class="QLabel" name="box2_label">
-                      <property name="geometry">
-                       <rect>
-                        <x>0</x>
-                        <y>0</y>
-                        <width>868</width>
-                        <height>75</height>
-                       </rect>
-                      </property>
-                      <property name="minimumSize">
-                       <size>
-                        <width>0</width>
-                        <height>75</height>
-                       </size>
-                      </property>
-                      <property name="styleSheet">
-                       <string notr="true">color: rgb(30, 30, 30);
-font: 20pt &quot;Segoe UI&quot;;
-background-color: rgb(179, 179, 179);</string>
-                      </property>
-                      <property name="text">
-                       <string/>
-                      </property>
-                     </widget>
-                     <widget class="QTextEdit" name="box2_stats">
-                      <property name="geometry">
-                       <rect>
-                        <x>0</x>
-                        <y>75</y>
-                        <width>868</width>
-                        <height>100</height>
-                       </rect>
-                      </property>
-                      <property name="minimumSize">
-                       <size>
-                        <width>0</width>
-                        <height>100</height>
-                       </size>
-                      </property>
-                      <property name="contextMenuPolicy">
-                       <enum>Qt::NoContextMenu</enum>
-                      </property>
-                      <property name="styleSheet">
-                       <string notr="true">font: 20pt &quot;Segoe UI&quot;;
-background-color: rgb(117, 117, 117);
-color: rgb(255, 255, 255);
-</string>
-                      </property>
-                      <property name="readOnly">
-                       <bool>true</bool>
-                      </property>
-                     </widget>
-                    </widget>
-                   </item>
-                  </layout>
+                    </item>
+                   </layout>
+                  </widget>
                  </item>
                 </layout>
                </widget>
@@ -2871,7 +3152,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>968</width>
+     <width>994</width>
      <height>21</height>
     </rect>
    </property>
