@@ -42,6 +42,33 @@ Connection::Connection(QString portName)
     // This constructor delegates to the first constructor
 }
 
+//returns true if a valid message is in the serial port, false otherwise
+bool Connection::checkForValidMessage()
+{
+    //ensure port is open to prevent possible errors
+    if (serialPort.isOpen())
+    {
+        //copy data from serial port buffer without altering buffer
+        QByteArray serializedMessage = serialPort.peek(serialPort.bytesAvailable());
+
+        //deserialize the message
+        QString message = QString::fromUtf8(serializedMessage);
+
+        //check for complete message
+        if ( message.contains("\n") )
+        {
+            return true;
+        }
+    }
+    else
+    {
+        qDebug() << "Error: serial port is closed, message cannot be read";
+    }
+
+    //invalid message
+    return false;
+}
+
 //sends message through serial port
 void Connection::transmit(QString message)
 {
