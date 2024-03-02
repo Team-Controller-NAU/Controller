@@ -32,6 +32,8 @@ MainWindow::MainWindow(QWidget *parent)
     // timer is used to update controller running time
     runningControllerTimer( new QTimer(this) ),
 
+    autoSaveLimit(5),
+
     //init user settings to our organization and project
     userSettings("Team Controller", "WSSS"),
 
@@ -47,9 +49,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     //init gui
     ui->setupUi(this);
-
-    //check for empty logfile location and sets to default
-    setup_logfile_location();
 
     //scan available ports, add port names to port selection combo boxes
     setup_connection_settings();
@@ -107,10 +106,6 @@ MainWindow::MainWindow(QWidget *parent)
     }
 
     qDebug() << "GUI is now listening to port " << ddmCon->portName;
-
-    // set logfile name
-    qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
-    logfileName = QString::number(secsSinceEpoch);
 
     //TEMP CODE TO MAKE FEED POSITION RESPONSIVE WITH STATUS UPDATES========
     ui->feedPosition->setMaximum(360);
@@ -212,7 +207,7 @@ void MainWindow::readSerialData()
         //update gui with new message
         ui->stdout_label->setText(message);
 
-        //check if message is correctly labeled (message id is present)
+        //check if message id is present and followed by a comma
         if (message[0].isDigit() && message[1] == DELIMETER)
         {
             //extract message id
@@ -243,9 +238,8 @@ void MainWindow::readSerialData()
                 //add new event to event ll
                 events->loadEventData(message);
 
-                // update log file (false for not dump)
-                events->appendToLogfile(userSettings.value("logfileLocation").toString() + "/" + logfileName + "-logfile-A.txt",
-                                        message,false);
+                // update log file
+                events->appendToLogfile(autosaveLogFile, events->lastEventNode);
 
                 // update GUI elements
                 updateEventsOutput(events->lastEventNode);
@@ -258,11 +252,10 @@ void MainWindow::readSerialData()
                 qDebug() <<  "Message id: error update" << qPrintable("\n");
 
                 //add new error to error ll
-                events->loadErrorData(message);
+                events->loadErrorData( message );
 
-                // update log file (false for not dump)
-                events->appendToLogfile(userSettings.value("logfileLocation").toString() + "/" + logfileName + "-logfile-A.txt",
-                                        message,false);
+                // update log file
+                events->appendToLogfile(autosaveLogFile, events->lastErrorNode);
 
                 //update gui elements
                 updateEventsOutput(events->lastErrorNode);
@@ -350,9 +343,8 @@ void MainWindow::readSerialData()
                 // load all events to event linked list
                 events->loadEventDump(message);
 
-                // update log file (true for dump)
-                events->appendToLogfile(userSettings.value("logfileLocation").toString() + "/" + logfileName + "-logfile-A.txt",
-                                        message,true);
+                // create log file
+                events->outputToLogFile( autosaveLogFile );
 
                 //refresh the events output with dumped event data
                 refreshEventsOutput();
@@ -363,13 +355,11 @@ void MainWindow::readSerialData()
 
                 qDebug() <<  "Message id: error dump" << qPrintable("\n");
 
-
                 // load all errors to error linked list
                 events->loadErrorDump(message);
 
-                // update log file (true for dump)
-                events->appendToLogfile(userSettings.value("logfileLocation").toString() + "/" + logfileName + "-logfile-A.txt",
-                                        message,true);
+                // create log file
+                events->outputToLogFile( autosaveLogFile );
 
                 //refresh the events output with dumped error data
                 refreshEventsOutput();
@@ -394,6 +384,9 @@ void MainWindow::readSerialData()
 
                 //load crc and version
                 status->loadVersionData(message);
+
+                //check for empty logfile location and sets to default
+                setup_logfile_location();
 
                 // update controller version and crc version on gui
                 ui->controllerLabel->setText("Controller Version: " + status->version);
@@ -623,40 +616,110 @@ void MainWindow::displaySavedConnectionSettings()
     qDebug() << "logfile location: " << userSettings.value("logfileLocation").toString() << Qt::endl;
 }
 
+//checks if user has setup a custom log file directory, if not, the default directory is selected
+//the auto save log file for this session will be stored in the directory chosen by this
+//function
 void MainWindow::setup_logfile_location()
 {
-    QString appPath = QCoreApplication::applicationDirPath();
-    QString logfileLocation = appPath + "/" + INITIAL_LOGFILE_LOCATION;
-
-    // check if logfile setting is empty
-    if(userSettings.value("logfileLocation").toString().isEmpty())
+    //check if user has set a custom log file output directory
+    if ( !userSettings.value("logfileLocation").toString().isEmpty() )
     {
-        // set logfile location to default location
-        userSettings.setValue("logfileLocation", logfileLocation);
+        //initialize the logfile into this directory
+        autosaveLogFile = userSettings.value("logfileLocation").toString();
     }
-    //qDebug() << "Initial logfile" << logfileLocation;
+    //otherwise use default directory
+    else
+    {
+        //use the path of the exe and add a "Log Files" directory
+        autosaveLogFile = QCoreApplication::applicationDirPath() + "/" + INITIAL_LOGFILE_LOCATION;
+    }
 
-    QDir dir(logfileLocation);
+    //initialize a directory object in selected location
+    QDir dir(autosaveLogFile);
+
+    //check if directory doesnt exist
     if(!dir.exists())
     {
-        if(!dir.mkpath(logfileLocation))
+        //attempt to create the directory
+        if(!dir.mkpath(autosaveLogFile))
         {
-            qDebug() << "Failed to create logfile folder on startup" << logfileLocation;
+            qDebug() << "Failed to create logfile folder on startup" << autosaveLogFile;
             return;
         }
     }
-    if(dir.exists())
+
+    //if there are more auto saves than the current limit, delete the extras (oldest first)
+    enforceAutoSaveLimit(autosaveLogFile);
+
+    // set unique logfile name for this session
+    qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
+    autosaveLogFile += QString::number(secsSinceEpoch) + "-logfile-A.txt";
+
+    qDebug() << "Auto Save log file for this session: " << autosaveLogFile;
+}
+
+void MainWindow::enforceAutoSaveLimit(QString path)
+{
+    // Set a filter to display only files
+    QDir dir(path);
+    dir.setFilter(QDir::Files);
+
+    // Get list of files in directory
+    QStringList fileList = dir.entryList();
+
+    // Create a new list to add auto save file names to
+    QStringList autoSaveFileList;
+
+    // Loop through names of files in directory
+    for (const QString &fileName : fileList)
     {
-        qDebug() << "Folder already exists";
-        return;
-    }
-    else
-    {
-        qDebug() << "Successful logfile folder creation on startup" << logfileLocation;
+        // Check if this is an auto save file
+        if (fileName.endsWith("logfile-A.txt"))
+        {
+            // Append to the new list
+            autoSaveFileList.append(fileName);
+        }
     }
 
-    //qDebug() << "Final logfile location" << logfileLocation;
+    // Delete the oldest file if the number of auto saved files is above the limit
+    while (autoSaveFileList.size() > autoSaveLimit)
+    {
+        QString oldestFilePath;
+        QDateTime oldestCreationTime;
+
+        // Find the oldest file in the list
+        for (const QString &autoSaveFile : autoSaveFileList)
+        {
+            // Get the path of the file
+            QString filePath = dir.filePath(autoSaveFile);
+            // Get the creation time of the file
+            QFileInfo fileInfo(filePath);
+            QDateTime creationTime = fileInfo.lastModified();
+
+            // Check if this is the oldest file so far
+            if (oldestCreationTime.isNull() || creationTime < oldestCreationTime)
+            {
+                oldestCreationTime = creationTime;
+                oldestFilePath = filePath;
+            }
+        }
+
+        // Remove the oldest file
+        if (!QFile::remove(oldestFilePath))
+        {
+            qDebug() << "Failed to delete file: " << oldestFilePath;
+            return;
+        }
+        else
+        {
+            qDebug() << "An old autosave file was deleted";
+        }
+
+        // Remove the oldest file name from the list
+        autoSaveFileList.removeOne(QFileInfo(oldestFilePath).fileName());
+    }
 }
+
 
 void MainWindow::setup_connection_settings()
 {
@@ -1057,7 +1120,7 @@ void MainWindow::resetFiringMode()
     ui->singleLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
 }
 
-//overloaded function
+//overloaded function to add simplicity when possible
 void MainWindow::updateEventsOutput(EventNode *event)
 {
     updateEventsOutput(events->nodeToString(event), event->error, event->cleared);
@@ -1072,7 +1135,7 @@ void MainWindow::updateEventsOutput(QString outString, bool error, bool cleared)
     QTextDocument document;
     QString richText;
 
-    //check if we have an event as input and filter allows printing events
+    //check if we have an event as input and check if filter allows printing events
     if (!error )
     {
         if (eventFilter == EVENTS || eventFilter == ALL)
@@ -1164,6 +1227,8 @@ void MainWindow::refreshEventsOutput()
 {
     // reset gui element
     ui->events_output->clear();
+
+    //init vars
     EventNode *wkgErrPtr = events->headErrorNode;
     EventNode *wkgEventPtr = events->headEventNode;
     EventNode *nextPrintPtr;
@@ -1172,10 +1237,12 @@ void MainWindow::refreshEventsOutput()
     //loop through all events and errors
     while(wkgErrPtr != nullptr || wkgEventPtr != nullptr)
     {
-        // get next to print by ID
+        // get next to print
         nextPrintPtr = events->getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
 
         //update events output if filter allows
         updateEventsOutput(nextPrintPtr);
     }
 }
+
+

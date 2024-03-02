@@ -48,8 +48,11 @@ public:
     QTimer* runningControllerTimer;
     QDateTime timeLastReceived;
     EventFilter eventFilter;
-    QString logfileName;
+    QString autosaveLogFile;
+
+    //user managed settings
     bool coloredEventOutput;
+    int autoSaveLimit;
 
     //set true to enable automatic handshake once CSim sends closing connection message
     bool reconnect;
@@ -86,7 +89,9 @@ signals:
     void outputMessagesSentRequest();
 
 private slots:
-    //non-gui triggered slots (should be declared in mainwindow.cpp)
+    //==========================================================================
+    //non-gui triggered slots (should be defined in mainwindow.cpp)
+    //==========================================================================
     void updateTimer();
     void updateElapsedTime();
     void readSerialData();
@@ -103,15 +108,28 @@ private slots:
     //clears current content of the events page text output and replaces
     //it with freshly generated data based on current contents of events class
     void refreshEventsOutput();
+    //checks if the current number of auto saved files is higher than the limit, deletes the
+    //oldest one each iteration until the limit is enforced
+    void enforceAutoSaveLimit(QString path);
+    //==================================================================================
 
+
+
+    //========================================================================================================
     //non-gui triggered slots relating exclusively to managing gui (should be declared in mainwindow.cpp)
+    //=======================================================================================================
     void setup_csim_port_selection(int index);
     void setup_ddm_port_selection(int index);
     void update_non_cleared_error_selection();
     void setup_logfile_location();
     void setup_connection_settings();
+    //========================================================================================================
 
+
+
+    //================================================================================
     //gui triggered slots (should be declared in mainwindow_gui_slots.cpp)
+    //====================================================================================
     void findText();
     void on_send_message_button_clicked();
     void on_csim_port_selection_currentIndexChanged(int index);
@@ -138,6 +156,10 @@ private slots:
     void on_setLogfileFolder_clicked();
 
     void on_toggle_num_triggers_clicked();
+
+    void on_load_events_from_logfile_clicked();
+    //=========================================================================================================
+
 
 private:
     Ui::MainWindow *ui;

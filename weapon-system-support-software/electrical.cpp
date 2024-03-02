@@ -48,7 +48,7 @@ void electrical::addNode(QString name, int voltage, int amps)
 
         lastNode = wkgNode;
     }
-    qDebug() << "Electrical node created";
+    //qDebug() << "Electrical node created";
 }
 
 void electrical::printNodes()
@@ -133,7 +133,7 @@ void electrical::loadElecDump(QString message)
     // Split the dump messages into individual error sets
     QStringList electricalSet = message.split(",,", Qt::SkipEmptyParts);
 
-    qDebug() << electricalSet;
+    //qDebug() << electricalSet;
 
     // Iterate through the electrical sets and call loadElecData for each
     for (const QString &elec : electricalSet)
