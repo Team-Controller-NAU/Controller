@@ -5,7 +5,7 @@
 #include <QSerialPortInfo>
 #include <QSerialPort>
 #include <QDir>
-#include <QPixMap>
+#include <QRegularExpression>
 
 //this file will define enumerated values and constants used elsewhere in code
 
@@ -69,15 +69,18 @@ const QString ELECTRICAL_MESSAGES[NUM_ELECTRICAL_MESSAGES] = {"Servo Motor, 20, 
                                                               "Servo Motor, 19, 2,,Pump Cooler, 2, 3,,Internal Temp Sensor, 33, 4",
                                                               "Fuel Injector, 27, 1,,Voltage Regulator, 19, 3,,Rotor 1, 9, 13,,Rotor 3, 9, 9,,Exciter Stator, 19, 2"};
 
-const int MAX_ELECTRICAL_COMPONENTS = 8; // the max number of electrical componenets to expect from a weapon
+const int MAX_ELECTRICAL_COMPONENTS = 25; // the max number of electrical componenets to expect from a weapon
 
 const int NUM_ERROR_DELIMETERS = 3;
 const int NUM_EVENT_DELIMETERS = 2;
 const int NUM_ELECTRIC_DELIMETERS = 2;
 
+//error codes
 const int DATA_NOT_FOUND = -101;
+const int INCORRECT_FORMAT = -102;
+const int SUCCESS = 1;
 
-const QString INITIAL_LOGFILE_LOCATION = "WSSS_Logfiles";
+const QString INITIAL_LOGFILE_LOCATION = "WSSS_Logfiles/";
 
 const QString QDEBUG_OUTPUT_FORMAT = "[%{time h:mm:ss}] %{message}";
 
