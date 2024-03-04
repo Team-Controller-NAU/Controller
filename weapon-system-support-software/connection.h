@@ -8,8 +8,7 @@
 /********************************************************************************
 ** connection.h
 **
-** The Connection class is used for reading/writing data from a physical or
-** virtual serial port. This class provides functionality for establishing and
+** The Connection class provides functionality for establishing and
 ** managing a serial port connection, including transmitting a message.
 **
 ** @author Team Controller

@@ -60,7 +60,7 @@ Connection::Connection(QString portName, QSerialPort::BaudRate baudRate,
  * Initialization constructor overload for initializing a connection object using stored settings.
  *
  * This constructor delegates to the primary constructor, providing default values for baud rate, data bits,
- * parity, stop bits, and flow control settings using constants defined elsewhere in the codebase.
+ * parity, stop bits, and flow control settings using constants defined in constants.h.
  *
  * @param portName The name of the serial port.
  */
