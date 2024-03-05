@@ -31,10 +31,10 @@ void feedposition::paintEvent(QPaintEvent*)
     painter.setRenderHint(QPainter::Antialiasing);
 
     // No border
-    painter.setPen(QPen(Qt::NoPen));
+    painter.setPen(QPen("000000"));
 
     //change brush color
-    painter.setBrush(QBrush("#9747FF"));
+    painter.setBrush(QBrush("#ff8533"));
 
     //area of the dial background
     QRectF dialBackground(0, 0, QDial::height(), QDial::height());
@@ -49,7 +49,7 @@ void feedposition::paintEvent(QPaintEvent*)
         painter.drawPie(dialBackground, startAngle, spanAngle);
 
         //alternates color
-        if(index % 2 == 0)
+        if(index > 5)
         {
             //change brush color
             painter.setBrush(QBrush("#ff8533"));
@@ -60,6 +60,8 @@ void feedposition::paintEvent(QPaintEvent*)
             painter.setBrush(QBrush("#9747FF"));
         }
     }
+
+    painter.setPen(QPen(Qt::NoPen));
 
     //change brush color
     painter.setBrush(QBrush("#272727"));
@@ -74,11 +76,21 @@ void feedposition::paintEvent(QPaintEvent*)
     painter.setBrush(QBrush("#FFFFFF"));
 
     //draws knob for the pointer line
-    painter.drawEllipse(QPointF(QDial::height()/2,QDial::height()/2),QDial::height()/20,QDial::height()/20);
+    painter.drawEllipse(QPointF(QDial::height()/2,QDial::height()/2),QDial::height()/10,QDial::height()/10);
 
     //draws the pointer line
-    painter.drawPie(positionLine, -value*16, 3*16);
+    painter.drawPie(positionLine, -(value-90)*16, 3*16);
 
     //setting text
     painter.setPen(text);
+
+    painter.setPen(QPen("#000000"));
+
+    QFont textfont = painter.font();
+
+    textfont.setPixelSize(QDial::height()/20);
+
+    painter.setFont(textfont);
+
+    painter.drawText(QDial::height()/2.15,QDial::height()/2.15,QDial::height(),QDial::height(),0,QString::number(value));
 }
