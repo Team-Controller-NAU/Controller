@@ -4,7 +4,6 @@
 #include "constants.h"
 #include "./ui_mainwindow.h"
 
-
 MainWindow::MainWindow(QWidget *parent)
 
     //initialize imbedded classes/vars
@@ -18,18 +17,31 @@ MainWindow::MainWindow(QWidget *parent)
     //setting determines if automatic handshake starts after csim disconnects
     reconnect(false),
 
+    //setting toggles color coded events page output
+    coloredEventOutput(true),
+
     //this determines what will be shown on the events page
     eventFilter(ALL),
 
     //timer is used to repeatedly transmit handshake signals
     handshakeTimer( new QTimer(this) ),
 
-    // timer is used to update the GUI
+    // timer is used to update last message received time
     lastMessageTimer( new QTimer(this) ),
 
-    //init user settings to our organization and project
-    userSettings("Team Controller", "WSSS")
+    // timer is used to update controller running time
+    runningControllerTimer( new QTimer(this) ),
 
+    autoSaveLimit(5),
+
+    //init user settings to our organization and project
+    userSettings("Team Controller", "WSSS"),
+
+    BLANK_LIGHT(":/resources/Images/blankButton.png"),
+
+    RED_LIGHT(":/resources/Images/redButton.png"),
+
+    GREEN_LIGHT(":/resources/Images/greenButton.png")
 {
 
     //set output settings for qDebug
@@ -83,6 +95,10 @@ MainWindow::MainWindow(QWidget *parent)
     lastMessageTimer->setInterval(1000);
     connect(lastMessageTimer, &QTimer::timeout, this, &MainWindow::updateTimer);
 
+    // connect running controller timer
+    runningControllerTimer->setInterval(1000);
+    connect(runningControllerTimer, &QTimer::timeout, this, &MainWindow::updateElapsedTime);
+
     //if handshake timeout is enabled, setup signal to timeout
     if (HANDSHAKE_TIMEOUT)
     {
@@ -91,12 +107,35 @@ MainWindow::MainWindow(QWidget *parent)
 
     qDebug() << "GUI is now listening to port " << ddmCon->portName;
 
-    // set logfile name
-    qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
-    logfileName = QString::number(secsSinceEpoch);
+    //TEMP CODE TO MAKE FEED POSITION RESPONSIVE WITH STATUS UPDATES========
+    ui->feedPosition->setMaximum(360);
+    //ui->feedPosition->setReadOnly(true);
+
+    //======================================================================
+
+    //init trigger to grey buttons until updated by serial status updates
+    ui->trigger1->setPixmap(BLANK_LIGHT);
+    ui->trigger2->setPixmap(BLANK_LIGHT);
+
+    // create a shortcut for ctrl + f
+    QShortcut *find = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_F), this);
+    connect(find, &QShortcut::activated, this, &MainWindow::findText);
 
     // ensures that the application will open on the events page
     on_EventsPageButton_clicked();
+
+    // hide electrical data boxes until the data is filled in
+    for(int index = 1; index <= MAX_ELECTRICAL_COMPONENTS; index++)
+    {
+        // get the current box name
+        QString widgetName = QString("box%1_widget").arg(index);
+
+        // get the current box based off name
+        QWidget *widget = findChild<QWidget *>(widgetName);
+
+        // check if widget exists, and hide it
+        if(widget) widget->hide();
+    }
 }
 
 //destructor
@@ -149,480 +188,335 @@ void MainWindow::handshake()
 //in other words, this function is called whenever ddm port receives a new message
 void MainWindow::readSerialData()
 {
-    //ensure port is open to prevent possible errors
-    if (ddmCon->serialPort.isOpen())
+    //read lines until all data in buffer is processed
+    while (ddmCon->checkForValidMessage())
     {
-        //read lines until all data in buffer is processed
-        while (ddmCon->serialPort.bytesAvailable() > 0)
+        // declare variables
+        electricalNode* wkgElecPtr;
+        SerialMessageIdentifier messageId;
+        int boxIndex;
+
+        //get serialized string from port
+        QByteArray serializedMessage = ddmCon->serialPort.readLine();
+
+        //deserialize string
+        QString message = QString::fromUtf8(serializedMessage);
+
+        qDebug() << "message: " << message;
+
+        //update gui with new message
+        ui->stdout_label->setText(message);
+
+        //check if message id is present and followed by a comma
+        if (message[0].isDigit() && message[1] == DELIMETER)
         {
-            // declare variables
-            EventNode* wkgErrPtr;
-            EventNode* wkgEventPtr;
-            electricalNode* wkgElecPtr;
-            bool printErr;
-            QString dumpMessage;
-            QStringList messageSet;
-
-
-            //get images for buttons
-            QPixmap greenButton(":/resources/Images/greenButton.png");
-            QPixmap redButton(":/resources/Images/redButton.png");
-
-            //get serialized string from port
-            QByteArray serializedMessage = ddmCon->serialPort.readLine();
-
-            //deserialize string
-            QString message = QString::fromUtf8(serializedMessage);
-
-            qDebug() << "message: " << message;
-
-            //update gui with new message
-            ui->stdout_label->setText(message);
-
             //extract message id
-            SerialMessageIdentifier messageId = static_cast<SerialMessageIdentifier>(QString(message[0]).toInt());
+            messageId = static_cast<SerialMessageIdentifier>(QString(message[0]).toInt());
 
             //remove message id from message
             message = message.mid(1 + DELIMETER.length());
 
             //determine what kind of message this is
-            //SerialMessageIdentifier {EVENT_DUMP = 0, ERROR_DUMP = 1, ELECTRICAL = 2, EVENT =3, ERROR =4, STATUS =5};
-            switch (messageId)
+            switch ( messageId )
             {
-                case STATUS:
-
-                    qDebug() <<  "Message id: status update" << qPrintable("\n");
-
-                    //update status class with new data
-                    status->loadData(message);
-
-                    ui->status_output->setText(message);
-
-                    qDebug() << "fireMode: " << status->firingMode;
-
-                    resetFiringMode();
-
-                    if(status->firingMode == SAFE)
-                    {
-                        ui->safeLabel->setStyleSheet("color: #FF7518;font: 20pt Segoe UI;");
-                    }
-                    else if(status->firingMode == SINGLE)
-                    {
-                        ui->singleLabel->setStyleSheet("color: #FF7518;font: 20pt Segoe UI;");
-                    }
-                    else if(status->firingMode == BURST)
-                    {
-                        ui->burstLabel->setStyleSheet("color: #FF7518;font: 20pt Segoe UI;");
-                    }
-                    else
-                    {
-                        ui->automaticLabel->setStyleSheet("color: #FF7518;font: 20pt Segoe UI;");
-                    }
-
-                    break;
-
-                case EVENT:
-
-                    // status
-                    qDebug() <<  "Message id: event update" << qPrintable("\n");
-
-                    //add new event to event ll
-                    events->loadEventData(message);
-
-                    // update log file (false for not dump)
-                    events->appendToLogfile(userSettings.value("logfileLocation").toString() + "/" + logfileName + "-logfile-A.txt",
-                                            message,
-                                            false);
-
-                    // update GUI
-                    if (eventFilter == ALL || eventFilter == EVENTS) ui->events_output->append(message);
-
-                    // update total events gui
-                    ui->TotalEventsOutput->setText(QString::number(events->totalEvents));
-                    ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
-                    ui->statusEventOutput->setText(QString::number(events->totalEvents));
-                    ui->statusEventOutput->setAlignment(Qt::AlignCenter);
-                    break;
-
-                case ERROR:
-
-                    // status
-                    qDebug() <<  "Message id: error update" << qPrintable("\n");
-
-                    //add new error to error ll
-                    events->loadErrorData(message);
-
-                    // update log file (false for not dump)
-                    events->appendToLogfile(userSettings.value("logfileLocation").toString() + "/" + logfileName + "-logfile-A.txt",
-                                            message,
-                                            false);
-
-                    // check for any type of error filter, including all
-                    if(eventFilter != EVENTS)
-                    {
-                        // check for cleared filter
-                        if(eventFilter == CLEARED_ERRORS && events->lastErrorNode->cleared)
-                        {
-                            ui->events_output->append(message);
-                        }
-                        // check for non-cleared filter
-                        else if (eventFilter == NON_CLEARED_ERRORS && !events->lastErrorNode->cleared)
-                        {
-                            ui->events_output->append(message);
-                        }
-                        // check for all or errors filter
-                        else if (eventFilter == ALL || eventFilter == ERRORS)
-                        {
-                            ui->events_output->append(message);
-                        }
-                    }
-                    // otherwise do nothing
-
-                    //update the cleared error selection box in dev tools
-                    update_non_cleared_error_selection();
-
-                    // update total errors gui
-                    ui->TotalErrorsOutput->setText(QString::number(events->totalErrors));
-                    ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
-                    ui->statusErrorOutput->setText(QString::number(events->totalErrors));
-                    ui->statusErrorOutput->setAlignment(Qt::AlignCenter);
-
-                    // update cleared errors gui
-                    ui->ClearedErrorsOutput->setText(QString::number(events->totalCleared));
-                    ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
-
-                    // update active errors gui
-                    ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
-                    ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
-                    break;
-
-                case ELECTRICAL:
-
-                    qDebug() <<  "Message id: electrical" << qPrintable("\n");
-                    //dump electrical data
-                    electricalObject->loadElecDump(message);
-
-                    wkgElecPtr = electricalObject->headNode;
-
-                    ui->Cooling_Label->setText(wkgElecPtr->name);
-                    ui->Cooling_Stats->setText("Voltage: " + QString::number(wkgElecPtr->voltage) + '\n' + "Amps: " +  QString::number(wkgElecPtr->amps));
-
-                    wkgElecPtr = wkgElecPtr->nextNode;
-                    ui->InternalTemp_Label->setText(wkgElecPtr->name);
-                    ui->InternalTemp_Stats->setText("Voltage: " + QString::number(wkgElecPtr->voltage) + '\n' + "Amps: " + QString::number(wkgElecPtr->amps));
-
-                    wkgElecPtr = wkgElecPtr->nextNode;
-                    ui->ExternalTemp_Label->setText(wkgElecPtr->name);
-                    ui->ExternalTemp_Stats->setText("Voltage: " + QString::number(wkgElecPtr->voltage) + '\n' + "Amps: " + QString::number(wkgElecPtr->amps));
-
-                    // update controller version and crc version
-                    ui->controllerLabel->setText(ui->controllerLabel->text() + CONTROLLER_VERSION);
-                    ui->crcLabel->setText(ui->crcLabel->text() + CRC_VERSION);
-
-                    break;
-
-                case EVENT_DUMP:
-
-                    qDebug() <<  "Message id: event dump" << qPrintable("\n");
-
-                    // load all events to event linked list
-                    events->loadEventDump(message);
-
-                    // update log file (true for dump)
-                    events->appendToLogfile(userSettings.value("logfileLocation").toString() + "/" + logfileName + "-logfile-A.txt",
-                                            message,
-                                            true);
-
-                    // reset dump
-                    dumpMessage = "";
-                    wkgErrPtr = events->headErrorNode;
-                    wkgEventPtr = events->headEventNode;
-
-                    // check for all filter
-                    if(eventFilter == ALL)
-                    {
-                        // loop through all errors and events
-                        while (wkgErrPtr != nullptr || wkgEventPtr != nullptr)
-                        {
-                            // get next to print by ID
-                            EventNode* nextPrintPtr = events->getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
-
-                            // set dump message
-                            if (dumpMessage != "") dumpMessage += '\n';
-                            dumpMessage += QString::number(nextPrintPtr->id) + ',' + nextPrintPtr->timeStamp + ',' + nextPrintPtr->eventString + ',';
-                            if (printErr) dumpMessage += (nextPrintPtr->cleared ? "1," : "0,");
-                            dumpMessage += "\n";
-                        }
-
-                        // update gui
-                        ui->events_output->setText(dumpMessage);
-                    }
-                    // check for events filter
-                    else if(eventFilter == EVENTS)
-                    {
-                        // split the event dump messages up
-                        messageSet = message.split(",,", Qt::SkipEmptyParts);
-
-                        // iterate through the event set
-                        for (const QString &event : messageSet)
-                        {
-                            // check for empty
-                            if(!messageSet.isEmpty() && event != "\n")
-                            {
-                                // update gui
-                                ui->events_output->append(event + ",\n");
-                            }
-                        }
-                    }
-                    // otherwise do nothing
-
-                    // update total events gui
-                    ui->TotalEventsOutput->setText(QString::number(events->totalEvents));
-                    ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
-                    ui->statusEventOutput->setText(QString::number(events->totalEvents));
-                    ui->statusEventOutput->setAlignment(Qt::AlignCenter);
-                    break;
-
-                case ERROR_DUMP:
-
-                    qDebug() <<  "Message id: error dump" << qPrintable("\n");
-
-                    // load all errors to error linked list
-                    events->loadErrorDump(message);
-
-                    // update log file (true for dump)
-                    events->appendToLogfile(userSettings.value("logfileLocation").toString() + "/" + logfileName + "-logfile-A.txt",
-                                            message,
-                                            true);
-
-                    // reset dump
-                    dumpMessage = "";
-                    wkgErrPtr = events->headErrorNode;
-                    wkgEventPtr = events->headEventNode;
-
-                    // check for all filter
-                    if(eventFilter == ALL)
-                    {
-                        // loop through all errors and events
-                        while (wkgErrPtr != nullptr || wkgEventPtr != nullptr)
-                        {
-                            // get next to print by ID
-                            EventNode* nextPrintPtr = events->getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
-
-                            // set dump message
-                            if (dumpMessage != "") dumpMessage += '\n';
-                            dumpMessage += QString::number(nextPrintPtr->id) + ',' + nextPrintPtr->timeStamp + ',' + nextPrintPtr->eventString + ',';
-                            if (printErr) dumpMessage += (nextPrintPtr->cleared ? "1," : "0,");
-                            dumpMessage += "\n";
-                        }
-
-                        // update gui
-                        ui->events_output->setText(dumpMessage);
-                    }
-                    // check for any errors filter
-                    else if(eventFilter != EVENTS)
-                    {
-                        // check for cleared filter
-                        if(eventFilter == CLEARED_ERRORS)
-                        {
-                            // loop through all errors
-                            while(wkgErrPtr != nullptr)
-                            {
-                                // check for cleared
-                                if(wkgErrPtr->cleared)
-                                {
-                                    // set dump message
-                                    if (dumpMessage != "") dumpMessage += '\n';
-                                    dumpMessage += QString::number(wkgErrPtr->id) + ',' + wkgErrPtr->timeStamp + ',' + wkgErrPtr->eventString + ',';
-                                    dumpMessage += (wkgErrPtr->cleared ? "1," : "0,");
-                                    dumpMessage += "\n";
-                                }
-                                wkgErrPtr = wkgErrPtr->nextPtr;
-                            }
-                            // update ui
-                            ui->events_output->setText(dumpMessage);
-                        }
-                        // check for non-cleared filter
-                        else if(eventFilter == NON_CLEARED_ERRORS)
-                        {
-                            // loop through all errors
-                            while(wkgErrPtr != nullptr)
-                            {
-                                // check for non-cleared
-                                if(!wkgErrPtr->cleared)
-                                {
-                                    // set dump message
-                                    if (dumpMessage != "") dumpMessage += '\n';
-                                    dumpMessage += QString::number(wkgErrPtr->id) + ',' + wkgErrPtr->timeStamp + ',' + wkgErrPtr->eventString + ',';
-                                    dumpMessage += (wkgErrPtr->cleared ? "1," : "0,");
-                                    dumpMessage += "\n";
-                                }
-                                wkgErrPtr = wkgErrPtr->nextPtr;
-                            }
-                            // update ui
-                            ui->events_output->setText(dumpMessage);
-                        }
-                        // assume errors filter
-                        else
-                        {
-                            // split the event dump messages up
-                            messageSet = message.split(",,", Qt::SkipEmptyParts);
-
-                            // iterate through the event set
-                            for (const QString &error : messageSet)
-                            {
-                                // check for empty
-                                if(!messageSet.isEmpty() && error != "\n")
-                                {
-                                    // update gui
-                                    ui->events_output->append(error + ",\n");
-                                }
-                            }
-                        }
-                    }
-                    // otherwise do nothing
-
-                    // update total errors gui
-                    ui->TotalErrorsOutput->setText(QString::number(events->totalErrors));
-                    ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
-                    ui->statusErrorOutput->setText(QString::number(events->totalErrors));
-                    ui->statusErrorOutput->setAlignment(Qt::AlignCenter);
-
-                    // update cleared errors gui
-                    ui->ClearedErrorsOutput->setText(QString::number(events->totalCleared));
-                    ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
-
-                    // update active errors gui
-                    ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
-                    ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
-
-                    break;
-
-                case CLEAR_ERROR:
-                    qDebug() << "Message id: clear error " << message << qPrintable("\n");
-
-                    //update cleared status of error with given id
-                    events->clearError(message.left(message.indexOf(DELIMETER)).toInt());
-
-                    //update the cleared error selection box in dev tools
-                    update_non_cleared_error_selection();
-
-                    // update cleared errors gui
-                    ui->ClearedErrorsOutput->setText(QString::number(events->totalCleared));
-                    ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
-
-                    // update active errors gui
-                    ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
-                    ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
-
-                    // TOOD: update events tab GUI, update live log file
-                    // ...
-
-                    break;
-
-                case BEGIN:
-
-                    //stop handshake protocols
-                    handshakeTimer->stop();
-
-                    // start last message timer if not already active
-                    if(!lastMessageTimer->isActive())
-                    {
-                        lastMessageTimer->start();
-                    }
-
-                    // debug
-                    qDebug() << "Begin signal received, handshake complete";
-
-                    // update ui
-                    ui->handshake_button->setText("Disconnect");
-                    ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #FE1C1C;font: 15pt Segoe UI;");
-                    ui->connectionStatus->setPixmap(greenButton);
-
-                    events->freeLinkedLists();
-                    ui->events_output->clear();
-
-                    ui->TotalEventsOutput->setText("0");
-                    ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
-                    ui->statusEventOutput->setText("0");
-                    ui->statusEventOutput->setAlignment(Qt::AlignCenter);
-
-                    ui->TotalErrorsOutput->setText("0");
-                    ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
-                    ui->statusErrorOutput->setText("0");
-                    ui->statusErrorOutput->setAlignment(Qt::AlignCenter);
-
-                    ui->ClearedErrorsOutput->setText("0");
-                    ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
-
-                    ui->ActiveErrorsOutput->setText("0");
-                    ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
-
-                    ddmCon->connected = true;
-
-                    break;
-
-                case CLOSING_CONNECTION:
-
-                    //log
-                    qDebug() << "Controller disconnect message received";
-
-                    // check for not empty
-                    // if(events->totalNodes != 0)
-                    // {
-                    //     // new "session" ended, save to log file
-                    //     qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
-                    //     QString logFileName = QString::number(secsSinceEpoch);
-
-                    //     // save logfile - autosave condition
-                    //     events->outputToLogFile(logFileName.toStdString() + "-logfile-A.txt");
-                    // }
-
-                    //assign conn flag
-                    ddmCon->connected = false;
-
-                    // update time since last message so its not frozen
-                    ui->DDMTimer->setText("Time Since Last Message: 00:00:00");
-                    ui->DDMTimer->setAlignment(Qt::AlignRight);
-
-                    // stop last message timer if still active
-                    if(lastMessageTimer->isActive())
-                    {
-                        lastMessageTimer->stop();
-                    }
-
-                    if (reconnect)
-                    {
-                        //attempt handshake to reconnect, (optional setting)
-                        on_handshake_button_clicked();
-                    }
-                    else
-                    {
-                        //refreshes connection button/displays
-                        ui->handshake_button->setText("Connect");
-                        ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #14AE5C;font: 15pt Segoe UI;");
-                        ui->connectionStatus->setPixmap(redButton);
-                    }
-
-                    break;
-
-                default:
-
-                    //log
-                    qDebug() << "Unrecognized serial message received : " << message;
-
-                    break;
+            case STATUS:
 
+                qDebug() <<  "Message id: status update" << qPrintable("\n");
+
+                //update status class with new data
+                status->loadData(message);
+
+                //update gui
+                updateStatusDisplay();
+
+                break;
+
+            case EVENT:
+
+                qDebug() <<  "Message id: event update" << qPrintable("\n");
+
+                //add new event to event ll
+                events->loadEventData(message);
+
+                // update log file
+                events->appendToLogfile(autosaveLogFile, events->lastEventNode);
+
+                // update GUI elements
+                updateEventsOutput(events->lastEventNode);
+
+                break;
+
+            case ERROR:
+
+                // status
+                qDebug() <<  "Message id: error update" << qPrintable("\n");
+
+                //add new error to error ll
+                events->loadErrorData( message );
+
+                // update log file
+                events->appendToLogfile(autosaveLogFile, events->lastErrorNode);
+
+                //update gui elements
+                updateEventsOutput(events->lastErrorNode);
+
+                //update the cleared error selection box in dev tools
+                //(this can be removed when dev page is removed)
+                update_non_cleared_error_selection();
+
+                break;
+
+            case ELECTRICAL:
+
+                qDebug() <<  "Message id: electrical" << qPrintable("\n");
+
+                // clear electrical ll
+                electricalObject->freeLL();
+
+                //load new data into electrical ll
+                electricalObject->loadElecDump(message);
+
+                //get head node into wkg ptr
+                wkgElecPtr = electricalObject->headNode;
+
+                // loop through each electrical data box
+                for (boxIndex = 1; boxIndex <= MAX_ELECTRICAL_COMPONENTS; boxIndex++)
+                {
+                    // get the current box name
+                    QString widgetName = "box" + QString::number(boxIndex) + "_widget";
+
+                    // get the current box based off name
+                    QWidget *widget = findChild<QWidget *>(widgetName);
+
+                    // check if widget exists, and hide it
+                    if(widget) widget->hide();
                 }
 
-                //qDebug() << "remaining buffer: " << ddmCon->serialPort.peek(ddmCon->serialPort.bytesAvailable());
+                // loop through each electrical data box
+                for (boxIndex = 1; boxIndex <= MAX_ELECTRICAL_COMPONENTS; boxIndex++)
+                {
+                    // get the current box name
+                    QString widgetName = "box" + QString::number(boxIndex) + "_widget";
+
+                    // get the names of the labels for this box
+                    QString labelName = "box" + QString::number(boxIndex) + "_label";
+                    QString statsName = "box" + QString::number(boxIndex) + "_stats";
+
+                    // get the current box based off name
+                    QWidget *widget = findChild<QWidget *>(widgetName);
+
+                    // find the label objects with findChild
+                    QLabel *boxLabel = findChild<QLabel *>(labelName);
+                    QTextEdit *boxStats = findChild<QTextEdit *>(statsName);
+
+                    // check if the current electrical node exists
+                    if (wkgElecPtr != nullptr)
+                    {
+                        // update label with name if it exists
+                        if (boxLabel) boxLabel->setText(" " + wkgElecPtr->name);
+
+                        // update stats with voltage and amps if it exists
+                        if (boxStats) boxStats->setPlainText("Voltage: " + QString::number(wkgElecPtr->voltage) +
+                                              '\n' + "Amps: " + QString::number(wkgElecPtr->amps));
+
+                        // check if the box exists, and show it
+                        if(widget) widget->show();
+
+                        // move to next electrical node
+                        wkgElecPtr = wkgElecPtr->nextNode;
+                    }
+                    // else, there are no more electrical nodes
+                    else
+                    {
+                        // break once we are done
+                        break;
+                    }
+                }
+
+                // break if we have reached the max number of electrical boxes to fill
+                break;
+
+            case EVENT_DUMP:
+
+                qDebug() <<  "Message id: event dump" << qPrintable("\n");
+
+                // load all events to event linked list
+                events->loadEventDump(message);
+
+                // create log file
+                events->outputToLogFile( autosaveLogFile );
+
+                //refresh the events output with dumped event data
+                refreshEventsOutput();
+
+                break;
+
+            case ERROR_DUMP:
+
+                qDebug() <<  "Message id: error dump" << qPrintable("\n");
+
+                // load all errors to error linked list
+                events->loadErrorDump(message);
+
+                // create log file
+                events->outputToLogFile( autosaveLogFile );
+
+                //refresh the events output with dumped error data
+                refreshEventsOutput();
+
+                break;
+
+            case CLEAR_ERROR:
+                qDebug() << "Message id: clear error " << message << qPrintable("\n");
+
+                //update cleared status of error with given id
+                events->clearError(message.left(message.indexOf(DELIMETER)).toInt());
+
+                //update the cleared error selection box in dev tools (can be removed when dev page is removed)
+                update_non_cleared_error_selection();
+
+                //refresh the events output with newly cleared error
+                refreshEventsOutput();
+
+                break;
+
+            case BEGIN:
+
+                //load crc and version
+                status->loadVersionData(message);
+
+                //check for empty logfile location and sets to default
+                setup_logfile_location();
+
+                // update controller version and crc version on gui
+                ui->controllerLabel->setText("Controller Version: " + status->version);
+                ui->crcLabel->setText("CRC: " + status->crc);
+
+                // check if controller timer is running
+                if(!runningControllerTimer->isActive())
+                {
+                    // start it
+                    runningControllerTimer->start();
+
+                    // update elapsed time
+                    ui->elapsedTime->setText("Elapsed Time: " + status->elapsedControllerTime);
+                    ui->elapsedTime->setAlignment(Qt::AlignRight);
+                }
+
+                //stop handshake protocols
+                handshakeTimer->stop();
+
+                // start last message timer if not already active
+                if(!lastMessageTimer->isActive())
+                {
+                    lastMessageTimer->start();
+                }
+
+                // debug
+                qDebug() << "Begin signal received, handshake complete";
+
+                // update ui
+                ui->handshake_button->setText("Disconnect");
+                ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #FE1C1C; border: 1px solid; border-color: #cb0101; font: 15pt 'Segoe UI'; } "
+                                                    "QPushButton::hover { background-color: #fe3434; } "
+                                                    "QPushButton::pressed { background-color: #fe8080;}");
+                ui->connectionLabel->setText("Connected ");
+                ui->connectionStatus->setPixmap(GREEN_LIGHT);
+
+                //clear events ll and output box
+                events->freeLinkedLists();
+                ui->events_output->clear();
+
+                //reset event counters
+                ui->TotalEventsOutput->setText("0");
+                ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
+                ui->statusEventOutput->setText("0");
+                ui->statusEventOutput->setAlignment(Qt::AlignCenter);
+
+                ui->TotalErrorsOutput->setText("0");
+                ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
+                ui->statusErrorOutput->setText("0");
+                ui->statusErrorOutput->setAlignment(Qt::AlignCenter);
+
+                ui->ClearedErrorsOutput->setText("0");
+                ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
+
+                ui->ActiveErrorsOutput->setText("0");
+                ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
+
+                //set connected
+                ddmCon->connected = true;
+
+                break;
+
+            case CLOSING_CONNECTION:
+
+                //log
+                qDebug() << "Disconnect message received from Controller";
+
+                // check for not empty
+                // if(events->totalNodes != 0)
+                // {
+                //     // new "session" ended, save to log file
+                //     qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
+                //     QString logFileName = QString::number(secsSinceEpoch);
+
+                //     // save logfile - autosave condition
+                //     events->outputToLogFile(logFileName.toStdString() + "-logfile-A.txt");
+                // }
+
+                //assign conn flag
+                ddmCon->connected = false;
+
+                // update time since last message so its not frozen
+                ui->DDMTimer->setText("Time Since Last Message: 00:00:00");
+                ui->DDMTimer->setAlignment(Qt::AlignRight);
+
+                // stop last message timer if still active
+                if(lastMessageTimer->isActive())
+                {
+                    lastMessageTimer->stop();
+                }
+
+                // stop elapsed timer if still active
+                if(runningControllerTimer->isActive())
+                {
+                    runningControllerTimer->stop();
+                }
+
+                if (reconnect)
+                {
+                    //attempt handshake to reconnect, (optional setting)
+                    on_handshake_button_clicked();
+                }
+                else
+                {
+                    //refreshes connection button/displays
+                    ui->handshake_button->setText("Connect");
+                    ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #14AE5C; border: 1px solid; border-color: #0d723c; font: 15pt 'Segoe UI'; } "
+                                                        "QPushButton::hover { background-color: #1be479; } "
+                                                        "QPushButton::pressed { background-color: #76efae;}");
+                    ui->connectionStatus->setPixmap(RED_LIGHT);
+                    ui->connectionLabel->setText("Disconnected ");
+                }
+
+                break;
+
+            default:
+                qDebug() << "ERROR: message from controller is not recognized";
+
+                break;
+            }
+
+            // update the timestamp of last received message
+            timeLastReceived = QDateTime::currentDateTime();
         }
-        // update the timestamp of last received message
-        timeLastReceived = QDateTime::currentDateTime();
-    }
-    else
-    {
-        qDebug() << "Serial port is closed, unable to read data";
+        //invalid message id detected
+        else
+        {
+            //log
+            qDebug() << "Unrecognized serial message received : " << message;
+        }
     }
 }
 
@@ -722,6 +616,111 @@ void MainWindow::displaySavedConnectionSettings()
     qDebug() << "logfile location: " << userSettings.value("logfileLocation").toString() << Qt::endl;
 }
 
+//checks if user has setup a custom log file directory, if not, the default directory is selected
+//the auto save log file for this session will be stored in the directory chosen by this
+//function
+void MainWindow::setup_logfile_location()
+{
+    //check if user has set a custom log file output directory
+    if ( !userSettings.value("logfileLocation").toString().isEmpty() )
+    {
+        //initialize the logfile into this directory
+        autosaveLogFile = userSettings.value("logfileLocation").toString();
+    }
+    //otherwise use default directory
+    else
+    {
+        //use the path of the exe and add a "Log Files" directory
+        autosaveLogFile = QCoreApplication::applicationDirPath() + "/" + INITIAL_LOGFILE_LOCATION;
+    }
+
+    //initialize a directory object in selected location
+    QDir dir(autosaveLogFile);
+
+    //check if directory doesnt exist
+    if(!dir.exists())
+    {
+        //attempt to create the directory
+        if(!dir.mkpath(autosaveLogFile))
+        {
+            qDebug() << "Failed to create logfile folder on startup" << autosaveLogFile;
+            return;
+        }
+    }
+
+    //if there are more auto saves than the current limit, delete the extras (oldest first)
+    enforceAutoSaveLimit(autosaveLogFile);
+
+    // set unique logfile name for this session
+    qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
+    autosaveLogFile += QString::number(secsSinceEpoch) + "-logfile-A.txt";
+
+    qDebug() << "Auto Save log file for this session: " << autosaveLogFile;
+}
+
+void MainWindow::enforceAutoSaveLimit(QString path)
+{
+    // Set a filter to display only files
+    QDir dir(path);
+    dir.setFilter(QDir::Files);
+
+    // Get list of files in directory
+    QStringList fileList = dir.entryList();
+
+    // Create a new list to add auto save file names to
+    QStringList autoSaveFileList;
+
+    // Loop through names of files in directory
+    for (const QString &fileName : fileList)
+    {
+        // Check if this is an auto save file
+        if (fileName.endsWith("logfile-A.txt"))
+        {
+            // Append to the new list
+            autoSaveFileList.append(fileName);
+        }
+    }
+
+    // Delete the oldest file if the number of auto saved files is above the limit
+    while (autoSaveFileList.size() > autoSaveLimit)
+    {
+        QString oldestFilePath;
+        QDateTime oldestCreationTime;
+
+        // Find the oldest file in the list
+        for (const QString &autoSaveFile : autoSaveFileList)
+        {
+            // Get the path of the file
+            QString filePath = dir.filePath(autoSaveFile);
+            // Get the creation time of the file
+            QFileInfo fileInfo(filePath);
+            QDateTime creationTime = fileInfo.lastModified();
+
+            // Check if this is the oldest file so far
+            if (oldestCreationTime.isNull() || creationTime < oldestCreationTime)
+            {
+                oldestCreationTime = creationTime;
+                oldestFilePath = filePath;
+            }
+        }
+
+        // Remove the oldest file
+        if (!QFile::remove(oldestFilePath))
+        {
+            qDebug() << "Failed to delete file: " << oldestFilePath;
+            return;
+        }
+        else
+        {
+            qDebug() << "An old autosave file was deleted";
+        }
+
+        // Remove the oldest file name from the list
+        autoSaveFileList.removeOne(QFileInfo(oldestFilePath).fileName());
+    }
+}
+
+
 void MainWindow::setup_connection_settings()
 {
     int i;
@@ -815,6 +814,105 @@ void MainWindow::setup_connection_settings()
         ui->stop_bit_selection->setCurrentIndex(ui->stop_bit_selection->findText(toString(QSerialPort::TwoStop)));
         break;
     }
+}
+
+//displays the current values of the status class onto the gui status page
+void MainWindow::updateStatusDisplay()
+{
+    //display current values in status class to dev page
+    ui->status_output->setText(status->generateMessage());
+
+    //qDebug() << "fireMode: " << status->firingMode;
+
+    resetFiringMode();
+
+    //update font color of the active firing mode
+    if(status->firingMode == SAFE)
+    {
+        ui->safeLabel->setStyleSheet("color: #FF7518;font: 20pt Segoe UI;");
+    }
+    else if(status->firingMode == SINGLE)
+    {
+        ui->singleLabel->setStyleSheet("color: #FF7518;font: 20pt Segoe UI;");
+    }
+    else if(status->firingMode == BURST)
+    {
+        ui->burstLabel->setStyleSheet("color: #FF7518;font: 20pt Segoe UI;");
+    }
+    else
+    {
+        ui->automaticLabel->setStyleSheet("color: #FF7518;font: 20pt Segoe UI;");
+    }
+
+    //update feed position
+    ui->feedPosition->setValue(status->feedPosition);
+
+    //update trigger 1 light
+    switch (status->trigger1)
+    {
+    case ENGAGED:
+        ui->trigger1->setPixmap(GREEN_LIGHT);
+
+        break;
+
+    case DISENGAGED:
+        ui->trigger1->setPixmap(RED_LIGHT);
+
+        break;
+
+    default:
+        ui->trigger1->setPixmap(BLANK_LIGHT);
+    }
+
+
+    //update trigger 2 light
+    switch (status->trigger2)
+    {
+        case ENGAGED:
+            ui->trigger2->setPixmap(GREEN_LIGHT);
+
+            break;
+
+        case DISENGAGED:
+            ui->trigger2->setPixmap(RED_LIGHT);
+
+            break;
+
+        default:
+            ui->trigger2->setPixmap(BLANK_LIGHT);
+    }
+}
+
+// method updates the running elapsed controller time
+void MainWindow::updateElapsedTime()
+{
+    // get the current timestamp
+    QString timestamp = ui->elapsedTime->toPlainText();
+
+    // extract the time, remove "ELapsed Time: "
+    timestamp = timestamp.mid(14); // assuming this will always be in position 14, it should never change
+
+    // split up the day and time components
+    // this is required because a QTime object does not support days (more than 24hrs)
+    QStringList timeParts = timestamp.split(":");
+    int days = timeParts.takeFirst().toInt(); // removes the days from the list as well
+
+    // convert to QTime and add one second
+    QTime currentTime = QTime::fromString(timeParts.join(":"), "HH:mm:ss");
+    currentTime = currentTime.addSecs(1);
+
+    // check if the time exceeds 23:59:59
+    // when it does, the entire timestamp will be reset since QTime can not exceed 24 hours
+    if (currentTime.hour() == 0 && currentTime.minute() == 0 && currentTime.second() == 0)
+    {
+        // increment number of days
+        days++;
+    }
+
+    // update the GUI
+    status->elapsedControllerTime = QString::number(days) + ":" + currentTime.toString("HH:mm:ss");
+    ui->elapsedTime->setText("Elapsed Time: " + QString::number(days) + ":" + currentTime.toString("HH:mm:ss"));
+    ui->elapsedTime->setAlignment(Qt::AlignRight);
 }
 
 // method updates the elapsed time since last message received to DDM
@@ -1022,7 +1120,129 @@ void MainWindow::resetFiringMode()
     ui->singleLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
 }
 
+//overloaded function to add simplicity when possible
+void MainWindow::updateEventsOutput(EventNode *event)
+{
+    updateEventsOutput(events->nodeToString(event), event->error, event->cleared);
+}
 
 
+//updates gui with given message, dynamically colors output based on the type of outString
+//accounts for filtering settings and only renders the outString if it is being filtered for
+// by the user
+void MainWindow::updateEventsOutput(QString outString, bool error, bool cleared)
+{
+    QTextDocument document;
+    QString richText;
+
+    //check if we have an event as input and check if filter allows printing events
+    if (!error )
+    {
+        if (eventFilter == EVENTS || eventFilter == ALL)
+        {
+           //change output text color to white
+           richText = "<p style='color: #FFFFFF; font-size: 16px'>"+ outString + "</p>";
+
+           //activate html for the output
+           document.setHtml(richText);
+
+           //append styled string to the events output
+           ui->events_output->append(document.toHtml());
+        }
+    }
+    //otherwise check for cleared error and if filter allows printing cleared errors
+    else if (cleared)
+    {
+        if (eventFilter == ALL || eventFilter == ERRORS || eventFilter == CLEARED_ERRORS)
+        {
+            if (coloredEventOutput)
+            {
+                //change output text color to green
+                richText = "<p style='color: #14AE5C; font-size: 16px'>"+ outString + "</p>";
+            }
+            else
+            {
+                //change output text color to white
+                richText = "<p style='color: #FFFFFF; font-size: 16px'>"+ outString + "</p>";
+            }
+
+            //activate html for the output
+            document.setHtml(richText);
+
+            //append styled string to the events output
+            ui->events_output->append(document.toHtml());
+        }
+    }
+    //otherwise this is a non-cleared error check if filtering allows printing non-cleared errors
+    else if (eventFilter == ALL || eventFilter == NON_CLEARED_ERRORS || eventFilter == ERRORS)
+    {
+        if (coloredEventOutput)
+        {
+            //change output text color to red
+            richText = "<p style='color: #FE1C1C; font-size: 16px'>"+ outString + "</p>";
+        }
+        else
+        {
+            //change output text color to white
+            richText = "<p style='color: #FFFFFF; font-size: 16px'>"+ outString + "</p>";
+        }
+
+       //activate html for the output
+       document.setHtml(richText);
+
+       //append styled string to the events output
+       ui->events_output->append(document.toHtml());
+    }
+
+    // update total events gui
+    ui->TotalEventsOutput->setText(QString::number(events->totalEvents));
+    ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
+    ui->statusEventOutput->setText(QString::number(events->totalEvents));
+    ui->statusEventOutput->setAlignment(Qt::AlignCenter);
+
+    if (!error) return;
+
+    // update total errors gui
+    ui->TotalErrorsOutput->setText(QString::number(events->totalErrors));
+    ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
+    ui->statusErrorOutput->setText(QString::number(events->totalErrors));
+    ui->statusErrorOutput->setAlignment(Qt::AlignCenter);
+
+    if ( cleared )
+    {
+        // update cleared errors gui
+        ui->ClearedErrorsOutput->setText(QString::number(events->totalCleared));
+        ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
+    }
+    else
+    {
+        // update active errors gui
+        ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
+        ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
+    }
+}
+
+//clears events tab gui element, then repopulates it with current event data
+void MainWindow::refreshEventsOutput()
+{
+    // reset gui element
+    ui->events_output->clear();
+
+    //init vars
+    EventNode *wkgErrPtr = events->headErrorNode;
+    EventNode *wkgEventPtr = events->headEventNode;
+    EventNode *nextPrintPtr;
+    bool printErr;
+
+    //loop through all events and errors
+    while(wkgErrPtr != nullptr || wkgEventPtr != nullptr)
+    {
+        // get next to print
+        nextPrintPtr = events->getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
+
+        //update events output if filter allows
+        updateEventsOutput(nextPrintPtr);
+    }
+}
 
 

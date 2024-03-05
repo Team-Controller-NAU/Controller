@@ -29,6 +29,9 @@ public:
     //void simulateWeaponController();
     bool stop;
 
+    //set true for csim to generate data for 2 triggers, false for 1 trigger
+    bool secondTrigger;
+
     //stores port name for initializing connection class
     QString portName;
 

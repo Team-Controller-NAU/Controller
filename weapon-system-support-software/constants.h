@@ -5,6 +5,12 @@
 #include <QSerialPortInfo>
 #include <QSerialPort>
 #include <QDir>
+#ifdef _WIN32 // check if we are compiling on Windows
+#include <QPixMap>
+#else
+#include <qpixmap.h> // for linux
+#endif
+#include <QRegularExpression>
 
 //this file will define enumerated values and constants used elsewhere in code
 
@@ -12,8 +18,8 @@
 //status enums
 //------------
 //integer length vals are used by csim during random generation
-enum TriggerStatus {DISENGAGED=0, ENGAGED=1};
-const int NUM_TRIGGER_STATUS = 2;
+enum TriggerStatus {DISENGAGED=0, ENGAGED=1, NA=2};
+const int NUM_TRIGGER_STATUS = 3;
 
 enum ControllerState {RUNNING=0, BLOCKED=1, TERMINATED=2, SUSPENDED=3};
 const int NUM_CONTROLLER_STATE = 4;
@@ -21,7 +27,8 @@ const int NUM_CONTROLLER_STATE = 4;
 enum FiringMode {SAFE=0, SINGLE=1, BURST=2, FULL_AUTO=3};
 const int NUM_FIRING_MODE = 4;
 
-enum FeedPosition {FEEDING=0, CHAMBERING=45, LOCKING=90, FIRING=135, UNLOCKING=180, EXTRACTING=225, EJECTING=270, COCKING=315};
+enum FeedPosition {FEEDING=0, CHAMBERING=45, LOCKING=90, FIRING=135, UNLOCKING=180,
+                    EXTRACTING=225, EJECTING=270, COCKING=315};
 const int NUM_FEED_POSITION = 8;
 const int FEED_POSITION_INCREMENT_VALUE = 360/NUM_FEED_POSITION;
 //------------
@@ -33,7 +40,7 @@ enum SerialMessageIdentifier { /*the following identifiers are used to id contro
                                LISTENING = 7, BEGIN = 8, CLOSING_CONNECTION = 9};
 
 //for filtering the event page output
-enum EventFilter {ALL, EVENTS, ERRORS, CLEARED_ERRORS, NON_CLEARED_ERRORS};
+enum EventFilter {ALL=0, EVENTS=1, ERRORS=2, CLEARED_ERRORS=3, NON_CLEARED_ERRORS=4};
 enum Parity {NO_PARITY, EVEN_PARITY, ODD_PARITY};
 enum StopBits {ONE, ONE_AND_A_HALF, TWO};
 
@@ -61,15 +68,24 @@ const QString EVENT_MESSAGES[NUM_EVENT_MESSAGES] = {"Sample event message 1", "S
 const int NUM_ERROR_MESSAGES = 3;
 const QString ERROR_MESSAGES[NUM_ERROR_MESSAGES] = {"Sample error message 1.22", "Sample error message 2; 5; 0", "Sample error message 3; 677"};
 
-const QString ELECTRICAL_MESSAGES = "Servo Motor, 19, 2,,Pump Cooler, 2, 3,,Internal Temp Sensor, 33, 4";
+const int NUM_ELECTRICAL_MESSAGES = 4;
+const QString ELECTRICAL_MESSAGES[NUM_ELECTRICAL_MESSAGES] = {"Servo Motor, 20, 4",
+                                                              "Piston, 14, 29,,Alternator, 96, 3",
+                                                              "Servo Motor, 19, 2,,Pump Cooler, 2, 3,,Internal Temp Sensor, 33, 4",
+                                                              "Fuel Injector, 27, 1,,Voltage Regulator, 19, 3,,Rotor 1, 9, 13,,Rotor 3, 9, 9,,Exciter Stator, 19, 2"};
+
+const int MAX_ELECTRICAL_COMPONENTS = 25; // the max number of electrical componenets to expect from a weapon
 
 const int NUM_ERROR_DELIMETERS = 3;
 const int NUM_EVENT_DELIMETERS = 2;
 const int NUM_ELECTRIC_DELIMETERS = 2;
 
+//error codes
 const int DATA_NOT_FOUND = -101;
+const int INCORRECT_FORMAT = -102;
+const int SUCCESS = 1;
 
-const QString INITIAL_LOGFILE_LOCATION = "WSSS_Logfiles";
+const QString INITIAL_LOGFILE_LOCATION = "WSSS_Logfiles/";
 
 const QString QDEBUG_OUTPUT_FORMAT = "[%{time h:mm:ss}] %{message}";
 

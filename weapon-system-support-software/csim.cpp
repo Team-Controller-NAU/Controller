@@ -3,7 +3,8 @@
 //constructor
 CSim::CSim(QObject *parent, QString portName)
     : QThread(parent), stop(false), portName(portName),
-    connPtr(nullptr), eventsPtr(nullptr), startupTime(QDateTime::currentMSecsSinceEpoch())
+    connPtr(nullptr), eventsPtr(nullptr), startupTime(QDateTime::currentMSecsSinceEpoch()),
+    secondTrigger(true)
 {
     // Avoid class initialization until thread is running
 }
@@ -40,10 +41,10 @@ void CSim::clearError(int clearedId)
     eventsPtr->freeError(clearedId);
 
     //transmit error cleared message to ddm
-    connPtr->transmit(QString::number(CLEAR_ERROR) + DELIMETER + QString::number(clearedId) + DELIMETER);
+    connPtr->transmit(QString::number(CLEAR_ERROR) + DELIMETER + QString::number(clearedId) + DELIMETER + "\n");
 
     //store message
-    messagesSent += QString::number(CLEAR_ERROR) + DELIMETER + QString::number(clearedId) + DELIMETER;
+    messagesSent += QString::number(CLEAR_ERROR) + DELIMETER + QString::number(clearedId) + DELIMETER + "\n";
 }
 
 //slot connected to transmissionRequest signal in ddm,
@@ -90,6 +91,9 @@ void CSim::stopSimulation()
     // clear dump messages
     eventDumpMessage = "";
     errorDumpMessage = "";
+
+    // reset startup time
+    startupTime = 0;
 }
 
 //starts csim in seperate thread, messages will be sent through given port
@@ -99,7 +103,11 @@ void CSim::startCSim(QString portNameInput)
 
     if (!isRunning())
     {
+        // notify
         qDebug() << "[CSIM] Starting CSim in seperate thread";
+
+        // reset startup time
+        startupTime = QDateTime::currentMSecsSinceEpoch();
 
         //sets up thread and calls run()
         start();
@@ -109,97 +117,94 @@ void CSim::startCSim(QString portNameInput)
 //reads messages from ddm
 void CSim::checkConnection(Connection *conn)
 {
-    // Ensure port is open to prevent possible errors
-    if (conn->serialPort.isOpen())
+    // Check for message from ddm
+    if (conn->checkForValidMessage())
     {
-        // Check for message from ddm
-        if (conn->serialPort.bytesAvailable() > 0)
+        // Get serialized string from port
+        QByteArray serializedMessage = conn->serialPort.readAll();
+
+        // Deserialize string
+        QString message = QString::fromUtf8(serializedMessage);
+
+        // Extract message id
+        SerialMessageIdentifier messageId = static_cast<SerialMessageIdentifier>(QString(message[0]).toInt());
+
+        int randNum;
+
+        // Determine what kind of message this is
+        switch (messageId)
         {
-            // Get serialized string from port
-            QByteArray serializedMessage = conn->serialPort.readAll();
+        case CLOSING_CONNECTION:
+            // Log
+            qDebug() << "[CSIM] Disconnect message received from DDM. Serial communication halted" << qPrintable("\n");
 
-            // Deserialize string
-            QString message = QString::fromUtf8(serializedMessage);
+            // Update flag
+            conn->connected = false;
 
-            // Extract message id
-            SerialMessageIdentifier messageId = static_cast<SerialMessageIdentifier>(QString(message[0]).toInt());
+            break;
 
-            electrical *elec(new electrical());
+        case LISTENING:
+            // initalize a random number generator with null time seed
+            std::srand(std::time(nullptr));
 
-            // Determine what kind of message this is
-            switch (messageId)
+            // get a random number between 0 and 3
+            randNum = std::rand() % 4;
+
+            // Log
+            qDebug() << "[CSIM] DDM listening signal received. Serial communication beginning"<< qPrintable("\n");
+
+            // Send message to begin serial comm (controller version and crc are included in the begin message)
+            conn->transmit(QString::number(BEGIN) + DELIMETER + getTimeStamp() + DELIMETER + CONTROLLER_VERSION + DELIMETER + CRC_VERSION + DELIMETER + '\n');
+
+            //store message
+            messagesSent += QString::number(BEGIN) + DELIMETER + getTimeStamp() + DELIMETER + CONTROLLER_VERSION + DELIMETER + CRC_VERSION + DELIMETER + '\n';
+
+            // transmit a random electrical message
+            conn->transmit(QString::number(ELECTRICAL) + DELIMETER + ELECTRICAL_MESSAGES[randNum] + '\n');
+
+            //store message
+            messagesSent += QString::number(ELECTRICAL) + DELIMETER + ELECTRICAL_MESSAGES[randNum] + '\n';
+
+            //check for existing event dump message
+            if (eventDumpMessage.length() > 0)
             {
-            case CLOSING_CONNECTION:
-                // Log
-                qDebug() << "[CSIM] Disconnect message received from DDM. Serial communication halted" << qPrintable("\n");
-
-                // Update flag
-                conn->connected = false;
-
-                break;
-
-            case LISTENING:
-
-                // Log
-                qDebug() << "[CSIM] DDM listening signal received. Serial communication beginning"<< qPrintable("\n");
-
-                // Send message to begin serial comm
-                conn->transmit(QString::number(BEGIN) + DELIMETER + '\n');
+                //send event dump
+                conn->transmit( eventDumpMessage + '\n');
 
                 //store message
-                messagesSent += QString::number(BEGIN) + DELIMETER + '\n';
+                messagesSent += eventDumpMessage + '\n';
 
-                // transmit the electrial signal
-                conn->transmit(QString::number(ELECTRICAL) + DELIMETER + ELECTRICAL_MESSAGES + '\n');
-
-                //store message
-                messagesSent += QString::number(ELECTRICAL) + DELIMETER + ELECTRICAL_MESSAGES + '\n';
-
-                //check for existing event dump message
-                if (eventDumpMessage.length() > 0)
-                {
-                    //send event dump
-                    conn->transmit( eventDumpMessage + '\n');
-
-                    //store message
-                    messagesSent += eventDumpMessage + '\n';
-
-                    //empty event dump
-                    eventDumpMessage = "";
-                }
-
-                //check for existing error dump message
-                if (errorDumpMessage.length() > 0)
-                {
-                    //send error dump
-                    conn->transmit( errorDumpMessage + '\n');
-
-                    //store message
-                    messagesSent += errorDumpMessage + '\n';
-
-                    //empty error dump
-                    errorDumpMessage = "";
-                }
-
-                // Update flag
-                conn->connected = true;
-
-                break;
-
-            default:
-                // Log
-                qDebug() << "[CSIM] Unrecognized serial message received: " << message;
-
-                //disconnect, synchronization failed
-                conn->connected = false;
-
-                break;
+                //empty event dump
+                eventDumpMessage = "";
             }
+
+            //check for existing error dump message
+            if (errorDumpMessage.length() > 0)
+            {
+                //send error dump
+                conn->transmit( errorDumpMessage + '\n');
+
+                //store message
+                messagesSent += errorDumpMessage + '\n';
+
+                //empty error dump
+                errorDumpMessage = "";
+            }
+
+            // Update flag
+            conn->connected = true;
+
+            break;
+
+        default:
+            // Log
+            qDebug() << "[CSIM] Unrecognized serial message received: " << message;
+
+            //disconnect, synchronization failed
+            conn->connected = false;
+
+            break;
         }
-    }
-    else
-    {
-        qDebug() << "[CSIM] Serial port is closed, unable to read data";
     }
 }
 
@@ -241,6 +246,9 @@ void CSim::run()
         //for status use smart pointer for automatic memory management (resources auto free when function exits)
         std::unique_ptr<Status> status(new Status());
 
+        //manually set feed position to starting val
+        status->feedPosition = FEEDING;
+
         // Get time based seed for rng
         qint64 seed = QDateTime::currentMSecsSinceEpoch();
 
@@ -259,7 +267,6 @@ void CSim::run()
         QString errorMessage;
         int clearedId;
 
-
         conn->connected = false;
 
         //loop until told to stop by owner of csim handle
@@ -272,7 +279,7 @@ void CSim::run()
             qDebug() << "[CSIM] Iteration: " << i;
 
             //replace status values with randomized ones
-            status->randomize();
+            status->randomize(secondTrigger);
 
             //check conn before transmission
             checkConnection(conn);
@@ -297,7 +304,7 @@ void CSim::run()
             message = "";
 
             //20% chance of generating event
-            if ( randomGenerator.bounded(1, 6) == 1)
+            if (true) //randomGenerator.bounded(1, 6) == 1)
             {
                 //check conn before transmission
                 checkConnection(conn);
@@ -351,7 +358,7 @@ void CSim::run()
 
             //20% chance of generating error
             //TEMPORARILY SET TO GENERATE ERROR EACH ITERATION
-            if ( true )//randomGenerator.bounded(1, 6) == 1)
+            if (true)//randomGenerator.bounded(1, 6) == 1)
             {
                 //check conn before transmission
                 checkConnection(conn);
@@ -444,7 +451,7 @@ void CSim::run()
         //if connected, add disconnect message to messagesSent (sent in destructor)
         if (conn->connected)
         {
-            messagesSent += QString::number(static_cast<int>(CLOSING_CONNECTION)) + '\n';
+            messagesSent += QString::number(static_cast<int>(CLOSING_CONNECTION)) + DELIMETER + '\n';
         }
 
         //free connection

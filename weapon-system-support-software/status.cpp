@@ -3,10 +3,7 @@
 Status::Status(QObject *parent)
     : QObject{parent}
 {
-    totalEvents = 0;
-    totalErrors = 0;
     totalFiringEvents = 0;
-
 }
 
 //given a status message, update status class with new data
@@ -15,15 +12,13 @@ void Status::loadData(QString statusMessage)
     /* the statusMessage contains csv data in the following order
      *
         bool armed;
-        TriggerStatus trigger1Status;
-        TriggerStatus trigger2Status;
+        TriggerStatus trigger1;
+        TriggerStatus trigger2;
         ControllerState controllerState;
         FiringMode firingMode;
         FeedPosition feedPosition;
         //to find total events including errors, add total errors and events
-        int totalErrors;
         int totalFiringEvents;
-        int totalEvents; //count of total non error events
         int burstLength;
         double firingRate;
      *
@@ -31,146 +26,64 @@ void Status::loadData(QString statusMessage)
     //create bool ptr to store result of string->double conversion for fire rate
     bool result = true;
 
-    //locate first comma
-    int commaPosition = statusMessage.indexOf(DELIMETER);
+    QStringList values = statusMessage.split(DELIMETER);
 
     //extract armed value from message
-    armed = (statusMessage.left(commaPosition) == "1");
-
-    //cut statusMessage
-    statusMessage = statusMessage.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = statusMessage.indexOf(DELIMETER);
+    armed = (values[0] == "1");
 
     //extract trigger1 status
-    trigger1Status = static_cast<TriggerStatus>(statusMessage.left(commaPosition).toInt());
-
-    //cut statusMessage
-    statusMessage = statusMessage.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = statusMessage.indexOf(DELIMETER);
+    trigger1 = static_cast<TriggerStatus>(values[1].toInt());
 
     //extract trigger2
-    trigger1Status = static_cast<TriggerStatus>(statusMessage.left(commaPosition).toInt());
-
-    //cut statusMessage
-    statusMessage = statusMessage.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = statusMessage.indexOf(DELIMETER);
+    trigger2 = static_cast<TriggerStatus>(values[2].toInt());
 
     //extract controller state
-    controllerState = static_cast<ControllerState>(statusMessage.left(commaPosition).toInt());
-
-    //cut statusMessage
-    statusMessage = statusMessage.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = statusMessage.indexOf(DELIMETER);
+    controllerState = static_cast<ControllerState>(values[3].toInt());
 
     //extract firing mode
-    firingMode = static_cast<FiringMode>(statusMessage.left(commaPosition).toInt());
-
-    //cut statusMessage
-    statusMessage = statusMessage.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = statusMessage.indexOf(DELIMETER);
+    firingMode = static_cast<FiringMode>(values[4].toInt());
 
     //extract feed pos
-    feedPosition = static_cast<FeedPosition>(statusMessage.left(commaPosition).toInt());
-
-    //cut statusMessage
-    statusMessage = statusMessage.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = statusMessage.indexOf(DELIMETER);
-
-    //extract total errors
-    totalErrors = statusMessage.left(commaPosition).toInt();
-
-    //cut statusMessage
-    statusMessage = statusMessage.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = statusMessage.indexOf(DELIMETER);
+    feedPosition = static_cast<FeedPosition>(values[5].toInt());
 
     //extract
-    totalFiringEvents = statusMessage.left(commaPosition).toInt();
-
-    //cut statusMessage
-    statusMessage = statusMessage.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = statusMessage.indexOf(DELIMETER);
+    totalFiringEvents = values[6].toInt();
 
     //extract
-    totalEvents = statusMessage.left(commaPosition).toInt();
-
-    //cut statusMessage
-    statusMessage = statusMessage.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = statusMessage.indexOf(DELIMETER);
+    burstLength = values[7].toInt();
 
     //extract
-    burstLength = statusMessage.left(commaPosition).toInt();
-
-    //cut statusMessage
-    statusMessage = statusMessage.right(commaPosition);
-
-
-
-    //get comma pos
-    commaPosition = statusMessage.indexOf(DELIMETER);
-
-    //extract
-    firingRate = statusMessage.left(commaPosition).toDouble(&result);
-
-    //cut statusMessage
-    statusMessage = statusMessage.right(commaPosition);
-
+    firingRate = values[8].toDouble(&result);
 
     //emit signal, new status data is loaded
     emit newDataLoaded(this);
 }
 
+//given a message containing the controller version and crc updates corresponding class variables
+void Status::loadVersionData(QString versionMessage)
+{
+    QStringList values = versionMessage.split(DELIMETER);
 
+    elapsedControllerTime = values[0];
+    version = values[1];
+    crc = values[2];
+
+    //emit signal, new status data is loaded
+    emit newDataLoaded(this);
+}
 
 QString Status::generateMessage()
 {
     /* will create a status message that contains csv data in the following order
      *
         bool armed;
-        TriggerStatus trigger1Status;
-        TriggerStatus trigger2Status;
+        TriggerStatus trigger1;
+        TriggerStatus trigger2;
         ControllerState controllerState;
         FiringMode firingMode;
         FeedPosition feedPosition;
         //to find total events including errors, add total errors and events
-        int totalErrors;
         int totalFiringEvents;
-        int totalEvents; //count of total non error events
         int burstLength;
         double firingRate;
      *
@@ -179,9 +92,9 @@ QString Status::generateMessage()
     //add each value and a delimeter to the end of the string, then return the string
     QString message = QString::number(armed) + DELIMETER;
 
-    message += QString::number(trigger1Status) + DELIMETER;
+    message += QString::number(trigger1) + DELIMETER;
 
-    message += QString::number(trigger2Status) + DELIMETER;
+    message += QString::number(trigger2) + DELIMETER;
 
     message += QString::number(controllerState) + DELIMETER;
 
@@ -189,11 +102,7 @@ QString Status::generateMessage()
 
     message += QString::number(feedPosition) + DELIMETER;
 
-    message += QString::number(totalErrors) + DELIMETER;
-
     message += QString::number(totalFiringEvents) + DELIMETER;
-
-    message += QString::number(totalEvents) + DELIMETER;
 
     message += QString::number(burstLength) + DELIMETER;
 
@@ -203,22 +112,71 @@ QString Status::generateMessage()
 }
 
 //generate random values for status
-void Status::randomize()
+void Status::randomize(bool secondTrigger)
 {
     armed = QRandomGenerator::global()->bounded(0, 1 + 1);
 
-    trigger1Status = static_cast<TriggerStatus>(QRandomGenerator::global()->bounded(0, NUM_TRIGGER_STATUS));
+    trigger1 = static_cast<TriggerStatus>(QRandomGenerator::global()->bounded(0, NUM_TRIGGER_STATUS -1));
 
-    trigger2Status = static_cast<TriggerStatus>(QRandomGenerator::global()->bounded(0, NUM_TRIGGER_STATUS));
+    //check if second trigger is enabled
+    if (secondTrigger)
+    {
+        //get random value
+        trigger2 = static_cast<TriggerStatus>(QRandomGenerator::global()->bounded(0, NUM_TRIGGER_STATUS -1));
+    }
+    //disabled, set to NA
+    else
+    {
+        trigger2 = NA;
+    }
 
     controllerState = static_cast<ControllerState>(QRandomGenerator::global()->bounded(0, NUM_CONTROLLER_STATE));
 
     firingMode = static_cast<FiringMode>(QRandomGenerator::global()->bounded(0, NUM_FIRING_MODE));
 
-    feedPosition = static_cast<FeedPosition>(QRandomGenerator::global()->bounded(0, NUM_FEED_POSITION)
-                                             * FEED_POSITION_INCREMENT_VALUE);
+    //new randomization method to iterate feed position smoothly
+    switch (feedPosition)
+    {
+    case FEEDING:
+        feedPosition = CHAMBERING;
+        break;
+    case CHAMBERING:
+        feedPosition = LOCKING;
+        break;
+    case LOCKING:
+        feedPosition = FIRING;
+        break;
+    case FIRING:
+        feedPosition = UNLOCKING;
+        break;
+    case UNLOCKING:
+        feedPosition = EXTRACTING;
+        break;
+    case EXTRACTING:
+        feedPosition = EJECTING;
+        break;
+    case EJECTING:
+        feedPosition = COCKING;
+        break;
+    case COCKING:
+        feedPosition = FEEDING; // Cycle back to FEEDING
+        break;
+    default:
+        feedPosition = FEEDING;
+        break;
+    }
+
+    //old randomization method to get random feed position
+    //feedPosition = static_cast<FeedPosition>(QRandomGenerator::global()->bounded(0, NUM_FEED_POSITION)
+    //                                         * FEED_POSITION_INCREMENT_VALUE);
 
     burstLength = QRandomGenerator::global()->bounded(2, 50 +1);
 
     firingRate = QRandomGenerator::global()->bounded(0, 2000 +1) + QRandomGenerator::global()->generateDouble();
+
+    //1/8 odds of incrementing total firing events
+    if (QRandomGenerator::global()->bounded(0,8 +1) == 4)
+    {
+        totalFiringEvents++;
+    }
 }

@@ -64,6 +64,94 @@ void MainWindow::on_clear_error_button_clicked()
     emit clearErrorRequest(errorId);
 }
 
+// slot for find functionality within the events_output box when the user presses CTRL+F on their keyboard
+void MainWindow::findText()
+{
+    // make sure the user is in the events_output box
+    if (qApp->focusWidget() != ui->events_output) return;
+
+    // get the text to find from the user by opening an inputdialog box
+    QString searchText;
+    QInputDialog inputDialog = QInputDialog(this);
+    inputDialog.setInputMode(QInputDialog::TextInput);
+    inputDialog.setLabelText("Search for some text:");
+    inputDialog.setOkButtonText("Find Next");
+    inputDialog.setWindowTitle("Search");
+    inputDialog.setStyleSheet("color:white;");
+    QSize minSize = inputDialog.minimumSizeHint();
+    inputDialog.setFixedSize(minSize);
+
+    // use findChild to get the QLineEdit instance of the QInputDialog so we can set placeholder text
+    QLineEdit *lineEdit = inputDialog.findChild<QLineEdit *>();
+    if (lineEdit) lineEdit->setPlaceholderText("Enter text to find...");
+
+    bool windowOpen = true;
+
+    // start loop for continuous search until the user presses cancel or closes the window
+    while (windowOpen)
+    {
+        // open the dialog box and get the user input
+        windowOpen = inputDialog.exec();
+
+        // get text from user input
+        searchText = inputDialog.textValue();
+        int index = 0;
+
+        // check if the window is still open and the search text is not empty
+        if (windowOpen && !searchText.isEmpty())
+        {
+            // get all the text content from events_output
+            QString eventsText = ui->events_output->toPlainText();
+
+            // set up cursor object
+            QTextCursor cursor = ui->events_output->textCursor();
+
+            // check if we have done a search in this loop
+            if (cursor.hasSelection())
+            {
+                // set index to current position
+                index = cursor.position() + 1;
+            }
+
+            // find the next occurrence of the text in the events_output, ignoring caps
+            int position = eventsText.indexOf(searchText, index, Qt::CaseInsensitive);
+
+            // check if we have actually found the text
+            if (position != -1) {
+                // if the text is found, move the cursor to the found position and highlight it
+                cursor.setPosition(position);
+                cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor, searchText.length());
+                ui->events_output->setTextCursor(cursor);
+            }
+            // otherwise, assume we have not found the text
+            else
+            {
+                // reset cursor selection
+                cursor.clearSelection();
+                cursor.setPosition(0);
+                ui->events_output->setTextCursor(cursor);
+
+                // show error message
+                QMessageBox informationBox = QMessageBox(this);
+                informationBox.setWindowTitle("Search");
+                informationBox.setText("Next occurrence not found.");
+                informationBox.setIcon(QMessageBox::Information);
+                informationBox.setStyleSheet("color: white;");
+                informationBox.exec();
+            }
+        }
+        else
+        {
+            // break the loop if the window is closed or the search text is empty
+            QTextCursor cursor = ui->events_output->textCursor();
+            cursor.clearSelection();
+            cursor.setPosition(0);
+            ui->events_output->setTextCursor(cursor);
+            break;
+        }
+    }
+}
+
 //button toggles csim random generation on and off. first click will setup thread and run csim.
 //second will terminate thread and close csim connection.
 void MainWindow::on_CSim_button_clicked()
@@ -165,14 +253,26 @@ void MainWindow::on_DevPageButton_clicked()
 //download button for events in CSV format
 void MainWindow::on_download_button_clicked()
 {
-    // get current date
-    //QString logFileName = QDateTime::currentDateTime().date().toString("MM-dd-yyyy");
+    QString logFile;
+
+    //check if user has set a custom log file output directory
+    if ( !userSettings.value("portName").toString().isEmpty() )
+    {
+        //initialize the logfile into this directory
+        logFile = userSettings.value("logfileLocation").toString();
+    }
+    //otherwise use default directory
+    else
+    {
+        //use the path of the exe and add a "Log Files" directory
+        logFile = QCoreApplication::applicationDirPath() + "/WSSS Log Files/";
+    }
 
     qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
-    QString logFileName = QString::number(secsSinceEpoch);
+    logFile += QString::number(secsSinceEpoch);
 
     // save logfile - mannually done
-    events->outputToLogFile(logFileName.toStdString() + "-logfile-M.txt");
+    events->outputToLogFile(logFile + "-logfile-M.txt");
 }
 
 //sends user to electrical page when clicked
@@ -194,151 +294,51 @@ void MainWindow::on_EventsPageButton_clicked()
 
 void MainWindow::on_FilterBox_currentIndexChanged(int index)
 {
-    // initialize slot
-    EventNode* wkgErrPtr = events->headErrorNode;
-    EventNode* wkgEventPtr = events->headEventNode;
-    QString dumpMessage;
-    bool printErr;
-
-    // check for which filter
+    // check for which filter the user selected
     switch(index)
     {
-    case 0:
+    case ALL:
 
         qDebug() << "All filter selected";
 
         // set filter
         eventFilter = ALL;
 
-        // reset dump
-        dumpMessage = "";
-
-        // loop through all errors and events
-        while (wkgErrPtr != nullptr || wkgEventPtr != nullptr)
-        {
-            // get next to print by ID
-            EventNode* nextPrintPtr = events->getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
-
-            // set dump message
-            if (dumpMessage != "") dumpMessage += '\n';
-            dumpMessage += QString::number(nextPrintPtr->id) + ',' + nextPrintPtr->timeStamp + ',' + nextPrintPtr->eventString + ',';
-            if (printErr) dumpMessage += (nextPrintPtr->cleared ? "1," : "0,");
-            dumpMessage += "\n";
-        }
-
-        // update ui
-        ui->events_output->setText(dumpMessage);
-
         break;
 
-    case 1:
+    case EVENTS:
 
         qDebug() << "All events filter selected";
 
         // set filter
         eventFilter = EVENTS;
 
-        // reset dump
-        dumpMessage = "";
-
-        // loop through all events
-        while (wkgEventPtr != nullptr)
-        {
-            // set dump message
-            if (dumpMessage != "") dumpMessage += '\n';
-            dumpMessage += QString::number(wkgEventPtr->id) + ',' + wkgEventPtr->timeStamp + ',' + wkgEventPtr->eventString + ',';
-            dumpMessage += "\n";
-            wkgEventPtr = wkgEventPtr->nextPtr;
-        }
-
-        // update ui
-        ui->events_output->setText(dumpMessage);
-
         break;
 
-    case 2:
+    case ERRORS:
 
         qDebug() << "All errors filter selected";
 
         //set filter
         eventFilter = ERRORS;
 
-        // reset dump
-        dumpMessage = "";
-
-        // loop through all errors
-        while (wkgErrPtr != nullptr)
-        {
-            // set dump message
-            if (dumpMessage != "") dumpMessage += '\n';
-            dumpMessage += QString::number(wkgErrPtr->id) + ',' + wkgErrPtr->timeStamp + ',' + wkgErrPtr->eventString + ',';
-            dumpMessage += (wkgErrPtr->cleared ? "1," : "0,");
-            dumpMessage += "\n";
-            wkgErrPtr = wkgErrPtr->nextPtr;
-        }
-
-        // update ui
-        ui->events_output->setText(dumpMessage);
-
         break;
 
-    case 3:
+    case CLEARED_ERRORS:
 
         qDebug() << "All cleared errors filter selected";
 
         // set filter
         eventFilter = CLEARED_ERRORS;
 
-        // reset dump
-        dumpMessage = "";
-
-        // loop through all errors
-        while (wkgErrPtr != nullptr)
-        {
-            // check for cleared
-            if (wkgErrPtr->cleared)
-            {
-                // set dump message
-                if (dumpMessage != "") dumpMessage += '\n';
-                dumpMessage += QString::number(wkgErrPtr->id) + ',' + wkgErrPtr->timeStamp + ',' + wkgErrPtr->eventString + ',';
-                dumpMessage += (wkgErrPtr->cleared ? "1," : "0,");
-                dumpMessage += "\n";
-            }
-            wkgErrPtr = wkgErrPtr->nextPtr;
-        }
-
-        // update ui
-        ui->events_output->setText(dumpMessage);
-
         break;
 
-    case 4:
+    case NON_CLEARED_ERRORS:
 
         qDebug() << "All non-cleared errors filter selected";
 
         // set filter
         eventFilter = NON_CLEARED_ERRORS;
-
-        // reset dump
-        dumpMessage = "";
-
-        // loop through all errors
-        while (wkgErrPtr != nullptr)
-        {
-            // check for non-cleared
-            if (!wkgErrPtr->cleared)
-            {
-                // set dump message
-                if (dumpMessage != "") dumpMessage += '\n';
-                dumpMessage += QString::number(wkgErrPtr->id) + ',' + wkgErrPtr->timeStamp + ',' + wkgErrPtr->eventString + ',';
-                dumpMessage += (wkgErrPtr->cleared ? "1," : "0,");
-                dumpMessage += "\n";
-            }
-            wkgErrPtr = wkgErrPtr->nextPtr;
-        }
-
-        // update ui
-        ui->events_output->setText(dumpMessage);
 
         break;
 
@@ -347,6 +347,8 @@ void MainWindow::on_FilterBox_currentIndexChanged(int index)
         // do nothing
         qDebug() << "Error: Unrecognized filter index.";
     }
+
+    refreshEventsOutput();
 }
 
 void MainWindow::on_flow_control_selection_currentIndexChanged(int index)
@@ -376,7 +378,7 @@ void MainWindow::on_flow_control_selection_currentIndexChanged(int index)
 //toggles handshake process on and off. Once connected, allow for disconnect (send disconnect message to controller)
 void MainWindow::on_handshake_button_clicked()
 {
-    QPixmap redButton(":/resources/Images/redButton.png");
+   // QPixmap redButton(":/resources/Images/redButton.png");
 
     // Check if the timer is started or ddmCon is not connected
     if ( !handshakeTimer->isActive() && !ddmCon->connected )
@@ -394,7 +396,9 @@ void MainWindow::on_handshake_button_clicked()
 
         //refreshes connection button/displays
         ui->handshake_button->setText("Connecting");
-        ui->handshake_button->setStyleSheet("color: #FFFFFF;border-color: rgb(255, 255, 255);background-color: #FF7518;font: 15pt Segoe UI;");
+        ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #FF7518; border: 1px solid; border-color: #e65c00; font: 15pt 'Segoe UI'; } "
+                                            "QPushButton::hover { background-color: #ff8533; } "
+                                            "QPushButton::pressed { background-color: #ffa366;}");
         ui->ddm_port_selection->setEnabled(false);
 
         //disable changes to connection settings
@@ -418,8 +422,11 @@ void MainWindow::on_handshake_button_clicked()
 
         //refreshes connection button/displays
         ui->handshake_button->setText("Connect");
-        ui->handshake_button->setStyleSheet("color: rgb(255, 255, 255);border-color: rgb(255, 255, 255);background-color: #14AE5C;font: 15pt Segoe UI;");
-        ui->connectionStatus->setPixmap(redButton);
+        ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #14AE5C; border: 1px solid; border-color: #0d723c; font: 15pt 'Segoe UI'; } "
+                                            "QPushButton::hover { background-color: #1be479; } "
+                                            "QPushButton::pressed { background-color: #76efae;}");
+        ui->connectionStatus->setPixmap(RED_LIGHT);
+        ui->connectionLabel->setText("Disconnected ");
         ui->ddm_port_selection->setEnabled(true);
 
         //allow user to modify connection settings
@@ -486,6 +493,8 @@ void MainWindow::on_save_Button_clicked()
     userSettings.setValue("parity", ui->parity_selection->currentText());
     userSettings.setValue("stopBits", ui->stop_bit_selection->currentText());
     userSettings.setValue("flowControl", ui->flow_control_selection->currentText());
+    userSettings.setValue("portName", ui->ddm_port_selection->currentText());
+    userSettings.setValue("csimPortName", ui->csim_port_selection->currentText());
 
     displaySavedConnectionSettings();
 }
@@ -649,7 +658,7 @@ void MainWindow::on_setLogfileFolder_clicked()
     QString previousPath = userSettings.value("logfileLocation").toString();
 
     // set logfile location with the user choice
-    userSettings.setValue("logfileLocation", QFileDialog::getExistingDirectory(this, tr("Create or Select a logfolder directory")));
+    userSettings.setValue("logfileLocation", QFileDialog::getExistingDirectory(this, tr("Create or Select a logfolder directory")) + "/");
 
     // check the success of saving settings
     if(userSettings.status() != QSettings::NoError)
@@ -666,9 +675,66 @@ void MainWindow::on_setLogfileFolder_clicked()
     // otherwise, assume successful logfile directory creation
     else
     {
-        qDebug() << "Successfully set user settings";
+        qDebug() << "New log file directory set: " << userSettings.value("logfileLocation").toString();
     }
 
     //sync user settings
     userSettings.sync();
+}
+
+//toggles csim between accounting for 1 and 2 triggers
+void MainWindow::on_toggle_num_triggers_clicked()
+{
+    //check if secondTrigger is currently enabled
+    if ( csimHandle->secondTrigger )
+    {
+        //disable it
+        csimHandle->secondTrigger = false;
+
+        //update button text
+        ui->toggle_num_triggers->setText("Set to two triggers");
+
+        //empty the trigger status current value
+        status->trigger2 = NA;
+    }
+    //secondTrigger is currently disabled
+    else
+    {
+        //enable it
+        csimHandle->secondTrigger = true;
+        //update button text
+        ui->toggle_num_triggers->setText("Set to single trigger");
+    }
+}
+
+
+void MainWindow::on_load_events_from_logfile_clicked()
+{
+    // Open a file dialog for the user to select a logfile
+    QString selectedFile = QFileDialog::getOpenFileName(this, tr("Select Log File"), QString(), tr("Log Files (*.txt);;All Files (*)"));
+
+    // Check if the user canceled the dialog
+    if (selectedFile.isEmpty())
+    {
+        return;
+    }
+
+    qDebug() << "User selected " << selectedFile;
+
+    // Pass the selected file name to the loadDataFromLogFile function
+    int result = events->loadDataFromLogFile(events, selectedFile);
+
+    // Handle the result if needed
+    if (result == INCORRECT_FORMAT)
+    {
+        // Handle error
+        qDebug() << "Log file was of incorrect format.";
+    }
+    else if (result == DATA_NOT_FOUND)
+    {
+        qDebug() << "Log file could not be found";
+    }
+
+    //refresh the events output
+    refreshEventsOutput();
 }
