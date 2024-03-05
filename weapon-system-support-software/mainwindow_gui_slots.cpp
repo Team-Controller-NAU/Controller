@@ -253,14 +253,26 @@ void MainWindow::on_DevPageButton_clicked()
 //download button for events in CSV format
 void MainWindow::on_download_button_clicked()
 {
-    // get current date
-    //QString logFileName = QDateTime::currentDateTime().date().toString("MM-dd-yyyy");
+    QString logFile;
+
+    //check if user has set a custom log file output directory
+    if ( !userSettings.value("portName").toString().isEmpty() )
+    {
+        //initialize the logfile into this directory
+        logFile = userSettings.value("logfileLocation").toString();
+    }
+    //otherwise use default directory
+    else
+    {
+        //use the path of the exe and add a "Log Files" directory
+        logFile = QCoreApplication::applicationDirPath() + "/WSSS Log Files/";
+    }
 
     qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
-    QString logFileName = QString::number(secsSinceEpoch);
+    logFile += QString::number(secsSinceEpoch);
 
     // save logfile - mannually done
-    events->outputToLogFile(logFileName.toStdString() + "-logfile-M.txt");
+    events->outputToLogFile(logFile + "-logfile-M.txt");
 }
 
 //sends user to electrical page when clicked
@@ -646,7 +658,7 @@ void MainWindow::on_setLogfileFolder_clicked()
     QString previousPath = userSettings.value("logfileLocation").toString();
 
     // set logfile location with the user choice
-    userSettings.setValue("logfileLocation", QFileDialog::getExistingDirectory(this, tr("Create or Select a logfolder directory")));
+    userSettings.setValue("logfileLocation", QFileDialog::getExistingDirectory(this, tr("Create or Select a logfolder directory")) + "/");
 
     // check the success of saving settings
     if(userSettings.status() != QSettings::NoError)
@@ -663,7 +675,7 @@ void MainWindow::on_setLogfileFolder_clicked()
     // otherwise, assume successful logfile directory creation
     else
     {
-        qDebug() << "Successfully set user settings";
+        qDebug() << "New log file directory set: " << userSettings.value("logfileLocation").toString();
     }
 
     //sync user settings
@@ -693,4 +705,36 @@ void MainWindow::on_toggle_num_triggers_clicked()
         //update button text
         ui->toggle_num_triggers->setText("Set to single trigger");
     }
+}
+
+
+void MainWindow::on_load_events_from_logfile_clicked()
+{
+    // Open a file dialog for the user to select a logfile
+    QString selectedFile = QFileDialog::getOpenFileName(this, tr("Select Log File"), QString(), tr("Log Files (*.txt);;All Files (*)"));
+
+    // Check if the user canceled the dialog
+    if (selectedFile.isEmpty())
+    {
+        return;
+    }
+
+    qDebug() << "User selected " << selectedFile;
+
+    // Pass the selected file name to the loadDataFromLogFile function
+    int result = events->loadDataFromLogFile(events, selectedFile);
+
+    // Handle the result if needed
+    if (result == INCORRECT_FORMAT)
+    {
+        // Handle error
+        qDebug() << "Log file was of incorrect format.";
+    }
+    else if (result == DATA_NOT_FOUND)
+    {
+        qDebug() << "Log file could not be found";
+    }
+
+    //refresh the events output
+    refreshEventsOutput();
 }

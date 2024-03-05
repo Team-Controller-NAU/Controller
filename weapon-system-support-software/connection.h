@@ -27,13 +27,15 @@ public:
                QSerialPort::DataBits dataBits, QSerialPort::Parity parity,
                QSerialPort::StopBits stopBits, QSerialPort::FlowControl flowControl);
 
-    // overloaded constructor uses initial serail setting constants
+    //overloaded constructor uses initial serail setting constants
     Connection(QString portName);
 
     // destructor, sends closing message to port then closes port
     ~Connection();
 
-    // stores name of port given upon initialization
+    bool checkForValidMessage();
+
+    //stores name of port given upon initialization
     QString portName;
 
     // true when proper handshake has occurred on connected port
