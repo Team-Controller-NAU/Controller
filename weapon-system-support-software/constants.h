@@ -2,8 +2,7 @@
 #define CONSTANTS_H
 
 #include <QString>
-#include <QSerialPortInfo>
-#include <QSerialPort>
+#include <QtSerialPort/QtSerialPort>
 #include <QDir>
 #ifdef _WIN32 // check if we are compiling on Windows
 #include <QPixMap>

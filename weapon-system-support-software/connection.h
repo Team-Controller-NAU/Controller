@@ -2,7 +2,7 @@
 #define CLASSES_H
 
 #include <QDebug>
-#include <QtSerialPort>
+#include <QtSerialPort/QtSerialPort>
 #include <constants.h>
 
 /********************************************************************************

@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QtConcurrent>
+#include <QtConcurrent/QtConcurrent>
 #include <QDesktopServices>
 #include <connection.h>
 #include <csim.h>
