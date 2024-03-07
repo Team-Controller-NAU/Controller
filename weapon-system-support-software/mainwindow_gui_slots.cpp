@@ -265,7 +265,7 @@ void MainWindow::on_download_button_clicked()
     else
     {
         //use the path of the exe and add a "Log Files" directory
-        logFile = QCoreApplication::applicationDirPath() + "/WSSS Log Files/";
+        logFile = QCoreApplication::applicationDirPath() + "/" + INITIAL_LOGFILE_LOCATION;
     }
 
     qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
@@ -496,6 +496,10 @@ void MainWindow::on_save_Button_clicked()
     userSettings.setValue("portName", ui->ddm_port_selection->currentText());
     userSettings.setValue("csimPortName", ui->csim_port_selection->currentText());
 
+    //write changes to the registry
+    userSettings.sync();
+
+    //output new settings to qDebug()
     displaySavedConnectionSettings();
 }
 
@@ -666,7 +670,7 @@ void MainWindow::on_setLogfileFolder_clicked()
         qDebug() << "Error while saving user settings: " << userSettings.status();
     }
     // check if user exited the dialog box
-    else if(userSettings.value("logfileLocation").toString() == "")
+    else if(userSettings.value("logfileLocation").toString() == "/")
     {
         // revert to previous user setting
         userSettings.setValue("logfileLocation", previousPath);
@@ -707,11 +711,18 @@ void MainWindow::on_toggle_num_triggers_clicked()
     }
 }
 
-
+//opens log file directory to prompt user to select log file. data from log file is then
+//loaded into events class and rendered in events page.
 void MainWindow::on_load_events_from_logfile_clicked()
 {
+    //declare file browser class
+    QFileDialog dialog(this);
+
+    //set initial directory to log file directory set by user
+    dialog.setDirectory(userSettings.value("logfileLocation").toString());
+
     // Open a file dialog for the user to select a logfile
-    QString selectedFile = QFileDialog::getOpenFileName(this, tr("Select Log File"), QString(), tr("Log Files (*.txt);;All Files (*)"));
+    QString selectedFile = dialog.getOpenFileName(this, tr("Select Log File"), QString(), tr("Log Files (*.txt);;All Files (*)"));
 
     // Check if the user canceled the dialog
     if (selectedFile.isEmpty())
@@ -719,7 +730,8 @@ void MainWindow::on_load_events_from_logfile_clicked()
         return;
     }
 
-    qDebug() << "User selected " << selectedFile;
+    logEmptyLine();
+    qDebug() << "Loading data from: " << selectedFile;
 
     // Pass the selected file name to the loadDataFromLogFile function
     int result = events->loadDataFromLogFile(events, selectedFile);
