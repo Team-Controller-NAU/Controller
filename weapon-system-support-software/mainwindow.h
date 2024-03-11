@@ -110,7 +110,7 @@ private slots:
     void refreshEventsOutput();
     //checks if the current number of auto saved files is higher than the limit, deletes the
     //oldest one each iteration until the limit is enforced
-    void enforceAutoSaveLimit(QString path);
+    void enforceAutoSaveLimit();
     //==================================================================================
 
 

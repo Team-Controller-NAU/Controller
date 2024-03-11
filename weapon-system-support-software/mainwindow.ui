@@ -302,23 +302,73 @@ font: 16pt &quot;Segoe UI&quot;;</string>
             </sizepolicy>
            </property>
            <property name="currentIndex">
-            <number>1</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="Events_page">
             <layout class="QGridLayout" name="gridLayout_3">
-             <item row="2" column="0" rowspan="3" colspan="6">
-              <widget class="QTextEdit" name="events_output">
+             <item row="0" column="5" alignment="Qt::AlignBottom">
+              <widget class="QComboBox" name="FilterBox">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Filter the events output&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="styleSheet">
-                <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(30, 30, 30);
-border-color: rgb(255, 255, 255);</string>
+                <string notr="true">QComboBox {
+	padding-bottom: 3px;
+	color: rgb(255, 255, 255);
+	background-color: rgb(47, 47, 47);
+	border: 1px solid;
+	border-color: rgb(64, 64, 64);
+	font: 8pt &quot;Segoe UI&quot;;
+}
+
+QComboBox::items {
+	color: rgb(255, 255, 255);
+}
+
+QListView {
+	color: rgb(255, 255, 255);
+}
+
+QToolTip{
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid black;
+}</string>
                </property>
-               <property name="readOnly">
-                <bool>true</bool>
+               <property name="editable">
+                <bool>false</bool>
                </property>
+               <property name="currentText">
+                <string> Default</string>
+               </property>
+               <item>
+                <property name="text">
+                 <string> Default</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string> All Events</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string> All Errors</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string> Cleared Errors</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string> Active Errors</string>
+                </property>
+               </item>
               </widget>
              </item>
-             <item row="5" column="0" colspan="6">
+             <item row="7" column="0" colspan="6">
               <layout class="QGridLayout" name="EventStatus">
                <property name="verticalSpacing">
                 <number>1</number>
@@ -664,6 +714,18 @@ QPushButton::pressed {
                </item>
               </layout>
              </item>
+             <item row="3" column="0" rowspan="3" colspan="6">
+              <widget class="QTextEdit" name="events_output">
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 255, 255);
+background-color: rgb(30, 30, 30);
+border-color: rgb(255, 255, 255);</string>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
              <item row="0" column="0" alignment="Qt::AlignLeft">
               <widget class="QLabel" name="Event_Header">
                <property name="sizePolicy">
@@ -687,68 +749,6 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
                <property name="text">
                 <string>Events</string>
                </property>
-              </widget>
-             </item>
-             <item row="0" column="5" alignment="Qt::AlignBottom">
-              <widget class="QComboBox" name="FilterBox">
-               <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Filter the events output&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">QComboBox {
-	padding-bottom: 3px;
-	color: rgb(255, 255, 255);
-	background-color: rgb(47, 47, 47);
-	border: 1px solid;
-	border-color: rgb(64, 64, 64);
-	font: 8pt &quot;Segoe UI&quot;;
-}
-
-QComboBox::items {
-	color: rgb(255, 255, 255);
-}
-
-QListView {
-	color: rgb(255, 255, 255);
-}
-
-QToolTip{
-    background-color: #000000;
-    color: #FFFFFF;
-    border: 1px solid black;
-}</string>
-               </property>
-               <property name="editable">
-                <bool>false</bool>
-               </property>
-               <property name="currentText">
-                <string> Default</string>
-               </property>
-               <item>
-                <property name="text">
-                 <string> Default</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string> All Events</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string> All Errors</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string> Cleared Errors</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string> Active Errors</string>
-                </property>
-               </item>
               </widget>
              </item>
             </layout>
@@ -850,6 +850,9 @@ border-color: rgb(255, 255, 255);</string>
              <layout class="QGridLayout" name="gridLayout_2">
               <item row="4" column="1">
                <widget class="QPushButton" name="load_events_from_logfile">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(255, 255, 255);</string>
+                </property>
                 <property name="text">
                  <string>Load events from log file</string>
                 </property>
@@ -1602,7 +1605,7 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>922</width>
+                  <width>892</width>
                   <height>736</height>
                  </rect>
                 </property>
@@ -2966,6 +2969,34 @@ font: 20pt &quot;Segoe UI&quot;;</string>
     </item>
     <item>
      <layout class="QGridLayout" name="gridLayout">
+      <item row="1" column="2" alignment="Qt::AlignLeft">
+       <widget class="QLabel" name="crcLabel">
+        <property name="maximumSize">
+         <size>
+          <width>150</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Controller's CRC&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QLabel {
+color: rgb(255, 255, 255);
+font: 10pt &quot;Segoe UI&quot;;
+}
+
+QToolTip{
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid black;
+}</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="4">
        <widget class="QTextEdit" name="elapsedTime">
         <property name="maximumSize">
@@ -3009,19 +3040,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
         </property>
        </widget>
       </item>
-      <item row="1" column="3">
-       <spacer name="horizontalSpacer_6">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
       <item row="1" column="1">
        <spacer name="horizontalSpacer_13">
         <property name="orientation">
@@ -3038,16 +3056,22 @@ li.checked::marker { content: &quot;\2612&quot;; }
         </property>
        </spacer>
       </item>
-      <item row="1" column="2" alignment="Qt::AlignLeft">
-       <widget class="QLabel" name="crcLabel">
+      <item row="1" column="0" alignment="Qt::AlignLeft">
+       <widget class="QLabel" name="controllerLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="maximumSize">
          <size>
           <width>150</width>
-          <height>16777215</height>
+          <height>20</height>
          </size>
         </property>
         <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Controller's CRC&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Controller's version&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="styleSheet">
          <string notr="true">QLabel {
@@ -3065,6 +3089,19 @@ QToolTip{
          <string/>
         </property>
        </widget>
+      </item>
+      <item row="1" column="3">
+       <spacer name="horizontalSpacer_6">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
       <item row="1" column="5" alignment="Qt::AlignRight">
        <widget class="QTextEdit" name="DDMTimer">
@@ -3112,40 +3149,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
 &lt;p align=&quot;right&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="placeholderText">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0" alignment="Qt::AlignLeft">
-       <widget class="QLabel" name="controllerLabel">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>150</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Controller's version&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QLabel {
-color: rgb(255, 255, 255);
-font: 10pt &quot;Segoe UI&quot;;
-}
-
-QToolTip{
-    background-color: #000000;
-    color: #FFFFFF;
-    border: 1px solid black;
-}</string>
-        </property>
-        <property name="text">
          <string/>
         </property>
        </widget>

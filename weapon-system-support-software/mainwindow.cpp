@@ -346,6 +346,9 @@ void MainWindow::readSerialData()
                 // create log file
                 events->outputToLogFile( autosaveLogFile );
 
+                //new auto save file created, enforce auto save limit
+                enforceAutoSaveLimit();
+
                 //refresh the events output with dumped event data
                 refreshEventsOutput();
 
@@ -360,6 +363,9 @@ void MainWindow::readSerialData()
 
                 // create log file
                 events->outputToLogFile( autosaveLogFile );
+
+                //new auto save file created, enforce auto save limit
+                enforceAutoSaveLimit();
 
                 //refresh the events output with dumped error data
                 refreshEventsOutput();
@@ -454,6 +460,8 @@ void MainWindow::readSerialData()
                 //log
                 qDebug() << "Disconnect message received from Controller";
 
+                enableConnectionChanges();
+
                 // check for not empty
                 // if(events->totalNodes != 0)
                 // {
@@ -514,7 +522,6 @@ void MainWindow::readSerialData()
         //invalid message id detected
         else
         {
-            //log
             qDebug() << "Unrecognized serial message received : " << message;
         }
     }
@@ -649,7 +656,7 @@ void MainWindow::setup_logfile_location()
     }
 
     //if there are more auto saves than the current limit, delete the extras (oldest first)
-    enforceAutoSaveLimit(autosaveLogFile);
+    enforceAutoSaveLimit();
 
     // set unique logfile name for this session
     qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
@@ -658,8 +665,23 @@ void MainWindow::setup_logfile_location()
     qDebug() << "Auto Save log file for this session: " << autosaveLogFile;
 }
 
-void MainWindow::enforceAutoSaveLimit(QString path)
+void MainWindow::enforceAutoSaveLimit()
 {
+    QString path;
+
+    //check if user has set a custom log file output directory
+    if ( !userSettings.value("logfileLocation").toString().isEmpty() )
+    {
+        //initialize the logfile into this directory
+        path = userSettings.value("logfileLocation").toString();
+    }
+    //otherwise use default directory
+    else
+    {
+        //use the path of the exe and add a "Log Files" directory
+        path = QCoreApplication::applicationDirPath() + "/" + INITIAL_LOGFILE_LOCATION;
+    }
+
     // Set a filter to display only files
     QDir dir(path);
     dir.setFilter(QDir::Files);
@@ -712,7 +734,7 @@ void MainWindow::enforceAutoSaveLimit(QString path)
         }
         else
         {
-            qDebug() << "An old autosave file was deleted";
+            qDebug() << "An autosave file was deleted";
         }
 
         // Remove the oldest file name from the list
@@ -1099,7 +1121,7 @@ QSerialPort::FlowControl MainWindow::fromStringFlowControl(QString flowControlSt
     }
 }
 
-//logs empty line to qdebug
+//writes empty line to qdebug
 void MainWindow::logEmptyLine()
 {
     //revert to standard output format
