@@ -17,6 +17,7 @@ private:
 private slots:
     void electrical_constructor();
     void test_addNode();
+    void test_freeLL();
 };
 
 tests::tests()
@@ -68,7 +69,30 @@ void tests::test_addNode()
     QCOMPARE(wkgNode->voltage, voltage);
     QCOMPARE(wkgNode->amps, amps);
 
+    delete elecObj;
+}
 
+void tests::test_freeLL()
+{
+    // create electrical object and variables
+    electrical *elecObj = new electrical();
+    QString name1 = "node1";
+    QString name2 = "node2";
+    int voltage = 14;
+    int amps = 3;
+
+    //create node(s) to test free ll
+    elecObj->addNode(name1, voltage, amps);
+    elecObj->addNode(name2, voltage, amps);
+
+    // show that the head/last node is not null
+    QVERIFY(elecObj->headNode != nullptr);
+    QVERIFY(elecObj->lastNode != nullptr);
+
+    // free and test if head/last node is null
+    elecObj->freeLL();
+    QVERIFY(elecObj->headNode == nullptr);
+    QVERIFY(elecObj->lastNode == nullptr);
 
     delete elecObj;
 }
