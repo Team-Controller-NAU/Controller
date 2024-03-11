@@ -4,13 +4,13 @@
 
 // add necessary includes here
 
-class foo : public QObject
+class tests : public QObject
 {
     Q_OBJECT
 
 public:
-    foo();
-    ~foo();
+    tests();
+    ~tests();
 private:
     electrical *electricalObject;
 
@@ -19,16 +19,16 @@ private slots:
     void test_addNode();
 };
 
-foo::foo()
+tests::tests()
 {
 
 }
 
-foo::~foo()
+tests::~tests()
 {
 }
 
-void foo::electrical_constructor()
+void tests::electrical_constructor()
 {
     electrical *elecObj = new electrical();
 
@@ -44,7 +44,7 @@ void foo::electrical_constructor()
     delete elecObj;
 }
 
-void foo::test_addNode()
+void tests::test_addNode()
 {
     // create electrical object and variables
     electrical *elecObj = new electrical();
@@ -62,7 +62,7 @@ void foo::test_addNode()
     // should only be one node for test case
     electricalNode *wkgNode = elecObj->headNode;
 
-    // test the values of the wkgnode
+    // test the values of the wkgnodes
     QVERIFY(wkgNode != nullptr);
     QCOMPARE(wkgNode->name, nodeName);
     QCOMPARE(wkgNode->voltage, voltage);
@@ -73,5 +73,5 @@ void foo::test_addNode()
     delete elecObj;
 }
 
-QTEST_MAIN(foo)
-#include "tst_foo.moc"
+QTEST_MAIN(tests)
+#include "tst_electrical.moc"
