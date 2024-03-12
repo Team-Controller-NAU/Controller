@@ -14,12 +14,6 @@ MainWindow::MainWindow(QWidget *parent)
     events(new Events()),
     electricalObject(new electrical()),
 
-    //setting determines if automatic handshake starts after csim disconnects
-    reconnect(false),
-
-    //setting toggles color coded events page output
-    coloredEventOutput(true),
-
     //this determines what will be shown on the events page
     eventFilter(ALL),
 
@@ -31,8 +25,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     // timer is used to update controller running time
     runningControllerTimer( new QTimer(this) ),
-
-    autoSaveLimit(5),
 
     //init user settings to our organization and project
     userSettings("Team Controller", "WSSS"),
@@ -51,7 +43,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     //scan available ports, add port names to port selection combo boxes
-    setup_connection_settings();
+    setupSettings();
 
     //update class port name values
     csimPortName = ui->csim_port_selection->currentText();
@@ -179,9 +171,6 @@ void MainWindow::handshake()
 {
     // Send handshake message
     ddmCon->transmit(QString::number(LISTENING) + '\n');
-
-    //keep gui interactive
-    QCoreApplication::processEvents();
 }
 
 //this function is called as a result of the readyRead signal being emmited by a connected serial port
@@ -394,6 +383,8 @@ void MainWindow::readSerialData()
                 //check for empty logfile location and sets to default
                 setup_logfile_location();
 
+                disableConnectionChanges();
+
                 // update controller version and crc version on gui
                 ui->controllerLabel->setText("Controller Version: " + status->version);
                 ui->crcLabel->setText("CRC: " + status->crc);
@@ -462,17 +453,6 @@ void MainWindow::readSerialData()
 
                 enableConnectionChanges();
 
-                // check for not empty
-                // if(events->totalNodes != 0)
-                // {
-                //     // new "session" ended, save to log file
-                //     qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
-                //     QString logFileName = QString::number(secsSinceEpoch);
-
-                //     // save logfile - autosave condition
-                //     events->outputToLogFile(logFileName.toStdString() + "-logfile-A.txt");
-                // }
-
                 //assign conn flag
                 ddmCon->connected = false;
 
@@ -492,21 +472,13 @@ void MainWindow::readSerialData()
                     runningControllerTimer->stop();
                 }
 
-                if (reconnect)
-                {
-                    //attempt handshake to reconnect, (optional setting)
-                    on_handshake_button_clicked();
-                }
-                else
-                {
-                    //refreshes connection button/displays
-                    ui->handshake_button->setText("Connect");
-                    ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #14AE5C; border: 1px solid; border-color: #0d723c; font: 15pt 'Segoe UI'; } "
-                                                        "QPushButton::hover { background-color: #1be479; } "
-                                                        "QPushButton::pressed { background-color: #76efae;}");
-                    ui->connectionStatus->setPixmap(RED_LIGHT);
-                    ui->connectionLabel->setText("Disconnected ");
-                }
+                //refreshes connection button/displays
+                ui->handshake_button->setText("Connect");
+                ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #14AE5C; border: 1px solid; border-color: #0d723c; font: 15pt 'Segoe UI'; } "
+                                                    "QPushButton::hover { background-color: #1be479; } "
+                                                    "QPushButton::pressed { background-color: #76efae;}");
+                ui->connectionStatus->setPixmap(RED_LIGHT);
+                ui->connectionLabel->setText("Disconnected ");
 
                 break;
 
@@ -594,6 +566,7 @@ void MainWindow::disableConnectionChanges()
     ui->parity_selection->setDisabled(true);
     ui->stop_bit_selection->setDisabled(true);
     ui->flow_control_selection->setDisabled(true);
+    ui->load_events_from_logfile->setDisabled(true);
 }
 
 
@@ -605,10 +578,11 @@ void MainWindow::enableConnectionChanges()
     ui->parity_selection->setEnabled(true);
     ui->stop_bit_selection->setEnabled(true);
     ui->flow_control_selection->setEnabled(true);
+    ui->load_events_from_logfile->setEnabled(true);
 }
 
 //support function, outputs usersettings values to qdebug
-void MainWindow::displaySavedConnectionSettings()
+void MainWindow::displaySavedSettings()
 {
     logEmptyLine();
     qDebug() << "Connection Settings Saved Cross Session:";
@@ -620,7 +594,9 @@ void MainWindow::displaySavedConnectionSettings()
     qDebug() << "parity:" << userSettings.value("parity").toString();
     qDebug() << "stopBits:" << userSettings.value("stopBits").toString();
     qDebug() << "flowControl:" << userSettings.value("flowControl").toString();
-    qDebug() << "logfile location: " << userSettings.value("logfileLocation").toString() << Qt::endl;
+    qDebug() << "logfile location: " << userSettings.value("logfileLocation").toString();
+    qDebug() << "Colored Event Output: " << userSettings.value("coloredEventOutput").toBool();
+    qDebug() << "Auto Save Limit: " << userSettings.value("autoSaveLimit").toInt() << Qt::endl;
 }
 
 //checks if user has setup a custom log file directory, if not, the default directory is selected
@@ -743,9 +719,11 @@ void MainWindow::enforceAutoSaveLimit()
 }
 
 
-void MainWindow::setup_connection_settings()
+void MainWindow::setupSettings()
 {
     int i;
+
+    //Connection Setttings
 
     // Check and set initial value for "portName"
     if (userSettings.value("portName").toString().isEmpty())
@@ -776,8 +754,35 @@ void MainWindow::setup_connection_settings()
         userSettings.setValue("flowControl", toString(INITIAL_FLOW_CONTROL));
 
 
+    //Misc. Settings
+
+
+    // Check if the setting exists and is valid
+    if (!userSettings.contains("coloredEventOutput") || !userSettings.value("coloredEventOutput").isValid()) {
+        // If it doesn't exist or is not valid, set the default value
+        userSettings.setValue("coloredEventOutput", INITIAL_COLORED_EVENTS_OUTPUT);
+    }
+
+    //set session variable based on setting
+    coloredEventOutput = userSettings.value("coloredEventOutput").toBool();
+
+    //set gui display to match
+    ui->colored_events_output->setChecked(coloredEventOutput);
+
+    // Check if the setting exists and is valid
+    if (!userSettings.contains("autoSaveLimit") || !userSettings.value("autoSaveLimit").isValid()) {
+        // If it doesn't exist or is not valid, set the default value
+        userSettings.setValue("autoSaveLimit", INITIAL_AUTO_SAVE_LIMIT);
+    }
+
+    //set session variable based on setting
+    autoSaveLimit = userSettings.value("autoSaveLimit").toInt();
+
+    //update gui to match
+    ui->auto_save_limit->setValue(autoSaveLimit);
+
     // Display user settings
-    displaySavedConnectionSettings();
+    displaySavedSettings();
 
     //setup port name selections on gui (scans for available ports)
     setup_ddm_port_selection(0);
@@ -1266,5 +1271,3 @@ void MainWindow::refreshEventsOutput()
         updateEventsOutput(nextPrintPtr);
     }
 }
-
-

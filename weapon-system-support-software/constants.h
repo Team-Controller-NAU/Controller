@@ -50,6 +50,10 @@ const QSerialPort::Parity INITIAL_PARITY = QSerialPort::NoParity;
 const QSerialPort::StopBits INITIAL_STOP_BITS = QSerialPort::OneStop;
 const QSerialPort::FlowControl INITIAL_FLOW_CONTROL = QSerialPort::NoFlowControl;
 
+const bool INITIAL_COLORED_EVENTS_OUTPUT = true;
+const QString INITIAL_LOGFILE_LOCATION = "WSSS_Logfiles/";
+const int INITIAL_AUTO_SAVE_LIMIT = 5;
+
 const QString DELIMETER = ",";
 
 //set true to enable handshake timeout after timeout duration has passed if ddm is still not connected
@@ -84,8 +88,6 @@ const int NUM_ELECTRIC_DELIMETERS = 2;
 const int DATA_NOT_FOUND = -101;
 const int INCORRECT_FORMAT = -102;
 const int SUCCESS = 1;
-
-const QString INITIAL_LOGFILE_LOCATION = "WSSS_Logfiles/";
 
 const QString QDEBUG_OUTPUT_FORMAT = "[%{time h:mm:ss}] %{message}";
 
