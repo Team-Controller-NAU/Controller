@@ -500,7 +500,7 @@ void MainWindow::on_save_Button_clicked()
     userSettings.sync();
 
     //output new settings to qDebug()
-    displaySavedConnectionSettings();
+    displaySavedSettings();
 }
 
 //sends custom user input message
@@ -542,11 +542,11 @@ void MainWindow::on_send_message_button_clicked()
 }
 
 //sends user to settings page when clicked
-void MainWindow::on_SettingsPageButton_clicked()
+void MainWindow::on_ConnectionPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(2);
     resetPageButton();
-    ui->SettingsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
+    ui->ConnectionPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
 }
 
 //sends user to status page when clicked
@@ -555,6 +555,13 @@ void MainWindow::on_StatusPageButton_clicked()
     ui->Flow_Label->setCurrentIndex(4);
     resetPageButton();
     ui->StatusPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
+}
+
+void MainWindow::on_SettingsPageButton_clicked()
+{
+    ui->Flow_Label->setCurrentIndex(5);
+    resetPageButton();
+    ui->SettingsPageButton->setStyleSheet("border-image: url(://resources/Images/purpleSettings.png);");
 }
 
 void MainWindow::on_stop_bit_selection_currentIndexChanged(int index)
@@ -584,11 +591,12 @@ void MainWindow::on_stop_bit_selection_currentIndexChanged(int index)
 //reset all tab buttons to default style
 void MainWindow::resetPageButton()
 {
-    ui->SettingsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
+    ui->ConnectionPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
     ui->EventsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
     ui->StatusPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
     ui->ElectricalPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
     ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
+    ui->SettingsPageButton->setStyleSheet("border-image: url(://resources/Images/whiteSettings.png)");
 }
 
 //restores connection settings to the values saved to the system as default
@@ -749,4 +757,31 @@ void MainWindow::on_load_events_from_logfile_clicked()
 
     //refresh the events output
     refreshEventsOutput();
+}
+
+//toggle colored events output (from settings page)
+void MainWindow::on_colored_events_output_stateChanged(int arg1)
+{
+    //arg1 represents the state of the checkbox
+    switch(arg1)
+    {
+        //unchecked
+        case 0:
+            coloredEventOutput = false;
+            break;
+
+        //checked
+        default:
+            coloredEventOutput = true;
+    }
+
+    userSettings.setValue("coloredEventOutput", coloredEventOutput);
+    refreshEventsOutput();
+}
+
+//choose the number of auto save log files before overwrites occur (from settings page)
+void MainWindow::on_auto_save_limit_valueChanged(int arg1)
+{
+    autoSaveLimit = arg1;
+    userSettings.setValue("autoSaveLimit", autoSaveLimit);
 }

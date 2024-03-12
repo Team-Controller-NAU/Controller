@@ -54,9 +54,6 @@ public:
     bool coloredEventOutput;
     int autoSaveLimit;
 
-    //set true to enable automatic handshake once CSim sends closing connection message
-    bool reconnect;
-
     //creates a new connection using currently selected serial port settings
     void createDDMCon();
 
@@ -95,7 +92,7 @@ private slots:
     void updateTimer();
     void updateElapsedTime();
     void readSerialData();
-    void displaySavedConnectionSettings();
+    void displaySavedSettings();
     void updateStatusDisplay();
     void handshake();
     void resetPageButton();
@@ -122,7 +119,7 @@ private slots:
     void setup_ddm_port_selection(int index);
     void update_non_cleared_error_selection();
     void setup_logfile_location();
-    void setup_connection_settings();
+    void setupSettings();
     //========================================================================================================
 
 
@@ -136,7 +133,7 @@ private slots:
     void on_CSim_button_clicked();
     void on_ddm_port_selection_currentIndexChanged(int index);
     void on_handshake_button_clicked();
-    void on_SettingsPageButton_clicked();
+    void on_ConnectionPageButton_clicked();
     void on_EventsPageButton_clicked();
     void on_StatusPageButton_clicked();
     void on_ElectricalPageButton_clicked();
@@ -160,6 +157,12 @@ private slots:
     void on_load_events_from_logfile_clicked();
     //=========================================================================================================
 
+
+    void on_SettingsPageButton_clicked();
+
+    void on_colored_events_output_stateChanged(int arg1);
+
+    void on_auto_save_limit_valueChanged(int arg1);
 
 private:
     Ui::MainWindow *ui;
