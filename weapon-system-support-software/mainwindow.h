@@ -89,7 +89,7 @@ private slots:
     //==========================================================================
     //non-gui triggered slots (should be defined in mainwindow.cpp)
     //==========================================================================
-    void updateTimer();
+    void updateTimeSinceLastMessage();
     void updateElapsedTime();
     void readSerialData();
     void displaySavedSettings();
@@ -108,6 +108,7 @@ private slots:
     //checks if the current number of auto saved files is higher than the limit, deletes the
     //oldest one each iteration until the limit is enforced
     void enforceAutoSaveLimit();
+    void updateConnectionStatus(bool connectionStatus);
     //==================================================================================
 
 
