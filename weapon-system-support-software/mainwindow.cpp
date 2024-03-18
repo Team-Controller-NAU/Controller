@@ -29,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent)
     //init user settings to our organization and project
     userSettings("Team Controller", "WSSS"),
 
+    //Load graphical resources
     BLANK_LIGHT(":/resources/Images/blankButton.png"),
 
     RED_LIGHT(":/resources/Images/redButton.png"),
@@ -85,7 +86,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // connect update elapsed time function to a timer
     lastMessageTimer->setInterval(1000);
-    connect(lastMessageTimer, &QTimer::timeout, this, &MainWindow::updateTimer);
+    connect(lastMessageTimer, &QTimer::timeout, this, &MainWindow::updateTimeSinceLastMessage);
 
     // connect running controller timer
     runningControllerTimer->setInterval(1000);
@@ -99,11 +100,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     qDebug() << "GUI is now listening to port " << ddmCon->portName;
 
-    //TEMP CODE TO MAKE FEED POSITION RESPONSIVE WITH STATUS UPDATES========
+    //set feed pos to be measured in 360 degrees
     ui->feedPosition->setMaximum(360);
-    //ui->feedPosition->setReadOnly(true);
 
-    //======================================================================
+    //set feed pos to be non-editable by user
+    ui->feedPosition->setEnabled(false);
 
     //init trigger to grey buttons until updated by serial status updates
     ui->trigger1->setPixmap(BLANK_LIGHT);
@@ -142,6 +143,91 @@ MainWindow::~MainWindow()
     delete electricalObject;
 }
 
+//sets connection status, updates gui and timers
+void MainWindow::updateConnectionStatus(bool connectionStatus)
+{
+    //update connection status
+    ddmCon->connected = connectionStatus;
+
+    //check if we are connected
+    if (ddmCon->connected)
+    {
+        //disable changes to connection related settings
+        disableConnectionChanges();
+
+        //stop handshake protocols
+        handshakeTimer->stop();
+
+        // check if controller timer is not running
+        if(!runningControllerTimer->isActive())
+        {
+            // start it
+            runningControllerTimer->start();
+
+            // update elapsed time
+            ui->elapsedTime->setText("Elapsed Time: " + status->elapsedControllerTime);
+            ui->elapsedTime->setAlignment(Qt::AlignRight);
+        }
+
+        //start last message timer
+        timeLastReceived = QDateTime::currentDateTime();
+        ui->DDMTimer->setText("Time Since Last Message: 00:00:00");
+        ui->DDMTimer->setAlignment(Qt::AlignRight);
+        lastMessageTimer->start();
+
+        // update ui
+        ui->handshake_button->setText("Disconnect");
+        ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #FE1C1C; border: 1px solid; border-color: #cb0101; font: 15pt 'Segoe UI'; } "
+                                            "QPushButton::hover { background-color: #fe3434; } "
+                                            "QPushButton::pressed { background-color: #fe8080;}");
+        ui->connectionLabel->setText("Connected ");
+        ui->connectionStatus->setPixmap(GREEN_LIGHT);
+
+        //clear events ll and output box
+        events->freeLinkedLists();
+        ui->events_output->clear();
+
+        //reset event counters
+        ui->TotalEventsOutput->setText("0");
+        ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
+        ui->statusEventOutput->setText("0");
+        ui->statusEventOutput->setAlignment(Qt::AlignCenter);
+
+        ui->TotalErrorsOutput->setText("0");
+        ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
+        ui->statusErrorOutput->setText("0");
+        ui->statusErrorOutput->setAlignment(Qt::AlignCenter);
+
+        ui->ClearedErrorsOutput->setText("0");
+        ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
+
+        ui->ActiveErrorsOutput->setText("0");
+        ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
+    }
+    //otherwise we are disconnected
+    else
+    {
+        //stop timers if they are running
+        runningControllerTimer->stop();
+        lastMessageTimer->stop();
+        handshakeTimer->stop();
+        ui->DDMTimer->clear();
+
+        //enable changes to connection related settings
+        enableConnectionChanges();
+
+        //refreshes connection button/displays
+        ui->handshake_button->setText("Connect");
+        ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #14AE5C; border: 1px solid; border-color: #0d723c; font: 15pt 'Segoe UI'; } "
+                                            "QPushButton::hover { background-color: #1be479; } "
+                                            "QPushButton::pressed { background-color: #76efae;}");
+        ui->connectionStatus->setPixmap(RED_LIGHT);
+        ui->connectionLabel->setText("Disconnected ");
+    }
+}
+
+//when ddm port is selected, create connection class to work with that port.
+//apply serial settings from settings page
 void MainWindow::createDDMCon()
 {
     //check if ddmCon is allocated
@@ -377,108 +463,29 @@ void MainWindow::readSerialData()
 
             case BEGIN:
 
-                //load crc and version
+                //load controller crc and version
                 status->loadVersionData(message);
+
+                //set connection status to connected and update related objects
+                updateConnectionStatus(true);
+
+                // update controller version and crc on gui
+                ui->controllerLabel->setText("Controller Version: " + status->version);
+                ui->crcLabel->setText("CRC: " + status->crc);
 
                 //check for empty logfile location and sets to default
                 setup_logfile_location();
 
-                disableConnectionChanges();
-
-                // update controller version and crc version on gui
-                ui->controllerLabel->setText("Controller Version: " + status->version);
-                ui->crcLabel->setText("CRC: " + status->crc);
-
-                // check if controller timer is running
-                if(!runningControllerTimer->isActive())
-                {
-                    // start it
-                    runningControllerTimer->start();
-
-                    // update elapsed time
-                    ui->elapsedTime->setText("Elapsed Time: " + status->elapsedControllerTime);
-                    ui->elapsedTime->setAlignment(Qt::AlignRight);
-                }
-
-                //stop handshake protocols
-                handshakeTimer->stop();
-
-                // start last message timer if not already active
-                if(!lastMessageTimer->isActive())
-                {
-                    lastMessageTimer->start();
-                }
-
-                // debug
                 qDebug() << "Begin signal received, handshake complete";
-
-                // update ui
-                ui->handshake_button->setText("Disconnect");
-                ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #FE1C1C; border: 1px solid; border-color: #cb0101; font: 15pt 'Segoe UI'; } "
-                                                    "QPushButton::hover { background-color: #fe3434; } "
-                                                    "QPushButton::pressed { background-color: #fe8080;}");
-                ui->connectionLabel->setText("Connected ");
-                ui->connectionStatus->setPixmap(GREEN_LIGHT);
-
-                //clear events ll and output box
-                events->freeLinkedLists();
-                ui->events_output->clear();
-
-                //reset event counters
-                ui->TotalEventsOutput->setText("0");
-                ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
-                ui->statusEventOutput->setText("0");
-                ui->statusEventOutput->setAlignment(Qt::AlignCenter);
-
-                ui->TotalErrorsOutput->setText("0");
-                ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
-                ui->statusErrorOutput->setText("0");
-                ui->statusErrorOutput->setAlignment(Qt::AlignCenter);
-
-                ui->ClearedErrorsOutput->setText("0");
-                ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
-
-                ui->ActiveErrorsOutput->setText("0");
-                ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
-
-                //set connected
-                ddmCon->connected = true;
 
                 break;
 
             case CLOSING_CONNECTION:
 
-                //log
+                //set connection status false and update related objects
+                updateConnectionStatus(false);
+
                 qDebug() << "Disconnect message received from Controller";
-
-                enableConnectionChanges();
-
-                //assign conn flag
-                ddmCon->connected = false;
-
-                // update time since last message so its not frozen
-                ui->DDMTimer->setText("Time Since Last Message: 00:00:00");
-                ui->DDMTimer->setAlignment(Qt::AlignRight);
-
-                // stop last message timer if still active
-                if(lastMessageTimer->isActive())
-                {
-                    lastMessageTimer->stop();
-                }
-
-                // stop elapsed timer if still active
-                if(runningControllerTimer->isActive())
-                {
-                    runningControllerTimer->stop();
-                }
-
-                //refreshes connection button/displays
-                ui->handshake_button->setText("Connect");
-                ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #14AE5C; border: 1px solid; border-color: #0d723c; font: 15pt 'Segoe UI'; } "
-                                                    "QPushButton::hover { background-color: #1be479; } "
-                                                    "QPushButton::pressed { background-color: #76efae;}");
-                ui->connectionStatus->setPixmap(RED_LIGHT);
-                ui->connectionLabel->setText("Disconnected ");
 
                 break;
 
@@ -499,6 +506,7 @@ void MainWindow::readSerialData()
     }
 }
 
+//scans for available serial ports and adds them to csim port selection box
 void MainWindow::setup_csim_port_selection(int index)
 {
     // Fetch available serial ports and add their names to the combo box
@@ -516,6 +524,7 @@ void MainWindow::setup_csim_port_selection(int index)
     }
 }
 
+//scans for available serial ports and adds them to ddm port selection box
 void MainWindow::setup_ddm_port_selection(int index)
 {
     // Fetch available serial ports and add their names to the combo box
@@ -533,6 +542,7 @@ void MainWindow::setup_ddm_port_selection(int index)
     }
 }
 
+//updates the dev page non cleared error selection box
 void MainWindow::update_non_cleared_error_selection()
 {
     //clear combo box
@@ -569,7 +579,8 @@ void MainWindow::disableConnectionChanges()
     ui->load_events_from_logfile->setDisabled(true);
 }
 
-
+//makes all settings in connection settings editable (call when ddm connection
+//ends)
 void MainWindow::enableConnectionChanges()
 {
     ui->ddm_port_selection->setEnabled(true);
@@ -641,6 +652,8 @@ void MainWindow::setup_logfile_location()
     qDebug() << "Auto Save log file for this session: " << autosaveLogFile;
 }
 
+//checks if the number of auto saved log files is greater than the user
+//set max value. Deletes the oldest until auto save limit is enforced
 void MainWindow::enforceAutoSaveLimit()
 {
     QString path;
@@ -718,7 +731,10 @@ void MainWindow::enforceAutoSaveLimit()
     }
 }
 
-
+//Checks if registry values exist for all settings in userSettings. If so settings
+//are loaded into local variables. If not, initial settings are taken from constants.h
+//and loaded into registry and local variables. Selection boxes for connection settings
+//are loaded with Qt serial options.
 void MainWindow::setupSettings()
 {
     int i;
@@ -846,11 +862,6 @@ void MainWindow::setupSettings()
 //displays the current values of the status class onto the gui status page
 void MainWindow::updateStatusDisplay()
 {
-    //display current values in status class to dev page
-    ui->status_output->setText(status->generateMessage());
-
-    //qDebug() << "fireMode: " << status->firingMode;
-
     resetFiringMode();
 
     //update font color of the active firing mode
@@ -943,7 +954,7 @@ void MainWindow::updateElapsedTime()
 }
 
 // method updates the elapsed time since last message received to DDM
-void MainWindow::updateTimer()
+void MainWindow::updateTimeSinceLastMessage()
 {
     // initialize variables
     QTime elapsedTime;

@@ -376,10 +376,9 @@ void MainWindow::on_flow_control_selection_currentIndexChanged(int index)
 }
 
 //toggles handshake process on and off. Once connected, allow for disconnect (send disconnect message to controller)
+//this button is seen as connect/connecting/disconnect on connection page
 void MainWindow::on_handshake_button_clicked()
 {
-   // QPixmap redButton(":/resources/Images/redButton.png");
-
     // Check if the timer is started or ddmCon is not connected
     if ( !handshakeTimer->isActive() && !ddmCon->connected )
     {
@@ -387,19 +386,12 @@ void MainWindow::on_handshake_button_clicked()
 
         // Start the timer to periodically check the handshake status
         handshakeTimer->start();
-        if(!lastMessageTimer->isActive())
-        {
-            lastMessageTimer->start();
-        }
-
-        timeLastReceived = QDateTime::currentDateTime();
 
         //refreshes connection button/displays
         ui->handshake_button->setText("Connecting");
         ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #FF7518; border: 1px solid; border-color: #e65c00; font: 15pt 'Segoe UI'; } "
                                             "QPushButton::hover { background-color: #ff8533; } "
                                             "QPushButton::pressed { background-color: #ffa366;}");
-        ui->ddm_port_selection->setEnabled(false);
 
         //disable changes to connection settings
         disableConnectionChanges();
@@ -410,40 +402,8 @@ void MainWindow::on_handshake_button_clicked()
 
         ddmCon->transmit(QString::number(CLOSING_CONNECTION) + '\n');
 
-        handshakeTimer->stop();
-        if(lastMessageTimer->isActive())
-        {
-            lastMessageTimer->stop();
-        }
-
-        // update time since last message so its not frozen
-        ui->DDMTimer->setText("Time Since Last Message: 00:00:00");
-        ui->DDMTimer->setAlignment(Qt::AlignRight);
-
-        //refreshes connection button/displays
-        ui->handshake_button->setText("Connect");
-        ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #14AE5C; border: 1px solid; border-color: #0d723c; font: 15pt 'Segoe UI'; } "
-                                            "QPushButton::hover { background-color: #1be479; } "
-                                            "QPushButton::pressed { background-color: #76efae;}");
-        ui->connectionStatus->setPixmap(RED_LIGHT);
-        ui->connectionLabel->setText("Disconnected ");
-        ui->ddm_port_selection->setEnabled(true);
-
-        //allow user to modify connection settings
-        enableConnectionChanges();
-
-        // check for not empty
-        if(events->totalNodes != 0)
-        {
-            // new "session" ended, save to log file
-            // qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
-            // QString logFileName = QString::number(secsSinceEpoch);
-
-            // save logfile - autosave conditon
-            //events->outputToLogFile(logFileName.toStdString() + "-logfile-A.txt");
-        }
-
-        ddmCon->connected = false;
+        //update connection status to disconnected and update related objects
+        updateConnectionStatus(false);
     }
 }
 
@@ -640,7 +600,7 @@ void MainWindow::on_openLogfileFolder_clicked()
         // check if the path does not lead to anything
         if(!path.exists())
         {
-            // check if can make path successfully
+            // check if we can make path successfully
             if(path.mkpath("."))
             {
                 qDebug() << "Logfile directory created at: " << INITIAL_LOGFILE_LOCATION;
