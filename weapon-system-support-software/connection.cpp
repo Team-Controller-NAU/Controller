@@ -1,4 +1,4 @@
-#include <connection.h>
+#include "connection.h"
 
 /********************************************************************************
 ** connection.cpp
@@ -54,21 +54,6 @@ Connection::Connection(QString portName, QSerialPort::BaudRate baudRate,
         serialPort.clear();
         serialPort.readAll();
     }
-}
-
-/**
- * Initialization constructor overload for initializing a connection object using stored settings.
- *
- * This constructor delegates to the primary constructor, providing default values for baud rate, data bits,
- * parity, stop bits, and flow control settings using constants defined in constants.h.
- *
- * @param portName The name of the serial port.
- */
-Connection::Connection(QString portName)
-    : Connection(portName, INITIAL_BAUD_RATE, INITIAL_DATA_BITS,
-                 INITIAL_PARITY, INITIAL_STOP_BITS, INITIAL_FLOW_CONTROL)
-{
-    // this constructor delegates to the first constructor
 }
 
 //returns true if a valid message is in the serial port, false otherwise
@@ -162,4 +147,22 @@ Connection::~Connection()
     serialPort.close();
 }
 
-
+//======================================================================================
+//DEV_MODE exclusive methods
+//======================================================================================
+#if DEV_MODE
+/**
+ * Initialization constructor overload for initializing a connection object using stored settings.
+ *
+ * This constructor delegates to the primary constructor, providing default values for baud rate, data bits,
+ * parity, stop bits, and flow control settings using constants defined in constants.h.
+ *
+ * @param portName The name of the serial port.
+ */
+Connection::Connection(QString portName)
+    : Connection(portName, INITIAL_BAUD_RATE, INITIAL_DATA_BITS,
+                 INITIAL_PARITY, INITIAL_STOP_BITS, INITIAL_FLOW_CONTROL)
+{
+    // this constructor delegates to the first constructor
+}
+#endif

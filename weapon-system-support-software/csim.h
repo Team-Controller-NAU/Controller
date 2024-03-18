@@ -7,6 +7,7 @@
 #include <events.h>
 #include <electrical.h>
 #include <QDebug>
+#include "constants.h"
 
 // This class simulates the weapon controller, must be called in seperate thread so it doesnt
 // block mainwindow functions from running
@@ -84,3 +85,4 @@ private:
 };
 
 #endif // CSIM_H
+

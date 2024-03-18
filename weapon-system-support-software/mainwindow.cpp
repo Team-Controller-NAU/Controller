@@ -1,8 +1,4 @@
-#include <connection.h>
 #include "mainwindow.h"
-#include "csim.h"
-#include "constants.h"
-#include "./ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
 
@@ -43,11 +39,33 @@ MainWindow::MainWindow(QWidget *parent)
     //init gui
     ui->setupUi(this);
 
-    //scan available ports, add port names to port selection combo boxes
+    //setup user settings and init settings related gui elements
     setupSettings();
 
+    //if dev mode is active, init CSim
+    #if DEV_MODE
+        //get csimPortName from port selection
+        csimPortName = ui->csim_port_selection->currentText();
+
+        //init csim class, assign serial port
+        csimHandle = new CSim(nullptr, csimPortName);
+
+        //CSIM control slots ==============================================================
+
+        //connect custom transmission requests from ddm to csims execution slot
+        connect(this, &MainWindow::transmissionRequest, csimHandle, &CSim::completeTransmissionRequest);
+
+        //connect custom clear error requests from ddm to csims execution slot
+        connect(this, &MainWindow::clearErrorRequest, csimHandle, &CSim::clearError);
+
+        //connect output session string to ddm output session string slot
+        connect(this, &MainWindow::outputMessagesSentRequest, csimHandle, &CSim::outputMessagesSent);
+        //=================================================================================
+    #else
+        ui->DevPageButton->setVisible(false);
+    #endif
+
     //update class port name values
-    csimPortName = ui->csim_port_selection->currentText();
     ddmPortName = ui->ddm_port_selection->currentText();
 
     //init ddm connection using the current values set in connection settings
@@ -58,45 +76,24 @@ MainWindow::MainWindow(QWidget *parent)
                             fromStringStopBits(ui->stop_bit_selection->currentText()),
                             fromStringFlowControl(ui->flow_control_selection->currentText()));
 
-    //init csim class, assign serial port
-    csimHandle = new CSim(nullptr, csimPortName);
-
     //set up signal and slot (when a message is sent to DDMs serial port, the readyRead signal is emitted and
     //readSerialData() is called)
     connect(&ddmCon->serialPort, &QSerialPort::readyRead, this, &MainWindow::readSerialData);
 
     //set handshake timer interval
-    handshakeTimer->setInterval(2000);
+    handshakeTimer->setInterval(HANDSHAKE_INTERVAL);
 
     //connect handshake function to a timer. After each interval handshake will be called.
     //this is necessary to prevent the gui from freezing. signals stop when timer is stoped
     connect(handshakeTimer, &QTimer::timeout, this, &MainWindow::handshake);
 
-    //CSIM control slots ==============================================================
-
-    //connect custom transmission requests from ddm to csims execution slot
-    connect(this, &MainWindow::transmissionRequest, csimHandle, &CSim::completeTransmissionRequest);
-
-    //connect custom clear error requests from ddm to csims execution slot
-    connect(this, &MainWindow::clearErrorRequest, csimHandle, &CSim::clearError);
-
-    //connect output session string to ddm output session string slot
-    connect(this, &MainWindow::outputMessagesSentRequest, csimHandle, &CSim::outputMessagesSent);
-    //=================================================================================
-
     // connect update elapsed time function to a timer
-    lastMessageTimer->setInterval(1000);
+    lastMessageTimer->setInterval(ONE_SECOND);
     connect(lastMessageTimer, &QTimer::timeout, this, &MainWindow::updateTimeSinceLastMessage);
 
     // connect running controller timer
-    runningControllerTimer->setInterval(1000);
+    runningControllerTimer->setInterval(ONE_SECOND);
     connect(runningControllerTimer, &QTimer::timeout, this, &MainWindow::updateElapsedTime);
-
-    //if handshake timeout is enabled, setup signal to timeout
-    if (HANDSHAKE_TIMEOUT)
-    {
-        QTimer::singleShot(TIMEOUT_DURATION, this, &MainWindow::on_handshake_button_clicked);
-    }
 
     qDebug() << "GUI is now listening to port " << ddmCon->portName;
 
@@ -137,10 +134,12 @@ MainWindow::~MainWindow()
     //call destructors for classes declared in main window
     delete ui;
     delete ddmCon;
-    delete csimHandle;
     delete status;
     delete events;
     delete electricalObject;
+    #if DEV_MODE
+        delete csimHandle;
+    #endif
 }
 
 //sets connection status, updates gui and timers
@@ -506,24 +505,6 @@ void MainWindow::readSerialData()
     }
 }
 
-//scans for available serial ports and adds them to csim port selection box
-void MainWindow::setup_csim_port_selection(int index)
-{
-    // Fetch available serial ports and add their names to the combo box
-    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
-    {
-        QString portName = info.portName();
-        ui->csim_port_selection->addItem(portName);
-
-        // Check if the current port name matches the one declared in settings
-        if (portName == userSettings.value("csimPortName").toString())
-        {
-            // If a match is found, set the current index of the combo box
-            ui->csim_port_selection->setCurrentIndex(ui->csim_port_selection->count() - 1);
-        }
-    }
-}
-
 //scans for available serial ports and adds them to ddm port selection box
 void MainWindow::setup_ddm_port_selection(int index)
 {
@@ -538,30 +519,6 @@ void MainWindow::setup_ddm_port_selection(int index)
         {
             // If a match is found, set the current index of the combo box
             ui->ddm_port_selection->setCurrentIndex(ui->ddm_port_selection->count() - 1);
-        }
-    }
-}
-
-//updates the dev page non cleared error selection box
-void MainWindow::update_non_cleared_error_selection()
-{
-    //clear combo box
-    ui->non_cleared_error_selection->clear();
-
-    //check for valid events ptr
-    if (csimHandle->eventsPtr != nullptr)
-    {
-        //get head node
-        EventNode *wkgPtr = csimHandle->eventsPtr->headErrorNode;
-
-        //loop until list ends
-        while (wkgPtr != nullptr)
-        {
-            //add the uncleared error to the combo box
-            ui->non_cleared_error_selection->addItem(QString::number(wkgPtr->id) + DELIMETER + wkgPtr->eventString);
-
-            //get next error
-            wkgPtr = wkgPtr->nextPtr;
         }
     }
 }
@@ -599,7 +556,9 @@ void MainWindow::displaySavedSettings()
     qDebug() << "Connection Settings Saved Cross Session:";
     // Print the values of each setting
     qDebug() << "DDM Port: " << userSettings.value("portName").toString();
-    qDebug() << "CSIM Port: " << userSettings.value("csimPortName").toString();
+    #if DEV_MODE
+        qDebug() << "CSIM Port: " << userSettings.value("csimPortName").toString();
+    #endif
     qDebug() << "baudRate:" << userSettings.value("baudRate").toString();
     qDebug() << "dataBits:" << userSettings.value("dataBits").toString();
     qDebug() << "parity:" << userSettings.value("parity").toString();
@@ -745,9 +704,11 @@ void MainWindow::setupSettings()
     if (userSettings.value("portName").toString().isEmpty())
         userSettings.setValue("portName", INITIAL_DDM_PORT);
 
-    // Check and set initial value for "csimPortName"
-    if (userSettings.value("csimPortName").toString().isEmpty())
-        userSettings.setValue("csimPortName", INITIAL_CSIM_PORT);
+    #if DEV_MODE
+        // Check and set initial value for "csimPortName"
+        if (userSettings.value("csimPortName").toString().isEmpty())
+            userSettings.setValue("csimPortName", INITIAL_CSIM_PORT);
+    #endif
 
     // Check and set initial value for "baudRate"
     if (userSettings.value("baudRate").toString().isEmpty())
@@ -802,7 +763,9 @@ void MainWindow::setupSettings()
 
     //setup port name selections on gui (scans for available ports)
     setup_ddm_port_selection(0);
-    setup_csim_port_selection(0);
+    #if DEV_MODE
+        setup_csim_port_selection(0);
+    #endif
 
     // Add baud rate settings
     ui->baud_rate_selection->addItem(toString(QSerialPort::Baud1200));
@@ -989,6 +952,152 @@ void MainWindow::updateTimeSinceLastMessage()
     }
 }
 
+//writes empty line to qdebug
+void MainWindow::logEmptyLine()
+{
+    //revert to standard output format
+    qSetMessagePattern("%{message}");
+
+    //log empty line
+    qDebug();
+
+    //enable custom message format
+    qSetMessagePattern(QDEBUG_OUTPUT_FORMAT);
+}
+
+void MainWindow::resetFiringMode()
+{
+    ui->automaticLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
+    ui->burstLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
+    ui->safeLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
+    ui->singleLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
+}
+
+//overloaded function to add simplicity when possible
+void MainWindow::updateEventsOutput(EventNode *event)
+{
+    updateEventsOutput(events->nodeToString(event), event->error, event->cleared);
+}
+
+
+//updates gui with given message, dynamically colors output based on the type of outString
+//accounts for filtering settings and only renders the outString if it is being filtered for
+// by the user
+void MainWindow::updateEventsOutput(QString outString, bool error, bool cleared)
+{
+    QTextDocument document;
+    QString richText;
+
+    //check if we have an event as input and check if filter allows printing events
+    if (!error )
+    {
+        if (eventFilter == EVENTS || eventFilter == ALL)
+        {
+            //change output text color to white
+            richText = "<p style='color: #FFFFFF; font-size: 16px'>"+ outString + "</p>";
+
+            //activate html for the output
+            document.setHtml(richText);
+
+            //append styled string to the events output
+            ui->events_output->append(document.toHtml());
+        }
+    }
+    //otherwise check for cleared error and if filter allows printing cleared errors
+    else if (cleared)
+    {
+        if (eventFilter == ALL || eventFilter == ERRORS || eventFilter == CLEARED_ERRORS)
+        {
+            if (coloredEventOutput)
+            {
+                //change output text color to green
+                richText = "<p style='color: #14AE5C; font-size: 16px'>"+ outString + "</p>";
+            }
+            else
+            {
+                //change output text color to white
+                richText = "<p style='color: #FFFFFF; font-size: 16px'>"+ outString + "</p>";
+            }
+
+            //activate html for the output
+            document.setHtml(richText);
+
+            //append styled string to the events output
+            ui->events_output->append(document.toHtml());
+        }
+    }
+    //otherwise this is a non-cleared error check if filtering allows printing non-cleared errors
+    else if (eventFilter == ALL || eventFilter == NON_CLEARED_ERRORS || eventFilter == ERRORS)
+    {
+        if (coloredEventOutput)
+        {
+            //change output text color to red
+            richText = "<p style='color: #FE1C1C; font-size: 16px'>"+ outString + "</p>";
+        }
+        else
+        {
+            //change output text color to white
+            richText = "<p style='color: #FFFFFF; font-size: 16px'>"+ outString + "</p>";
+        }
+
+        //activate html for the output
+        document.setHtml(richText);
+
+        //append styled string to the events output
+        ui->events_output->append(document.toHtml());
+    }
+
+    // update total events gui
+    ui->TotalEventsOutput->setText(QString::number(events->totalEvents));
+    ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
+    ui->statusEventOutput->setText(QString::number(events->totalEvents));
+    ui->statusEventOutput->setAlignment(Qt::AlignCenter);
+
+    if (!error) return;
+
+    // update total errors gui
+    ui->TotalErrorsOutput->setText(QString::number(events->totalErrors));
+    ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
+    ui->statusErrorOutput->setText(QString::number(events->totalErrors));
+    ui->statusErrorOutput->setAlignment(Qt::AlignCenter);
+
+    if ( cleared )
+    {
+        // update cleared errors gui
+        ui->ClearedErrorsOutput->setText(QString::number(events->totalCleared));
+        ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
+    }
+    else
+    {
+        // update active errors gui
+        ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
+        ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
+    }
+}
+
+//clears events tab gui element, then repopulates it with current event data
+void MainWindow::refreshEventsOutput()
+{
+    // reset gui element
+    ui->events_output->clear();
+
+    //init vars
+    EventNode *wkgErrPtr = events->headErrorNode;
+    EventNode *wkgEventPtr = events->headEventNode;
+    EventNode *nextPrintPtr;
+    bool printErr;
+
+    //loop through all events and errors
+    while(wkgErrPtr != nullptr || wkgEventPtr != nullptr)
+    {
+        // get next to print
+        nextPrintPtr = events->getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
+
+        //update events output if filter allows
+        updateEventsOutput(nextPrintPtr);
+    }
+}
+
 //======================================================================================
 // To string methods for QSerialPortEnumeratedValues
 //======================================================================================
@@ -1137,148 +1246,50 @@ QSerialPort::FlowControl MainWindow::fromStringFlowControl(QString flowControlSt
     }
 }
 
-//writes empty line to qdebug
-void MainWindow::logEmptyLine()
+//======================================================================================
+//DEV_MODE exclusive methods
+//======================================================================================
+
+#if DEV_MODE
+//scans for available serial ports and adds them to csim port selection box
+void MainWindow::setup_csim_port_selection(int index)
 {
-    //revert to standard output format
-    qSetMessagePattern("%{message}");
-
-    //log empty line
-    qDebug();
-
-    //enable custom message format
-    qSetMessagePattern(QDEBUG_OUTPUT_FORMAT);
-}
-
-void MainWindow::resetFiringMode()
-{
-    ui->automaticLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
-    ui->burstLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
-    ui->safeLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
-    ui->singleLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
-}
-
-//overloaded function to add simplicity when possible
-void MainWindow::updateEventsOutput(EventNode *event)
-{
-    updateEventsOutput(events->nodeToString(event), event->error, event->cleared);
-}
-
-
-//updates gui with given message, dynamically colors output based on the type of outString
-//accounts for filtering settings and only renders the outString if it is being filtered for
-// by the user
-void MainWindow::updateEventsOutput(QString outString, bool error, bool cleared)
-{
-    QTextDocument document;
-    QString richText;
-
-    //check if we have an event as input and check if filter allows printing events
-    if (!error )
+    // Fetch available serial ports and add their names to the combo box
+    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
     {
-        if (eventFilter == EVENTS || eventFilter == ALL)
+        QString portName = info.portName();
+        ui->csim_port_selection->addItem(portName);
+
+        // Check if the current port name matches the one declared in settings
+        if (portName == userSettings.value("csimPortName").toString())
         {
-           //change output text color to white
-           richText = "<p style='color: #FFFFFF; font-size: 16px'>"+ outString + "</p>";
-
-           //activate html for the output
-           document.setHtml(richText);
-
-           //append styled string to the events output
-           ui->events_output->append(document.toHtml());
+            // If a match is found, set the current index of the combo box
+            ui->csim_port_selection->setCurrentIndex(ui->csim_port_selection->count() - 1);
         }
     }
-    //otherwise check for cleared error and if filter allows printing cleared errors
-    else if (cleared)
-    {
-        if (eventFilter == ALL || eventFilter == ERRORS || eventFilter == CLEARED_ERRORS)
-        {
-            if (coloredEventOutput)
-            {
-                //change output text color to green
-                richText = "<p style='color: #14AE5C; font-size: 16px'>"+ outString + "</p>";
-            }
-            else
-            {
-                //change output text color to white
-                richText = "<p style='color: #FFFFFF; font-size: 16px'>"+ outString + "</p>";
-            }
-
-            //activate html for the output
-            document.setHtml(richText);
-
-            //append styled string to the events output
-            ui->events_output->append(document.toHtml());
-        }
-    }
-    //otherwise this is a non-cleared error check if filtering allows printing non-cleared errors
-    else if (eventFilter == ALL || eventFilter == NON_CLEARED_ERRORS || eventFilter == ERRORS)
-    {
-        if (coloredEventOutput)
-        {
-            //change output text color to red
-            richText = "<p style='color: #FE1C1C; font-size: 16px'>"+ outString + "</p>";
-        }
-        else
-        {
-            //change output text color to white
-            richText = "<p style='color: #FFFFFF; font-size: 16px'>"+ outString + "</p>";
-        }
-
-       //activate html for the output
-       document.setHtml(richText);
-
-       //append styled string to the events output
-       ui->events_output->append(document.toHtml());
-    }
-
-    // update total events gui
-    ui->TotalEventsOutput->setText(QString::number(events->totalEvents));
-    ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
-    ui->statusEventOutput->setText(QString::number(events->totalEvents));
-    ui->statusEventOutput->setAlignment(Qt::AlignCenter);
-
-    if (!error) return;
-
-    // update total errors gui
-    ui->TotalErrorsOutput->setText(QString::number(events->totalErrors));
-    ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
-    ui->statusErrorOutput->setText(QString::number(events->totalErrors));
-    ui->statusErrorOutput->setAlignment(Qt::AlignCenter);
-
-    if ( cleared )
-    {
-        // update cleared errors gui
-        ui->ClearedErrorsOutput->setText(QString::number(events->totalCleared));
-        ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
-    }
-    else
-    {
-        // update active errors gui
-        ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
-        ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
-    }
 }
 
-//clears events tab gui element, then repopulates it with current event data
-void MainWindow::refreshEventsOutput()
+//updates the dev page non cleared error selection box
+void MainWindow::update_non_cleared_error_selection()
 {
-    // reset gui element
-    ui->events_output->clear();
+    //clear combo box
+    ui->non_cleared_error_selection->clear();
 
-    //init vars
-    EventNode *wkgErrPtr = events->headErrorNode;
-    EventNode *wkgEventPtr = events->headEventNode;
-    EventNode *nextPrintPtr;
-    bool printErr;
-
-    //loop through all events and errors
-    while(wkgErrPtr != nullptr || wkgEventPtr != nullptr)
+    //check for valid events ptr
+    if (csimHandle->eventsPtr != nullptr)
     {
-        // get next to print
-        nextPrintPtr = events->getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
+        //get head node
+        EventNode *wkgPtr = csimHandle->eventsPtr->headErrorNode;
 
-        //update events output if filter allows
-        updateEventsOutput(nextPrintPtr);
+        //loop until list ends
+        while (wkgPtr != nullptr)
+        {
+            //add the uncleared error to the combo box
+            ui->non_cleared_error_selection->addItem(QString::number(wkgPtr->id) + DELIMETER + wkgPtr->eventString);
+
+            //get next error
+            wkgPtr = wkgPtr->nextPtr;
+        }
     }
 }
+#endif

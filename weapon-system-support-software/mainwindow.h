@@ -4,15 +4,19 @@
 #include <QMainWindow>
 #include <QtConcurrent>
 #include <QDesktopServices>
-#include <connection.h>
-#include <csim.h>
-#include <events.h>
-#include <electrical.h>
+#include "connection.h"
+#include "events.h"
+#include "electrical.h"
 #include <QShortcut>
 #include <QTextCursor>
 #include <QMessageBox>
 #include <QInputDialog>
+#include "./ui_mainwindow.h"
+#include "constants.h"
 
+#if DEV_MODE
+    #include "csim.h"
+#endif
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -31,8 +35,13 @@ public:
     //class for ddms serial communication
     Connection *ddmCon;
 
-    //csim simulator is contained within this class. It makes thread that can be managed through the handle
-    CSim *csimHandle;
+    #if DEV_MODE
+        //csim simulator is contained within this class. It makes thread that can be managed through the handle
+        CSim *csimHandle;
+        QString csimPortName;
+        //logs empty line to qDebug() output
+        void logEmptyLine();
+    #endif
 
     //data classes
     Status *status;
@@ -41,7 +50,6 @@ public:
     QSettings userSettings;
 
     // vars
-    QString csimPortName;
     QString ddmPortName;
     QTimer* handshakeTimer;
     QTimer* lastMessageTimer;
@@ -56,9 +64,6 @@ public:
 
     //creates a new connection using currently selected serial port settings
     void createDDMCon();
-
-    //logs empty line to qDebug() output
-    void logEmptyLine();
 
     // Declare toString methods
     static QString toString(QSerialPort::BaudRate baudRate);
@@ -75,15 +80,17 @@ public:
     static QSerialPort::FlowControl fromStringFlowControl(QString flowControlStr);
 
 signals:
-    //signal to be connected to csim's completeTransmissionRequest() slot
-    //will tell csim to send the message
-    void transmissionRequest(QString message);
+    #if DEV_MODE
+        //signal to be connected to csim's completeTransmissionRequest() slot
+        //will tell csim to send the message
+        void transmissionRequest(QString message);
 
-    //signal will be connected to csims clearError() slot.
-    void clearErrorRequest(int clearedId);
+        //signal will be connected to csims clearError() slot.
+        void clearErrorRequest(int clearedId);
 
-    //signal will be connected to csims outputSessionString() slot.
-    void outputMessagesSentRequest();
+        //signal will be connected to csims outputSessionString() slot.
+        void outputMessagesSentRequest();
+    #endif
 
 private slots:
     //==========================================================================
@@ -116,9 +123,11 @@ private slots:
     //========================================================================================================
     //non-gui triggered slots relating exclusively to managing gui (should be declared in mainwindow.cpp)
     //=======================================================================================================
-    void setup_csim_port_selection(int index);
+    #if DEV_MODE
+        void setup_csim_port_selection(int index);
+        void update_non_cleared_error_selection();
+    #endif
     void setup_ddm_port_selection(int index);
-    void update_non_cleared_error_selection();
     void setup_logfile_location();
     void setupSettings();
     //========================================================================================================
@@ -129,41 +138,37 @@ private slots:
     //gui triggered slots (should be declared in mainwindow_gui_slots.cpp)
     //====================================================================================
     void findText();
-    void on_send_message_button_clicked();
-    void on_csim_port_selection_currentIndexChanged(int index);
-    void on_CSim_button_clicked();
     void on_ddm_port_selection_currentIndexChanged(int index);
     void on_handshake_button_clicked();
     void on_ConnectionPageButton_clicked();
     void on_EventsPageButton_clicked();
     void on_StatusPageButton_clicked();
     void on_ElectricalPageButton_clicked();
-    void on_DevPageButton_clicked();
     void on_download_button_clicked();
-    void on_clear_error_button_clicked();
     void on_baud_rate_selection_currentIndexChanged(int index);
     void on_stop_bit_selection_currentIndexChanged(int index);
     void on_flow_control_selection_currentIndexChanged(int index);
     void on_parity_selection_currentIndexChanged(int index);
     void on_data_bits_selection_currentIndexChanged(int index);
     void on_FilterBox_currentIndexChanged(int index);
-    void on_output_messages_sent_button_clicked();
     void on_save_Button_clicked();
     void on_restore_Button_clicked();
     void on_openLogfileFolder_clicked();
     void on_setLogfileFolder_clicked();
-
-    void on_toggle_num_triggers_clicked();
-
     void on_load_events_from_logfile_clicked();
-    //=========================================================================================================
-
-
     void on_SettingsPageButton_clicked();
-
     void on_colored_events_output_stateChanged(int arg1);
-
     void on_auto_save_limit_valueChanged(int arg1);
+    #if DEV_MODE
+        void on_send_message_button_clicked();
+        void on_csim_port_selection_currentIndexChanged(int index);
+        void on_CSim_button_clicked();
+        void on_clear_error_button_clicked();
+        void on_DevPageButton_clicked();
+        void on_output_messages_sent_button_clicked();
+        void on_toggle_num_triggers_clicked();
+    #endif
+    //=========================================================================================================
 
 private:
     Ui::MainWindow *ui;
