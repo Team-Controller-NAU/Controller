@@ -1,4 +1,6 @@
 #include "mainwindow.h"
+#include "constants.h"
+#include <QtCore>
 
 MainWindow::MainWindow(QWidget *parent)
 
@@ -32,10 +34,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     GREEN_LIGHT(":/resources/Images/greenButton.png")
 {
-
-    //set output settings for qDebug
-    qSetMessagePattern(QDEBUG_OUTPUT_FORMAT);
-
     //init gui
     ui->setupUi(this);
 
@@ -44,6 +42,12 @@ MainWindow::MainWindow(QWidget *parent)
 
     //if dev mode is active, init CSim
     #if DEV_MODE
+
+        //set output settings for qDebug
+        qSetMessagePattern(QDEBUG_OUTPUT_FORMAT);
+
+        qDebug() << "Dev mode active";
+
         //get csimPortName from port selection
         csimPortName = ui->csim_port_selection->currentText();
 
@@ -334,9 +338,11 @@ void MainWindow::readSerialData()
                 //update gui elements
                 updateEventsOutput(events->lastErrorNode);
 
-                //update the cleared error selection box in dev tools
-                //(this can be removed when dev page is removed)
-                update_non_cleared_error_selection();
+                #if DEV_MODE
+                    //update the cleared error selection box in dev tools
+                    //(this can be removed when dev page is removed)
+                    update_non_cleared_error_selection();
+                #endif
 
                 break;
 
@@ -452,8 +458,10 @@ void MainWindow::readSerialData()
                 //update cleared status of error with given id
                 events->clearError(message.left(message.indexOf(DELIMETER)).toInt());
 
-                //update the cleared error selection box in dev tools (can be removed when dev page is removed)
-                update_non_cleared_error_selection();
+                #if DEV_MODE
+                    //update the cleared error selection box in dev tools (can be removed when dev page is removed)
+                    update_non_cleared_error_selection();
+                #endif
 
                 //refresh the events output with newly cleared error
                 refreshEventsOutput();
@@ -552,7 +560,9 @@ void MainWindow::enableConnectionChanges()
 //support function, outputs usersettings values to qdebug
 void MainWindow::displaySavedSettings()
 {
-    logEmptyLine();
+    #if DEV_MODE
+        logEmptyLine();
+    #endif
     qDebug() << "Connection Settings Saved Cross Session:";
     // Print the values of each setting
     qDebug() << "DDM Port: " << userSettings.value("portName").toString();
@@ -952,19 +962,6 @@ void MainWindow::updateTimeSinceLastMessage()
     }
 }
 
-//writes empty line to qdebug
-void MainWindow::logEmptyLine()
-{
-    //revert to standard output format
-    qSetMessagePattern("%{message}");
-
-    //log empty line
-    qDebug();
-
-    //enable custom message format
-    qSetMessagePattern(QDEBUG_OUTPUT_FORMAT);
-}
-
 void MainWindow::resetFiringMode()
 {
     ui->automaticLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
@@ -1292,4 +1289,26 @@ void MainWindow::update_non_cleared_error_selection()
         }
     }
 }
+//sends user to developer page when clicked
+void MainWindow::on_DevPageButton_clicked()
+{
+    qDebug() << "Dev Page clicked";
+    ui->Flow_Label->setCurrentIndex(1);
+    resetPageButton();
+    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
+}
+
+//writes empty line to qdebug
+void MainWindow::logEmptyLine()
+{
+    //revert to standard output format
+    qSetMessagePattern("%{message}");
+
+    //log empty line
+    qDebug();
+
+    //enable custom message format
+    qSetMessagePattern(QDEBUG_OUTPUT_FORMAT);
+}
 #endif
+

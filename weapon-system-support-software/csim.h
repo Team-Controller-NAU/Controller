@@ -1,10 +1,10 @@
 #ifndef CSIM_H
 #define CSIM_H
-
+#if DEV_MODE
 #include <QThread>
-#include <status.h>
-#include <connection.h>
-#include <events.h>
+#include "status.h"
+#include "connection.h"
+#include "events.h"
 #include <electrical.h>
 #include <QDebug>
 #include "constants.h"
@@ -83,6 +83,6 @@ private:
     //overloaded threading function.
     void run() override;
 };
-
+#endif //DEV_MODE
 #endif // CSIM_H
 

@@ -460,31 +460,6 @@ void Events::freeError(int id)
     qDebug() << "[CSIM] No node with id " << id << " was found, no deletions made";
 }
 
-//given the head to either the error linked list or the event linked list, a message will be created containing
-//data from all nodes in the list (data dump is used when the controller has been running prior to the ddm being connected
-//the data dump will catch the ddm up to any events and errors that have occured before connection)
-QString Events::generateDataDump(EventNode *headPtr)
-{
-    QString message = "";
-    EventNode *wkgPtr = headPtr;
-
-    while (wkgPtr != nullptr)
-    {
-        message += QString::number(wkgPtr->id) + DELIMETER;
-
-        message += wkgPtr->timeStamp + DELIMETER;
-
-        message += wkgPtr->eventString + DELIMETER;
-
-        message += QString::number(wkgPtr->cleared) + DELIMETER;
-
-        wkgPtr = wkgPtr->nextPtr;
-    }
-
-    //add new line for data parsing and return
-    return message + '\n';
-}
-
 //function developed to handle reading a node message and create a new error node with given data
 void Events::loadErrorData(QString message)
 {
@@ -673,5 +648,30 @@ void Events::displayErrorLL()
     }
 
     qDebug() << "===================================";
+}
+
+//given the head to either the error linked list or the event linked list, a message will be created containing
+//data from all nodes in the list (data dump is used when the controller has been running prior to the ddm being connected
+//the data dump will catch the ddm up to any events and errors that have occured before connection)
+QString Events::generateDataDump(EventNode *headPtr)
+{
+    QString message = "";
+    EventNode *wkgPtr = headPtr;
+
+    while (wkgPtr != nullptr)
+    {
+        message += QString::number(wkgPtr->id) + DELIMETER;
+
+        message += wkgPtr->timeStamp + DELIMETER;
+
+        message += wkgPtr->eventString + DELIMETER;
+
+        message += QString::number(wkgPtr->cleared) + DELIMETER;
+
+        wkgPtr = wkgPtr->nextPtr;
+    }
+
+    //add new line for data parsing and return
+    return message + '\n';
 }
 #endif

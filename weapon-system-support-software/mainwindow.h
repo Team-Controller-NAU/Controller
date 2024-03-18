@@ -1,18 +1,20 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "constants.h"
 #include <QMainWindow>
 #include <QtConcurrent>
 #include <QDesktopServices>
 #include "connection.h"
 #include "events.h"
+#include "status.h"
 #include "electrical.h"
 #include <QShortcut>
 #include <QTextCursor>
 #include <QMessageBox>
 #include <QInputDialog>
+#include <QObject>
 #include "./ui_mainwindow.h"
-#include "constants.h"
 
 #if DEV_MODE
     #include "csim.h"
@@ -34,14 +36,6 @@ public:
 
     //class for ddms serial communication
     Connection *ddmCon;
-
-    #if DEV_MODE
-        //csim simulator is contained within this class. It makes thread that can be managed through the handle
-        CSim *csimHandle;
-        QString csimPortName;
-        //logs empty line to qDebug() output
-        void logEmptyLine();
-    #endif
 
     //data classes
     Status *status;
@@ -79,17 +73,23 @@ public:
     static QSerialPort::StopBits fromStringStopBits(QString stopBitsStr);
     static QSerialPort::FlowControl fromStringFlowControl(QString flowControlStr);
 
-signals:
     #if DEV_MODE
-        //signal to be connected to csim's completeTransmissionRequest() slot
-        //will tell csim to send the message
-        void transmissionRequest(QString message);
+        //csim simulator is contained within this class. It makes thread that can be managed through the handle
+    CSim *csimHandle;
+    QString csimPortName;
+    //logs empty line to qDebug() output
+    void logEmptyLine();
 
-        //signal will be connected to csims clearError() slot.
-        void clearErrorRequest(int clearedId);
+signals:
+    //signal to be connected to csim's completeTransmissionRequest() slot
+    //will tell csim to send the message
+    void transmissionRequest(QString message);
 
-        //signal will be connected to csims outputSessionString() slot.
-        void outputMessagesSentRequest();
+    //signal will be connected to csims clearError() slot.
+    void clearErrorRequest(int clearedId);
+
+    //signal will be connected to csims outputSessionString() slot.
+    void outputMessagesSentRequest();
     #endif
 
 private slots:
@@ -117,7 +117,6 @@ private slots:
     void enforceAutoSaveLimit();
     void updateConnectionStatus(bool connectionStatus);
     //==================================================================================
-
 
 
     //========================================================================================================
@@ -159,7 +158,7 @@ private slots:
     void on_SettingsPageButton_clicked();
     void on_colored_events_output_stateChanged(int arg1);
     void on_auto_save_limit_valueChanged(int arg1);
-    #if DEV_MODE
+#if (DEV_MODE)
         void on_send_message_button_clicked();
         void on_csim_port_selection_currentIndexChanged(int index);
         void on_CSim_button_clicked();
@@ -170,7 +169,7 @@ private slots:
     #endif
     //=========================================================================================================
 
-private:
+    private:
     Ui::MainWindow *ui;
 
     QPixmap GREEN_LIGHT;

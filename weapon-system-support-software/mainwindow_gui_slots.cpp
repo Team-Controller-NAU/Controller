@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include <QObject>
 
 //this file contains only the implementation of the GUI slots. Declare
 //other processing functions in mainwindow.cpp
@@ -555,7 +556,9 @@ void MainWindow::on_load_events_from_logfile_clicked()
         return;
     }
 
-    logEmptyLine();
+    #if DEV_MODE
+        logEmptyLine();
+    #endif
     qDebug() << "Loading data from: " << selectedFile;
 
     // Pass the selected file name to the loadDataFromLogFile function
@@ -672,14 +675,6 @@ void MainWindow::on_csim_port_selection_currentIndexChanged(int index)
     csimPortName = ui->csim_port_selection->currentText();
 
     qDebug() << "CSIM port set to " << csimPortName;
-}
-
-//sends user to developer page when clicked
-void MainWindow::on_DevPageButton_clicked()
-{
-    ui->Flow_Label->setCurrentIndex(1);
-    resetPageButton();
-    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
 }
 
 void MainWindow::on_output_messages_sent_button_clicked()

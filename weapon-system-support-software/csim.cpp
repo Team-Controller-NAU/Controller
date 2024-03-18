@@ -1,5 +1,5 @@
 #include "csim.h"
-
+#if DEV_MODE
 //constructor
 CSim::CSim(QObject *parent, QString portName)
     : QThread(parent), stop(false), portName(portName),
@@ -489,3 +489,4 @@ void CSim::logEmptyLine()
     //enable custom message format
     qSetMessagePattern(QDEBUG_OUTPUT_FORMAT);
 }
+#endif

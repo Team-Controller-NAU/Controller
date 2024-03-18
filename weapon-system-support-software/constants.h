@@ -1,8 +1,6 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#define DEV_MODE true
-
 #include <QString>
 #include <QSerialPortInfo>
 #include <QSerialPort>
