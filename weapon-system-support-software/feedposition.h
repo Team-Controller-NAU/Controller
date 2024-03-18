@@ -2,6 +2,7 @@
 #define FEEDPOSITION_H
 
 #include <QDial>
+#include <QMouseEvent>
 
 class feedposition : public QDial
 {
@@ -14,6 +15,7 @@ public:
 private:
 
     virtual void paintEvent(QPaintEvent*) override;
+    void mousePressEvent(QMouseEvent *event) override;
 
 };
 #endif // FEEDPOSITION_H

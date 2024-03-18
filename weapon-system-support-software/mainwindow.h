@@ -171,5 +171,6 @@ private:
     QPixmap GREEN_LIGHT;
     QPixmap RED_LIGHT;
     QPixmap BLANK_LIGHT;
+    QPixmap ORANGE_LIGHT;
 };
 #endif // MAINWINDOW_H
