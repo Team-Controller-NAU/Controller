@@ -2,7 +2,6 @@
 
 #include <QPainter>
 #include <QColor>
-#include <cmath>
 
 feedposition::feedposition(QWidget* parent)
     : QDial(parent)
@@ -93,4 +92,9 @@ void feedposition::paintEvent(QPaintEvent*)
     painter.setFont(textfont);
 
     painter.drawText(QDial::height()/2.15,QDial::height()/2.15,QDial::height(),QDial::height(),0,QString::number(value));
+}
+
+void feedposition::mousePressEvent(QMouseEvent *event)
+{
+    event->ignore();
 }

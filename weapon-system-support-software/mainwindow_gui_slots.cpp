@@ -393,6 +393,8 @@ void MainWindow::on_handshake_button_clicked()
                                             "QPushButton::hover { background-color: #ff8533; } "
                                             "QPushButton::pressed { background-color: #ffa366;}");
 
+        ui->connectionStatus->setPixmap(ORANGE_LIGHT);
+        ui->connectionLabel->setText("Connecting ");
         //disable changes to connection settings
         disableConnectionChanges();
     }
