@@ -2,14 +2,13 @@
 #define EVENTS_H
 
 #include <QObject>
-#include <fstream>
 #include <QDebug>
-#include <iostream>
 #include <QDateTime>
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QSettings>
 #include <QRegularExpression>
+#include "constants.h"
 
 
 struct EventNode {
@@ -50,15 +49,6 @@ public:
 
     //navigation utils
     EventNode* getNextNodeToPrint(EventNode*& eventPtr, EventNode*& errorPtr, bool& printErr);
-    int getErrorIdByPosition(int pos);
-
-    //debug utils
-    void displayErrorLL();
-
-    //serial message generation utils
-    QString generateNodeMessage(EventNode *event);
-    QString generateDataDump(EventNode *headPtr);
-    QString generateClearedMessage(EventNode *error);
 
     //load from serial message utils
     void loadErrorData(QString message);
@@ -73,6 +63,21 @@ public:
     void appendToLogfile(QString logfilePath, EventNode *event);
     QString nodeToString(EventNode *event);
     bool stringToNode(QString nodeString);
+
+    //======================================================================================
+    //DEV_MODE exclusive methods
+    //======================================================================================
+    #if DEV_MODE
+        //serial message generation utils
+        QString generateNodeMessage(EventNode *event);
+        QString generateDataDump(EventNode *headPtr);
+        QString generateClearedMessage(EventNode *error);
+
+        //debug utils
+        void displayErrorLL();
+
+        int getErrorIdByPosition(int pos);
+    #endif
 };
 
 #endif // EVENTS_H

@@ -5,6 +5,7 @@
 #include <constants.h>
 #include <QString>
 #include <QRandomGenerator>
+#include "constants.h"
 
 class Status : public QObject
 {
@@ -27,26 +28,23 @@ public:
     QString crc;
     QString elapsedControllerTime;
 
-    //serial communication utilities===================================================================
-
     //reads a status message from controller and updates class variables
     void loadData(QString statusMessage);
 
     //reads a message containing controller version and crc and updates corresponding class variables
     void loadVersionData(QString versionMessage);
 
-    //generates a serial message given the current values in the status class
-    QString generateMessage();
-
-    //=================================================================================================
-
+    //======================================================================================
+    //DEV_MODE exclusive methods
+    //======================================================================================
+    #if DEV_MODE
     //randomization utility, relies heavily on values defined in constants.h, accounts
     //for single or double trigger data generation
     void randomize(bool secondTrigger);
 
-signals:
-    //signal is emitted after new data is loaded into status from a status message
-    void newDataLoaded(Status *status);
+    //generates a serial message given the current values in the status class
+    QString generateMessage();
+    #endif
 };
 
 #endif // STATUS_H

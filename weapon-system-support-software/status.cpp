@@ -54,9 +54,6 @@ void Status::loadData(QString statusMessage)
 
     //extract
     firingRate = values[8].toDouble(&result);
-
-    //emit signal, new status data is loaded
-    emit newDataLoaded(this);
 }
 
 //given a message containing the controller version and crc updates corresponding class variables
@@ -67,11 +64,13 @@ void Status::loadVersionData(QString versionMessage)
     elapsedControllerTime = values[0];
     version = values[1];
     crc = values[2];
-
-    //emit signal, new status data is loaded
-    emit newDataLoaded(this);
 }
 
+//======================================================================================
+//DEV_MODE exclusive methods
+//======================================================================================
+
+#if DEV_MODE
 QString Status::generateMessage()
 {
     /* will create a status message that contains csv data in the following order
@@ -180,3 +179,4 @@ void Status::randomize(bool secondTrigger)
         totalFiringEvents++;
     }
 }
+#endif

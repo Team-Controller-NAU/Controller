@@ -1,8 +1,5 @@
-#include <connection.h>
 #include "mainwindow.h"
-#include "csim.h"
-#include "constants.h"
-#include "./ui_mainwindow.h"
+#include <QObject>
 
 //this file contains only the implementation of the GUI slots. Declare
 //other processing functions in mainwindow.cpp
@@ -44,24 +41,6 @@ void MainWindow::on_baud_rate_selection_currentIndexChanged(int index)
         // Handle default case
         break;
     }
-}
-
-void MainWindow::on_clear_error_button_clicked()
-{
-
-    //get error from combo box and split the error on delimeter
-    QStringList errorElements = ui->non_cleared_error_selection->currentText().split(DELIMETER);
-
-    if (errorElements.isEmpty() || errorElements.first().isEmpty())
-    {
-        return;
-    }
-
-    //get the id of the error
-    int errorId = errorElements[0].toInt();
-
-    //make a request to csim to clear the error
-    emit clearErrorRequest(errorId);
 }
 
 // slot for find functionality within the events_output box when the user presses CTRL+F on their keyboard
@@ -152,53 +131,6 @@ void MainWindow::findText()
     }
 }
 
-//button toggles csim random generation on and off. first click will setup thread and run csim.
-//second will terminate thread and close csim connection.
-void MainWindow::on_CSim_button_clicked()
-{
-    //check if csim is currently running
-    if (csimHandle->isRunning())
-    {
-        // csim is running, shut it down
-        csimHandle->stopSimulation();
-
-        // stop ddm timer
-        lastMessageTimer->stop();
-
-        // update ui
-        ui->CSim_button->setText("Start CSim");
-
-        //enable csim port selection
-        ui->csim_port_selection->setEnabled(true);
-    }
-    //csim is not running, start it
-    else
-    {
-        //set button to display the option to stop csim
-        ui->CSim_button->setText("Stop CSim");
-
-        //start csim
-        csimHandle->startCSim(csimPortName);
-
-        //temporarily disable csim port selection
-        ui->csim_port_selection->setEnabled(false);
-    }
-}
-
-//runs when the user selects an option out of csim port drop down menu
-void MainWindow::on_csim_port_selection_currentIndexChanged(int index)
-{
-    if (ui->ddm_port_selection->currentText() == "")
-    {
-        return;
-    }
-
-    //update port
-    csimPortName = ui->csim_port_selection->currentText();
-
-    qDebug() << "CSIM port set to " << csimPortName;
-}
-
 void MainWindow::on_data_bits_selection_currentIndexChanged(int index)
 {
     if (ddmCon == nullptr) {
@@ -240,14 +172,6 @@ void MainWindow::on_ddm_port_selection_currentIndexChanged(int index)
 
     //create connection class
     createDDMCon();
-}
-
-//sends user to developer page when clicked
-void MainWindow::on_DevPageButton_clicked()
-{
-    ui->Flow_Label->setCurrentIndex(1);
-    resetPageButton();
-    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
 }
 
 //download button for events in CSV format
@@ -409,12 +333,6 @@ void MainWindow::on_handshake_button_clicked()
     }
 }
 
-void MainWindow::on_output_messages_sent_button_clicked()
-{
-    //send request for csim to output its session string
-    emit outputMessagesSentRequest();
-}
-
 void MainWindow::on_parity_selection_currentIndexChanged(int index)
 {
     if (ddmCon == nullptr) {
@@ -463,44 +381,6 @@ void MainWindow::on_save_Button_clicked()
 
     //output new settings to qDebug()
     displaySavedSettings();
-}
-
-//sends custom user input message
-void MainWindow::on_send_message_button_clicked()
-{
-    // Get user input from input box
-    QString userInput = ui->message_contents->toPlainText();
-
-    // Replace literal "\n" characters with actual newline characters
-    userInput.replace("\\n", "\n");
-
-    // Add newline character if userInput does not end with newline
-    if (!userInput.endsWith('\n'))
-        userInput += '\n';
-
-    // Clear the contents of input box
-    ui->message_contents->clear();
-
-    // Check if csim has an active connection
-    if (csimHandle->connPtr != nullptr)
-    {
-        // Send signal for csim to transmit message
-        emit transmissionRequest(userInput);
-    }
-    // No active connection from csim, make temporary connection
-    else
-    {
-        // Open new connection on com4 (smart pointer auto frees memory when function exits)
-            std::unique_ptr<Connection> conn(new Connection(ui->csim_port_selection->currentText(),
-                                fromStringBaudRate(ui->baud_rate_selection->currentText()),
-                                fromStringDataBits(ui->data_bits_selection->currentText()),
-                                fromStringParity(ui->parity_selection->currentText()),
-                                fromStringStopBits(ui->stop_bit_selection->currentText()),
-                                fromStringFlowControl(ui->flow_control_selection->currentText())));
-
-        // Send message through csim port
-        conn->transmit(userInput);
-    }
 }
 
 //sends user to settings page when clicked
@@ -557,8 +437,11 @@ void MainWindow::resetPageButton()
     ui->EventsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
     ui->StatusPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
     ui->ElectricalPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
-    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
     ui->SettingsPageButton->setStyleSheet("border-image: url(://resources/Images/whiteSettings.png)");
+
+    #if DEV_MODE
+        ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
+    #endif
 }
 
 //restores connection settings to the values saved to the system as default
@@ -656,31 +539,6 @@ void MainWindow::on_setLogfileFolder_clicked()
     userSettings.sync();
 }
 
-//toggles csim between accounting for 1 and 2 triggers
-void MainWindow::on_toggle_num_triggers_clicked()
-{
-    //check if secondTrigger is currently enabled
-    if ( csimHandle->secondTrigger )
-    {
-        //disable it
-        csimHandle->secondTrigger = false;
-
-        //update button text
-        ui->toggle_num_triggers->setText("Set to two triggers");
-
-        //empty the trigger status current value
-        status->trigger2 = NA;
-    }
-    //secondTrigger is currently disabled
-    else
-    {
-        //enable it
-        csimHandle->secondTrigger = true;
-        //update button text
-        ui->toggle_num_triggers->setText("Set to single trigger");
-    }
-}
-
 //opens log file directory to prompt user to select log file. data from log file is then
 //loaded into events class and rendered in events page.
 void MainWindow::on_load_events_from_logfile_clicked()
@@ -700,7 +558,9 @@ void MainWindow::on_load_events_from_logfile_clicked()
         return;
     }
 
-    logEmptyLine();
+    #if DEV_MODE
+        logEmptyLine();
+    #endif
     qDebug() << "Loading data from: " << selectedFile;
 
     // Pass the selected file name to the loadDataFromLogFile function
@@ -747,3 +607,144 @@ void MainWindow::on_auto_save_limit_valueChanged(int arg1)
     autoSaveLimit = arg1;
     userSettings.setValue("autoSaveLimit", autoSaveLimit);
 }
+
+//======================================================================================
+//DEV_MODE exclusive methods
+//======================================================================================
+
+#if DEV_MODE
+//manually clear errors from dev page
+void MainWindow::on_clear_error_button_clicked()
+{
+
+    //get error from combo box and split the error on delimeter
+    QStringList errorElements = ui->non_cleared_error_selection->currentText().split(DELIMETER);
+
+    if (errorElements.isEmpty() || errorElements.first().isEmpty())
+    {
+        return;
+    }
+
+    //get the id of the error
+    int errorId = errorElements[0].toInt();
+
+    //make a request to csim to clear the error
+    emit clearErrorRequest(errorId);
+}
+
+//button toggles csim random generation on and off. first click will setup thread and run csim.
+//second will terminate thread and close csim connection.
+void MainWindow::on_CSim_button_clicked()
+{
+    //check if csim is currently running
+    if (csimHandle->isRunning())
+    {
+        // csim is running, shut it down
+        csimHandle->stopSimulation();
+
+        // stop ddm timer
+        lastMessageTimer->stop();
+
+        // update ui
+        ui->CSim_button->setText("Start CSim");
+
+        //enable csim port selection
+        ui->csim_port_selection->setEnabled(true);
+    }
+    //csim is not running, start it
+    else
+    {
+        //set button to display the option to stop csim
+        ui->CSim_button->setText("Stop CSim");
+
+        //start csim
+        csimHandle->startCSim(csimPortName);
+
+        //temporarily disable csim port selection
+        ui->csim_port_selection->setEnabled(false);
+    }
+}
+
+//runs when the user selects an option out of csim port drop down menu
+void MainWindow::on_csim_port_selection_currentIndexChanged(int index)
+{
+    if (ui->ddm_port_selection->currentText() == "")
+    {
+        return;
+    }
+
+    //update port
+    csimPortName = ui->csim_port_selection->currentText();
+
+    qDebug() << "CSIM port set to " << csimPortName;
+}
+
+void MainWindow::on_output_messages_sent_button_clicked()
+{
+    //send request for csim to output its session string
+    emit outputMessagesSentRequest();
+}
+
+//toggles csim between accounting for 1 and 2 triggers
+void MainWindow::on_toggle_num_triggers_clicked()
+{
+    //check if secondTrigger is currently enabled
+    if ( csimHandle->secondTrigger )
+    {
+        //disable it
+        csimHandle->secondTrigger = false;
+
+        //update button text
+        ui->toggle_num_triggers->setText("Set to two triggers");
+
+        //empty the trigger status current value
+        status->trigger2 = NA;
+    }
+    //secondTrigger is currently disabled
+    else
+    {
+        //enable it
+        csimHandle->secondTrigger = true;
+        //update button text
+        ui->toggle_num_triggers->setText("Set to single trigger");
+    }
+}
+
+//sends custom user input message
+void MainWindow::on_send_message_button_clicked()
+{
+    // Get user input from input box
+    QString userInput = ui->message_contents->toPlainText();
+
+    // Replace literal "\n" characters with actual newline characters
+    userInput.replace("\\n", "\n");
+
+    // Add newline character if userInput does not end with newline
+    if (!userInput.endsWith('\n'))
+        userInput += '\n';
+
+    // Clear the contents of input box
+    ui->message_contents->clear();
+
+    // Check if csim has an active connection
+    if (csimHandle->connPtr != nullptr)
+    {
+        // Send signal for csim to transmit message
+        emit transmissionRequest(userInput);
+    }
+    // No active connection from csim, make temporary connection
+    else
+    {
+        // Open new connection on com4 (smart pointer auto frees memory when function exits)
+        std::unique_ptr<Connection> conn(new Connection(ui->csim_port_selection->currentText(),
+                                                        fromStringBaudRate(ui->baud_rate_selection->currentText()),
+                                                        fromStringDataBits(ui->data_bits_selection->currentText()),
+                                                        fromStringParity(ui->parity_selection->currentText()),
+                                                        fromStringStopBits(ui->stop_bit_selection->currentText()),
+                                                        fromStringFlowControl(ui->flow_control_selection->currentText())));
+
+        // Send message through csim port
+        conn->transmit(userInput);
+    }
+}
+#endif

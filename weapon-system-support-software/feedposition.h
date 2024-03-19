@@ -2,6 +2,7 @@
 #define FEEDPOSITION_H
 
 #include <QDial>
+#include "constants.h"
 #include <QMouseEvent>
 
 class feedposition : public QDial
