@@ -1,5 +1,4 @@
 #include "events.h"
-#include "constants.h"
 
 Events::Events()
 {
@@ -103,23 +102,6 @@ void Events::addError(int id, QString timeStamp, QString eventString, bool clear
 
     //log: new err created
     qDebug() << "New error node created. Total nodes: " << totalNodes << " total errors: " << totalErrors;
-}
-
-void Events::displayErrorLL()
-{
-    EventNode *wkgPtr = headErrorNode;
-
-    qDebug() << "====Printing Error Linked List ====";
-    qDebug() << "Total Errors " << totalErrors;
-
-    while (wkgPtr != nullptr)
-    {
-        qDebug() << "Error " << wkgPtr->id << wkgPtr->eventString << wkgPtr->cleared;
-
-        wkgPtr = wkgPtr->nextPtr;
-    }
-
-    qDebug() << "===================================";
 }
 
 //free memory allocated to error and event linked lists
@@ -331,7 +313,7 @@ bool Events::stringToNode(QString nodeString)
     qDebug() << parts[0].mid(idStartIndex);
     id = parts[0].mid(idStartIndex).toInt(&conversionError);
 
-    //check for error
+    //check for int conversion error
     if (!conversionError)
     {
         qDebug() << "Int conversion error: " << nodeString;
@@ -478,81 +460,6 @@ void Events::freeError(int id)
     qDebug() << "[CSIM] No node with id " << id << " was found, no deletions made";
 }
 
-//generate message containing data from given event or error, csim will attach an identifier to the
-//begining of message to tell ddm if it is an error or event
-QString Events::generateNodeMessage(EventNode *event)
-{
-    /*the message will format data in this order
-    int id;
-    QString timeStamp;
-    QString eventString;
-    double param1;
-    double param2;
-    double param3;
-    bool cleared;*/
-
-    QString message = QString::number(event->id) + DELIMETER;
-
-    message += event->timeStamp + DELIMETER;
-
-    message += event->eventString + DELIMETER;
-
-    message += QString::number(event->cleared) + DELIMETER;
-
-    return message + '\n';
-
-}
-
-//given the head to either the error linked list or the event linked list, a message will be created containing
-//data from all nodes in the list (data dump is used when the controller has been running prior to the ddm being connected
-//the data dump will catch the ddm up to any events and errors that have occured before connection)
-QString Events::generateDataDump(EventNode *headPtr)
-{
-    QString message = "";
-    EventNode *wkgPtr = headPtr;
-
-    while (wkgPtr != nullptr)
-    {
-        message += QString::number(wkgPtr->id) + DELIMETER;
-
-        message += wkgPtr->timeStamp + DELIMETER;
-
-        message += wkgPtr->eventString + DELIMETER;
-
-        message += QString::number(wkgPtr->cleared) + DELIMETER;
-
-        wkgPtr = wkgPtr->nextPtr;
-    }
-
-    //add new line for data parsing and return
-    return message + '\n';
-}
-
-
-//retrieves the error in position i in the linked list
-int Events::getErrorIdByPosition(int pos)
-{
-    EventNode *wkgPtr = headErrorNode;
-    int i = 0;
-
-    //loop until we reach the position, or ll ends
-    while(i != pos && wkgPtr != nullptr)
-    {
-        //get next error
-        wkgPtr = wkgPtr->nextPtr;
-        i++;
-    }
-
-    //check if we got to correct position
-    if (i == pos)
-    {
-        return wkgPtr->id;
-    }
-
-    //otherwise data not found
-    return DATA_NOT_FOUND;
-}
-
 //function developed to handle reading a node message and create a new error node with given data
 void Events::loadErrorData(QString message)
 {
@@ -673,3 +580,98 @@ QString Events::nodeToString(EventNode *event)
 
     return nodeString; // Return the concatenated QString
 }
+
+//======================================================================================
+//DEV_MODE exclusive methods
+//======================================================================================
+#if DEV_MODE
+//generate message containing data from given event or error, csim will attach an identifier to the
+//begining of message to tell ddm if it is an error or event
+QString Events::generateNodeMessage(EventNode *event)
+{
+    /*the message will format data in this order
+    int id;
+    QString timeStamp;
+    QString eventString;
+    double param1;
+    double param2;
+    double param3;
+    bool cleared;*/
+
+    QString message = QString::number(event->id) + DELIMETER;
+
+    message += event->timeStamp + DELIMETER;
+
+    message += event->eventString + DELIMETER;
+
+    message += QString::number(event->cleared) + DELIMETER;
+
+    return message + '\n';
+}
+
+//retrieves the error in position i in the linked list
+int Events::getErrorIdByPosition(int pos)
+{
+    EventNode *wkgPtr = headErrorNode;
+    int i = 0;
+
+    //loop until we reach the position, or ll ends
+    while(i != pos && wkgPtr != nullptr)
+    {
+        //get next error
+        wkgPtr = wkgPtr->nextPtr;
+        i++;
+    }
+
+    //check if we got to correct position
+    if (i == pos)
+    {
+        return wkgPtr->id;
+    }
+
+    //otherwise data not found
+    return DATA_NOT_FOUND;
+}
+
+void Events::displayErrorLL()
+{
+    EventNode *wkgPtr = headErrorNode;
+
+    qDebug() << "====Printing Error Linked List ====";
+    qDebug() << "Total Errors " << totalErrors;
+
+    while (wkgPtr != nullptr)
+    {
+        qDebug() << "Error " << wkgPtr->id << wkgPtr->eventString << wkgPtr->cleared;
+
+        wkgPtr = wkgPtr->nextPtr;
+    }
+
+    qDebug() << "===================================";
+}
+
+//given the head to either the error linked list or the event linked list, a message will be created containing
+//data from all nodes in the list (data dump is used when the controller has been running prior to the ddm being connected
+//the data dump will catch the ddm up to any events and errors that have occured before connection)
+QString Events::generateDataDump(EventNode *headPtr)
+{
+    QString message = "";
+    EventNode *wkgPtr = headPtr;
+
+    while (wkgPtr != nullptr)
+    {
+        message += QString::number(wkgPtr->id) + DELIMETER;
+
+        message += wkgPtr->timeStamp + DELIMETER;
+
+        message += wkgPtr->eventString + DELIMETER;
+
+        message += QString::number(wkgPtr->cleared) + DELIMETER;
+
+        wkgPtr = wkgPtr->nextPtr;
+    }
+
+    //add new line for data parsing and return
+    return message + '\n';
+}
+#endif

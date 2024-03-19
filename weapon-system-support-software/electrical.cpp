@@ -1,5 +1,4 @@
 #include "electrical.h"
-#include "constants.h"
 
 electrical::electrical()
 {
@@ -51,23 +50,6 @@ void electrical::addNode(QString name, int voltage, int amps)
     //qDebug() << "Electrical node created";
 }
 
-void electrical::printNodes()
-{
-    electricalNode *wkgNode = headNode;
-    electricalNode *traversalNode;
-
-    qDebug() << "=== electrical nodes ===";
-    while(wkgNode != nullptr)
-    {
-        qDebug() << "Electrical: " << wkgNode->name << " " << wkgNode->amps <<
-            ", " << wkgNode->voltage;
-
-        //move wkgnode
-        wkgNode = wkgNode->nextNode;
-    }
-    qDebug() << "=== end of electrical nodes ===";
-}
-
 void electrical::freeLL()
 {
     electricalNode *wkgNode = headNode;
@@ -84,25 +66,6 @@ void electrical::freeLL()
 
     //once out of loop, set head and last to null
     headNode = lastNode = nullptr;
-}
-
-QString electrical::generateElectricalMessage()
-{
-    // electrical components have:
-    /**
-     * name
-     * amps
-     * volts
-     * */
-
-    //add values to message
-    QString message = QString::number(ELECTRICAL) + DELIMETER;
-    message += QString::number(7) + DELIMETER;
-    message += names[rand()%6] + DELIMETER;
-    message += QString::number(rand()%100) + DELIMETER;
-    message += QString::number(rand()%30) + DELIMETER;
-
-    return message + '\n';
 }
 
 void electrical::loadElecData(QString message)
@@ -147,4 +110,43 @@ void electrical::loadElecDump(QString message)
     }
 }
 
+//======================================================================================
+//DEV_MODE exclusive methods
+//======================================================================================
+#if DEV_MODE
+QString electrical::generateElectricalMessage()
+{
+    // electrical components have:
+    /**
+     * name
+     * amps
+     * volts
+     * */
 
+    //add values to message
+    QString message = QString::number(ELECTRICAL) + DELIMETER;
+    message += QString::number(7) + DELIMETER;
+    message += names[rand()%6] + DELIMETER;
+    message += QString::number(rand()%100) + DELIMETER;
+    message += QString::number(rand()%30) + DELIMETER;
+
+    return message + '\n';
+}
+
+void electrical::printNodes()
+{
+    electricalNode *wkgNode = headNode;
+    electricalNode *traversalNode;
+
+    qDebug() << "=== electrical nodes ===";
+    while(wkgNode != nullptr)
+    {
+        qDebug() << "Electrical: " << wkgNode->name << " " << wkgNode->amps <<
+            ", " << wkgNode->voltage;
+
+        //move wkgnode
+        wkgNode = wkgNode->nextNode;
+    }
+    qDebug() << "=== end of electrical nodes ===";
+}
+#endif

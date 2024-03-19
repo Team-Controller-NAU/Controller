@@ -1,8 +1,5 @@
-#include <connection.h>
 #include "mainwindow.h"
-#include "csim.h"
-#include "constants.h"
-#include "./ui_mainwindow.h"
+#include <QObject>
 
 //this file contains only the implementation of the GUI slots. Declare
 //other processing functions in mainwindow.cpp
@@ -44,24 +41,6 @@ void MainWindow::on_baud_rate_selection_currentIndexChanged(int index)
         // Handle default case
         break;
     }
-}
-
-void MainWindow::on_clear_error_button_clicked()
-{
-
-    //get error from combo box and split the error on delimeter
-    QStringList errorElements = ui->non_cleared_error_selection->currentText().split(DELIMETER);
-
-    if (errorElements.isEmpty() || errorElements.first().isEmpty())
-    {
-        return;
-    }
-
-    //get the id of the error
-    int errorId = errorElements[0].toInt();
-
-    //make a request to csim to clear the error
-    emit clearErrorRequest(errorId);
 }
 
 // slot for find functionality within the events_output box when the user presses CTRL+F on their keyboard
@@ -152,53 +131,6 @@ void MainWindow::findText()
     }
 }
 
-//button toggles csim random generation on and off. first click will setup thread and run csim.
-//second will terminate thread and close csim connection.
-void MainWindow::on_CSim_button_clicked()
-{
-    //check if csim is currently running
-    if (csimHandle->isRunning())
-    {
-        // csim is running, shut it down
-        csimHandle->stopSimulation();
-
-        // stop ddm timer
-        lastMessageTimer->stop();
-
-        // update ui
-        ui->CSim_button->setText("Start CSim");
-
-        //enable csim port selection
-        ui->csim_port_selection->setEnabled(true);
-    }
-    //csim is not running, start it
-    else
-    {
-        //set button to display the option to stop csim
-        ui->CSim_button->setText("Stop CSim");
-
-        //start csim
-        csimHandle->startCSim(csimPortName);
-
-        //temporarily disable csim port selection
-        ui->csim_port_selection->setEnabled(false);
-    }
-}
-
-//runs when the user selects an option out of csim port drop down menu
-void MainWindow::on_csim_port_selection_currentIndexChanged(int index)
-{
-    if (ui->ddm_port_selection->currentText() == "")
-    {
-        return;
-    }
-
-    //update port
-    csimPortName = ui->csim_port_selection->currentText();
-
-    qDebug() << "CSIM port set to " << csimPortName;
-}
-
 void MainWindow::on_data_bits_selection_currentIndexChanged(int index)
 {
     if (ddmCon == nullptr) {
@@ -242,14 +174,6 @@ void MainWindow::on_ddm_port_selection_currentIndexChanged(int index)
     createDDMCon();
 }
 
-//sends user to developer page when clicked
-void MainWindow::on_DevPageButton_clicked()
-{
-    ui->Flow_Label->setCurrentIndex(1);
-    resetPageButton();
-    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
-}
-
 //download button for events in CSV format
 void MainWindow::on_download_button_clicked()
 {
@@ -265,7 +189,7 @@ void MainWindow::on_download_button_clicked()
     else
     {
         //use the path of the exe and add a "Log Files" directory
-        logFile = QCoreApplication::applicationDirPath() + "/WSSS Log Files/";
+        logFile = QCoreApplication::applicationDirPath() + "/" + INITIAL_LOGFILE_LOCATION;
     }
 
     qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
@@ -376,10 +300,9 @@ void MainWindow::on_flow_control_selection_currentIndexChanged(int index)
 }
 
 //toggles handshake process on and off. Once connected, allow for disconnect (send disconnect message to controller)
+//this button is seen as connect/connecting/disconnect on connection page
 void MainWindow::on_handshake_button_clicked()
 {
-   // QPixmap redButton(":/resources/Images/redButton.png");
-
     // Check if the timer is started or ddmCon is not connected
     if ( !handshakeTimer->isActive() && !ddmCon->connected )
     {
@@ -387,20 +310,15 @@ void MainWindow::on_handshake_button_clicked()
 
         // Start the timer to periodically check the handshake status
         handshakeTimer->start();
-        if(!lastMessageTimer->isActive())
-        {
-            lastMessageTimer->start();
-        }
-
-        timeLastReceived = QDateTime::currentDateTime();
 
         //refreshes connection button/displays
         ui->handshake_button->setText("Connecting");
         ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #FF7518; border: 1px solid; border-color: #e65c00; font: 15pt 'Segoe UI'; } "
                                             "QPushButton::hover { background-color: #ff8533; } "
                                             "QPushButton::pressed { background-color: #ffa366;}");
-        ui->ddm_port_selection->setEnabled(false);
 
+        ui->connectionStatus->setPixmap(ORANGE_LIGHT);
+        ui->connectionLabel->setText("Connecting ");
         //disable changes to connection settings
         disableConnectionChanges();
     }
@@ -410,47 +328,9 @@ void MainWindow::on_handshake_button_clicked()
 
         ddmCon->transmit(QString::number(CLOSING_CONNECTION) + '\n');
 
-        handshakeTimer->stop();
-        if(lastMessageTimer->isActive())
-        {
-            lastMessageTimer->stop();
-        }
-
-        // update time since last message so its not frozen
-        ui->DDMTimer->setText("Time Since Last Message: 00:00:00");
-        ui->DDMTimer->setAlignment(Qt::AlignRight);
-
-        //refreshes connection button/displays
-        ui->handshake_button->setText("Connect");
-        ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #14AE5C; border: 1px solid; border-color: #0d723c; font: 15pt 'Segoe UI'; } "
-                                            "QPushButton::hover { background-color: #1be479; } "
-                                            "QPushButton::pressed { background-color: #76efae;}");
-        ui->connectionStatus->setPixmap(RED_LIGHT);
-        ui->connectionLabel->setText("Disconnected ");
-        ui->ddm_port_selection->setEnabled(true);
-
-        //allow user to modify connection settings
-        enableConnectionChanges();
-
-        // check for not empty
-        if(events->totalNodes != 0)
-        {
-            // new "session" ended, save to log file
-            // qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
-            // QString logFileName = QString::number(secsSinceEpoch);
-
-            // save logfile - autosave conditon
-            //events->outputToLogFile(logFileName.toStdString() + "-logfile-A.txt");
-        }
-
-        ddmCon->connected = false;
+        //update connection status to disconnected and update related objects
+        updateConnectionStatus(false);
     }
-}
-
-void MainWindow::on_output_messages_sent_button_clicked()
-{
-    //send request for csim to output its session string
-    emit outputMessagesSentRequest();
 }
 
 void MainWindow::on_parity_selection_currentIndexChanged(int index)
@@ -496,53 +376,19 @@ void MainWindow::on_save_Button_clicked()
     userSettings.setValue("portName", ui->ddm_port_selection->currentText());
     userSettings.setValue("csimPortName", ui->csim_port_selection->currentText());
 
-    displaySavedConnectionSettings();
-}
+    //write changes to the registry
+    userSettings.sync();
 
-//sends custom user input message
-void MainWindow::on_send_message_button_clicked()
-{
-    // Get user input from input box
-    QString userInput = ui->message_contents->toPlainText();
-
-    // Replace literal "\n" characters with actual newline characters
-    userInput.replace("\\n", "\n");
-
-    // Add newline character if userInput does not end with newline
-    if (!userInput.endsWith('\n'))
-        userInput += '\n';
-
-    // Clear the contents of input box
-    ui->message_contents->clear();
-
-    // Check if csim has an active connection
-    if (csimHandle->connPtr != nullptr)
-    {
-        // Send signal for csim to transmit message
-        emit transmissionRequest(userInput);
-    }
-    // No active connection from csim, make temporary connection
-    else
-    {
-        // Open new connection on com4 (smart pointer auto frees memory when function exits)
-            std::unique_ptr<Connection> conn(new Connection(ui->csim_port_selection->currentText(),
-                                fromStringBaudRate(ui->baud_rate_selection->currentText()),
-                                fromStringDataBits(ui->data_bits_selection->currentText()),
-                                fromStringParity(ui->parity_selection->currentText()),
-                                fromStringStopBits(ui->stop_bit_selection->currentText()),
-                                fromStringFlowControl(ui->flow_control_selection->currentText())));
-
-        // Send message through csim port
-        conn->transmit(userInput);
-    }
+    //output new settings to qDebug()
+    displaySavedSettings();
 }
 
 //sends user to settings page when clicked
-void MainWindow::on_SettingsPageButton_clicked()
+void MainWindow::on_ConnectionPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(2);
     resetPageButton();
-    ui->SettingsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
+    ui->ConnectionPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
 }
 
 //sends user to status page when clicked
@@ -551,6 +397,13 @@ void MainWindow::on_StatusPageButton_clicked()
     ui->Flow_Label->setCurrentIndex(4);
     resetPageButton();
     ui->StatusPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
+}
+
+void MainWindow::on_SettingsPageButton_clicked()
+{
+    ui->Flow_Label->setCurrentIndex(5);
+    resetPageButton();
+    ui->SettingsPageButton->setStyleSheet("border-image: url(://resources/Images/purpleSettings.png);");
 }
 
 void MainWindow::on_stop_bit_selection_currentIndexChanged(int index)
@@ -580,11 +433,15 @@ void MainWindow::on_stop_bit_selection_currentIndexChanged(int index)
 //reset all tab buttons to default style
 void MainWindow::resetPageButton()
 {
-    ui->SettingsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
+    ui->ConnectionPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
     ui->EventsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
     ui->StatusPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
     ui->ElectricalPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
-    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
+    ui->SettingsPageButton->setStyleSheet("border-image: url(://resources/Images/whiteSettings.png)");
+
+    #if DEV_MODE
+        ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
+    #endif
 }
 
 //restores connection settings to the values saved to the system as default
@@ -628,7 +485,7 @@ void MainWindow::on_openLogfileFolder_clicked()
         // check if the path does not lead to anything
         if(!path.exists())
         {
-            // check if can make path successfully
+            // check if we can make path successfully
             if(path.mkpath("."))
             {
                 qDebug() << "Logfile directory created at: " << INITIAL_LOGFILE_LOCATION;
@@ -666,7 +523,7 @@ void MainWindow::on_setLogfileFolder_clicked()
         qDebug() << "Error while saving user settings: " << userSettings.status();
     }
     // check if user exited the dialog box
-    else if(userSettings.value("logfileLocation").toString() == "")
+    else if(userSettings.value("logfileLocation").toString() == "/")
     {
         // revert to previous user setting
         userSettings.setValue("logfileLocation", previousPath);
@@ -680,6 +537,152 @@ void MainWindow::on_setLogfileFolder_clicked()
 
     //sync user settings
     userSettings.sync();
+}
+
+//opens log file directory to prompt user to select log file. data from log file is then
+//loaded into events class and rendered in events page.
+void MainWindow::on_load_events_from_logfile_clicked()
+{
+    //declare file browser class
+    QFileDialog dialog(this);
+
+    //set initial directory to log file directory set by user
+    dialog.setDirectory(userSettings.value("logfileLocation").toString());
+
+    // Open a file dialog for the user to select a logfile
+    QString selectedFile = dialog.getOpenFileName(this, tr("Select Log File"), QString(), tr("Log Files (*.txt);;All Files (*)"));
+
+    // Check if the user canceled the dialog
+    if (selectedFile.isEmpty())
+    {
+        return;
+    }
+
+    #if DEV_MODE
+        logEmptyLine();
+    #endif
+    qDebug() << "Loading data from: " << selectedFile;
+
+    // Pass the selected file name to the loadDataFromLogFile function
+    int result = events->loadDataFromLogFile(events, selectedFile);
+
+    // Handle the result if needed
+    if (result == INCORRECT_FORMAT)
+    {
+        // Handle error
+        qDebug() << "Log file was of incorrect format.";
+    }
+    else if (result == DATA_NOT_FOUND)
+    {
+        qDebug() << "Log file could not be found";
+    }
+
+    //refresh the events output
+    refreshEventsOutput();
+}
+
+//toggle colored events output (from settings page)
+void MainWindow::on_colored_events_output_stateChanged(int arg1)
+{
+    //arg1 represents the state of the checkbox
+    switch(arg1)
+    {
+        //unchecked
+        case 0:
+            coloredEventOutput = false;
+            break;
+
+        //checked
+        default:
+            coloredEventOutput = true;
+    }
+
+    userSettings.setValue("coloredEventOutput", coloredEventOutput);
+    refreshEventsOutput();
+}
+
+//choose the number of auto save log files before overwrites occur (from settings page)
+void MainWindow::on_auto_save_limit_valueChanged(int arg1)
+{
+    autoSaveLimit = arg1;
+    userSettings.setValue("autoSaveLimit", autoSaveLimit);
+}
+
+//======================================================================================
+//DEV_MODE exclusive methods
+//======================================================================================
+
+#if DEV_MODE
+//manually clear errors from dev page
+void MainWindow::on_clear_error_button_clicked()
+{
+
+    //get error from combo box and split the error on delimeter
+    QStringList errorElements = ui->non_cleared_error_selection->currentText().split(DELIMETER);
+
+    if (errorElements.isEmpty() || errorElements.first().isEmpty())
+    {
+        return;
+    }
+
+    //get the id of the error
+    int errorId = errorElements[0].toInt();
+
+    //make a request to csim to clear the error
+    emit clearErrorRequest(errorId);
+}
+
+//button toggles csim random generation on and off. first click will setup thread and run csim.
+//second will terminate thread and close csim connection.
+void MainWindow::on_CSim_button_clicked()
+{
+    //check if csim is currently running
+    if (csimHandle->isRunning())
+    {
+        // csim is running, shut it down
+        csimHandle->stopSimulation();
+
+        // stop ddm timer
+        lastMessageTimer->stop();
+
+        // update ui
+        ui->CSim_button->setText("Start CSim");
+
+        //enable csim port selection
+        ui->csim_port_selection->setEnabled(true);
+    }
+    //csim is not running, start it
+    else
+    {
+        //set button to display the option to stop csim
+        ui->CSim_button->setText("Stop CSim");
+
+        //start csim
+        csimHandle->startCSim(csimPortName);
+
+        //temporarily disable csim port selection
+        ui->csim_port_selection->setEnabled(false);
+    }
+}
+
+//runs when the user selects an option out of csim port drop down menu
+void MainWindow::on_csim_port_selection_currentIndexChanged(int index)
+{
+    if (ui->ddm_port_selection->currentText() == "")
+    {
+        return;
+    }
+
+    //update port
+    csimPortName = ui->csim_port_selection->currentText();
+
+    qDebug() << "CSIM port set to " << csimPortName;
+}
+
+void MainWindow::on_output_messages_sent_button_clicked()
+{
+    //send request for csim to output its session string
+    emit outputMessagesSentRequest();
 }
 
 //toggles csim between accounting for 1 and 2 triggers
@@ -707,34 +710,41 @@ void MainWindow::on_toggle_num_triggers_clicked()
     }
 }
 
-
-void MainWindow::on_load_events_from_logfile_clicked()
+//sends custom user input message
+void MainWindow::on_send_message_button_clicked()
 {
-    // Open a file dialog for the user to select a logfile
-    QString selectedFile = QFileDialog::getOpenFileName(this, tr("Select Log File"), QString(), tr("Log Files (*.txt);;All Files (*)"));
+    // Get user input from input box
+    QString userInput = ui->message_contents->toPlainText();
 
-    // Check if the user canceled the dialog
-    if (selectedFile.isEmpty())
+    // Replace literal "\n" characters with actual newline characters
+    userInput.replace("\\n", "\n");
+
+    // Add newline character if userInput does not end with newline
+    if (!userInput.endsWith('\n'))
+        userInput += '\n';
+
+    // Clear the contents of input box
+    ui->message_contents->clear();
+
+    // Check if csim has an active connection
+    if (csimHandle->connPtr != nullptr)
     {
-        return;
+        // Send signal for csim to transmit message
+        emit transmissionRequest(userInput);
     }
-
-    qDebug() << "User selected " << selectedFile;
-
-    // Pass the selected file name to the loadDataFromLogFile function
-    int result = events->loadDataFromLogFile(events, selectedFile);
-
-    // Handle the result if needed
-    if (result == INCORRECT_FORMAT)
+    // No active connection from csim, make temporary connection
+    else
     {
-        // Handle error
-        qDebug() << "Log file was of incorrect format.";
-    }
-    else if (result == DATA_NOT_FOUND)
-    {
-        qDebug() << "Log file could not be found";
-    }
+        // Open new connection on com4 (smart pointer auto frees memory when function exits)
+        std::unique_ptr<Connection> conn(new Connection(ui->csim_port_selection->currentText(),
+                                                        fromStringBaudRate(ui->baud_rate_selection->currentText()),
+                                                        fromStringDataBits(ui->data_bits_selection->currentText()),
+                                                        fromStringParity(ui->parity_selection->currentText()),
+                                                        fromStringStopBits(ui->stop_bit_selection->currentText()),
+                                                        fromStringFlowControl(ui->flow_control_selection->currentText())));
 
-    //refresh the events output
-    refreshEventsOutput();
+        // Send message through csim port
+        conn->transmit(userInput);
+    }
 }
+#endif

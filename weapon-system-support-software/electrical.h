@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QDateTime>
+#include "constants.h"
 
 struct electricalNode {
     int id;
@@ -20,9 +21,7 @@ public:
     ~electrical();
 
     void addNode(QString name, int voltage, int amps);
-    void printNodes();
     void freeLL();
-    QString generateElectricalMessage();
     void loadElecData(QString message);
     void loadElecDump(QString message);
     void createElectricalLL();
@@ -38,8 +37,11 @@ public:
     electricalNode *headNode;
     electricalNode *lastNode;
 
-    QStringList names = {"Piston 1", "Servo Motor 1", "Servo Motor 2", "Cooling Motor", "Oil Sensor", "Hydraulic Actuator"};
-
+    #if DEV_MODE
+        QStringList names = {"Piston 1", "Servo Motor 1", "Servo Motor 2", "Cooling Motor", "Oil Sensor", "Hydraulic Actuator"};
+        QString generateElectricalMessage();
+        void printNodes();
+    #endif
 };
 
 #endif // ELECTRICAL_H
