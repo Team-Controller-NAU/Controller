@@ -32,7 +32,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     RED_LIGHT(":/resources/Images/redButton.png"),
 
-    GREEN_LIGHT(":/resources/Images/greenButton.png")
+    GREEN_LIGHT(":/resources/Images/greenButton.png"),
+
+    ORANGE_LIGHT(":/resources/Images/orangeButton.png")
 {
     //init gui
     ui->setupUi(this);
@@ -875,7 +877,6 @@ void MainWindow::updateStatusDisplay()
         ui->trigger1->setPixmap(BLANK_LIGHT);
     }
 
-
     //update trigger 2 light
     switch (status->trigger2)
     {
@@ -892,6 +893,47 @@ void MainWindow::updateStatusDisplay()
         default:
             ui->trigger2->setPixmap(BLANK_LIGHT);
     }
+
+    //update the armed light
+    if(status->armed)
+    {
+        ui->armedOutput->setPixmap(GREEN_LIGHT);
+    }
+    else
+    {
+        ui->armedOutput->setPixmap(RED_LIGHT);
+    }
+
+    ui->fireRateOutput->setText(QString::number(status->firingRate));
+    ui->fireRateOutput->setAlignment(Qt::AlignCenter);
+
+    ui->burstOutput->setText(QString::number(status->burstLength));
+    ui->burstOutput->setAlignment(Qt::AlignCenter);
+
+    switch(status->controllerState)
+    {
+        case RUNNING:
+            ui->processorOutput->setText("Running");
+
+            break;
+
+        case BLOCKED:
+            ui->processorOutput->setText("Blocked");
+
+            break;
+
+        case TERMINATED:
+            ui->processorOutput->setText("Terminated");
+
+            break;
+
+        case SUSPENDED:
+            ui->processorOutput->setText("Suspended");
+
+            break;
+    }
+
+    ui->processorOutput->setAlignment(Qt::AlignCenter);
 }
 
 // method updates the running elapsed controller time
