@@ -2,8 +2,8 @@
 #define CONNECTION_H
 
 #include <QDebug>
-#include <QtSerialPort>
-#include "constants.h"
+#include <QtSerialPort/QtSerialPort>
+#include <constants.h>
 
 /********************************************************************************
 ** connection.h

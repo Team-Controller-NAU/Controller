@@ -3,7 +3,7 @@
 
 #include "constants.h"
 #include <QMainWindow>
-#include <QtConcurrent>
+#include <QtConcurrent/QtConcurrent>
 #include <QDesktopServices>
 #include "connection.h"
 #include "events.h"
