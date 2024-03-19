@@ -1,8 +1,8 @@
-#ifndef CLASSES_H
-#define CLASSES_H
+#ifndef CONNECTION_H
+#define CONNECTION_H
 
 #include <QDebug>
-#include <QtSerialPort>
+#include <QtSerialPort/QtSerialPort>
 #include <constants.h>
 
 /********************************************************************************
@@ -33,6 +33,7 @@ public:
     // destructor, sends closing message to port then closes port
     ~Connection();
 
+    //checks if messages in the serial port are complete by checking if they contain \n
     bool checkForValidMessage();
 
     //stores name of port given upon initialization
@@ -47,4 +48,4 @@ public slots:
 
 };
 
-#endif // CLASSES_H
+#endif // CONNECTION_H

@@ -5,5 +5,8 @@
         <file>Images/blankButton.png</file>
         <file>Images/TeamControllerLogo.png</file>
         <file>Images/downloadLogo.png</file>
+        <file>Images/purpleSettings.png</file>
+        <file>Images/whiteSettings.png</file>
+        <file>Images/orangeButton.png</file>
     </qresource>
 </RCC>

@@ -1,8 +1,6 @@
-#include <connection.h>
 #include "mainwindow.h"
-#include "csim.h"
 #include "constants.h"
-#include "./ui_mainwindow.h"
+#include <QtCore>
 
 MainWindow::MainWindow(QWidget *parent)
 
@@ -13,12 +11,6 @@ MainWindow::MainWindow(QWidget *parent)
     status(new Status()),
     events(new Events()),
     electricalObject(new electrical()),
-
-    //setting determines if automatic handshake starts after csim disconnects
-    reconnect(false),
-
-    //setting toggles color coded events page output
-    coloredEventOutput(true),
 
     //this determines what will be shown on the events page
     eventFilter(ALL),
@@ -32,29 +24,54 @@ MainWindow::MainWindow(QWidget *parent)
     // timer is used to update controller running time
     runningControllerTimer( new QTimer(this) ),
 
-    autoSaveLimit(5),
-
     //init user settings to our organization and project
     userSettings("Team Controller", "WSSS"),
 
+    //Load graphical resources
     BLANK_LIGHT(":/resources/Images/blankButton.png"),
 
     RED_LIGHT(":/resources/Images/redButton.png"),
 
-    GREEN_LIGHT(":/resources/Images/greenButton.png")
+    GREEN_LIGHT(":/resources/Images/greenButton.png"),
+
+    ORANGE_LIGHT(":/resources/Images/orangeButton.png")
 {
-
-    //set output settings for qDebug
-    qSetMessagePattern(QDEBUG_OUTPUT_FORMAT);
-
     //init gui
     ui->setupUi(this);
 
-    //scan available ports, add port names to port selection combo boxes
-    setup_connection_settings();
+    //setup user settings and init settings related gui elements
+    setupSettings();
+
+    //if dev mode is active, init CSim
+    #if DEV_MODE
+
+        //set output settings for qDebug
+        qSetMessagePattern(QDEBUG_OUTPUT_FORMAT);
+
+        qDebug() << "Dev mode active";
+
+        //get csimPortName from port selection
+        csimPortName = ui->csim_port_selection->currentText();
+
+        //init csim class, assign serial port
+        csimHandle = new CSim(nullptr, csimPortName);
+
+        //CSIM control slots ==============================================================
+
+        //connect custom transmission requests from ddm to csims execution slot
+        connect(this, &MainWindow::transmissionRequest, csimHandle, &CSim::completeTransmissionRequest);
+
+        //connect custom clear error requests from ddm to csims execution slot
+        connect(this, &MainWindow::clearErrorRequest, csimHandle, &CSim::clearError);
+
+        //connect output session string to ddm output session string slot
+        connect(this, &MainWindow::outputMessagesSentRequest, csimHandle, &CSim::outputMessagesSent);
+        //=================================================================================
+    #else
+        ui->DevPageButton->setVisible(false);
+    #endif
 
     //update class port name values
-    csimPortName = ui->csim_port_selection->currentText();
     ddmPortName = ui->ddm_port_selection->currentText();
 
     //init ddm connection using the current values set in connection settings
@@ -65,53 +82,32 @@ MainWindow::MainWindow(QWidget *parent)
                             fromStringStopBits(ui->stop_bit_selection->currentText()),
                             fromStringFlowControl(ui->flow_control_selection->currentText()));
 
-    //init csim class, assign serial port
-    csimHandle = new CSim(nullptr, csimPortName);
-
     //set up signal and slot (when a message is sent to DDMs serial port, the readyRead signal is emitted and
     //readSerialData() is called)
     connect(&ddmCon->serialPort, &QSerialPort::readyRead, this, &MainWindow::readSerialData);
 
     //set handshake timer interval
-    handshakeTimer->setInterval(2000);
+    handshakeTimer->setInterval(HANDSHAKE_INTERVAL);
 
     //connect handshake function to a timer. After each interval handshake will be called.
     //this is necessary to prevent the gui from freezing. signals stop when timer is stoped
     connect(handshakeTimer, &QTimer::timeout, this, &MainWindow::handshake);
 
-    //CSIM control slots ==============================================================
-
-    //connect custom transmission requests from ddm to csims execution slot
-    connect(this, &MainWindow::transmissionRequest, csimHandle, &CSim::completeTransmissionRequest);
-
-    //connect custom clear error requests from ddm to csims execution slot
-    connect(this, &MainWindow::clearErrorRequest, csimHandle, &CSim::clearError);
-
-    //connect output session string to ddm output session string slot
-    connect(this, &MainWindow::outputMessagesSentRequest, csimHandle, &CSim::outputMessagesSent);
-    //=================================================================================
-
     // connect update elapsed time function to a timer
-    lastMessageTimer->setInterval(1000);
-    connect(lastMessageTimer, &QTimer::timeout, this, &MainWindow::updateTimer);
+    lastMessageTimer->setInterval(ONE_SECOND);
+    connect(lastMessageTimer, &QTimer::timeout, this, &MainWindow::updateTimeSinceLastMessage);
 
     // connect running controller timer
-    runningControllerTimer->setInterval(1000);
+    runningControllerTimer->setInterval(ONE_SECOND);
     connect(runningControllerTimer, &QTimer::timeout, this, &MainWindow::updateElapsedTime);
-
-    //if handshake timeout is enabled, setup signal to timeout
-    if (HANDSHAKE_TIMEOUT)
-    {
-        QTimer::singleShot(TIMEOUT_DURATION, this, &MainWindow::on_handshake_button_clicked);
-    }
 
     qDebug() << "GUI is now listening to port " << ddmCon->portName;
 
-    //TEMP CODE TO MAKE FEED POSITION RESPONSIVE WITH STATUS UPDATES========
+    //set feed pos to be measured in 360 degrees
     ui->feedPosition->setMaximum(360);
-    //ui->feedPosition->setReadOnly(true);
 
-    //======================================================================
+    //set feed pos to be non-editable by user
+    ui->feedPosition->setEnabled(false);
 
     //init trigger to grey buttons until updated by serial status updates
     ui->trigger1->setPixmap(BLANK_LIGHT);
@@ -144,12 +140,99 @@ MainWindow::~MainWindow()
     //call destructors for classes declared in main window
     delete ui;
     delete ddmCon;
-    delete csimHandle;
     delete status;
     delete events;
     delete electricalObject;
+    #if DEV_MODE
+        delete csimHandle;
+    #endif
 }
 
+//sets connection status, updates gui and timers
+void MainWindow::updateConnectionStatus(bool connectionStatus)
+{
+    //update connection status
+    ddmCon->connected = connectionStatus;
+
+    //check if we are connected
+    if (ddmCon->connected)
+    {
+        //disable changes to connection related settings
+        disableConnectionChanges();
+
+        //stop handshake protocols
+        handshakeTimer->stop();
+
+        // check if controller timer is not running
+        if(!runningControllerTimer->isActive())
+        {
+            // start it
+            runningControllerTimer->start();
+
+            // update elapsed time
+            ui->elapsedTime->setText("Elapsed Time: " + status->elapsedControllerTime);
+            ui->elapsedTime->setAlignment(Qt::AlignRight);
+        }
+
+        //start last message timer
+        timeLastReceived = QDateTime::currentDateTime();
+        ui->DDMTimer->setText("Time Since Last Message: 00:00:00");
+        ui->DDMTimer->setAlignment(Qt::AlignRight);
+        lastMessageTimer->start();
+
+        // update ui
+        ui->handshake_button->setText("Disconnect");
+        ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #FE1C1C; border: 1px solid; border-color: #cb0101; font: 15pt 'Segoe UI'; } "
+                                            "QPushButton::hover { background-color: #fe3434; } "
+                                            "QPushButton::pressed { background-color: #fe8080;}");
+        ui->connectionLabel->setText("Connected ");
+        ui->connectionStatus->setPixmap(GREEN_LIGHT);
+
+        //clear events ll and output box
+        events->freeLinkedLists();
+        ui->events_output->clear();
+
+        //reset event counters
+        ui->TotalEventsOutput->setText("0");
+        ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
+        ui->statusEventOutput->setText("0");
+        ui->statusEventOutput->setAlignment(Qt::AlignCenter);
+
+        ui->TotalErrorsOutput->setText("0");
+        ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
+        ui->statusErrorOutput->setText("0");
+        ui->statusErrorOutput->setAlignment(Qt::AlignCenter);
+
+        ui->ClearedErrorsOutput->setText("0");
+        ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
+
+        ui->ActiveErrorsOutput->setText("0");
+        ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
+    }
+    //otherwise we are disconnected
+    else
+    {
+        //stop timers if they are running
+        runningControllerTimer->stop();
+        lastMessageTimer->stop();
+        handshakeTimer->stop();
+        ui->DDMTimer->clear();
+
+        //enable changes to connection related settings
+        enableConnectionChanges();
+
+        //refreshes connection button/displays
+        ui->handshake_button->setText("Connect");
+        ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #14AE5C; border: 1px solid; border-color: #0d723c; font: 15pt 'Segoe UI'; } "
+                                            "QPushButton::hover { background-color: #1be479; } "
+                                            "QPushButton::pressed { background-color: #76efae;}");
+        ui->connectionStatus->setPixmap(RED_LIGHT);
+        ui->connectionLabel->setText("Disconnected ");
+    }
+}
+
+//when ddm port is selected, create connection class to work with that port.
+//apply serial settings from settings page
 void MainWindow::createDDMCon()
 {
     //check if ddmCon is allocated
@@ -179,9 +262,6 @@ void MainWindow::handshake()
 {
     // Send handshake message
     ddmCon->transmit(QString::number(LISTENING) + '\n');
-
-    //keep gui interactive
-    QCoreApplication::processEvents();
 }
 
 //this function is called as a result of the readyRead signal being emmited by a connected serial port
@@ -260,9 +340,11 @@ void MainWindow::readSerialData()
                 //update gui elements
                 updateEventsOutput(events->lastErrorNode);
 
-                //update the cleared error selection box in dev tools
-                //(this can be removed when dev page is removed)
-                update_non_cleared_error_selection();
+                #if DEV_MODE
+                    //update the cleared error selection box in dev tools
+                    //(this can be removed when dev page is removed)
+                    update_non_cleared_error_selection();
+                #endif
 
                 break;
 
@@ -346,6 +428,9 @@ void MainWindow::readSerialData()
                 // create log file
                 events->outputToLogFile( autosaveLogFile );
 
+                //new auto save file created, enforce auto save limit
+                enforceAutoSaveLimit();
+
                 //refresh the events output with dumped event data
                 refreshEventsOutput();
 
@@ -361,6 +446,9 @@ void MainWindow::readSerialData()
                 // create log file
                 events->outputToLogFile( autosaveLogFile );
 
+                //new auto save file created, enforce auto save limit
+                enforceAutoSaveLimit();
+
                 //refresh the events output with dumped error data
                 refreshEventsOutput();
 
@@ -372,8 +460,10 @@ void MainWindow::readSerialData()
                 //update cleared status of error with given id
                 events->clearError(message.left(message.indexOf(DELIMETER)).toInt());
 
-                //update the cleared error selection box in dev tools (can be removed when dev page is removed)
-                update_non_cleared_error_selection();
+                #if DEV_MODE
+                    //update the cleared error selection box in dev tools (can be removed when dev page is removed)
+                    update_non_cleared_error_selection();
+                #endif
 
                 //refresh the events output with newly cleared error
                 refreshEventsOutput();
@@ -382,123 +472,29 @@ void MainWindow::readSerialData()
 
             case BEGIN:
 
-                //load crc and version
+                //load controller crc and version
                 status->loadVersionData(message);
+
+                //set connection status to connected and update related objects
+                updateConnectionStatus(true);
+
+                // update controller version and crc on gui
+                ui->controllerLabel->setText("Controller Version: " + status->version);
+                ui->crcLabel->setText("CRC: " + status->crc);
 
                 //check for empty logfile location and sets to default
                 setup_logfile_location();
 
-                // update controller version and crc version on gui
-                ui->controllerLabel->setText("Controller Version: " + status->version);
-                ui->crcLabel->setText("CRC: " + status->crc);
-
-                // check if controller timer is running
-                if(!runningControllerTimer->isActive())
-                {
-                    // start it
-                    runningControllerTimer->start();
-
-                    // update elapsed time
-                    ui->elapsedTime->setText("Elapsed Time: " + status->elapsedControllerTime);
-                    ui->elapsedTime->setAlignment(Qt::AlignRight);
-                }
-
-                //stop handshake protocols
-                handshakeTimer->stop();
-
-                // start last message timer if not already active
-                if(!lastMessageTimer->isActive())
-                {
-                    lastMessageTimer->start();
-                }
-
-                // debug
                 qDebug() << "Begin signal received, handshake complete";
-
-                // update ui
-                ui->handshake_button->setText("Disconnect");
-                ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #FE1C1C; border: 1px solid; border-color: #cb0101; font: 15pt 'Segoe UI'; } "
-                                                    "QPushButton::hover { background-color: #fe3434; } "
-                                                    "QPushButton::pressed { background-color: #fe8080;}");
-                ui->connectionLabel->setText("Connected ");
-                ui->connectionStatus->setPixmap(GREEN_LIGHT);
-
-                //clear events ll and output box
-                events->freeLinkedLists();
-                ui->events_output->clear();
-
-                //reset event counters
-                ui->TotalEventsOutput->setText("0");
-                ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
-                ui->statusEventOutput->setText("0");
-                ui->statusEventOutput->setAlignment(Qt::AlignCenter);
-
-                ui->TotalErrorsOutput->setText("0");
-                ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
-                ui->statusErrorOutput->setText("0");
-                ui->statusErrorOutput->setAlignment(Qt::AlignCenter);
-
-                ui->ClearedErrorsOutput->setText("0");
-                ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
-
-                ui->ActiveErrorsOutput->setText("0");
-                ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
-
-                //set connected
-                ddmCon->connected = true;
 
                 break;
 
             case CLOSING_CONNECTION:
 
-                //log
+                //set connection status false and update related objects
+                updateConnectionStatus(false);
+
                 qDebug() << "Disconnect message received from Controller";
-
-                // check for not empty
-                // if(events->totalNodes != 0)
-                // {
-                //     // new "session" ended, save to log file
-                //     qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
-                //     QString logFileName = QString::number(secsSinceEpoch);
-
-                //     // save logfile - autosave condition
-                //     events->outputToLogFile(logFileName.toStdString() + "-logfile-A.txt");
-                // }
-
-                //assign conn flag
-                ddmCon->connected = false;
-
-                // update time since last message so its not frozen
-                ui->DDMTimer->setText("Time Since Last Message: 00:00:00");
-                ui->DDMTimer->setAlignment(Qt::AlignRight);
-
-                // stop last message timer if still active
-                if(lastMessageTimer->isActive())
-                {
-                    lastMessageTimer->stop();
-                }
-
-                // stop elapsed timer if still active
-                if(runningControllerTimer->isActive())
-                {
-                    runningControllerTimer->stop();
-                }
-
-                if (reconnect)
-                {
-                    //attempt handshake to reconnect, (optional setting)
-                    on_handshake_button_clicked();
-                }
-                else
-                {
-                    //refreshes connection button/displays
-                    ui->handshake_button->setText("Connect");
-                    ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #14AE5C; border: 1px solid; border-color: #0d723c; font: 15pt 'Segoe UI'; } "
-                                                        "QPushButton::hover { background-color: #1be479; } "
-                                                        "QPushButton::pressed { background-color: #76efae;}");
-                    ui->connectionStatus->setPixmap(RED_LIGHT);
-                    ui->connectionLabel->setText("Disconnected ");
-                }
 
                 break;
 
@@ -514,29 +510,12 @@ void MainWindow::readSerialData()
         //invalid message id detected
         else
         {
-            //log
             qDebug() << "Unrecognized serial message received : " << message;
         }
     }
 }
 
-void MainWindow::setup_csim_port_selection(int index)
-{
-    // Fetch available serial ports and add their names to the combo box
-    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
-    {
-        QString portName = info.portName();
-        ui->csim_port_selection->addItem(portName);
-
-        // Check if the current port name matches the one declared in settings
-        if (portName == userSettings.value("csimPortName").toString())
-        {
-            // If a match is found, set the current index of the combo box
-            ui->csim_port_selection->setCurrentIndex(ui->csim_port_selection->count() - 1);
-        }
-    }
-}
-
+//scans for available serial ports and adds them to ddm port selection box
 void MainWindow::setup_ddm_port_selection(int index)
 {
     // Fetch available serial ports and add their names to the combo box
@@ -554,29 +533,6 @@ void MainWindow::setup_ddm_port_selection(int index)
     }
 }
 
-void MainWindow::update_non_cleared_error_selection()
-{
-    //clear combo box
-    ui->non_cleared_error_selection->clear();
-
-    //check for valid events ptr
-    if (csimHandle->eventsPtr != nullptr)
-    {
-        //get head node
-        EventNode *wkgPtr = csimHandle->eventsPtr->headErrorNode;
-
-        //loop until list ends
-        while (wkgPtr != nullptr)
-        {
-            //add the uncleared error to the combo box
-            ui->non_cleared_error_selection->addItem(QString::number(wkgPtr->id) + DELIMETER + wkgPtr->eventString);
-
-            //get next error
-            wkgPtr = wkgPtr->nextPtr;
-        }
-    }
-}
-
 //makes all settings in connection settings uneditable (call when ddm connection
 //is made)
 void MainWindow::disableConnectionChanges()
@@ -587,9 +543,11 @@ void MainWindow::disableConnectionChanges()
     ui->parity_selection->setDisabled(true);
     ui->stop_bit_selection->setDisabled(true);
     ui->flow_control_selection->setDisabled(true);
+    ui->load_events_from_logfile->setDisabled(true);
 }
 
-
+//makes all settings in connection settings editable (call when ddm connection
+//ends)
 void MainWindow::enableConnectionChanges()
 {
     ui->ddm_port_selection->setEnabled(true);
@@ -598,22 +556,29 @@ void MainWindow::enableConnectionChanges()
     ui->parity_selection->setEnabled(true);
     ui->stop_bit_selection->setEnabled(true);
     ui->flow_control_selection->setEnabled(true);
+    ui->load_events_from_logfile->setEnabled(true);
 }
 
 //support function, outputs usersettings values to qdebug
-void MainWindow::displaySavedConnectionSettings()
+void MainWindow::displaySavedSettings()
 {
-    logEmptyLine();
+    #if DEV_MODE
+        logEmptyLine();
+    #endif
     qDebug() << "Connection Settings Saved Cross Session:";
     // Print the values of each setting
     qDebug() << "DDM Port: " << userSettings.value("portName").toString();
-    qDebug() << "CSIM Port: " << userSettings.value("csimPortName").toString();
+    #if DEV_MODE
+        qDebug() << "CSIM Port: " << userSettings.value("csimPortName").toString();
+    #endif
     qDebug() << "baudRate:" << userSettings.value("baudRate").toString();
     qDebug() << "dataBits:" << userSettings.value("dataBits").toString();
     qDebug() << "parity:" << userSettings.value("parity").toString();
     qDebug() << "stopBits:" << userSettings.value("stopBits").toString();
     qDebug() << "flowControl:" << userSettings.value("flowControl").toString();
-    qDebug() << "logfile location: " << userSettings.value("logfileLocation").toString() << Qt::endl;
+    qDebug() << "logfile location: " << userSettings.value("logfileLocation").toString();
+    qDebug() << "Colored Event Output: " << userSettings.value("coloredEventOutput").toBool();
+    qDebug() << "Auto Save Limit: " << userSettings.value("autoSaveLimit").toInt() << Qt::endl;
 }
 
 //checks if user has setup a custom log file directory, if not, the default directory is selected
@@ -649,7 +614,7 @@ void MainWindow::setup_logfile_location()
     }
 
     //if there are more auto saves than the current limit, delete the extras (oldest first)
-    enforceAutoSaveLimit(autosaveLogFile);
+    enforceAutoSaveLimit();
 
     // set unique logfile name for this session
     qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
@@ -658,8 +623,25 @@ void MainWindow::setup_logfile_location()
     qDebug() << "Auto Save log file for this session: " << autosaveLogFile;
 }
 
-void MainWindow::enforceAutoSaveLimit(QString path)
+//checks if the number of auto saved log files is greater than the user
+//set max value. Deletes the oldest until auto save limit is enforced
+void MainWindow::enforceAutoSaveLimit()
 {
+    QString path;
+
+    //check if user has set a custom log file output directory
+    if ( !userSettings.value("logfileLocation").toString().isEmpty() )
+    {
+        //initialize the logfile into this directory
+        path = userSettings.value("logfileLocation").toString();
+    }
+    //otherwise use default directory
+    else
+    {
+        //use the path of the exe and add a "Log Files" directory
+        path = QCoreApplication::applicationDirPath() + "/" + INITIAL_LOGFILE_LOCATION;
+    }
+
     // Set a filter to display only files
     QDir dir(path);
     dir.setFilter(QDir::Files);
@@ -712,7 +694,7 @@ void MainWindow::enforceAutoSaveLimit(QString path)
         }
         else
         {
-            qDebug() << "An old autosave file was deleted";
+            qDebug() << "An autosave file was deleted";
         }
 
         // Remove the oldest file name from the list
@@ -720,18 +702,25 @@ void MainWindow::enforceAutoSaveLimit(QString path)
     }
 }
 
-
-void MainWindow::setup_connection_settings()
+//Checks if registry values exist for all settings in userSettings. If so settings
+//are loaded into local variables. If not, initial settings are taken from constants.h
+//and loaded into registry and local variables. Selection boxes for connection settings
+//are loaded with Qt serial options.
+void MainWindow::setupSettings()
 {
     int i;
+
+    //Connection Setttings
 
     // Check and set initial value for "portName"
     if (userSettings.value("portName").toString().isEmpty())
         userSettings.setValue("portName", INITIAL_DDM_PORT);
 
-    // Check and set initial value for "csimPortName"
-    if (userSettings.value("csimPortName").toString().isEmpty())
-        userSettings.setValue("csimPortName", INITIAL_CSIM_PORT);
+    #if DEV_MODE
+        // Check and set initial value for "csimPortName"
+        if (userSettings.value("csimPortName").toString().isEmpty())
+            userSettings.setValue("csimPortName", INITIAL_CSIM_PORT);
+    #endif
 
     // Check and set initial value for "baudRate"
     if (userSettings.value("baudRate").toString().isEmpty())
@@ -754,12 +743,41 @@ void MainWindow::setup_connection_settings()
         userSettings.setValue("flowControl", toString(INITIAL_FLOW_CONTROL));
 
 
+    //Misc. Settings
+
+
+    // Check if the setting exists and is valid
+    if (!userSettings.contains("coloredEventOutput") || !userSettings.value("coloredEventOutput").isValid()) {
+        // If it doesn't exist or is not valid, set the default value
+        userSettings.setValue("coloredEventOutput", INITIAL_COLORED_EVENTS_OUTPUT);
+    }
+
+    //set session variable based on setting
+    coloredEventOutput = userSettings.value("coloredEventOutput").toBool();
+
+    //set gui display to match
+    ui->colored_events_output->setChecked(coloredEventOutput);
+
+    // Check if the setting exists and is valid
+    if (!userSettings.contains("autoSaveLimit") || !userSettings.value("autoSaveLimit").isValid()) {
+        // If it doesn't exist or is not valid, set the default value
+        userSettings.setValue("autoSaveLimit", INITIAL_AUTO_SAVE_LIMIT);
+    }
+
+    //set session variable based on setting
+    autoSaveLimit = userSettings.value("autoSaveLimit").toInt();
+
+    //update gui to match
+    ui->auto_save_limit->setValue(autoSaveLimit);
+
     // Display user settings
-    displaySavedConnectionSettings();
+    displaySavedSettings();
 
     //setup port name selections on gui (scans for available ports)
     setup_ddm_port_selection(0);
-    setup_csim_port_selection(0);
+    #if DEV_MODE
+        setup_csim_port_selection(0);
+    #endif
 
     // Add baud rate settings
     ui->baud_rate_selection->addItem(toString(QSerialPort::Baud1200));
@@ -819,11 +837,6 @@ void MainWindow::setup_connection_settings()
 //displays the current values of the status class onto the gui status page
 void MainWindow::updateStatusDisplay()
 {
-    //display current values in status class to dev page
-    ui->status_output->setText(status->generateMessage());
-
-    //qDebug() << "fireMode: " << status->firingMode;
-
     resetFiringMode();
 
     //update font color of the active firing mode
@@ -864,7 +877,6 @@ void MainWindow::updateStatusDisplay()
         ui->trigger1->setPixmap(BLANK_LIGHT);
     }
 
-
     //update trigger 2 light
     switch (status->trigger2)
     {
@@ -881,6 +893,47 @@ void MainWindow::updateStatusDisplay()
         default:
             ui->trigger2->setPixmap(BLANK_LIGHT);
     }
+
+    //update the armed light
+    if(status->armed)
+    {
+        ui->armedOutput->setPixmap(GREEN_LIGHT);
+    }
+    else
+    {
+        ui->armedOutput->setPixmap(RED_LIGHT);
+    }
+
+    ui->fireRateOutput->setText(QString::number(status->firingRate));
+    ui->fireRateOutput->setAlignment(Qt::AlignCenter);
+
+    ui->burstOutput->setText(QString::number(status->burstLength));
+    ui->burstOutput->setAlignment(Qt::AlignCenter);
+
+    switch(status->controllerState)
+    {
+        case RUNNING:
+            ui->processorOutput->setText("Running");
+
+            break;
+
+        case BLOCKED:
+            ui->processorOutput->setText("Blocked");
+
+            break;
+
+        case TERMINATED:
+            ui->processorOutput->setText("Terminated");
+
+            break;
+
+        case SUSPENDED:
+            ui->processorOutput->setText("Suspended");
+
+            break;
+    }
+
+    ui->processorOutput->setAlignment(Qt::AlignCenter);
 }
 
 // method updates the running elapsed controller time
@@ -916,7 +969,7 @@ void MainWindow::updateElapsedTime()
 }
 
 // method updates the elapsed time since last message received to DDM
-void MainWindow::updateTimer()
+void MainWindow::updateTimeSinceLastMessage()
 {
     // initialize variables
     QTime elapsedTime;
@@ -948,6 +1001,139 @@ void MainWindow::updateTimer()
         message = "Time Since Last Message: " + elapsedTime.toString("HH:mm:ss");
         ui->DDMTimer->setText(message);
         ui->DDMTimer->setAlignment(Qt::AlignRight);
+    }
+}
+
+void MainWindow::resetFiringMode()
+{
+    ui->automaticLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
+    ui->burstLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
+    ui->safeLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
+    ui->singleLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
+}
+
+//overloaded function to add simplicity when possible
+void MainWindow::updateEventsOutput(EventNode *event)
+{
+    updateEventsOutput(events->nodeToString(event), event->error, event->cleared);
+}
+
+
+//updates gui with given message, dynamically colors output based on the type of outString
+//accounts for filtering settings and only renders the outString if it is being filtered for
+// by the user
+void MainWindow::updateEventsOutput(QString outString, bool error, bool cleared)
+{
+    QTextDocument document;
+    QString richText;
+
+    //check if we have an event as input and check if filter allows printing events
+    if (!error )
+    {
+        if (eventFilter == EVENTS || eventFilter == ALL)
+        {
+            //change output text color to white
+            richText = "<p style='color: #FFFFFF; font-size: 16px'>"+ outString + "</p>";
+
+            //activate html for the output
+            document.setHtml(richText);
+
+            //append styled string to the events output
+            ui->events_output->append(document.toHtml());
+        }
+    }
+    //otherwise check for cleared error and if filter allows printing cleared errors
+    else if (cleared)
+    {
+        if (eventFilter == ALL || eventFilter == ERRORS || eventFilter == CLEARED_ERRORS)
+        {
+            if (coloredEventOutput)
+            {
+                //change output text color to green
+                richText = "<p style='color: #14AE5C; font-size: 16px'>"+ outString + "</p>";
+            }
+            else
+            {
+                //change output text color to white
+                richText = "<p style='color: #FFFFFF; font-size: 16px'>"+ outString + "</p>";
+            }
+
+            //activate html for the output
+            document.setHtml(richText);
+
+            //append styled string to the events output
+            ui->events_output->append(document.toHtml());
+        }
+    }
+    //otherwise this is a non-cleared error check if filtering allows printing non-cleared errors
+    else if (eventFilter == ALL || eventFilter == NON_CLEARED_ERRORS || eventFilter == ERRORS)
+    {
+        if (coloredEventOutput)
+        {
+            //change output text color to red
+            richText = "<p style='color: #FE1C1C; font-size: 16px'>"+ outString + "</p>";
+        }
+        else
+        {
+            //change output text color to white
+            richText = "<p style='color: #FFFFFF; font-size: 16px'>"+ outString + "</p>";
+        }
+
+        //activate html for the output
+        document.setHtml(richText);
+
+        //append styled string to the events output
+        ui->events_output->append(document.toHtml());
+    }
+
+    // update total events gui
+    ui->TotalEventsOutput->setText(QString::number(events->totalEvents));
+    ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
+    ui->statusEventOutput->setText(QString::number(events->totalEvents));
+    ui->statusEventOutput->setAlignment(Qt::AlignCenter);
+
+    if (!error) return;
+
+    // update total errors gui
+    ui->TotalErrorsOutput->setText(QString::number(events->totalErrors));
+    ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
+    ui->statusErrorOutput->setText(QString::number(events->totalErrors));
+    ui->statusErrorOutput->setAlignment(Qt::AlignCenter);
+
+    if ( cleared )
+    {
+        // update cleared errors gui
+        ui->ClearedErrorsOutput->setText(QString::number(events->totalCleared));
+        ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
+    }
+    else
+    {
+        // update active errors gui
+        ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
+        ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
+    }
+}
+
+//clears events tab gui element, then repopulates it with current event data
+void MainWindow::refreshEventsOutput()
+{
+    // reset gui element
+    ui->events_output->clear();
+
+    //init vars
+    EventNode *wkgErrPtr = events->headErrorNode;
+    EventNode *wkgEventPtr = events->headEventNode;
+    EventNode *nextPrintPtr;
+    bool printErr;
+
+    //loop through all events and errors
+    while(wkgErrPtr != nullptr || wkgEventPtr != nullptr)
+    {
+        // get next to print
+        nextPrintPtr = events->getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
+
+        //update events output if filter allows
+        updateEventsOutput(nextPrintPtr);
     }
 }
 
@@ -1099,7 +1285,62 @@ QSerialPort::FlowControl MainWindow::fromStringFlowControl(QString flowControlSt
     }
 }
 
-//logs empty line to qdebug
+//======================================================================================
+//DEV_MODE exclusive methods
+//======================================================================================
+
+#if DEV_MODE
+//scans for available serial ports and adds them to csim port selection box
+void MainWindow::setup_csim_port_selection(int index)
+{
+    // Fetch available serial ports and add their names to the combo box
+    foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
+    {
+        QString portName = info.portName();
+        ui->csim_port_selection->addItem(portName);
+
+        // Check if the current port name matches the one declared in settings
+        if (portName == userSettings.value("csimPortName").toString())
+        {
+            // If a match is found, set the current index of the combo box
+            ui->csim_port_selection->setCurrentIndex(ui->csim_port_selection->count() - 1);
+        }
+    }
+}
+
+//updates the dev page non cleared error selection box
+void MainWindow::update_non_cleared_error_selection()
+{
+    //clear combo box
+    ui->non_cleared_error_selection->clear();
+
+    //check for valid events ptr
+    if (csimHandle->eventsPtr != nullptr)
+    {
+        //get head node
+        EventNode *wkgPtr = csimHandle->eventsPtr->headErrorNode;
+
+        //loop until list ends
+        while (wkgPtr != nullptr)
+        {
+            //add the uncleared error to the combo box
+            ui->non_cleared_error_selection->addItem(QString::number(wkgPtr->id) + DELIMETER + wkgPtr->eventString);
+
+            //get next error
+            wkgPtr = wkgPtr->nextPtr;
+        }
+    }
+}
+//sends user to developer page when clicked
+void MainWindow::on_DevPageButton_clicked()
+{
+    qDebug() << "Dev Page clicked";
+    ui->Flow_Label->setCurrentIndex(1);
+    resetPageButton();
+    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
+}
+
+//writes empty line to qdebug
 void MainWindow::logEmptyLine()
 {
     //revert to standard output format
@@ -1111,138 +1352,5 @@ void MainWindow::logEmptyLine()
     //enable custom message format
     qSetMessagePattern(QDEBUG_OUTPUT_FORMAT);
 }
-
-void MainWindow::resetFiringMode()
-{
-    ui->automaticLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
-    ui->burstLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
-    ui->safeLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
-    ui->singleLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
-}
-
-//overloaded function to add simplicity when possible
-void MainWindow::updateEventsOutput(EventNode *event)
-{
-    updateEventsOutput(events->nodeToString(event), event->error, event->cleared);
-}
-
-
-//updates gui with given message, dynamically colors output based on the type of outString
-//accounts for filtering settings and only renders the outString if it is being filtered for
-// by the user
-void MainWindow::updateEventsOutput(QString outString, bool error, bool cleared)
-{
-    QTextDocument document;
-    QString richText;
-
-    //check if we have an event as input and check if filter allows printing events
-    if (!error )
-    {
-        if (eventFilter == EVENTS || eventFilter == ALL)
-        {
-           //change output text color to white
-           richText = "<p style='color: #FFFFFF; font-size: 16px'>"+ outString + "</p>";
-
-           //activate html for the output
-           document.setHtml(richText);
-
-           //append styled string to the events output
-           ui->events_output->append(document.toHtml());
-        }
-    }
-    //otherwise check for cleared error and if filter allows printing cleared errors
-    else if (cleared)
-    {
-        if (eventFilter == ALL || eventFilter == ERRORS || eventFilter == CLEARED_ERRORS)
-        {
-            if (coloredEventOutput)
-            {
-                //change output text color to green
-                richText = "<p style='color: #14AE5C; font-size: 16px'>"+ outString + "</p>";
-            }
-            else
-            {
-                //change output text color to white
-                richText = "<p style='color: #FFFFFF; font-size: 16px'>"+ outString + "</p>";
-            }
-
-            //activate html for the output
-            document.setHtml(richText);
-
-            //append styled string to the events output
-            ui->events_output->append(document.toHtml());
-        }
-    }
-    //otherwise this is a non-cleared error check if filtering allows printing non-cleared errors
-    else if (eventFilter == ALL || eventFilter == NON_CLEARED_ERRORS || eventFilter == ERRORS)
-    {
-        if (coloredEventOutput)
-        {
-            //change output text color to red
-            richText = "<p style='color: #FE1C1C; font-size: 16px'>"+ outString + "</p>";
-        }
-        else
-        {
-            //change output text color to white
-            richText = "<p style='color: #FFFFFF; font-size: 16px'>"+ outString + "</p>";
-        }
-
-       //activate html for the output
-       document.setHtml(richText);
-
-       //append styled string to the events output
-       ui->events_output->append(document.toHtml());
-    }
-
-    // update total events gui
-    ui->TotalEventsOutput->setText(QString::number(events->totalEvents));
-    ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
-    ui->statusEventOutput->setText(QString::number(events->totalEvents));
-    ui->statusEventOutput->setAlignment(Qt::AlignCenter);
-
-    if (!error) return;
-
-    // update total errors gui
-    ui->TotalErrorsOutput->setText(QString::number(events->totalErrors));
-    ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
-    ui->statusErrorOutput->setText(QString::number(events->totalErrors));
-    ui->statusErrorOutput->setAlignment(Qt::AlignCenter);
-
-    if ( cleared )
-    {
-        // update cleared errors gui
-        ui->ClearedErrorsOutput->setText(QString::number(events->totalCleared));
-        ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
-    }
-    else
-    {
-        // update active errors gui
-        ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
-        ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
-    }
-}
-
-//clears events tab gui element, then repopulates it with current event data
-void MainWindow::refreshEventsOutput()
-{
-    // reset gui element
-    ui->events_output->clear();
-
-    //init vars
-    EventNode *wkgErrPtr = events->headErrorNode;
-    EventNode *wkgEventPtr = events->headEventNode;
-    EventNode *nextPrintPtr;
-    bool printErr;
-
-    //loop through all events and errors
-    while(wkgErrPtr != nullptr || wkgEventPtr != nullptr)
-    {
-        // get next to print
-        nextPrintPtr = events->getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
-
-        //update events output if filter allows
-        updateEventsOutput(nextPrintPtr);
-    }
-}
-
+#endif
 
