@@ -15,6 +15,8 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(tests tst_electrical.cpp
+    tst_status.cpp
+
 )
 add_test(NAME foo COMMAND foo)
 
