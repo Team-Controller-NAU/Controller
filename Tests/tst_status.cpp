@@ -22,7 +22,7 @@ private slots:
 void tst_status::wawa()
 {
     QString hello = "hello";
-    QCOMPARE(hello, hello.toUpper());
+    QCOMPARE(hello.toUpper(), "HELLO");
 }
 
 QTEST_MAIN(tst_status)
