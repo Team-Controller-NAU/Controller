@@ -1,6 +1,9 @@
+
 #include <QCoreApplication>
 #include <QTest>
 #include "../weapon-system-support-software/electrical.cpp"
+#include "mainwindow.h"
+
 
 // add necessary includes here
 
