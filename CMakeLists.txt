@@ -6,5 +6,5 @@ cmake_minimum_required(VERSION 3.10)
 project(Controller)
 
 # Add subdirectories for unit tests and WSSS applications
-add_subdirectory(tests/)
 add_subdirectory(weapon-system-support-software/)
+add_subdirectory(tests/)

@@ -1,19 +1,16 @@
-
 #include <QCoreApplication>
 #include <QTest>
 #include "../weapon-system-support-software/electrical.cpp"
-#include "mainwindow.h"
-
 
 // add necessary includes here
 
-class tests : public QObject
+class tst_electrical : public QObject
 {
     Q_OBJECT
 
 public:
-    tests();
-    ~tests();
+    tst_electrical();
+    ~tst_electrical();
 private:
     electrical *electricalObject;
 
@@ -23,16 +20,17 @@ private slots:
     void test_freeLL();
 };
 
-tests::tests()
+tst_electrical::tst_electrical()
 {
 
 }
 
-tests::~tests()
+tst_electrical::~tst_electrical()
 {
+
 }
 
-void tests::electrical_constructor()
+void tst_electrical::electrical_constructor()
 {
     electrical *elecObj = new electrical();
 
@@ -48,7 +46,7 @@ void tests::electrical_constructor()
     delete elecObj;
 }
 
-void tests::test_addNode()
+void tst_electrical::test_addNode()
 {
     // create electrical object and variables
     electrical *elecObj = new electrical();
@@ -75,7 +73,7 @@ void tests::test_addNode()
     delete elecObj;
 }
 
-void tests::test_freeLL()
+void tst_electrical::test_freeLL()
 {
     // create electrical object and variables
     electrical *elecObj = new electrical();
@@ -100,5 +98,5 @@ void tests::test_freeLL()
     delete elecObj;
 }
 
-QTEST_MAIN(tests)
+QTEST_MAIN(tst_electrical)
 #include "tst_electrical.moc"
