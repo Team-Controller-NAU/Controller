@@ -8,9 +8,6 @@ class tst_electrical : public QObject
 {
     Q_OBJECT
 
-public:
-    tst_electrical();
-    ~tst_electrical();
 private:
     electrical *electricalObject;
 
@@ -19,16 +16,6 @@ private slots:
     void test_addNode();
     void test_freeLL();
 };
-
-tst_electrical::tst_electrical()
-{
-
-}
-
-tst_electrical::~tst_electrical()
-{
-
-}
 
 void tst_electrical::electrical_constructor()
 {

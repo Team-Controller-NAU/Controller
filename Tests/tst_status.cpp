@@ -12,18 +12,33 @@ public:
 
 private:
 
-
 private slots:
-    void wawa();
+    void test_loadData();
+    void test_loadVersionData();
 };
 
 
-
-void tst_status::wawa()
+/**
+ * Test case for loadData() in status.cpp
+ */
+void tst_status::test_loadData()
 {
     QString hello = "hello";
     QCOMPARE(hello.toUpper(), "HELLO");
 }
+
+/**
+ * Test case for loadVersionData() in status.cpp
+ */
+void tst_status::test_loadVersionData()
+{
+
+}
+
+/**
+ * Test case for generateMessage() in status.cpp if we are in dev mode
+ */
+// TODO: How do get the scope of the DEV_MODE variable?
 
 QTEST_MAIN(tst_status)
 #include "tst_status.moc"
