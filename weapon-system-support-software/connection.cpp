@@ -65,15 +65,12 @@ bool Connection::checkForValidMessage()
         //copy data from serial port buffer without altering buffer
         QByteArray serializedMessage = serialPort.peek(serialPort.bytesAvailable());
 
-        qDebug() << serializedMessage;
-
-        //deserialize the message
-        QString message = QString::fromLatin1(serializedMessage);
+        QString message = QString::fromUtf8(serializedMessage);
 
         qDebug() << message;
 
         //check for complete message
-        if ( message.contains("\n") || serializedMessage == "\x01")
+        if ( message.contains("\n") )
         {
             return true;
         }
@@ -106,7 +103,7 @@ void Connection::transmit(QString message)
     }
 
     // serialize message string
-    QByteArray data = message.toLatin1();
+    QByteArray data = message.toUtf8();
 
     // write to serial port
     qint64 bytesWritten = serialPort.write(data);
