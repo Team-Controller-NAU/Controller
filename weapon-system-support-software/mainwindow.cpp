@@ -1,6 +1,4 @@
 #include "mainwindow.h"
-#include "constants.h"
-#include <QtCore>
 
 MainWindow::MainWindow(QWidget *parent)
 
@@ -67,6 +65,7 @@ MainWindow::MainWindow(QWidget *parent)
         //connect output session string to ddm output session string slot
         connect(this, &MainWindow::outputMessagesSentRequest, csimHandle, &CSim::outputMessagesSent);
         //=================================================================================
+    //dev mode is not active, hide dev page button
     #else
         ui->DevPageButton->setVisible(false);
     #endif
@@ -102,12 +101,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(runningControllerTimer, &QTimer::timeout, this, &MainWindow::updateElapsedTime);
 
     qDebug() << "GUI is now listening to port " << ddmCon->portName;
-
-    //set feed pos to be measured in 360 degrees
-    ui->feedPosition->setMaximum(360);
-
-    //set feed pos to be non-editable by user
-    ui->feedPosition->setEnabled(false);
 
     //init trigger to grey buttons until updated by serial status updates
     ui->trigger1->setPixmap(BLANK_LIGHT);
@@ -280,7 +273,7 @@ void MainWindow::readSerialData()
         QByteArray serializedMessage = ddmCon->serialPort.readLine();
 
         //deserialize string
-        QString message = QString::fromUtf8(serializedMessage);
+        QString message = QString::fromLatin1(serializedMessage);
 
         qDebug() << "message: " << message;
 
@@ -559,28 +552,6 @@ void MainWindow::enableConnectionChanges()
     ui->load_events_from_logfile->setEnabled(true);
 }
 
-//support function, outputs usersettings values to qdebug
-void MainWindow::displaySavedSettings()
-{
-    #if DEV_MODE
-        logEmptyLine();
-    #endif
-    qDebug() << "Connection Settings Saved Cross Session:";
-    // Print the values of each setting
-    qDebug() << "DDM Port: " << userSettings.value("portName").toString();
-    #if DEV_MODE
-        qDebug() << "CSIM Port: " << userSettings.value("csimPortName").toString();
-    #endif
-    qDebug() << "baudRate:" << userSettings.value("baudRate").toString();
-    qDebug() << "dataBits:" << userSettings.value("dataBits").toString();
-    qDebug() << "parity:" << userSettings.value("parity").toString();
-    qDebug() << "stopBits:" << userSettings.value("stopBits").toString();
-    qDebug() << "flowControl:" << userSettings.value("flowControl").toString();
-    qDebug() << "logfile location: " << userSettings.value("logfileLocation").toString();
-    qDebug() << "Colored Event Output: " << userSettings.value("coloredEventOutput").toBool();
-    qDebug() << "Auto Save Limit: " << userSettings.value("autoSaveLimit").toInt() << Qt::endl;
-}
-
 //checks if user has setup a custom log file directory, if not, the default directory is selected
 //the auto save log file for this session will be stored in the directory chosen by this
 //function
@@ -708,45 +679,7 @@ void MainWindow::enforceAutoSaveLimit()
 //are loaded with Qt serial options.
 void MainWindow::setupSettings()
 {
-    int i;
-
-    //Connection Setttings
-
-    // Check and set initial value for "portName"
-    if (userSettings.value("portName").toString().isEmpty())
-        userSettings.setValue("portName", INITIAL_DDM_PORT);
-
-    #if DEV_MODE
-        // Check and set initial value for "csimPortName"
-        if (userSettings.value("csimPortName").toString().isEmpty())
-            userSettings.setValue("csimPortName", INITIAL_CSIM_PORT);
-    #endif
-
-    // Check and set initial value for "baudRate"
-    if (userSettings.value("baudRate").toString().isEmpty())
-        userSettings.setValue("baudRate", toString(INITIAL_BAUD_RATE));
-
-    // Check and set initial value for "dataBits"
-    if (userSettings.value("dataBits").toString().isEmpty())
-        userSettings.setValue("dataBits", toString(INITIAL_DATA_BITS));
-
-    // Check and set initial value for "parity"
-    if (userSettings.value("parity").toString().isEmpty())
-        userSettings.setValue("parity", toString(INITIAL_PARITY));
-
-    // Check and set initial value for "stopBits"
-    if (userSettings.value("stopBits").toString().isEmpty())
-        userSettings.setValue("stopBits", toString(INITIAL_STOP_BITS));
-
-    // Check and set initial value for "flowControl"
-    if (userSettings.value("flowControl").toString().isEmpty())
-        userSettings.setValue("flowControl", toString(INITIAL_FLOW_CONTROL));
-
-
-    //Misc. Settings
-
-
-    // Check if the setting exists and is valid
+    // Check if colored event exists and is valid
     if (!userSettings.contains("coloredEventOutput") || !userSettings.value("coloredEventOutput").isValid()) {
         // If it doesn't exist or is not valid, set the default value
         userSettings.setValue("coloredEventOutput", INITIAL_COLORED_EVENTS_OUTPUT);
@@ -770,68 +703,20 @@ void MainWindow::setupSettings()
     //update gui to match
     ui->auto_save_limit->setValue(autoSaveLimit);
 
-    // Display user settings
-    displaySavedSettings();
-
     //setup port name selections on gui (scans for available ports)
     setup_ddm_port_selection(0);
+
+    //sets up text options in connection settings drop down boxes
+    setupConnectionPage();
+
     #if DEV_MODE
+        // Display user settings
+        displaySavedSettings();
         setup_csim_port_selection(0);
     #endif
 
-    // Add baud rate settings
-    ui->baud_rate_selection->addItem(toString(QSerialPort::Baud1200));
-    ui->baud_rate_selection->addItem(toString(QSerialPort::Baud2400));
-    ui->baud_rate_selection->addItem(toString(QSerialPort::Baud4800));
-    ui->baud_rate_selection->addItem(toString(QSerialPort::Baud9600));
-    ui->baud_rate_selection->addItem(toString(QSerialPort::Baud19200));
-    ui->baud_rate_selection->addItem(toString(QSerialPort::Baud38400));
-    ui->baud_rate_selection->addItem(toString(QSerialPort::Baud57600));
-    ui->baud_rate_selection->addItem(toString(QSerialPort::Baud115200));
-
-    // Add data bits settings
-    ui->data_bits_selection->addItem(toString(QSerialPort::Data5));
-    ui->data_bits_selection->addItem(toString(QSerialPort::Data6));
-    ui->data_bits_selection->addItem(toString(QSerialPort::Data7));
-    ui->data_bits_selection->addItem(toString(QSerialPort::Data8));
-
-    // Add parity settings
-    ui->parity_selection->addItem(toString(QSerialPort::NoParity));
-    ui->parity_selection->addItem(toString(QSerialPort::EvenParity));
-    ui->parity_selection->addItem(toString(QSerialPort::OddParity));
-    ui->parity_selection->addItem(toString(QSerialPort::SpaceParity));
-    ui->parity_selection->addItem(toString(QSerialPort::MarkParity));
-
-    // Add stop bits settings
-    ui->stop_bit_selection->addItem(toString(QSerialPort::OneStop));
-    ui->stop_bit_selection->addItem(toString(QSerialPort::OneAndHalfStop));
-    ui->stop_bit_selection->addItem(toString(QSerialPort::TwoStop));
-
-    // Add flow control settings
-    ui->flow_control_selection->addItem(toString(QSerialPort::NoFlowControl));
-    ui->flow_control_selection->addItem(toString(QSerialPort::HardwareControl));
-    ui->flow_control_selection->addItem(toString(QSerialPort::SoftwareControl));
-
-    // Set initial values for the q combo boxes
-    ui->baud_rate_selection->setCurrentIndex(ui->baud_rate_selection->findText(userSettings.value("baudRate").toString()));
-    ui->data_bits_selection->setCurrentIndex(ui->data_bits_selection->findText(userSettings.value("dataBits").toString()));
-    ui->parity_selection->setCurrentIndex(ui->parity_selection->findText(userSettings.value("parity").toString()));
-    ui->stop_bit_selection->setCurrentIndex(ui->stop_bit_selection->findText(userSettings.value("stopBits").toString()));
-    ui->flow_control_selection->setCurrentIndex(ui->flow_control_selection->findText(userSettings.value("flowControl").toString()));
-
-
-    // Set initial stop bits value
-    switch (fromStringStopBits(userSettings.value("stopBits").toString())) {
-    case QSerialPort::OneStop:
-        ui->stop_bit_selection->setCurrentIndex(ui->stop_bit_selection->findText(toString(QSerialPort::OneStop)));
-        break;
-    case QSerialPort::OneAndHalfStop:
-        ui->stop_bit_selection->setCurrentIndex(ui->stop_bit_selection->findText(toString(QSerialPort::OneAndHalfStop)));
-        break;
-    case QSerialPort::TwoStop:
-        ui->stop_bit_selection->setCurrentIndex(ui->stop_bit_selection->findText(toString(QSerialPort::TwoStop)));
-        break;
-    }
+    //write settings to registry
+    userSettings.sync();
 }
 
 //displays the current values of the status class onto the gui status page
@@ -1138,154 +1023,6 @@ void MainWindow::refreshEventsOutput()
 }
 
 //======================================================================================
-// To string methods for QSerialPortEnumeratedValues
-//======================================================================================
-// Convert QSerialPort::BaudRate to string
-QString MainWindow::toString(QSerialPort::BaudRate baudRate) {
-    switch (baudRate) {
-    case QSerialPort::Baud1200: return "1200";
-    case QSerialPort::Baud2400: return "2400";
-    case QSerialPort::Baud4800: return "4800";
-    case QSerialPort::Baud9600: return "9600";
-    case QSerialPort::Baud19200: return "19200";
-    case QSerialPort::Baud38400: return "38400";
-    case QSerialPort::Baud57600: return "57600";
-    case QSerialPort::Baud115200: return "115200";
-    default:
-        // Invalid input, throw an exception with the parameter value
-        throw std::invalid_argument("Invalid baud rate enum value: " + QString::number(baudRate).toStdString());
-    }
-}
-
-QString MainWindow::toString(QSerialPort::DataBits dataBits) {
-    switch (dataBits) {
-    case QSerialPort::Data5: return "5";
-    case QSerialPort::Data6: return "6";
-    case QSerialPort::Data7: return "7";
-    case QSerialPort::Data8: return "8";
-    default:
-        // Invalid input, throw an exception with the parameter value
-        throw std::invalid_argument("Invalid data bits enum value: " + QString::number(dataBits).toStdString());
-    }
-}
-
-QString MainWindow::toString(QSerialPort::Parity parity) {
-    switch (parity) {
-    case QSerialPort::NoParity: return "No Parity";
-    case QSerialPort::EvenParity: return "Even Parity";
-    case QSerialPort::OddParity: return "Odd Parity";
-    case QSerialPort::SpaceParity: return "Space Parity";
-    case QSerialPort::MarkParity: return "Mark Parity";
-    default:
-        // Invalid input, throw an exception with the parameter value
-        throw std::invalid_argument("Invalid parity enum value: " + QString::number(parity).toStdString());
-    }
-}
-
-QString MainWindow::toString(QSerialPort::StopBits stopBits) {
-    switch (stopBits) {
-    case QSerialPort::OneStop: return "1";
-    case QSerialPort::OneAndHalfStop: return "1.5";
-    case QSerialPort::TwoStop: return "2";
-    default:
-        // Invalid input, throw an exception with the parameter value
-        throw std::invalid_argument("Invalid stop bits enum value: " + QString::number(stopBits).toStdString());
-    }
-}
-
-QString MainWindow::toString(QSerialPort::FlowControl flowControl) {
-    switch (flowControl) {
-    case QSerialPort::NoFlowControl: return "No Flow Control";
-    case QSerialPort::HardwareControl: return "Hardware Control";
-    case QSerialPort::SoftwareControl: return "Software Control";
-    default:
-        // Invalid input, throw an exception with the parameter value
-        throw std::invalid_argument("Invalid flow control enum value: " + QString::number(flowControl).toStdString());
-    }
-}
-
-
-
-//======================================================================================
-//From string methods for QSerialPortEnumeratedValues
-//======================================================================================
-QSerialPort::BaudRate MainWindow::fromStringBaudRate(QString baudRateStr) {
-    if (baudRateStr == "1200") {
-        return QSerialPort::Baud1200;
-    } else if (baudRateStr == "2400") {
-        return QSerialPort::Baud2400;
-    } else if (baudRateStr == "4800") {
-        return QSerialPort::Baud4800;
-    } else if (baudRateStr == "9600") {
-        return QSerialPort::Baud9600;
-    } else if (baudRateStr == "19200") {
-        return QSerialPort::Baud19200;
-    } else if (baudRateStr == "38400") {
-        return QSerialPort::Baud38400;
-    } else if (baudRateStr == "57600") {
-        return QSerialPort::Baud57600;
-    } else if (baudRateStr == "115200") {
-        return QSerialPort::Baud115200;
-    } else {
-        throw std::invalid_argument("Invalid baud rate string: " + baudRateStr.toStdString());
-    }
-}
-
-QSerialPort::DataBits MainWindow::fromStringDataBits(QString dataBitsStr) {
-    if (dataBitsStr == "5") {
-        return QSerialPort::Data5;
-    } else if (dataBitsStr == "6") {
-        return QSerialPort::Data6;
-    } else if (dataBitsStr == "7") {
-        return QSerialPort::Data7;
-    } else if (dataBitsStr == "8") {
-        return QSerialPort::Data8;
-    } else {
-        throw std::invalid_argument("Invalid data bits string: " + dataBitsStr.toStdString());
-    }
-}
-
-QSerialPort::Parity MainWindow::fromStringParity(QString parityStr) {
-    if (parityStr == "No Parity") {
-        return QSerialPort::NoParity;
-    } else if (parityStr == "Even Parity") {
-        return QSerialPort::EvenParity;
-    } else if (parityStr == "Odd Parity") {
-        return QSerialPort::OddParity;
-    } else if (parityStr == "Space Parity") {
-        return QSerialPort::SpaceParity;
-    } else if (parityStr == "Mark Parity") {
-        return QSerialPort::MarkParity;
-    } else {
-        throw std::invalid_argument("Invalid parity string: " + parityStr.toStdString());
-    }
-}
-
-QSerialPort::StopBits MainWindow::fromStringStopBits(QString stopBitsStr) {
-    if (stopBitsStr == "1") {
-        return QSerialPort::OneStop;
-    } else if (stopBitsStr == "1.5") {
-        return QSerialPort::OneAndHalfStop;
-    } else if (stopBitsStr == "2") {
-        return QSerialPort::TwoStop;
-    } else {
-        throw std::invalid_argument("Invalid stop bits string: " + stopBitsStr.toStdString());
-    }
-}
-
-QSerialPort::FlowControl MainWindow::fromStringFlowControl(QString flowControlStr) {
-    if (flowControlStr == "No Flow Control") {
-        return QSerialPort::NoFlowControl;
-    } else if (flowControlStr == "Hardware Control") {
-        return QSerialPort::HardwareControl;
-    } else if (flowControlStr == "Software Control") {
-        return QSerialPort::SoftwareControl;
-    } else {
-        throw std::invalid_argument("Invalid flow control string: " + flowControlStr.toStdString());
-    }
-}
-
-//======================================================================================
 //DEV_MODE exclusive methods
 //======================================================================================
 
@@ -1331,14 +1068,6 @@ void MainWindow::update_non_cleared_error_selection()
         }
     }
 }
-//sends user to developer page when clicked
-void MainWindow::on_DevPageButton_clicked()
-{
-    qDebug() << "Dev Page clicked";
-    ui->Flow_Label->setCurrentIndex(1);
-    resetPageButton();
-    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
-}
 
 //writes empty line to qdebug
 void MainWindow::logEmptyLine()
@@ -1351,6 +1080,24 @@ void MainWindow::logEmptyLine()
 
     //enable custom message format
     qSetMessagePattern(QDEBUG_OUTPUT_FORMAT);
+}
+
+//support function, outputs usersettings values to qdebug
+void MainWindow::displaySavedSettings()
+{
+    logEmptyLine();
+    qDebug() << "Connection Settings Saved Cross Session:";
+    // Print the values of each setting
+    qDebug() << "DDM Port: " << userSettings.value("portName").toString();
+    qDebug() << "CSIM Port: " << userSettings.value("csimPortName").toString();
+    qDebug() << "baudRate:" << userSettings.value("baudRate").toString();
+    qDebug() << "dataBits:" << userSettings.value("dataBits").toString();
+    qDebug() << "parity:" << userSettings.value("parity").toString();
+    qDebug() << "stopBits:" << userSettings.value("stopBits").toString();
+    qDebug() << "flowControl:" << userSettings.value("flowControl").toString();
+    qDebug() << "logfile location: " << userSettings.value("logfileLocation").toString();
+    qDebug() << "Colored Event Output: " << userSettings.value("coloredEventOutput").toBool();
+    qDebug() << "Auto Save Limit: " << userSettings.value("autoSaveLimit").toInt() << Qt::endl;
 }
 #endif
 

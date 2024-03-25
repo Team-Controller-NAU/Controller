@@ -1,13 +1,10 @@
 #include "feedposition.h"
 
-#include <QPainter>
-#include <QColor>
-
 feedposition::feedposition(QWidget* parent)
     : QDial(parent)
 {
-    // Default range
-    QDial::setRange(0,100);
+    //set feed pos to be measured in 360 degrees
+    QDial::setMaximum(360);
 }
 
 void feedposition::paintEvent(QPaintEvent*)
@@ -94,7 +91,17 @@ void feedposition::paintEvent(QPaintEvent*)
     painter.drawText(QDial::height()/2.15,QDial::height()/2.15,QDial::height(),QDial::height(),0,QString::number(value));
 }
 
+void feedposition::mouseMoveEvent(QMouseEvent *event)
+{
+    event->ignore();
+}
+
 void feedposition::mousePressEvent(QMouseEvent *event)
+{
+    event->ignore();
+}
+
+void feedposition::mouseReleaseEvent(QMouseEvent *event)
 {
     event->ignore();
 }

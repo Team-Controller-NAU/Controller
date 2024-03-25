@@ -1,5 +1,7 @@
 #include "csim.h"
+//this file wont compile if dev mode is inactive
 #if DEV_MODE
+
 //constructor
 CSim::CSim(QObject *parent, QString portName)
     : QThread(parent), stop(false), portName(portName),
