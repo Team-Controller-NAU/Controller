@@ -67,8 +67,6 @@ bool Connection::checkForValidMessage()
 
         QString message = QString::fromUtf8(serializedMessage);
 
-        qDebug() << message;
-
         //check for complete message
         if ( message.contains("\n") )
         {

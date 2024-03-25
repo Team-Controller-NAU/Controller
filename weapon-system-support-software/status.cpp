@@ -7,7 +7,7 @@ Status::Status(QObject *parent)
 }
 
 //given a status message, update status class with new data
-void Status::loadData(QString statusMessage)
+bool Status::loadData(QString statusMessage)
 {
     /* the statusMessage contains csv data in the following order
      *
@@ -27,6 +27,11 @@ void Status::loadData(QString statusMessage)
     bool result = true;
 
     QStringList values = statusMessage.split(DELIMETER);
+
+    if (values.length()-1 != NUM_STATUS_ELEMENTS)
+    {
+        return false;
+    }
 
     //extract armed value from message
     armed = (values[0] == "1");
@@ -54,16 +59,27 @@ void Status::loadData(QString statusMessage)
 
     //extract
     firingRate = values[8].toDouble(&result);
+
+    return true;
 }
 
 //given a message containing the controller version and crc updates corresponding class variables
-void Status::loadVersionData(QString versionMessage)
+bool Status::loadVersionData(QString versionMessage)
 {
+    //split along delimeter
     QStringList values = versionMessage.split(DELIMETER);
 
+    //ensure message has correct format
+    if(values.size()-1 != NUM_BEGIN_ELEMENTS)
+    {
+        return false;
+    }
+
+    //message is valid, load data
     elapsedControllerTime = values[0];
     version = values[1];
     crc = values[2];
+    return true;
 }
 
 //======================================================================================

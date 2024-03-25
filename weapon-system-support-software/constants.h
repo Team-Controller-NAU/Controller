@@ -89,9 +89,11 @@ const int ONE_SECOND = 1000;
 const int MAX_ELECTRICAL_COMPONENTS = 120;
 
 //for checking message integrity within loadData functions
-const int NUM_ERROR_DELIMETERS = 3;
-const int NUM_EVENT_DELIMETERS = 2;
-const int NUM_ELECTRIC_DELIMETERS = 2;
+const int NUM_ERROR_ELEMENTS = 3;
+const int NUM_EVENT_ELEMENTS = 2;
+const int NUM_ELECTRIC_ELEMENTS = 2;
+const int NUM_BEGIN_ELEMENTS = 3;
+const int NUM_STATUS_ELEMENTS = 9;
 
 //error codes
 const int DATA_NOT_FOUND = -101;

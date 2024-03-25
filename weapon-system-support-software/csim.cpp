@@ -38,15 +38,17 @@ void CSim::clearError(int clearedId)
         qDebug() << "Unable to clear error, no events class declared";
         return;
     }
+    else if (connPtr->connected)
+    {
+        //free the error from the linked list
+        eventsPtr->freeError(clearedId);
 
-    //free the error from the linked list
-    eventsPtr->freeError(clearedId);
+        //transmit "error cleared" message to ddm
+        connPtr->transmit(QString::number(CLEAR_ERROR) + DELIMETER + QString::number(clearedId) + DELIMETER + "\n");
 
-    //transmit error cleared message to ddm
-    connPtr->transmit(QString::number(CLEAR_ERROR) + DELIMETER + QString::number(clearedId) + DELIMETER + "\n");
-
-    //store message
-    messagesSent += QString::number(CLEAR_ERROR) + DELIMETER + QString::number(clearedId) + DELIMETER + "\n";
+        //store message
+        messagesSent += QString::number(CLEAR_ERROR) + DELIMETER + QString::number(clearedId) + DELIMETER + "\n";
+    }
 }
 
 //slot connected to transmissionRequest signal in ddm,
@@ -79,7 +81,6 @@ void CSim::completeTransmissionRequest(const QString &message)
 
     qDebug() << "[CSIM] transmission request declined, no active CSIM connection";
 }
-
 
 //can be called to end the csim event loop
 void CSim::stopSimulation()

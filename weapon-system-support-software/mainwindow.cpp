@@ -73,18 +73,6 @@ MainWindow::MainWindow(QWidget *parent)
     //update class port name values
     ddmPortName = ui->ddm_port_selection->currentText();
 
-    //init ddm connection using the current values set in connection settings
-    ddmCon = new Connection(ui->ddm_port_selection->currentText(),
-                            fromStringBaudRate(ui->baud_rate_selection->currentText()),
-                            fromStringDataBits(ui->data_bits_selection->currentText()),
-                            fromStringParity(ui->parity_selection->currentText()),
-                            fromStringStopBits(ui->stop_bit_selection->currentText()),
-                            fromStringFlowControl(ui->flow_control_selection->currentText()));
-
-    //set up signal and slot (when a message is sent to DDMs serial port, the readyRead signal is emitted and
-    //readSerialData() is called)
-    connect(&ddmCon->serialPort, &QSerialPort::readyRead, this, &MainWindow::readSerialData);
-
     //set handshake timer interval
     handshakeTimer->setInterval(HANDSHAKE_INTERVAL);
 
@@ -99,8 +87,6 @@ MainWindow::MainWindow(QWidget *parent)
     // connect running controller timer
     runningControllerTimer->setInterval(ONE_SECOND);
     connect(runningControllerTimer, &QTimer::timeout, this, &MainWindow::updateElapsedTime);
-
-    qDebug() << "GUI is now listening to port " << ddmCon->portName;
 
     //init trigger to grey buttons until updated by serial status updates
     ui->trigger1->setPixmap(BLANK_LIGHT);
@@ -155,6 +141,9 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
 
         //stop handshake protocols
         handshakeTimer->stop();
+
+        //free old electrical data if any exists
+        electricalObject->freeLL();
 
         // check if controller timer is not running
         if(!runningControllerTimer->isActive())
@@ -211,6 +200,14 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
         handshakeTimer->stop();
         ui->DDMTimer->clear();
 
+        //check if ddmCon exists
+        if (ddmCon != nullptr)
+        {
+            //notify user of closed connection class
+            notifyUser(ui->ddm_port_selection->currentText() + " closed", "Session ended",  false);
+            delete ddmCon;
+        }
+
         //enable changes to connection related settings
         enableConnectionChanges();
 
@@ -228,25 +225,41 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
 //apply serial settings from settings page
 void MainWindow::createDDMCon()
 {
-    //check if ddmCon is allocated
+    //close current connection
     if (ddmCon != nullptr)
     {
-        //close current connection
+        //notify user of closed connection class
+        notifyUser(ui->ddm_port_selection->currentText() + " closed", "Session ended",  false);
+        delete ddmCon;
+    }
+
+    //open new connection
+    ddmCon = new Connection(ui->ddm_port_selection->currentText(),
+                            fromStringBaudRate(ui->baud_rate_selection->currentText()),
+                            fromStringDataBits(ui->data_bits_selection->currentText()),
+                            fromStringParity(ui->parity_selection->currentText()),
+                            fromStringStopBits(ui->stop_bit_selection->currentText()),
+                            fromStringFlowControl(ui->flow_control_selection->currentText()));
+
+    //check for failure to open
+    if (!ddmCon->serialPort.isOpen())
+    {
         delete ddmCon;
 
-        //open new connection
-        ddmCon = new Connection(ui->ddm_port_selection->currentText(),
-                                fromStringBaudRate(ui->baud_rate_selection->currentText()),
-                                fromStringDataBits(ui->data_bits_selection->currentText()),
-                                fromStringParity(ui->parity_selection->currentText()),
-                                fromStringStopBits(ui->stop_bit_selection->currentText()),
-                                fromStringFlowControl(ui->flow_control_selection->currentText()));
+        ddmCon = nullptr;
 
+        //generate notification
+        notifyUser("Failed to open " + ui->ddm_port_selection->currentText(), true);
+    }
+    else
+    {
         //set up signal and slot (when a message is sent to DDMs serial port, the readyRead signal is emitted and
         //readSerialData() is called)
         connect(&ddmCon->serialPort, &QSerialPort::readyRead, this, &MainWindow::readSerialData);
 
         qDebug() << "GUI is now listening to port " << ddmCon->portName;
+
+        notifyUser(ui->ddm_port_selection->currentText() + " opened.", false);
     }
 }
 
@@ -297,7 +310,10 @@ void MainWindow::readSerialData()
                 qDebug() <<  "Message id: status update" << qPrintable("\n");
 
                 //update status class with new data
-                status->loadData(message);
+                if (!status->loadData(message))
+                {
+                    notifyUser("Invalid status message received", message, true);
+                }
 
                 //update gui
                 updateStatusDisplay();
@@ -309,7 +325,10 @@ void MainWindow::readSerialData()
                 qDebug() <<  "Message id: event update" << qPrintable("\n");
 
                 //add new event to event ll
-                events->loadEventData(message);
+                if (!events->loadEventData(message))
+                {
+                    notifyUser("Invalid event message received", message, true);
+                }
 
                 // update log file
                 events->appendToLogfile(autosaveLogFile, events->lastEventNode);
@@ -325,7 +344,10 @@ void MainWindow::readSerialData()
                 qDebug() <<  "Message id: error update" << qPrintable("\n");
 
                 //add new error to error ll
-                events->loadErrorData( message );
+                if (!events->loadErrorData( message ))
+                {
+                    notifyUser("Invalid error message received", message, true);
+                }
 
                 // update log file
                 events->appendToLogfile(autosaveLogFile, events->lastErrorNode);
@@ -345,11 +367,13 @@ void MainWindow::readSerialData()
 
                 qDebug() <<  "Message id: electrical" << qPrintable("\n");
 
-                // clear electrical ll
-                electricalObject->freeLL();
-
-                //load new data into electrical ll
-                electricalObject->loadElecDump(message);
+                //load new data into electrical ll, notify if fail
+                if (!electricalObject->loadElecDump(message))
+                {
+                    notifyUser("Invalid electrical dump received", message, true);
+                    //do nothing
+                    return;
+                }
 
                 //get head node into wkg ptr
                 wkgElecPtr = electricalObject->headNode;
@@ -415,8 +439,11 @@ void MainWindow::readSerialData()
 
                 qDebug() <<  "Message id: event dump" << qPrintable("\n");
 
-                // load all events to event linked list
-                events->loadEventDump(message);
+                // load all events to event linked list, notify if fail
+                if (!events->loadEventDump(message))
+                {
+                    notifyUser("Invalid event dump received", message, true);
+                }
 
                 // create log file
                 events->outputToLogFile( autosaveLogFile );
@@ -433,8 +460,11 @@ void MainWindow::readSerialData()
 
                 qDebug() <<  "Message id: error dump" << qPrintable("\n");
 
-                // load all errors to error linked list
-                events->loadErrorDump(message);
+                // load all errors to error linked list, notify if fail
+                if (!events->loadErrorDump(message))
+                {
+                    notifyUser("Invalid error dump received", message, true);
+                }
 
                 // create log file
                 events->outputToLogFile( autosaveLogFile );
@@ -450,8 +480,11 @@ void MainWindow::readSerialData()
             case CLEAR_ERROR:
                 qDebug() << "Message id: clear error " << message << qPrintable("\n");
 
-                //update cleared status of error with given id
-                events->clearError(message.left(message.indexOf(DELIMETER)).toInt());
+                //update cleared status of error with given id, notify if fail
+                if (!events->clearError(message.left(message.indexOf(DELIMETER)).toInt()))
+                {
+                    notifyUser("Failed to clear error", message, true);
+                }
 
                 #if DEV_MODE
                     //update the cleared error selection box in dev tools (can be removed when dev page is removed)
@@ -465,8 +498,12 @@ void MainWindow::readSerialData()
 
             case BEGIN:
 
-                //load controller crc and version
-                status->loadVersionData(message);
+                //load controller crc and version, check for fail
+                if (!status->loadVersionData(message))
+                {
+                    //report
+                    notifyUser("Invalid 'begin' message received", message, true);
+                }
 
                 //set connection status to connected and update related objects
                 updateConnectionStatus(true);
@@ -475,10 +512,12 @@ void MainWindow::readSerialData()
                 ui->controllerLabel->setText("Controller Version: " + status->version);
                 ui->crcLabel->setText("CRC: " + status->crc);
 
-                //check for empty logfile location and sets to default
+                //init logfile location (user setting)
                 setup_logfile_location();
 
                 qDebug() << "Begin signal received, handshake complete";
+
+                notifyUser("Handshake complete", false);
 
                 break;
 
@@ -489,10 +528,15 @@ void MainWindow::readSerialData()
 
                 qDebug() << "Disconnect message received from Controller";
 
+                notifyUser("Controller disconnected.", false);
+
                 break;
 
             default:
                 qDebug() << "ERROR: message from controller is not recognized";
+
+                //report
+                notifyUser("Unrecognized message received", message, true);
 
                 break;
             }
@@ -504,6 +548,7 @@ void MainWindow::readSerialData()
         else
         {
             qDebug() << "Unrecognized serial message received : " << message;
+            notifyUser("Unrecognized serial message received: ", message, true);
         }
     }
 }
@@ -703,11 +748,11 @@ void MainWindow::setupSettings()
     //update gui to match
     ui->auto_save_limit->setValue(autoSaveLimit);
 
-    //setup port name selections on gui (scans for available ports)
-    setup_ddm_port_selection(0);
-
     //sets up text options in connection settings drop down boxes
     setupConnectionPage();
+
+    //setup port name selections on gui (scans for available ports)
+    setup_ddm_port_selection(0);
 
     #if DEV_MODE
         // Display user settings
@@ -1020,6 +1065,52 @@ void MainWindow::refreshEventsOutput()
         //update events output if filter allows
         updateEventsOutput(nextPrintPtr);
     }
+}
+
+//overloaded function for convenience
+void MainWindow::notifyUser(QString notificationText, bool error)
+{
+    notifyUser(notificationText, "", error);
+}
+
+//renders a notification for the user that lasts 3 seconds. Updates the
+//notification page button to indicate unread messages. bool urgent is used to
+//toggle the notification outline from orange to red
+void MainWindow::notifyUser(QString notificationText, QString logText, bool error)
+{
+    // Get the current timestamp
+    QString timeStamp = QDateTime::currentDateTime().toString("[dd.MM.yyyy hh:mm:ss] ");
+
+    if (error)
+    {
+        ui->notificationPopUp->setStyleSheet("border: 3px solid red; color: white; text-align: center; font-size: 16px;" );
+        ui->notificationOutput->append("<p style='color: white; font-size: 16px'>" + timeStamp +
+                                       " " + "<span style='color: red; font-size: 16px'>" + notificationText +
+                                       " : " + logText + "</span></p>");
+    }
+    else
+    {
+        ui->notificationPopUp->setStyleSheet("border: 3px solid green; color: white; text-align: center; font-size: 16px;" );
+        ui->notificationOutput->append("<p style='color: white; font-size: 16px'>" + timeStamp +
+                                       " " + "<span style='color: green; font-size: 16px'>" + notificationText +
+                                       " : " + logText + "</span></p>");
+    }
+
+    //display notification text
+    ui->notificationPopUp->setText(notificationText);
+
+    //check if user is on notification page
+    if (ui->Flow_Label->currentIndex() != 6 && error)
+    {
+        //update the notification icon
+        ui->NotificationPageButton->setStyleSheet("border-image: url(://resources/Images/newNotification.png);");
+    }
+
+    // Create a QTimer to clear the notification pop-up after 3 seconds
+    QTimer::singleShot(3000, this, [this]() {
+        ui->notificationPopUp->setStyleSheet("background-color: transparent; border: none;");
+        ui->notificationPopUp->clear();
+    });
 }
 
 //======================================================================================

@@ -100,6 +100,8 @@ private slots:
     //non-gui triggered slots (should be defined in mainwindow.cpp)
     //==========================================================================
     void updateTimeSinceLastMessage();
+    void notifyUser(QString notificationText, bool error);
+    void notifyUser(QString notificationText, QString logText, bool error);
     void updateElapsedTime();
     void readSerialData();
     void updateStatusDisplay();
@@ -175,6 +177,8 @@ private slots:
         void on_toggle_num_triggers_clicked();
     #endif
     //=========================================================================================================
+
+        void on_NotificationPageButton_clicked();
 
     private:
     Ui::MainWindow *ui;

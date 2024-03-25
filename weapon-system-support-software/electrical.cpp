@@ -68,13 +68,13 @@ void electrical::freeLL()
     headNode = lastNode = nullptr;
 }
 
-void electrical::loadElecData(QString message)
+bool electrical::loadElecData(QString message)
 {
     // parse message
     QStringList values = message.split(DELIMETER);
 
-    // check for real error
-    if(values.length() > NUM_ELECTRIC_DELIMETERS)
+    // check for real electrical dump
+    if(values.length()-1 == NUM_ELECTRIC_ELEMENTS)
     {
         // get values
         QString name = values[0];
@@ -83,20 +83,20 @@ void electrical::loadElecData(QString message)
 
         //using extracted data, add an error to the end of the error linked list
         addNode(name, voltage, amps);
+        return true;
     }
     else
     {
         qDebug() << "Invalid input to load electrical data: " << message << "\n";
+        return false;
     }
 }
 
 
-void electrical::loadElecDump(QString message)
+bool electrical::loadElecDump(QString message)
 {
     // Split the dump messages into individual error sets
     QStringList electricalSet = message.split(",,", Qt::SkipEmptyParts);
-
-    //qDebug() << electricalSet;
 
     // Iterate through the electrical sets and call loadElecData for each
     for (const QString &elec : electricalSet)
@@ -104,10 +104,14 @@ void electrical::loadElecDump(QString message)
         // check for empty
         if(!electricalSet.isEmpty() && elec != "\n")
         {
-            // Call loadErrorData for each individual error set
-            loadElecData(elec);
+            // Call loadErrorData for each individual error set, if any errors, return
+            if (!loadElecData(elec))
+            {
+                return false;
+            }
         }
     }
+    return true;
 }
 
 //======================================================================================
