@@ -1,5 +1,7 @@
 #include <QCoreApplication>
 #include <QTest>
+//#include "constants.h"
+#include "../weapon-system-support-software/constants.h"
 #include "../weapon-system-support-software/status.cpp"
 
 // add necessary includes here
@@ -65,7 +67,12 @@ void tst_status::test_loadData()
  */
 void tst_status::test_loadVersionData()
 {
+    Status status;
+    QString dataMsg = "0:00:00:03,6.7.2,2F5A1D3E7B9";
 
+    status.loadVersionData(dataMsg);
+    // TODO: find out how to get constant values
+    //QCOMPARE(status.version, constants::CONTROLLER_VERSION);
 }
 
 /**
