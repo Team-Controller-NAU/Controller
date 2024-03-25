@@ -65,8 +65,9 @@ bool Connection::checkForValidMessage()
         //copy data from serial port buffer without altering buffer
         QByteArray serializedMessage = serialPort.peek(serialPort.bytesAvailable());
 
-        //deserialize the message
         QString message = QString::fromUtf8(serializedMessage);
+
+        qDebug() << message;
 
         //check for complete message
         if ( message.contains("\n") )

@@ -1,49 +1,71 @@
 #include "mainwindow.h"
-#include <QObject>
 
 //this file contains only the implementation of the GUI slots. Declare
 //other processing functions in mainwindow.cpp
 
-void MainWindow::on_baud_rate_selection_currentIndexChanged(int index)
-{
-    if (ddmCon == nullptr) {
-        // Handle case where ddmCon pointer is not initialized
-        return;
-    }
+//======================================================================================
+// Navigation
+//======================================================================================
 
-    switch (index)
-    {
-    case 0:
-        ddmCon->serialPort.setBaudRate(QSerialPort::Baud1200);
-        break;
-    case 1:
-        ddmCon->serialPort.setBaudRate(QSerialPort::Baud2400);
-        break;
-    case 2:
-        ddmCon->serialPort.setBaudRate(QSerialPort::Baud4800);
-        break;
-    case 3:
-        ddmCon->serialPort.setBaudRate(QSerialPort::Baud9600);
-        break;
-    case 4:
-        ddmCon->serialPort.setBaudRate(QSerialPort::Baud19200);
-        break;
-    case 5:
-        ddmCon->serialPort.setBaudRate(QSerialPort::Baud38400);
-        break;
-    case 6:
-        ddmCon->serialPort.setBaudRate(QSerialPort::Baud57600);
-        break;
-    case 7:
-        ddmCon->serialPort.setBaudRate(QSerialPort::Baud115200);
-        break;
-    default:
-        // Handle default case
-        break;
-    }
+//sends user to electrical page when clicked
+void MainWindow::on_ElectricalPageButton_clicked()
+{
+    ui->Flow_Label->setCurrentIndex(3);
+    resetPageButton();
+    ui->ElectricalPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
 }
 
-// slot for find functionality within the events_output box when the user presses CTRL+F on their keyboard
+//sends user to events page when clicked
+void MainWindow::on_EventsPageButton_clicked()
+{
+    // TODO: first visit refresh page with dump of whole LL??
+    ui->Flow_Label->setCurrentIndex(0);
+    resetPageButton();
+    ui->EventsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
+}
+
+//sends user to settings page when clicked
+void MainWindow::on_ConnectionPageButton_clicked()
+{
+    ui->Flow_Label->setCurrentIndex(2);
+    resetPageButton();
+    ui->ConnectionPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
+}
+
+//sends user to status page when clicked
+void MainWindow::on_StatusPageButton_clicked()
+{
+    ui->Flow_Label->setCurrentIndex(4);
+    resetPageButton();
+    ui->StatusPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
+}
+
+void MainWindow::on_SettingsPageButton_clicked()
+{
+    ui->Flow_Label->setCurrentIndex(5);
+    resetPageButton();
+    ui->SettingsPageButton->setStyleSheet("border-image: url(://resources/Images/purpleSettings.png);");
+}
+
+//reset all tab buttons to default style
+void MainWindow::resetPageButton()
+{
+    ui->ConnectionPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
+    ui->EventsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
+    ui->StatusPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
+    ui->ElectricalPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
+    ui->SettingsPageButton->setStyleSheet("border-image: url(://resources/Images/whiteSettings.png)");
+
+#if DEV_MODE
+    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
+#endif
+}
+
+//======================================================================================
+// Hotkeys
+//======================================================================================
+
+// (ctrl + f) opens search box for searching for text in events output
 void MainWindow::findText()
 {
     // make sure the user is in the events_output box
@@ -131,32 +153,9 @@ void MainWindow::findText()
     }
 }
 
-void MainWindow::on_data_bits_selection_currentIndexChanged(int index)
-{
-    if (ddmCon == nullptr) {
-        // Handle case where ddmCon pointer is not initialized
-        return;
-    }
-
-    switch (index)
-    {
-    case 0:
-        ddmCon->serialPort.setDataBits(QSerialPort::Data5);
-        break;
-    case 1:
-        ddmCon->serialPort.setDataBits(QSerialPort::Data6);
-        break;
-    case 2:
-        ddmCon->serialPort.setDataBits(QSerialPort::Data7);
-        break;
-    case 3:
-        ddmCon->serialPort.setDataBits(QSerialPort::Data8);
-        break;
-    default:
-        // Handle default case
-        break;
-    }
-}
+//======================================================================================
+// General GUI slots
+//======================================================================================
 
 //runs when user changes ddm port. Close old connection, make new one and connect to ready
 //read signal to listen for controller.
@@ -199,104 +198,41 @@ void MainWindow::on_download_button_clicked()
     events->outputToLogFile(logFile + "-logfile-M.txt");
 }
 
-//sends user to electrical page when clicked
-void MainWindow::on_ElectricalPageButton_clicked()
-{
-    ui->Flow_Label->setCurrentIndex(3);
-    resetPageButton();
-    ui->ElectricalPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
-}
-
-//sends user to events page when clicked
-void MainWindow::on_EventsPageButton_clicked()
-{
-    // TODO: first visit refresh page with dump of whole LL??
-    ui->Flow_Label->setCurrentIndex(0);
-    resetPageButton();
-    ui->EventsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
-}
-
 void MainWindow::on_FilterBox_currentIndexChanged(int index)
 {
     // check for which filter the user selected
     switch(index)
     {
     case ALL:
-
         qDebug() << "All filter selected";
-
-        // set filter
         eventFilter = ALL;
-
         break;
 
     case EVENTS:
-
-        qDebug() << "All events filter selected";
-
-        // set filter
+        qDebug() << "Events filter selected";
         eventFilter = EVENTS;
-
         break;
 
     case ERRORS:
-
-        qDebug() << "All errors filter selected";
-
-        //set filter
+        qDebug() << "Errors filter selected";
         eventFilter = ERRORS;
-
         break;
 
     case CLEARED_ERRORS:
-
-        qDebug() << "All cleared errors filter selected";
-
-        // set filter
+        qDebug() << "Cleared errors filter selected";
         eventFilter = CLEARED_ERRORS;
-
         break;
 
     case NON_CLEARED_ERRORS:
-
-        qDebug() << "All non-cleared errors filter selected";
-
-        // set filter
+        qDebug() << "Non-cleared errors filter selected";
         eventFilter = NON_CLEARED_ERRORS;
-
         break;
 
     default:
-
-        // do nothing
         qDebug() << "Error: Unrecognized filter index.";
     }
 
     refreshEventsOutput();
-}
-
-void MainWindow::on_flow_control_selection_currentIndexChanged(int index)
-{
-    if (ddmCon == nullptr) {
-        // Handle case where ddmCon pointer is not initialized
-        return;
-    }
-
-    switch (index)
-    {
-    case 0:
-        ddmCon->serialPort.setFlowControl(QSerialPort::NoFlowControl);
-        break;
-    case 1:
-        ddmCon->serialPort.setFlowControl(QSerialPort::HardwareControl);
-        break;
-    case 2:
-        ddmCon->serialPort.setFlowControl(QSerialPort::SoftwareControl);
-        break;
-    default:
-        // Handle default case
-        break;
-    }
 }
 
 //toggles handshake process on and off. Once connected, allow for disconnect (send disconnect message to controller)
@@ -333,37 +269,7 @@ void MainWindow::on_handshake_button_clicked()
     }
 }
 
-void MainWindow::on_parity_selection_currentIndexChanged(int index)
-{
-    if (ddmCon == nullptr) {
-        // Handle case where ddmCon pointer is not initialized
-        return;
-    }
-
-    switch (index)
-    {
-    case 0:
-        ddmCon->serialPort.setParity(QSerialPort::NoParity);
-        break;
-    case 1:
-        ddmCon->serialPort.setParity(QSerialPort::EvenParity);
-        break;
-    case 2:
-        ddmCon->serialPort.setParity(QSerialPort::OddParity);
-        break;
-    case 3:
-        ddmCon->serialPort.setParity(QSerialPort::SpaceParity);
-        break;
-    case 4:
-        ddmCon->serialPort.setParity(QSerialPort::MarkParity);
-        break;
-    default:
-        // do nothing
-        break;
-    }
-}
-
-//saves user settings into the qSettings class for cross session storage
+//saves connection settings into the qSettings class for cross session storage
 void MainWindow::on_save_Button_clicked()
 {
     // Load all of the current connection settings into the settings class
@@ -379,68 +285,9 @@ void MainWindow::on_save_Button_clicked()
     //write changes to the registry
     userSettings.sync();
 
-    //output new settings to qDebug()
-    displaySavedSettings();
-}
-
-//sends user to settings page when clicked
-void MainWindow::on_ConnectionPageButton_clicked()
-{
-    ui->Flow_Label->setCurrentIndex(2);
-    resetPageButton();
-    ui->ConnectionPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
-}
-
-//sends user to status page when clicked
-void MainWindow::on_StatusPageButton_clicked()
-{
-    ui->Flow_Label->setCurrentIndex(4);
-    resetPageButton();
-    ui->StatusPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
-}
-
-void MainWindow::on_SettingsPageButton_clicked()
-{
-    ui->Flow_Label->setCurrentIndex(5);
-    resetPageButton();
-    ui->SettingsPageButton->setStyleSheet("border-image: url(://resources/Images/purpleSettings.png);");
-}
-
-void MainWindow::on_stop_bit_selection_currentIndexChanged(int index)
-{
-    if (ddmCon == nullptr) {
-        // Handle case where ddmCon pointer is not initialized
-        return;
-    }
-
-    switch (index)
-    {
-    case 0:
-        ddmCon->serialPort.setStopBits(QSerialPort::OneStop);
-        break;
-    case 1:
-        ddmCon->serialPort.setStopBits(QSerialPort::OneAndHalfStop);
-        break;
-    case 2:
-        ddmCon->serialPort.setStopBits(QSerialPort::TwoStop);
-        break;
-    default:
-        // Handle default case
-        break;
-    }
-}
-
-//reset all tab buttons to default style
-void MainWindow::resetPageButton()
-{
-    ui->ConnectionPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
-    ui->EventsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
-    ui->StatusPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
-    ui->ElectricalPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
-    ui->SettingsPageButton->setStyleSheet("border-image: url(://resources/Images/whiteSettings.png)");
-
     #if DEV_MODE
-        ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
+        //output new settings to qDebug()
+        displaySavedSettings();
     #endif
 }
 
@@ -599,6 +446,9 @@ void MainWindow::on_colored_events_output_stateChanged(int arg1)
 
     userSettings.setValue("coloredEventOutput", coloredEventOutput);
     refreshEventsOutput();
+
+    //write changes to the registry
+    userSettings.sync();
 }
 
 //choose the number of auto save log files before overwrites occur (from settings page)
@@ -606,6 +456,9 @@ void MainWindow::on_auto_save_limit_valueChanged(int arg1)
 {
     autoSaveLimit = arg1;
     userSettings.setValue("autoSaveLimit", autoSaveLimit);
+
+    //write changes to the registry
+    userSettings.sync();
 }
 
 //======================================================================================
@@ -613,6 +466,15 @@ void MainWindow::on_auto_save_limit_valueChanged(int arg1)
 //======================================================================================
 
 #if DEV_MODE
+
+//sends user to developer page when clicked
+void MainWindow::on_DevPageButton_clicked()
+{
+    ui->Flow_Label->setCurrentIndex(1);
+    resetPageButton();
+    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
+}
+
 //manually clear errors from dev page
 void MainWindow::on_clear_error_button_clicked()
 {

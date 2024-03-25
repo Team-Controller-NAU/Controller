@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>994</width>
-    <height>548</height>
+    <width>1082</width>
+    <height>598</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -209,19 +209,6 @@ font: 16pt &quot;Segoe UI&quot;;</string>
         </widget>
        </item>
        <item>
-        <spacer name="horizontalSpacer_9">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
         <widget class="QPushButton" name="SettingsPageButton">
          <property name="minimumSize">
           <size>
@@ -237,6 +224,19 @@ font: 16pt &quot;Segoe UI&quot;;</string>
           <string/>
          </property>
         </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_9">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
        </item>
        <item alignment="Qt::AlignRight|Qt::AlignVCenter">
         <widget class="QLabel" name="connectionLabel">
@@ -319,7 +319,7 @@ font: 16pt &quot;Segoe UI&quot;;</string>
             </sizepolicy>
            </property>
            <property name="currentIndex">
-            <number>1</number>
+            <number>4</number>
            </property>
            <widget class="QWidget" name="Events_page">
             <layout class="QGridLayout" name="gridLayout_3">
@@ -1668,7 +1668,7 @@ border-color: rgb(255, 255, 255);</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>922</width>
+                  <width>892</width>
                   <height>736</height>
                  </rect>
                 </property>
@@ -3637,7 +3637,7 @@ QToolTip{
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>994</width>
+     <width>1082</width>
      <height>21</height>
     </rect>
    </property>
