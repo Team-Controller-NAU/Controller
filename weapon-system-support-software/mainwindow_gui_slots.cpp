@@ -169,6 +169,11 @@ void MainWindow::findText()
 //read signal to listen for controller.
 void MainWindow::on_ddm_port_selection_currentIndexChanged(int index)
 {
+    //create connection on selected port if combo box is set up
+    if (allowPortSelection)
+    {
+        createDDMCon();
+    }
 }
 
 //download button for events in CSV format
@@ -281,6 +286,11 @@ void MainWindow::on_handshake_button_clicked()
         qDebug() << "Sending disconnect message to controller" << Qt::endl;
 
         ddmCon->transmit(QString::number(CLOSING_CONNECTION) + '\n');
+
+        if (ddmCon->connected)
+        {
+            notifyUser("User disconnect", "Session end",  false);
+        }
 
         //update connection status to disconnected and update related objects
         updateConnectionStatus(false);
@@ -443,7 +453,7 @@ void MainWindow::on_load_events_from_logfile_clicked()
         notifyUser("Load failed on missing logfile.", true);
     }
 
-    notifyUser("Logfile loaded.", false);
+    notifyUser("Logfile loaded.", selectedFile, false);
 
     //refresh the events output
     refreshEventsOutput();
@@ -524,9 +534,6 @@ void MainWindow::on_CSim_button_clicked()
     {
         // csim is running, shut it down
         csimHandle->stopSimulation();
-
-        // stop ddm timer
-        lastMessageTimer->stop();
 
         // update ui
         ui->CSim_button->setText("Start CSim");

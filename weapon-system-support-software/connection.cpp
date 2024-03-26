@@ -136,7 +136,7 @@ Connection::~Connection()
     qDebug() << "Closing connection on port " << portName << qPrintable("\n");
 
     // confirm connection to another port
-    if (connected)
+    if ( connected )
     {
         // transmit closing message through port
         transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + DELIMETER + '\n');

@@ -13,32 +13,19 @@
 
 //this file will define enumerated values and constants used elsewhere in code
 
-#if DEV_MODE
-    const QString QDEBUG_OUTPUT_FORMAT = "[%{time h:mm:ss}] %{message}";
+//======================================================================================
+// General
+//======================================================================================
 
-    const QString INITIAL_CSIM_PORT = "COM4";
+//delimeter in serial messages
+const QString DELIMETER = ",";
 
-    //rate at which the csim thread will update the status class and send data through serial port (in seconds)
-    const double CSIM_GENERATION_INTERVAL = 2;
+// the max number of electrical componenets to expect from a weapon
+const int MAX_ELECTRICAL_COMPONENTS = 120;
 
-    const int NUM_EVENT_MESSAGES = 3;
-    const QString EVENT_MESSAGES[NUM_EVENT_MESSAGES] = {"Sample event message 1", "Sample event message 2; 76; 55.4", "Sample event message 3; 2"};
-
-    const int NUM_ERROR_MESSAGES = 3;
-    const QString ERROR_MESSAGES[NUM_ERROR_MESSAGES] = {"Sample error message 1.22", "Sample error message 2; 5; 0", "Sample error message 3; 677"};
-
-    const int NUM_ELECTRICAL_MESSAGES = 4;
-    const QString ELECTRICAL_MESSAGES[NUM_ELECTRICAL_MESSAGES] = {"Servo Motor, 20, 4",
-                                                              "Piston, 14, 29,,Alternator, 96, 3",
-                                                              "Servo Motor, 19, 2,,Pump Cooler, 2, 3,,Internal Temp Sensor, 33, 4",
-                                                              "Fuel Injector, 27, 1,,Voltage Regulator, 19, 3,,Rotor 1, 9, 13,,Rotor 3, 9, 9,,Exciter Stator, 19, 2"};
-
-    const QString CRC_VERSION = "2F5A1D3E7B9";
-    const QString CONTROLLER_VERSION = "6.7.2";
-#endif
-
-//status enums
-//------------
+//======================================================================================
+// Enumerations and enum related vals
+//======================================================================================
 //integer length vals are used by csim during random generation
 enum TriggerStatus {DISENGAGED=0, ENGAGED=1, NA=2};
 const int NUM_TRIGGER_STATUS = 3;
@@ -54,7 +41,6 @@ enum FeedPosition {FEEDING=0, CHAMBERING=45, LOCKING=90, FIRING=135, UNLOCKING=1
 
 const int NUM_FEED_POSITION = 8;
 const int FEED_POSITION_INCREMENT_VALUE = 360/NUM_FEED_POSITION;
-//------------
 
 enum SerialMessageIdentifier { /*the following identifiers are used to id controller data*/
                                EVENT_DUMP = 0, ERROR_DUMP = 1, ELECTRICAL = 2, EVENT =3, ERROR =4,
@@ -67,6 +53,10 @@ enum EventFilter {ALL=0, EVENTS=1, ERRORS=2, CLEARED_ERRORS=3, NON_CLEARED_ERROR
 enum Parity {NO_PARITY, EVEN_PARITY, ODD_PARITY};
 enum StopBits {ONE, ONE_AND_A_HALF, TWO};
 
+//======================================================================================
+// Initial settings
+//======================================================================================
+
 //initial values for user settings
 const QSerialPort::BaudRate INITIAL_BAUD_RATE = QSerialPort::Baud9600;
 const QSerialPort::DataBits INITIAL_DATA_BITS = QSerialPort::Data8;
@@ -78,26 +68,60 @@ const QString INITIAL_LOGFILE_LOCATION = "WSSS_Logfiles/";
 const int INITIAL_AUTO_SAVE_LIMIT = 5;
 const QString INITIAL_DDM_PORT = "COM5";
 
-//delimeter in serial messages
-const QString DELIMETER = ",";
+//======================================================================================
+// Timer vals
+//======================================================================================
 
 //rate at which handshake messages are sent
 const int HANDSHAKE_INTERVAL = 2000;
 const int ONE_SECOND = 1000;
+//time before clearing notification pop ups
+const int NOTIFICATION_DURATION = 3000;
 
-// the max number of electrical componenets to expect from a weapon
-const int MAX_ELECTRICAL_COMPONENTS = 120;
+//======================================================================================
+// Load data integrity checks
+//======================================================================================
 
 //for checking message integrity within loadData functions
-const int NUM_ERROR_ELEMENTS = 3;
-const int NUM_EVENT_ELEMENTS = 2;
+const int NUM_ERROR_ELEMENTS = 4;
+const int NUM_EVENT_ELEMENTS = 3;
 const int NUM_ELECTRIC_ELEMENTS = 2;
 const int NUM_BEGIN_ELEMENTS = 3;
 const int NUM_STATUS_ELEMENTS = 9;
 
-//error codes
+//======================================================================================
+// Integer codes
+//======================================================================================
+
 const int DATA_NOT_FOUND = -101;
 const int INCORRECT_FORMAT = -102;
 const int SUCCESS = 1;
+
+//======================================================================================
+// CSIM exclusive constants
+//======================================================================================
+#if DEV_MODE
+const QString QDEBUG_OUTPUT_FORMAT = "[%{time h:mm:ss}] %{message}";
+
+const QString INITIAL_CSIM_PORT = "COM4";
+
+//rate at which the csim thread will update the status class and send data through serial port (in seconds)
+const double CSIM_GENERATION_INTERVAL = 2;
+
+const int NUM_EVENT_MESSAGES = 3;
+const QString EVENT_MESSAGES[NUM_EVENT_MESSAGES] = {"Sample event message 1", "Sample event message 2; 76; 55.4", "Sample event message 3; 2"};
+
+const int NUM_ERROR_MESSAGES = 3;
+const QString ERROR_MESSAGES[NUM_ERROR_MESSAGES] = {"Sample error message 1.22", "Sample error message 2; 5; 0", "Sample error message 3; 677"};
+
+const int NUM_ELECTRICAL_MESSAGES = 4;
+const QString ELECTRICAL_MESSAGES[NUM_ELECTRICAL_MESSAGES] = {"Servo Motor, 20, 4",
+                                                              "Piston, 14, 29,,Alternator, 96, 3",
+                                                              "Servo Motor, 19, 2,,Pump Cooler, 2, 3,,Internal Temp Sensor, 33, 4",
+                                                              "Fuel Injector, 27, 1,,Voltage Regulator, 19, 3,,Rotor 1, 9, 13,,Rotor 3, 9, 9,,Exciter Stator, 19, 2"};
+
+const QString CRC_VERSION = "2F5A1D3E7B9";
+const QString CONTROLLER_VERSION = "6.7.2";
+#endif // DEV_MODE
 
 #endif // CONSTANTS_H

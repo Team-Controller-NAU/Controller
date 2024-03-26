@@ -472,8 +472,8 @@ bool Events::loadErrorData(QString message)
     // parse message
     QStringList values = message.split(DELIMETER);
 
-    // check for real error
-    if(values.length()-1 != NUM_ERROR_ELEMENTS)
+    // check for real error (allows new line at the end or no new line at the end)
+    if(values.length()-1 == NUM_ERROR_ELEMENTS || values.length() == NUM_ERROR_ELEMENTS)
     {
         // get values
         int id = values[0].toInt();
@@ -498,8 +498,8 @@ bool Events::loadEventData(QString message)
     // parse data
     QStringList values = message.split(DELIMETER);
 
-    // check for real event
-    if(values.length()-1 != NUM_EVENT_ELEMENTS)
+    // check for real event (allows new line at the end or no new line at the end)
+    if(values.length()-1 == NUM_EVENT_ELEMENTS || values.length() == NUM_EVENT_ELEMENTS)
     {
         // get values
         int id = values[0].toInt();
@@ -519,10 +519,11 @@ bool Events::loadEventData(QString message)
 
 bool Events::loadErrorDump(QString message)
 {
-    bool improperLoad = false;
+    bool successfulLoad = true;
 
     // Split the dump messages into individual error sets
     QStringList errorSet = message.split(",,", Qt::SkipEmptyParts);
+    qDebug() << "num errors in dump" << errorSet.length();
 
     // Iterate through the error sets and call loadErrorData for each
     for (const QString &error : errorSet)
@@ -533,19 +534,21 @@ bool Events::loadErrorDump(QString message)
             // Call loadErrorData for each individual error set, check if fail
             if ( !loadErrorData(error) )
             {
-                improperLoad = true;
+                successfulLoad = false;
             }
         }
     }
-    return improperLoad;
+    return successfulLoad;
 }
 
 bool Events::loadEventDump(QString message)
 {
-    bool improperLoad = false;
+    bool successfulLoad = true;
 
     // Split the dump messages into individual event sets
     QStringList eventSet = message.split(",,", Qt::SkipEmptyParts);
+
+    qDebug() << "num events in dump" << eventSet.length();
 
     // Iterate through the event sets and call loadEventData for each
     for (const QString &event : eventSet)
@@ -556,11 +559,11 @@ bool Events::loadEventDump(QString message)
             // Call loadEventData for each individual event set, check if fail
             if (!loadEventData(event))
             {
-                improperLoad = true;
+                successfulLoad = false;
             }
         }
     }
-    return improperLoad;
+    return successfulLoad;
 }
 
 // appends the given node to the log file

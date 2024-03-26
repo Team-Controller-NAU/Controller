@@ -52,6 +52,7 @@ public:
     QDateTime timeLastReceived;
     EventFilter eventFilter;
     QString autosaveLogFile;
+    bool allowPortSelection;
 
     //user managed settings
     bool coloredEventOutput;

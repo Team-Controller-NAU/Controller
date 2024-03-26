@@ -25,6 +25,9 @@ MainWindow::MainWindow(QWidget *parent)
     //init user settings to our organization and project
     userSettings("Team Controller", "WSSS"),
 
+    //init to false until connection page is setup
+    allowPortSelection(false),
+
     //Load graphical resources
     BLANK_LIGHT(":/resources/Images/blankButton.png"),
 
@@ -130,6 +133,11 @@ MainWindow::~MainWindow()
 //sets connection status, updates gui and timers
 void MainWindow::updateConnectionStatus(bool connectionStatus)
 {
+    if (ddmCon == nullptr)
+    {
+        return;
+    }
+
     //update connection status
     ddmCon->connected = connectionStatus;
 
@@ -200,14 +208,6 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
         handshakeTimer->stop();
         ui->DDMTimer->clear();
 
-        //check if ddmCon exists
-        if (ddmCon != nullptr)
-        {
-            //notify user of closed connection class
-            notifyUser(ui->ddm_port_selection->currentText() + " closed", "Session ended",  false);
-            delete ddmCon;
-        }
-
         //enable changes to connection related settings
         enableConnectionChanges();
 
@@ -229,8 +229,9 @@ void MainWindow::createDDMCon()
     if (ddmCon != nullptr)
     {
         //notify user of closed connection class
-        notifyUser(ui->ddm_port_selection->currentText() + " closed", "Session ended",  false);
+        notifyUser(ui->ddm_port_selection->currentText() + "Serial port closed",  false);
         delete ddmCon;
+        ddmCon = nullptr;
     }
 
     //open new connection
@@ -241,11 +242,14 @@ void MainWindow::createDDMCon()
                             fromStringStopBits(ui->stop_bit_selection->currentText()),
                             fromStringFlowControl(ui->flow_control_selection->currentText()));
 
+    if (ddmCon == nullptr)
+    {
+        notifyUser("Failed to open " + ui->ddm_port_selection->currentText(), true);
+    }
     //check for failure to open
-    if (!ddmCon->serialPort.isOpen())
+    else if (!ddmCon->serialPort.isOpen())
     {
         delete ddmCon;
-
         ddmCon = nullptr;
 
         //generate notification
@@ -259,13 +263,19 @@ void MainWindow::createDDMCon()
 
         qDebug() << "GUI is now listening to port " << ddmCon->portName;
 
-        notifyUser(ui->ddm_port_selection->currentText() + " opened.", false);
+        notifyUser(ui->ddm_port_selection->currentText() + " opened", false);
     }
 }
 
 //initial synchronization between controller and ddm
 void MainWindow::handshake()
 {
+    if (ddmCon == nullptr)
+    {
+        notifyUser("Handshake failed", "Connection class is not declared", true);
+        return;
+    }
+
     // Send handshake message
     ddmCon->transmit(QString::number(LISTENING) + '\n');
 }
@@ -274,6 +284,12 @@ void MainWindow::handshake()
 //in other words, this function is called whenever ddm port receives a new message
 void MainWindow::readSerialData()
 {
+    if (ddmCon == nullptr)
+    {
+        notifyUser("Could not read serial data", "Connection class is not declared", true);
+        return;
+    }
+
     //read lines until all data in buffer is processed
     while (ddmCon->checkForValidMessage())
     {
@@ -286,7 +302,7 @@ void MainWindow::readSerialData()
         QByteArray serializedMessage = ddmCon->serialPort.readLine();
 
         //deserialize string
-        QString message = QString::fromLatin1(serializedMessage);
+        QString message = QString::fromUtf8(serializedMessage);
 
         qDebug() << "message: " << message;
 
@@ -324,17 +340,20 @@ void MainWindow::readSerialData()
 
                 qDebug() <<  "Message id: event update" << qPrintable("\n");
 
-                //add new event to event ll
+                //add new event to event ll, check for fail
                 if (!events->loadEventData(message))
                 {
                     notifyUser("Invalid event message received", message, true);
                 }
+                //otherwise success
+                else
+                {
+                    // update log file
+                    events->appendToLogfile(autosaveLogFile, events->lastEventNode);
 
-                // update log file
-                events->appendToLogfile(autosaveLogFile, events->lastEventNode);
-
-                // update GUI elements
-                updateEventsOutput(events->lastEventNode);
+                    // update GUI elements
+                    updateEventsOutput(events->lastEventNode);
+                }
 
                 break;
 
@@ -343,23 +362,26 @@ void MainWindow::readSerialData()
                 // status
                 qDebug() <<  "Message id: error update" << qPrintable("\n");
 
-                //add new error to error ll
+                //add new error to error ll, check for fail
                 if (!events->loadErrorData( message ))
                 {
                     notifyUser("Invalid error message received", message, true);
                 }
+                //otherwise success
+                else
+                {
+                    // update log file
+                    events->appendToLogfile(autosaveLogFile, events->lastErrorNode);
 
-                // update log file
-                events->appendToLogfile(autosaveLogFile, events->lastErrorNode);
+                    //update gui elements
+                    updateEventsOutput(events->lastErrorNode);
 
-                //update gui elements
-                updateEventsOutput(events->lastErrorNode);
-
-                #if DEV_MODE
-                    //update the cleared error selection box in dev tools
-                    //(this can be removed when dev page is removed)
-                    update_non_cleared_error_selection();
-                #endif
+                    #if DEV_MODE
+                        //update the cleared error selection box in dev tools
+                        //(this can be removed when dev page is removed)
+                        update_non_cleared_error_selection();
+                    #endif
+                }
 
                 break;
 
@@ -371,64 +393,65 @@ void MainWindow::readSerialData()
                 if (!electricalObject->loadElecDump(message))
                 {
                     notifyUser("Invalid electrical dump received", message, true);
-                    //do nothing
-                    return;
                 }
-
-                //get head node into wkg ptr
-                wkgElecPtr = electricalObject->headNode;
-
-                // loop through each electrical data box
-                for (boxIndex = 1; boxIndex <= MAX_ELECTRICAL_COMPONENTS; boxIndex++)
+                //otherwise success
+                else
                 {
-                    // get the current box name
-                    QString widgetName = "box" + QString::number(boxIndex) + "_widget";
+                    //get head node into wkg ptr
+                    wkgElecPtr = electricalObject->headNode;
 
-                    // get the current box based off name
-                    QWidget *widget = findChild<QWidget *>(widgetName);
-
-                    // check if widget exists, and hide it
-                    if(widget) widget->hide();
-                }
-
-                // loop through each electrical data box
-                for (boxIndex = 1; boxIndex <= MAX_ELECTRICAL_COMPONENTS; boxIndex++)
-                {
-                    // get the current box name
-                    QString widgetName = "box" + QString::number(boxIndex) + "_widget";
-
-                    // get the names of the labels for this box
-                    QString labelName = "box" + QString::number(boxIndex) + "_label";
-                    QString statsName = "box" + QString::number(boxIndex) + "_stats";
-
-                    // get the current box based off name
-                    QWidget *widget = findChild<QWidget *>(widgetName);
-
-                    // find the label objects with findChild
-                    QLabel *boxLabel = findChild<QLabel *>(labelName);
-                    QTextEdit *boxStats = findChild<QTextEdit *>(statsName);
-
-                    // check if the current electrical node exists
-                    if (wkgElecPtr != nullptr)
+                    // loop through each electrical data box
+                    for (boxIndex = 1; boxIndex <= MAX_ELECTRICAL_COMPONENTS; boxIndex++)
                     {
-                        // update label with name if it exists
-                        if (boxLabel) boxLabel->setText(" " + wkgElecPtr->name);
+                        // get the current box name
+                        QString widgetName = "box" + QString::number(boxIndex) + "_widget";
 
-                        // update stats with voltage and amps if it exists
-                        if (boxStats) boxStats->setPlainText("Voltage: " + QString::number(wkgElecPtr->voltage) +
-                                              '\n' + "Amps: " + QString::number(wkgElecPtr->amps));
+                        // get the current box based off name
+                        QWidget *widget = findChild<QWidget *>(widgetName);
 
-                        // check if the box exists, and show it
-                        if(widget) widget->show();
-
-                        // move to next electrical node
-                        wkgElecPtr = wkgElecPtr->nextNode;
+                        // check if widget exists, and hide it
+                        if(widget) widget->hide();
                     }
-                    // else, there are no more electrical nodes
-                    else
+
+                    // loop through each electrical data box
+                    for (boxIndex = 1; boxIndex <= MAX_ELECTRICAL_COMPONENTS; boxIndex++)
                     {
-                        // break once we are done
-                        break;
+                        // get the current box name
+                        QString widgetName = "box" + QString::number(boxIndex) + "_widget";
+
+                        // get the names of the labels for this box
+                        QString labelName = "box" + QString::number(boxIndex) + "_label";
+                        QString statsName = "box" + QString::number(boxIndex) + "_stats";
+
+                        // get the current box based off name
+                        QWidget *widget = findChild<QWidget *>(widgetName);
+
+                        // find the label objects with findChild
+                        QLabel *boxLabel = findChild<QLabel *>(labelName);
+                        QTextEdit *boxStats = findChild<QTextEdit *>(statsName);
+
+                        // check if the current electrical node exists
+                        if (wkgElecPtr != nullptr)
+                        {
+                            // update label with name if it exists
+                            if (boxLabel) boxLabel->setText(" " + wkgElecPtr->name);
+
+                            // update stats with voltage and amps if it exists
+                            if (boxStats) boxStats->setPlainText("Voltage: " + QString::number(wkgElecPtr->voltage) +
+                                                       '\n' + "Amps: " + QString::number(wkgElecPtr->amps));
+
+                            // check if the box exists, and show it
+                            if(widget) widget->show();
+
+                            // move to next electrical node
+                            wkgElecPtr = wkgElecPtr->nextNode;
+                        }
+                        // else, there are no more electrical nodes
+                        else
+                        {
+                            // break once we are done
+                            break;
+                        }
                     }
                 }
 
@@ -485,50 +508,58 @@ void MainWindow::readSerialData()
                 {
                     notifyUser("Failed to clear error", message, true);
                 }
+                //otherwise success
+                else
+                {
+                    #if DEV_MODE
+                        //update the cleared error selection box in dev tools (can be removed when dev page is removed)
+                        update_non_cleared_error_selection();
+                    #endif
 
-                #if DEV_MODE
-                    //update the cleared error selection box in dev tools (can be removed when dev page is removed)
-                    update_non_cleared_error_selection();
-                #endif
-
-                //refresh the events output with newly cleared error
-                refreshEventsOutput();
+                    //refresh the events output with newly cleared error
+                    refreshEventsOutput();
+                }
 
                 break;
 
             case BEGIN:
 
+                qDebug() << "Message id: begin " << message << qPrintable("\n");
+
                 //load controller crc and version, check for fail
                 if (!status->loadVersionData(message))
                 {
                     //report
-                    notifyUser("Invalid 'begin' message received", message, true);
+                    notifyUser("Invalid 'begin' message received", message, true);                   
                 }
+                //otherwise success
+                else
+                {
+                    notifyUser("Handshake complete", "Session start", false);
 
-                //set connection status to connected and update related objects
-                updateConnectionStatus(true);
+                    //set connection status to connected and update related objects
+                    updateConnectionStatus(true);
 
-                // update controller version and crc on gui
-                ui->controllerLabel->setText("Controller Version: " + status->version);
-                ui->crcLabel->setText("CRC: " + status->crc);
+                    // update controller version and crc on gui
+                    ui->controllerLabel->setText("Controller Version: " + status->version);
+                    ui->crcLabel->setText("CRC: " + status->crc);
 
-                //init logfile location (user setting)
-                setup_logfile_location();
+                    //init logfile location (user setting)
+                    setup_logfile_location();
 
-                qDebug() << "Begin signal received, handshake complete";
-
-                notifyUser("Handshake complete", false);
+                    qDebug() << "Begin signal received, handshake complete";
+                }
 
                 break;
 
             case CLOSING_CONNECTION:
 
-                //set connection status false and update related objects
-                updateConnectionStatus(false);
-
                 qDebug() << "Disconnect message received from Controller";
 
-                notifyUser("Controller disconnected.", false);
+                notifyUser("Controller disconnected.", "Session end", false);
+
+                //set connection status false and update related objects
+                updateConnectionStatus(false);
 
                 break;
 
@@ -556,6 +587,15 @@ void MainWindow::readSerialData()
 //scans for available serial ports and adds them to ddm port selection box
 void MainWindow::setup_ddm_port_selection(int index)
 {
+    // Check and set initial value for "portName"
+    if (userSettings.value("portName").toString().isEmpty())
+        userSettings.setValue("portName", INITIAL_DDM_PORT);
+
+    //this is checked within the current index changed slot of ddm combo box
+    //start false prevents an accidental selection of the first
+    //index added.
+    allowPortSelection = false;
+
     // Fetch available serial ports and add their names to the combo box
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
     {
@@ -565,10 +605,15 @@ void MainWindow::setup_ddm_port_selection(int index)
         // Check if the current port name matches the one declared in settings
         if (portName == userSettings.value("portName").toString())
         {
+            //allow us to select this port
+            allowPortSelection = true;
+
             // If a match is found, set the current index of the combo box
             ui->ddm_port_selection->setCurrentIndex(ui->ddm_port_selection->count() - 1);
         }
     }
+    //initialization finished, allow port selection
+    allowPortSelection = true;
 }
 
 //makes all settings in connection settings uneditable (call when ddm connection
@@ -582,6 +627,7 @@ void MainWindow::disableConnectionChanges()
     ui->stop_bit_selection->setDisabled(true);
     ui->flow_control_selection->setDisabled(true);
     ui->load_events_from_logfile->setDisabled(true);
+    ui->restore_Button->setDisabled(true);
 }
 
 //makes all settings in connection settings editable (call when ddm connection
@@ -595,6 +641,7 @@ void MainWindow::enableConnectionChanges()
     ui->stop_bit_selection->setEnabled(true);
     ui->flow_control_selection->setEnabled(true);
     ui->load_events_from_logfile->setEnabled(true);
+    ui->restore_Button->setEnabled(true);
 }
 
 //checks if user has setup a custom log file directory, if not, the default directory is selected
@@ -637,6 +684,7 @@ void MainWindow::setup_logfile_location()
     autosaveLogFile += QString::number(secsSinceEpoch) + "-logfile-A.txt";
 
     qDebug() << "Auto Save log file for this session: " << autosaveLogFile;
+    notifyUser("Auto save log set", autosaveLogFile, false);
 }
 
 //checks if the number of auto saved log files is greater than the user
@@ -755,12 +803,14 @@ void MainWindow::setupSettings()
     setup_ddm_port_selection(0);
 
     #if DEV_MODE
+        //load port names for csim port selection
+        setup_csim_port_selection(0);
+
         // Display user settings
         displaySavedSettings();
-        setup_csim_port_selection(0);
     #endif
 
-    //write settings to registry
+    //in case settings were loaded from initial constants, sync settings to registry
     userSettings.sync();
 }
 
@@ -1079,35 +1129,50 @@ void MainWindow::notifyUser(QString notificationText, bool error)
 void MainWindow::notifyUser(QString notificationText, QString logText, bool error)
 {
     // Get the current timestamp
-    QString timeStamp = QDateTime::currentDateTime().toString("[dd.MM.yyyy hh:mm:ss] ");
+    QString timeStamp = QDateTime::currentDateTime().toString("[MM/dd/yyyy hh:mm:ss] ");
+
+    QString notificationRichText = "<p style='color: white; font-size: 16px'>" + timeStamp +
+                                   " " + "<span style='color: ";
+
+    QString popUpStyle = "border: 3px solid ";
 
     if (error)
     {
-        ui->notificationPopUp->setStyleSheet("border: 3px solid red; color: white; text-align: center; font-size: 16px;" );
-        ui->notificationOutput->append("<p style='color: white; font-size: 16px'>" + timeStamp +
-                                       " " + "<span style='color: red; font-size: 16px'>" + notificationText +
-                                       " : " + logText + "</span></p>");
+        notificationRichText += "red";
+        popUpStyle += "red";
     }
     else
     {
-        ui->notificationPopUp->setStyleSheet("border: 3px solid green; color: white; text-align: center; font-size: 16px;" );
-        ui->notificationOutput->append("<p style='color: white; font-size: 16px'>" + timeStamp +
-                                       " " + "<span style='color: green; font-size: 16px'>" + notificationText +
-                                       " : " + logText + "</span></p>");
+        notificationRichText += "green";
+        popUpStyle += "green";
     }
+    notificationRichText += "; font-size: 16px'>" + notificationText;
+    popUpStyle += "; color: white; text-align: center; font-size: 16px;";
+
+    if (logText != "")
+    {
+        notificationRichText += " : " + logText;
+    }
+    notificationRichText+= + "</span></p>";
+
+    //set pop up style
+    ui->notificationPopUp->setStyleSheet(popUpStyle);
+
+    //add full notification to notification page output
+    ui->notificationOutput->append(notificationRichText);
 
     //display notification text
     ui->notificationPopUp->setText(notificationText);
 
-    //check if user is on notification page
+    //check if user is on notification page, and if this is an error
     if (ui->Flow_Label->currentIndex() != 6 && error)
     {
-        //update the notification icon
+        //update the notification icon to get user attention
         ui->NotificationPageButton->setStyleSheet("border-image: url(://resources/Images/newNotification.png);");
     }
 
-    // Create a QTimer to clear the notification pop-up after 3 seconds
-    QTimer::singleShot(3000, this, [this]() {
+    // Create a QTimer to clear the notification pop-up after NOTIFICATION_DURATION
+    QTimer::singleShot(NOTIFICATION_DURATION, this, [this]() {
         ui->notificationPopUp->setStyleSheet("background-color: transparent; border: none;");
         ui->notificationPopUp->clear();
     });
@@ -1121,6 +1186,10 @@ void MainWindow::notifyUser(QString notificationText, QString logText, bool erro
 //scans for available serial ports and adds them to csim port selection box
 void MainWindow::setup_csim_port_selection(int index)
 {
+    // Check and set initial value for "csimPortName"
+    if (userSettings.value("csimPortName").toString().isEmpty())
+        userSettings.setValue("csimPortName", INITIAL_CSIM_PORT);
+
     // Fetch available serial ports and add their names to the combo box
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
     {
