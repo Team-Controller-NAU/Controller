@@ -14,16 +14,6 @@
 //initial setup
 void MainWindow::setupConnectionPage()
 {
-    // Check and set initial value for "portName"
-    if (userSettings.value("portName").toString().isEmpty())
-        userSettings.setValue("portName", INITIAL_DDM_PORT);
-
-    #if DEV_MODE
-        // Check and set initial value for "csimPortName"
-        if (userSettings.value("csimPortName").toString().isEmpty())
-            userSettings.setValue("csimPortName", INITIAL_CSIM_PORT);
-    #endif
-
     // Check and set initial value for "baudRate"
     if (userSettings.value("baudRate").toString().isEmpty())
         userSettings.setValue("baudRate", toString(INITIAL_BAUD_RATE));
@@ -102,7 +92,11 @@ void MainWindow::setupConnectionPage()
 void MainWindow::on_baud_rate_selection_currentIndexChanged(int index)
 {
     if (ddmCon == nullptr) {
-        // Handle case where ddmCon pointer is not initialized
+        // Handle case where ddmCon pointer is not initialized after setup is done
+        if (allowPortSelection)
+        {
+            notifyUser("Connection setting can't be applied", "Connection class is not declared", true);
+        }
         return;
     }
 
@@ -141,7 +135,11 @@ void MainWindow::on_baud_rate_selection_currentIndexChanged(int index)
 void MainWindow::on_data_bits_selection_currentIndexChanged(int index)
 {
     if (ddmCon == nullptr) {
-        // Handle case where ddmCon pointer is not initialized
+        // Handle case where ddmCon pointer is not initialized after setup is done
+        if (allowPortSelection)
+        {
+            notifyUser("Connection setting can't be applied", "Connection class is not declared", true);
+        }
         return;
     }
 
@@ -168,7 +166,11 @@ void MainWindow::on_data_bits_selection_currentIndexChanged(int index)
 void MainWindow::on_flow_control_selection_currentIndexChanged(int index)
 {
     if (ddmCon == nullptr) {
-        // Handle case where ddmCon pointer is not initialized
+        // Handle case where ddmCon pointer is not initialized after setup is done
+        if (allowPortSelection)
+        {
+            notifyUser("Connection setting can't be applied", "Connection class is not declared", true);
+        }
         return;
     }
 
@@ -192,7 +194,11 @@ void MainWindow::on_flow_control_selection_currentIndexChanged(int index)
 void MainWindow::on_stop_bit_selection_currentIndexChanged(int index)
 {
     if (ddmCon == nullptr) {
-        // Handle case where ddmCon pointer is not initialized
+        // Handle case where ddmCon pointer is not initialized after setup is done
+        if (allowPortSelection)
+        {
+            notifyUser("Connection setting can't be applied", "Connection class is not declared", true);
+        }
         return;
     }
 
@@ -216,7 +222,11 @@ void MainWindow::on_stop_bit_selection_currentIndexChanged(int index)
 void MainWindow::on_parity_selection_currentIndexChanged(int index)
 {
     if (ddmCon == nullptr) {
-        // Handle case where ddmCon pointer is not initialized
+        // Handle case where ddmCon pointer is not initialized after setup is done
+        if (allowPortSelection)
+        {
+            notifyUser("Connection setting can't be applied", "Connection class is not declared", true);
+        }
         return;
     }
 

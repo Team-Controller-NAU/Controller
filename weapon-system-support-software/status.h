@@ -29,10 +29,10 @@ public:
     QString elapsedControllerTime;
 
     //reads a status message from controller and updates class variables
-    void loadData(QString statusMessage);
+    bool loadData(QString statusMessage);
 
     //reads a message containing controller version and crc and updates corresponding class variables
-    void loadVersionData(QString versionMessage);
+    bool loadVersionData(QString versionMessage);
 
     //======================================================================================
     //DEV_MODE exclusive methods

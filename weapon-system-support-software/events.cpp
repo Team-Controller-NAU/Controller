@@ -155,6 +155,12 @@ void Events::freeLinkedLists()
 //if the error can not be found, return false.
 bool Events::clearError(int id)
 {
+    //check for invalid format
+    if (id == -1)
+    {
+        return false;
+    }
+
     //init vars
     EventNode *wkgPtr = headErrorNode;
 
@@ -461,13 +467,13 @@ void Events::freeError(int id)
 }
 
 //function developed to handle reading a node message and create a new error node with given data
-void Events::loadErrorData(QString message)
+bool Events::loadErrorData(QString message)
 {
     // parse message
     QStringList values = message.split(DELIMETER);
 
-    // check for real error
-    if(values.length() > NUM_ERROR_DELIMETERS)
+    // check for real error (allows new line at the end or no new line at the end)
+    if(values.length()-1 == NUM_ERROR_ELEMENTS || values.length() == NUM_ERROR_ELEMENTS)
     {
         // get values
         int id = values[0].toInt();
@@ -477,21 +483,23 @@ void Events::loadErrorData(QString message)
 
         //using extracted data, add an error to the end of the error linked list
         addError(id, timeStamp, eventString, cleared);
+        return true;
     }
     else
     {
         qDebug() << "Invalid input to load error data: " << message << "\n";
+        return false;
     }
 }
 
 //function developed to handle reading a node message and create a new event node with given data
-void Events::loadEventData(QString message)
+bool Events::loadEventData(QString message)
 {
     // parse data
     QStringList values = message.split(DELIMETER);
 
-    // check for real event
-    if(values.length() > NUM_EVENT_DELIMETERS)
+    // check for real event (allows new line at the end or no new line at the end)
+    if(values.length()-1 == NUM_EVENT_ELEMENTS || values.length() == NUM_EVENT_ELEMENTS)
     {
         // get values
         int id = values[0].toInt();
@@ -500,17 +508,22 @@ void Events::loadEventData(QString message)
 
         // using extracted data add a new event to the end of the events linked list
         addEvent( id, timeStamp, eventString);
+        return true;
     }
     else
     {
         qDebug() << "Invalid input to load event data: " << message << "\n";
+        return false;
     }
 }
 
-void Events::loadErrorDump(QString message)
+bool Events::loadErrorDump(QString message)
 {
+    bool successfulLoad = true;
+
     // Split the dump messages into individual error sets
     QStringList errorSet = message.split(",,", Qt::SkipEmptyParts);
+    qDebug() << "num errors in dump" << errorSet.length();
 
     // Iterate through the error sets and call loadErrorData for each
     for (const QString &error : errorSet)
@@ -518,16 +531,24 @@ void Events::loadErrorDump(QString message)
         // check for empty
         if(!errorSet.isEmpty() && error != "\n")
         {
-            // Call loadErrorData for each individual error set
-            loadErrorData(error);
+            // Call loadErrorData for each individual error set, check if fail
+            if ( !loadErrorData(error) )
+            {
+                successfulLoad = false;
+            }
         }
     }
+    return successfulLoad;
 }
 
-void Events::loadEventDump(QString message)
+bool Events::loadEventDump(QString message)
 {
+    bool successfulLoad = true;
+
     // Split the dump messages into individual event sets
     QStringList eventSet = message.split(",,", Qt::SkipEmptyParts);
+
+    qDebug() << "num events in dump" << eventSet.length();
 
     // Iterate through the event sets and call loadEventData for each
     for (const QString &event : eventSet)
@@ -535,10 +556,14 @@ void Events::loadEventDump(QString message)
         // check for empty
         if(!eventSet.isEmpty() && event != "\n")
         {
-            // Call loadEventData for each individual event set
-            loadEventData(event);
+            // Call loadEventData for each individual event set, check if fail
+            if (!loadEventData(event))
+            {
+                successfulLoad = false;
+            }
         }
     }
+    return successfulLoad;
 }
 
 // appends the given node to the log file

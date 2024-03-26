@@ -47,6 +47,13 @@ void MainWindow::on_SettingsPageButton_clicked()
     ui->SettingsPageButton->setStyleSheet("border-image: url(://resources/Images/purpleSettings.png);");
 }
 
+void MainWindow::on_NotificationPageButton_clicked()
+{
+    ui->Flow_Label->setCurrentIndex(6);
+    resetPageButton();
+    ui->NotificationPageButton->setStyleSheet("border-image: url(://resources/Images/purpleNotificationBell.png);");
+}
+
 //reset all tab buttons to default style
 void MainWindow::resetPageButton()
 {
@@ -55,6 +62,7 @@ void MainWindow::resetPageButton()
     ui->StatusPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
     ui->ElectricalPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
     ui->SettingsPageButton->setStyleSheet("border-image: url(://resources/Images/whiteSettings.png)");
+    ui->NotificationPageButton->setStyleSheet("border-image: url(://resources/Images/notificationBell.png);");
 
 #if DEV_MODE
     ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
@@ -161,16 +169,11 @@ void MainWindow::findText()
 //read signal to listen for controller.
 void MainWindow::on_ddm_port_selection_currentIndexChanged(int index)
 {
-    if (ui->ddm_port_selection->currentText() == "")
+    //create connection on selected port if combo box is set up
+    if (allowPortSelection)
     {
-        return;
+        createDDMCon();
     }
-
-    //update port name
-    ddmPortName = ui->ddm_port_selection->currentText();
-
-    //create connection class
-    createDDMCon();
 }
 
 //download button for events in CSV format
@@ -239,7 +242,27 @@ void MainWindow::on_FilterBox_currentIndexChanged(int index)
 //this button is seen as connect/connecting/disconnect on connection page
 void MainWindow::on_handshake_button_clicked()
 {
-    // Check if the timer is started or ddmCon is not connected
+    //if port isnt open, attempt to open it
+    if (ddmCon == nullptr)
+    {
+        createDDMCon();
+
+        //if unsuccessful, notify user of fail and return
+        if (ddmCon == nullptr)
+        {
+            notifyUser("Failed to open " + ui->ddm_port_selection->currentText(), true);
+            return;
+        }
+    }
+
+    //catch possible errors
+    if (!ddmCon->serialPort.isOpen())
+    {
+        notifyUser("Failed to open " + ui->ddm_port_selection->currentText(), true);
+        return;
+    }
+
+    // check if handshake is not in progress and ddm is not connected
     if ( !handshakeTimer->isActive() && !ddmCon->connected )
     {
         qDebug() << "Beginning handshake with controller" << Qt::endl;
@@ -264,6 +287,11 @@ void MainWindow::on_handshake_button_clicked()
 
         ddmCon->transmit(QString::number(CLOSING_CONNECTION) + '\n');
 
+        if (ddmCon->connected)
+        {
+            notifyUser("User disconnect", "Session end",  false);
+        }
+
         //update connection status to disconnected and update related objects
         updateConnectionStatus(false);
     }
@@ -284,6 +312,8 @@ void MainWindow::on_save_Button_clicked()
 
     //write changes to the registry
     userSettings.sync();
+
+    notifyUser("Default settings saved.", false);
 
     #if DEV_MODE
         //output new settings to qDebug()
@@ -316,9 +346,6 @@ void MainWindow::on_restore_Button_clicked()
 
     if (ui->flow_control_selection->findText(defaultFlowControl) != -1)
         ui->flow_control_selection->setCurrentText(defaultFlowControl);
-
-    //restart connection
-    createDDMCon();
 }
 
 void MainWindow::on_openLogfileFolder_clicked()
@@ -418,11 +445,15 @@ void MainWindow::on_load_events_from_logfile_clicked()
     {
         // Handle error
         qDebug() << "Log file was of incorrect format.";
+        notifyUser("Load failed on corrupt logfile.", true);
     }
     else if (result == DATA_NOT_FOUND)
     {
         qDebug() << "Log file could not be found";
+        notifyUser("Load failed on missing logfile.", true);
     }
+
+    notifyUser("Logfile loaded.", selectedFile, false);
 
     //refresh the events output
     refreshEventsOutput();
@@ -503,9 +534,6 @@ void MainWindow::on_CSim_button_clicked()
     {
         // csim is running, shut it down
         csimHandle->stopSimulation();
-
-        // stop ddm timer
-        lastMessageTimer->stop();
 
         // update ui
         ui->CSim_button->setText("Start CSim");

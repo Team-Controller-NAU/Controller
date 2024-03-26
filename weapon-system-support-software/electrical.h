@@ -22,8 +22,8 @@ public:
 
     void addNode(QString name, int voltage, int amps);
     void freeLL();
-    void loadElecData(QString message);
-    void loadElecDump(QString message);
+    bool loadElecData(QString message);
+    bool loadElecDump(QString message);
     void createElectricalLL();
 
     //variables

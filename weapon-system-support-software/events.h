@@ -51,10 +51,10 @@ public:
     EventNode* getNextNodeToPrint(EventNode*& eventPtr, EventNode*& errorPtr, bool& printErr);
 
     //load from serial message utils
-    void loadErrorData(QString message);
-    void loadEventData(QString message);
-    void loadEventDump(QString message);
-    void loadErrorDump(QString message);
+    bool loadErrorData(QString message);
+    bool loadEventData(QString message);
+    bool loadEventDump(QString message);
+    bool loadErrorDump(QString message);
     bool clearError(int id);
 
     //log file utils
