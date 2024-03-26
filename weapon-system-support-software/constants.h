@@ -36,10 +36,11 @@ const int NUM_CONTROLLER_STATE = 4;
 enum FiringMode {SAFE=0, SINGLE=1, BURST=2, FULL_AUTO=3};
 const int NUM_FIRING_MODE = 4;
 
-enum FeedPosition {FEEDING=0, CHAMBERING=45, LOCKING=90, FIRING=135, UNLOCKING=180,
-                    EXTRACTING=225, EJECTING=270, COCKING=315};
-
+enum FeedPosition {CHAMBERING=0, LOCKING=45, FIRING=90, UNLOCKING=135,
+                    EXTRACTING=180, EJECTING=225, COCKING=270, FEEDING=315};
 const int NUM_FEED_POSITION = 8;
+const QString FEED_POSITION_NAMES[NUM_FEED_POSITION]{ "Chambering", "Locking", "Firing","Unlocking",
+                                                     "Extracting", "Ejecting", "Cocking", "Feeding"};
 const int FEED_POSITION_INCREMENT_VALUE = 360/NUM_FEED_POSITION;
 
 enum SerialMessageIdentifier { /*the following identifiers are used to id controller data*/
@@ -67,6 +68,8 @@ const bool INITIAL_COLORED_EVENTS_OUTPUT = true;
 const QString INITIAL_LOGFILE_LOCATION = "WSSS_Logfiles/";
 const int INITIAL_AUTO_SAVE_LIMIT = 5;
 const QString INITIAL_DDM_PORT = "COM5";
+//if a message is not received from controller in 20 seconds, timeout connection
+const int INITIAL_CONNECTION_TIMEOUT = 20000; // 20 seconds
 
 //======================================================================================
 // Timer vals

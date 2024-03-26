@@ -250,7 +250,7 @@ void MainWindow::on_handshake_button_clicked()
         //if unsuccessful, notify user of fail and return
         if (ddmCon == nullptr)
         {
-            notifyUser("Failed to open " + ui->ddm_port_selection->currentText(), true);
+            notifyUser("Failed to open port " + ui->ddm_port_selection->currentText(), true);
             return;
         }
     }
@@ -258,7 +258,7 @@ void MainWindow::on_handshake_button_clicked()
     //catch possible errors
     if (!ddmCon->serialPort.isOpen())
     {
-        notifyUser("Failed to open " + ui->ddm_port_selection->currentText(), true);
+        notifyUser("Failed to open port" + ui->ddm_port_selection->currentText(), true);
         return;
     }
 
@@ -452,8 +452,10 @@ void MainWindow::on_load_events_from_logfile_clicked()
         qDebug() << "Log file could not be found";
         notifyUser("Load failed on missing logfile.", true);
     }
-
-    notifyUser("Logfile loaded.", selectedFile, false);
+    else
+    {
+        notifyUser("Logfile loaded.", selectedFile, false);
+    }
 
     //refresh the events output
     refreshEventsOutput();

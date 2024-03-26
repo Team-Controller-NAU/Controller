@@ -40,6 +40,12 @@ MainWindow::MainWindow(QWidget *parent)
     //init gui
     ui->setupUi(this);
 
+    //set status labels invisable
+    ui->trigger1_label->setVisible(false);
+    ui->trigger2_label->setVisible(false);
+    ui->armed_label->setVisible(false);
+    ui->feed_position_label->setVisible(false);
+
     //setup user settings and init settings related gui elements
     setupSettings();
 
@@ -87,7 +93,7 @@ MainWindow::MainWindow(QWidget *parent)
     lastMessageTimer->setInterval(ONE_SECOND);
     connect(lastMessageTimer, &QTimer::timeout, this, &MainWindow::updateTimeSinceLastMessage);
 
-    // connect running controller timer
+    //connect running controller timer to slot
     runningControllerTimer->setInterval(ONE_SECOND);
     connect(runningControllerTimer, &QTimer::timeout, this, &MainWindow::updateElapsedTime);
 
@@ -150,9 +156,6 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
         //stop handshake protocols
         handshakeTimer->stop();
 
-        //free old electrical data if any exists
-        electricalObject->freeLL();
-
         // check if controller timer is not running
         if(!runningControllerTimer->isActive())
         {
@@ -160,14 +163,24 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
             runningControllerTimer->start();
 
             // update elapsed time
-            ui->elapsedTime->setText("Elapsed Time: " + status->elapsedControllerTime);
-            ui->elapsedTime->setAlignment(Qt::AlignRight);
+            ui->elapsed_time_label->setText("Elapsed Time: ");
+            ui->elapsedTime->setText( status->elapsedControllerTime.toString("HH:mm:ss"));
         }
+
+        //free old electrical data if any exists
+        electricalObject->freeLL();
+
+        //set status labels visable
+        ui->trigger1_label->setVisible(true);
+        ui->trigger2_label->setVisible(true);
+        ui->armed_label->setVisible(true);
+        ui->feed_position_label->setVisible(true);
+
 
         //start last message timer
         timeLastReceived = QDateTime::currentDateTime();
-        ui->DDMTimer->setText("Time Since Last Message: 00:00:00");
-        ui->DDMTimer->setAlignment(Qt::AlignRight);
+        ui->DDM_timer_label->setText("Time Since Last Message: ");
+        ui->DDMTimer->setText("00:00:00");
         lastMessageTimer->start();
 
         // update ui
@@ -579,7 +592,7 @@ void MainWindow::readSerialData()
         else
         {
             qDebug() << "Unrecognized serial message received : " << message;
-            notifyUser("Unrecognized serial message received: ", message, true);
+            notifyUser("Unrecognized serial message received", message, true);
         }
     }
 }
@@ -772,9 +785,9 @@ void MainWindow::enforceAutoSaveLimit()
 //are loaded with Qt serial options.
 void MainWindow::setupSettings()
 {
-    // Check if colored event exists and is valid
+    // Check if colored event setting does not exist
     if (!userSettings.contains("coloredEventOutput") || !userSettings.value("coloredEventOutput").isValid()) {
-        // If it doesn't exist or is not valid, set the default value
+        // set the default value
         userSettings.setValue("coloredEventOutput", INITIAL_COLORED_EVENTS_OUTPUT);
     }
 
@@ -784,9 +797,9 @@ void MainWindow::setupSettings()
     //set gui display to match
     ui->colored_events_output->setChecked(coloredEventOutput);
 
-    // Check if the setting exists and is valid
+    // Check if the setting does not exist
     if (!userSettings.contains("autoSaveLimit") || !userSettings.value("autoSaveLimit").isValid()) {
-        // If it doesn't exist or is not valid, set the default value
+        // set the default value
         userSettings.setValue("autoSaveLimit", INITIAL_AUTO_SAVE_LIMIT);
     }
 
@@ -795,6 +808,18 @@ void MainWindow::setupSettings()
 
     //update gui to match
     ui->auto_save_limit->setValue(autoSaveLimit);
+
+    //check if the timeout setting does not exist
+    if (!userSettings.contains("connectionTimeout") || !userSettings.value("connectionTimeout").isValid()) {
+        // If it doesn't exist or is not valid, set the default value
+        userSettings.setValue("connectionTimeout", INITIAL_CONNECTION_TIMEOUT);
+    }
+
+    //set session variable based on setting
+    connectionTimeout = userSettings.value("connectionTimeout").toInt();
+
+    //update gui to match
+    ui->connection_timeout->setValue(connectionTimeout);
 
     //sets up text options in connection settings drop down boxes
     setupConnectionPage();
@@ -839,49 +864,58 @@ void MainWindow::updateStatusDisplay()
 
     //update feed position
     ui->feedPosition->setValue(status->feedPosition);
+    ui->feed_position_label->setText(FEED_POSITION_NAMES[status->feedPosition/FEED_POSITION_INCREMENT_VALUE]);
 
-    //update trigger 1 light
+    //update trigger 1
     switch (status->trigger1)
     {
     case ENGAGED:
         ui->trigger1->setPixmap(GREEN_LIGHT);
+        ui->trigger1_label->setText("Engaged");
 
         break;
 
     case DISENGAGED:
         ui->trigger1->setPixmap(RED_LIGHT);
+        ui->trigger1_label->setText("Disengaged");
 
         break;
 
     default:
         ui->trigger1->setPixmap(BLANK_LIGHT);
+        ui->trigger1_label->setText("NA");
     }
 
-    //update trigger 2 light
+    //update trigger 2
     switch (status->trigger2)
     {
         case ENGAGED:
             ui->trigger2->setPixmap(GREEN_LIGHT);
+            ui->trigger2_label->setText("Engaged");
 
             break;
 
         case DISENGAGED:
             ui->trigger2->setPixmap(RED_LIGHT);
+            ui->trigger2_label->setText("Disengaged");
 
             break;
 
         default:
             ui->trigger2->setPixmap(BLANK_LIGHT);
+            ui->trigger2_label->setText("NA");
     }
 
     //update the armed light
     if(status->armed)
     {
         ui->armedOutput->setPixmap(GREEN_LIGHT);
+        ui->armed_label->setText("Armed");
     }
     else
     {
         ui->armedOutput->setPixmap(RED_LIGHT);
+        ui->armed_label->setText("Disarmed");
     }
 
     ui->fireRateOutput->setText(QString::number(status->firingRate));
@@ -919,33 +953,11 @@ void MainWindow::updateStatusDisplay()
 // method updates the running elapsed controller time
 void MainWindow::updateElapsedTime()
 {
-    // get the current timestamp
-    QString timestamp = ui->elapsedTime->toPlainText();
-
-    // extract the time, remove "ELapsed Time: "
-    timestamp = timestamp.mid(14); // assuming this will always be in position 14, it should never change
-
-    // split up the day and time components
-    // this is required because a QTime object does not support days (more than 24hrs)
-    QStringList timeParts = timestamp.split(":");
-    int days = timeParts.takeFirst().toInt(); // removes the days from the list as well
-
-    // convert to QTime and add one second
-    QTime currentTime = QTime::fromString(timeParts.join(":"), "HH:mm:ss");
-    currentTime = currentTime.addSecs(1);
-
-    // check if the time exceeds 23:59:59
-    // when it does, the entire timestamp will be reset since QTime can not exceed 24 hours
-    if (currentTime.hour() == 0 && currentTime.minute() == 0 && currentTime.second() == 0)
-    {
-        // increment number of days
-        days++;
-    }
+    // add 1 second to timer
+    status->elapsedControllerTime = status->elapsedControllerTime.addSecs(1);
 
     // update the GUI
-    status->elapsedControllerTime = QString::number(days) + ":" + currentTime.toString("HH:mm:ss");
-    ui->elapsedTime->setText("Elapsed Time: " + QString::number(days) + ":" + currentTime.toString("HH:mm:ss"));
-    ui->elapsedTime->setAlignment(Qt::AlignRight);
+    ui->elapsedTime->setText(status->elapsedControllerTime.toString("HH:mm:ss"));
 }
 
 // method updates the elapsed time since last message received to DDM
@@ -953,7 +965,6 @@ void MainWindow::updateTimeSinceLastMessage()
 {
     // initialize variables
     QTime elapsedTime;
-    QString message;
 
     // calculate time elapsed since the last time DDM received a message
     QDateTime currentTime = QDateTime::currentDateTime();
@@ -971,6 +982,12 @@ void MainWindow::updateTimeSinceLastMessage()
     {
         qDebug() << "Error: either datetime is invalid.\n";
     }
+    //check if timeout was reached
+    else if (elapsedMs >= connectionTimeout)
+    {
+        //run disconnect method
+        on_handshake_button_clicked();
+    }
     // assume positive elapsed time
     else
     {
@@ -978,9 +995,8 @@ void MainWindow::updateTimeSinceLastMessage()
         elapsedTime = QTime(0, 0, 0).addMSecs(elapsedMs);
 
         // update gui
-        message = "Time Since Last Message: " + elapsedTime.toString("HH:mm:ss");
-        ui->DDMTimer->setText(message);
-        ui->DDMTimer->setAlignment(Qt::AlignRight);
+        ui->DDMTimer->setText(elapsedTime.toString("HH:mm:ss"));
+        //ui->DDMTimer->setAlignment(Qt::AlignRight);
     }
 }
 
@@ -1129,12 +1145,16 @@ void MainWindow::notifyUser(QString notificationText, bool error)
 void MainWindow::notifyUser(QString notificationText, QString logText, bool error)
 {
     // Get the current timestamp
-    QString timeStamp = QDateTime::currentDateTime().toString("[MM/dd/yyyy hh:mm:ss] ");
+    QString timeStamp = QDateTime::currentDateTime().toString("[hh:mm:ss] ");
 
     QString notificationRichText = "<p style='color: white; font-size: 16px'>" + timeStamp +
                                    " " + "<span style='color: ";
 
     QString popUpStyle = "border: 3px solid ";
+
+    // get new lines as literals
+    notificationText.replace("\n", "\\n");
+    logText.replace("\n", "\\n");
 
     if (error)
     {
@@ -1161,7 +1181,7 @@ void MainWindow::notifyUser(QString notificationText, QString logText, bool erro
     //add full notification to notification page output
     ui->notificationOutput->append(notificationRichText);
 
-    //display notification text
+    //display notification on "navbar"
     ui->notificationPopUp->setText(notificationText);
 
     //check if user is on notification page, and if this is an error
@@ -1177,6 +1197,7 @@ void MainWindow::notifyUser(QString notificationText, QString logText, bool erro
         ui->notificationPopUp->clear();
     });
 }
+
 
 //======================================================================================
 //DEV_MODE exclusive methods

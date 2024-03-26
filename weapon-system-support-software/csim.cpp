@@ -211,21 +211,19 @@ void CSim::checkConnection(Connection *conn)
     }
 }
 
-//returns a qstring containing the time since start up in D:H:M:S
+//returns a qstring containing the time since start up in H:M:S
 QString CSim::getTimeStamp()
 {
     // Calculate elapsed time since startup
     qint64 elapsedTime = QDateTime::currentMSecsSinceEpoch() - startupTime;
 
-    // Convert milliseconds to days, hours, minutes, and seconds
-    int days = elapsedTime / (1000 * 60 * 60 * 24);
-    int hours = (elapsedTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60);
+    // Convert milliseconds to hours, minutes, and seconds
+    int hours = elapsedTime / (1000 * 60 * 60);
     int minutes = (elapsedTime % (1000 * 60 * 60)) / (1000 * 60);
     int seconds = (elapsedTime % (1000 * 60)) / 1000;
 
-    // Format the timestamp as "D:H:M:S" and return
-    return QString("%1:%2:%3:%4").arg(days).arg(hours, 2, 10, QLatin1Char('0')).arg(minutes, 2, 10,
-                                     QLatin1Char('0')).arg(seconds, 2, 10, QLatin1Char('0'));
+    // Format the timestamp as "H:M:S" and return
+    return QString("%1:%2:%3").arg(hours, 2, 10, QLatin1Char('0')).arg(minutes, 2, 10, QLatin1Char('0')).arg(seconds, 2, 10, QLatin1Char('0'));
 }
 
 //this function contains main event loop for simulating weapon controller.

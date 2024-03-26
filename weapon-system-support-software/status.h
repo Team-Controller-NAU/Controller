@@ -26,7 +26,7 @@ public:
     double firingRate;
     QString version;
     QString crc;
-    QString elapsedControllerTime;
+    QTime elapsedControllerTime;
 
     //reads a status message from controller and updates class variables
     bool loadData(QString statusMessage);
