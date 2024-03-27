@@ -3,6 +3,7 @@
 //#include "constants.h"
 #include "../weapon-system-support-software/constants.h"
 #include "../weapon-system-support-software/status.cpp"
+// #include "../weapon-system-support-software/mainwindow.h"
 
 // add necessary includes here
 
@@ -17,6 +18,7 @@ private:
 private slots:
     void test_loadData();
     void test_loadVersionData();
+    void test_generateMessage();
 };
 
 
@@ -71,14 +73,34 @@ void tst_status::test_loadVersionData()
     QString dataMsg = "0:00:00:03,6.7.2,2F5A1D3E7B9";
 
     status.loadVersionData(dataMsg);
-    // TODO: find out how to get constant values
-    //QCOMPARE(status.version, constants::CONTROLLER_VERSION);
+
+    // verify that the controller and crc versions are correct
+    QCOMPARE(status.version, CONTROLLER_VERSION);
+    QCOMPARE(status.crc, CRC_VERSION);
 }
 
+//======================================================================================
+//DEV_MODE exclusive test cases
+//======================================================================================
+
+
+
+#if DEV_MODE
 /**
  * Test case for generateMessage() in status.cpp if we are in dev mode
  */
-// TODO: How do get the scope of the DEV_MODE variable?
+
+void tst_status::test_generateMessage()
+{
+    Status status;
+
+    QString msg = status.generateMessage();
+
+    qDebug() << msg;
+
+}
+#endif
+
 
 QTEST_MAIN(tst_status)
 #include "tst_status.moc"

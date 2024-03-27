@@ -14,7 +14,9 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_executable(status_tests tst_status.cpp ../weapon-system-support-software/status.h)
+add_executable(status_tests tst_status.cpp
+    ../weapon-system-support-software/status.h
+    ../weapon-system-support-software/constants.h)
 add_executable(electrical_tests tst_electrical.cpp)
 
 # Add include directories for mainwindow.h

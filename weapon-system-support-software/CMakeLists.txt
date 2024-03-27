@@ -10,10 +10,6 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-#set DEV_MODE to 1 to compile for dev release
-#set DEV_MODE to 0 to compile for user release
-add_compile_definitions(DEV_MODE=1)
-
 
 # Find required Qt modules, including QtConcurrent
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets SerialPort Concurrent)
