@@ -12,6 +12,7 @@ class Status : public QObject
     Q_OBJECT
 public:
     explicit Status(QObject *parent = nullptr);
+    virtual ~Status() = default;
     bool armed;
     TriggerStatus trigger1;
     TriggerStatus trigger2;
