@@ -89,19 +89,7 @@ void feedposition::paintEvent(QPaintEvent*)
     painter.setFont(textfont);
 
     painter.drawText(QDial::height()/2.15,QDial::height()/2.15,QDial::height(),QDial::height(),0,QString::number(value));
-}
 
-void feedposition::mouseMoveEvent(QMouseEvent *event)
-{
-    event->ignore();
-}
-
-void feedposition::mousePressEvent(QMouseEvent *event)
-{
-    event->ignore();
-}
-
-void feedposition::mouseReleaseEvent(QMouseEvent *event)
-{
-    event->ignore();
+    //disable user edits on feed pos
+    setDisabled(true);
 }

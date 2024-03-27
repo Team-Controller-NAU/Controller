@@ -19,11 +19,5 @@ private:
 
     virtual void paintEvent(QPaintEvent*) override;
 
-    void mouseMoveEvent(QMouseEvent *event) override;
-
-    void mousePressEvent(QMouseEvent *event) override;
-
-    void mouseReleaseEvent(QMouseEvent *event) override;
-
 };
 #endif // FEEDPOSITION_H

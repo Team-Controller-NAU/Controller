@@ -57,6 +57,7 @@ public:
     //user managed settings
     bool coloredEventOutput;
     int autoSaveLimit;
+    int connectionTimeout;
 
     //creates a new connection using currently selected serial port settings
     void createDDMCon();
