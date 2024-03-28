@@ -28,6 +28,7 @@ bool Status::loadData(QString statusMessage)
 
     QStringList values = statusMessage.split(DELIMETER);
 
+    // check if message contains too few or too many items
     if (values.length()-1 != NUM_STATUS_ELEMENTS)
     {
         return false;
@@ -70,7 +71,7 @@ bool Status::loadVersionData(QString versionMessage)
     QStringList values = versionMessage.split(DELIMETER);
 
     //ensure message has correct format
-    if(values.size()-1 != NUM_BEGIN_ELEMENTS)
+    if(values.length()-1 != NUM_BEGIN_ELEMENTS)
     {
         return false;
     }

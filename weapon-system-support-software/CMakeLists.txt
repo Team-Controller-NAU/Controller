@@ -34,6 +34,7 @@ set(PROJECT_SOURCES
     electrical.cpp
     feedposition.cpp
     feedposition.h
+    mainwindow_connection_settings.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
