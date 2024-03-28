@@ -25,8 +25,6 @@ private slots:
     void test_loadVersionData_badInputLess();
     void test_loadVersionData_badInputGreater();
     void test_loadVersionData_badInputType();
-
-    void test_generateMessage();
 };
 
 
@@ -110,6 +108,8 @@ void tst_status::test_loadData_badInputType()
     // initialize variables
     Status status;
     QString dataMsg = "0, 1.0 ,0,1,1,135, 6.2 ,23,1636.14,\n";
+
+    status.loadData(dataMsg);
 
     // trigger1 and totalfiringEvents output results in 0
     QCOMPARE(status.trigger1, 0);
