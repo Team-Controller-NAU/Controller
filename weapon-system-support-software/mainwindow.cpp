@@ -79,9 +79,6 @@ MainWindow::MainWindow(QWidget *parent)
         ui->DevPageButton->setVisible(false);
     #endif
 
-    //update class port name values
-    ddmPortName = ui->ddm_port_selection->currentText();
-
     //set handshake timer interval
     handshakeTimer->setInterval(HANDSHAKE_INTERVAL);
 
@@ -242,7 +239,7 @@ void MainWindow::createDDMCon()
     if (ddmCon != nullptr)
     {
         //notify user of closed connection class
-        notifyUser(ui->ddm_port_selection->currentText() + "Serial port closed",  false);
+        notifyUser(ddmPortName + " closed",  false);
         delete ddmCon;
         ddmCon = nullptr;
     }
@@ -543,7 +540,10 @@ void MainWindow::readSerialData()
                 if (!status->loadVersionData(message))
                 {
                     //report
-                    notifyUser("Invalid 'begin' message received", message, true);                   
+                    notifyUser("Invalid 'begin' message received", message, true);
+
+                    //end connection attempt
+                    ddmCon->transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + DELIMETER + "\n");
                 }
                 //otherwise success
                 else

@@ -144,6 +144,9 @@ void CSim::checkConnection(Connection *conn)
             // Update flag
             conn->connected = false;
 
+            //erase existing events to prevent unrecognized messages in next session
+            eventsPtr->freeLinkedLists();
+
             break;
 
         case LISTENING:
@@ -238,11 +241,17 @@ void CSim::run()
         Connection *conn(new Connection(portName));
         connPtr = conn;
 
+        if (!connPtr->serialPort.isOpen())
+        {
+            delete connPtr;
+            connPtr = nullptr;
+            return;
+        }
+
         //init events class (csim only uses this to store non cleared errors so that it can
         //clear them later)
         Events *events(new Events());
         eventsPtr = events;
-
 
         //for status use smart pointer for automatic memory management (resources auto free when function exits)
         std::unique_ptr<Status> status(new Status());

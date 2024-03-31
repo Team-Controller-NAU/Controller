@@ -139,7 +139,7 @@ Connection::~Connection()
     if ( connected )
     {
         // transmit closing message through port
-        transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + DELIMETER + '\n');
+        transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + DELIMETER + "\n");
     }
 
     // close the port
