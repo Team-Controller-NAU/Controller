@@ -17,8 +17,14 @@ private:
 
 private slots:
     void test_loadData();
+    void test_loadData_badInputLess();
+    void test_loadData_badInputGreater();
+    void test_loadData_badInputType();
+
     void test_loadVersionData();
-    void test_generateMessage();
+    void test_loadVersionData_badInputLess();
+    void test_loadVersionData_badInputGreater();
+    void test_loadVersionData_badInputType();
 };
 
 
@@ -39,9 +45,7 @@ void tst_status::test_loadData()
         int totalFiringEvents;
         int burstLength;
         double firingRate;
-     *
      */
-
     Status status;
     QString dataMsg = "0,1,0,1,1,135,6,23,1636.14,\n";
     QStringList values = dataMsg.split(DELIMETER);
@@ -58,46 +62,129 @@ void tst_status::test_loadData()
     QCOMPARE(status.trigger2, DISENGAGED);
     QCOMPARE(status.controllerState, BLOCKED);
     QCOMPARE(status.firingMode, SINGLE);
-    QCOMPARE(status.feedPosition, FIRING);
+    QCOMPARE(status.feedPosition, UNLOCKING);
     QCOMPARE(status.totalFiringEvents, totalFiringEvents_testData);
     QCOMPARE(status.burstLength, burstLength_testData);
     QCOMPARE(status.firingRate, firingRate_testData);
 }
 
 /**
- * Test case for loadVersionData() in status.cpp
+ * Test case for loadData() in status.cpp
+ *
+ * - tests the input having less items than the desired input
  */
-void tst_status::test_loadVersionData()
+void tst_status::test_loadData_badInputLess()
 {
+    // initialize variables
     Status status;
-    QString dataMsg = "0:00:00:03,6.7.2,2F5A1D3E7B9";
+    QString dataMsg = "0,1,0,1,1,135,6,23\n";
 
-    status.loadVersionData(dataMsg);
+    // make sure loadData returns false
+    QVERIFY(status.loadData(dataMsg) == false);
+}
 
-    // verify that the controller and crc versions are correct
-    QCOMPARE(status.version, CONTROLLER_VERSION);
-    QCOMPARE(status.crc, CRC_VERSION);
+/**
+ * Test case for loadData() in status.cpp
+ *
+ * - tests the input having more items than the desired input
+ */
+void tst_status::test_loadData_badInputGreater()
+{
+    // initialize variables
+    Status status;
+    QString dataMsg = "0,1,0,1,1,135,6,23,1636.14,100,\n";
+
+    // make sure loadData returns false
+    QVERIFY(status.loadData(dataMsg) == false);
+}
+
+/**
+ * Test case for loadData() in status.cpp
+ *
+ * - tests the input having the wrong type
+ */
+void tst_status::test_loadData_badInputType()
+{
+    // initialize variables
+    Status status;
+    QString dataMsg = "0, 1.0 ,0,1,1,135, 6.2 ,23,1636.14,\n";
+
+    status.loadData(dataMsg);
+
+    // trigger1 and totalfiringEvents output results in 0
+    QCOMPARE(status.trigger1, 0);
+    QCOMPARE(status.totalFiringEvents, 0);
+
 }
 
 //======================================================================================
 //DEV_MODE exclusive test cases
 //======================================================================================
-
-
-
 #if DEV_MODE
+
 /**
- * Test case for generateMessage() in status.cpp if we are in dev mode
+ * Test case for loadVersionData() in status.cpp
  */
-
-void tst_status::test_generateMessage()
+void tst_status::test_loadVersionData()
 {
+    // initialize variables
     Status status;
+    QString dataMsg = "00:00:02,6.7.2,2F5A1D3E7B9,\n";
+    QStringList values = dataMsg.split(DELIMETER);
+    QTime controllerTime = QTime::fromString(values[0]);
 
-    QString msg = status.generateMessage();
+    // call loadVersionData
+    status.loadVersionData(dataMsg);
 
-    qDebug() << msg;
+    // verify that the elapsed time, version and crc are correct
+    QCOMPARE(status.elapsedControllerTime, controllerTime);
+    QCOMPARE(status.version, CONTROLLER_VERSION);
+    QCOMPARE(status.crc, CRC_VERSION);
+}
 
+/**
+ * Test case for loadVersionData() in status.cpp
+ *
+ * - tests input have less items
+ */
+void tst_status::test_loadVersionData_badInputLess()
+{
+    //initialize variables
+    Status status;
+    QString dataMsg = "6.7.2,2F5A1D3E7B9,\n";
+
+    // make sure loadVersionData returns false
+    QVERIFY(status.loadVersionData(dataMsg) == false);
+}
+
+/**
+ * Test case for loadVersionData() in status.cpp
+ *
+ * - tests input have more items
+ */
+void tst_status::test_loadVersionData_badInputGreater()
+{
+    //initialize variables
+    Status status;
+    QString dataMsg = "00:00:02,6.7.2,2F5A1D3E7B9,7,\n";
+
+    // make sure loadVersionData returns false
+    QVERIFY(status.loadVersionData(dataMsg) == false);
+}
+
+/**
+ * Test case for loadVersionData() in status.cpp
+ *
+ * - tests input having improper type for time
+ */
+void tst_status::test_loadVersionData_badInputType()
+{
+    //initialize variables
+    Status status;
+    QString dataMsg = " 00.00.02 ,6.7.2,2F5A1D3E7B9,\n";
+
+    // make sure loadVersionData returns false
+    QVERIFY(status.loadVersionData(dataMsg) == false);
 }
 #endif
 
