@@ -173,6 +173,7 @@ void MainWindow::on_ddm_port_selection_currentIndexChanged(int index)
     if (allowPortSelection)
     {
         createDDMCon();
+        ddmPortName = ui->ddm_port_selection->currentText();
     }
 }
 
@@ -554,6 +555,22 @@ void MainWindow::on_CSim_button_clicked()
 
         //temporarily disable csim port selection
         ui->csim_port_selection->setEnabled(false);
+
+        QTimer::singleShot(1000, this, [this]() {
+            if (csimHandle->connPtr == nullptr)
+                {
+                // csim is running, shut it down
+                csimHandle->stopSimulation();
+
+                // update ui
+                ui->CSim_button->setText("Start CSim");
+
+                //enable csim port selection
+                ui->csim_port_selection->setEnabled(true);
+
+                notifyUser("Could not open " + ui->csim_port_selection->currentText() + " for CSIM", true);
+                }
+        });
     }
 }
 
