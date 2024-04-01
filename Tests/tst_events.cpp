@@ -17,6 +17,10 @@ private slots:
     void test_getNextNodeToPrint();
     void test_nodeToString();
     void test_stringToNode();
+    void test_loadEventData();
+    void test_loadErrorData();
+    void test_loadEventDump();
+    void test_loadErrorDump();
 };
 
 /**
@@ -315,11 +319,208 @@ void tst_events::test_stringToNode()
     // get new node that has been created in linked list
     EventNode *wkgEventNode = eventObj->headEventNode;
 
-    // compare stored values with the example string's values
-    QCOMPARE(wkgEventNode->id, 5);
-    QCOMPARE(wkgEventNode->timeStamp, "0:02:22");
-    QCOMPARE(wkgEventNode->eventString, "Sample test message 1");
-    QCOMPARE(wkgEventNode->error, false);
+    // test the values
+    if (wkgEventNode != nullptr)
+    {
+        // only access these values if stringToNode actually worked
+        // to avoid dereferencing a null pointer
+        QCOMPARE(wkgEventNode->id, 5);
+        QCOMPARE(wkgEventNode->timeStamp, "0:02:22");
+        QCOMPARE(wkgEventNode->eventString, "Sample test message 1");
+        QCOMPARE(wkgEventNode->error, false);
+        QCOMPARE(eventObj->totalEvents, 1);
+        QCOMPARE(eventObj->totalNodes, 1);
+    }
+    else
+    {
+        // force this test to fail, since we know it is null
+        QVERIFY(wkgEventNode != nullptr);
+    }
+
+    // free
+    delete eventObj;
+}
+
+/**
+ * Test case for loadEventData() in events.cpp
+ */
+void tst_events::test_loadEventData()
+{
+    // create a new events class object
+    Events *eventObj = new Events();
+
+    // set up some variables
+    QString exampleMsg = "30,0:01:15,Sample Test message 1,\n";
+
+    // attempt to add the node
+    eventObj->loadEventData(exampleMsg);
+
+    // test the head/last event node values
+    QVERIFY(eventObj->headEventNode != nullptr);
+    QVERIFY(eventObj->lastEventNode != nullptr);
+
+    // create a working node from the headEventNode
+    EventNode *wkgEventNode = eventObj->headEventNode;
+
+    // test the values
+    if (wkgEventNode != nullptr)
+    {
+        // only access these values if loadEventData actually worked
+        // to avoid dereferencing a null pointer
+        QCOMPARE(wkgEventNode->id, 30);
+        QCOMPARE(wkgEventNode->timeStamp, "0:01:15");
+        QCOMPARE(wkgEventNode->eventString, "Sample Test message 1");
+        QCOMPARE(eventObj->totalEvents, 1);
+        QCOMPARE(eventObj->totalNodes, 1);
+    }
+    else
+    {
+        // force this test to fail, since we know it is null
+        QVERIFY(wkgEventNode != nullptr);
+    }
+
+    // free
+    delete eventObj;
+}
+
+/**
+ * Test case for loadErrorData() in events.cpp
+ */
+void tst_events::test_loadErrorData()
+{
+    // create a new events class object
+    Events *eventObj = new Events();
+
+    // set up some variables
+    QString exampleMsg = "30,0:01:15,Sample Test message 1,1,\n";
+
+    // attempt to add the node
+    eventObj->loadErrorData(exampleMsg);
+
+    // test the head/last event node values
+    QVERIFY(eventObj->headErrorNode != nullptr);
+    QVERIFY(eventObj->lastErrorNode != nullptr);
+
+    // create a working node from the headEventNode
+    EventNode *wkgErrorNode = eventObj->headErrorNode;
+
+    // test the values
+    if (wkgErrorNode != nullptr)
+    {
+        // only access these values if loadEventData actually worked
+        // to avoid dereferencing a null pointer
+        QCOMPARE(wkgErrorNode->id, 30);
+        QCOMPARE(wkgErrorNode->timeStamp, "0:01:15");
+        QCOMPARE(wkgErrorNode->eventString, "Sample Test message 1");
+        QCOMPARE(wkgErrorNode->cleared, 1);
+        QCOMPARE(eventObj->totalErrors, 1);
+        QCOMPARE(eventObj->totalNodes, 1);
+        QCOMPARE(eventObj->totalCleared, 1);
+    }
+    else
+    {
+        // force this test to fail, since we know it is null
+        QVERIFY(wkgErrorNode != nullptr);
+    }
+
+    // free
+    delete eventObj;
+}
+
+/**
+ * Test case for loadEventDump() in events.cpp
+ */
+void tst_events::test_loadEventDump()
+{
+    // create a new events class object
+    Events *eventObj = new Events();
+
+    // set up some variables
+    QString exampleMsg = "30,0:01:15,Sample Test message 1,,31,0:02:31,Sample Test message 2";
+
+    // attempt to add the two nodes
+    eventObj->loadEventDump(exampleMsg);
+
+    // test the head/last event node values
+    QVERIFY(eventObj->headEventNode != nullptr);
+    QVERIFY(eventObj->lastEventNode != nullptr);
+
+    // create a working node from the headEventNode
+    EventNode *wkgEventNode = eventObj->headEventNode;
+
+    // test the values
+    if (wkgEventNode != nullptr && wkgEventNode->nextPtr != nullptr)
+    {
+        // only access these values if loadEventData actually worked
+        // to avoid dereferencing a null pointer
+        QCOMPARE(wkgEventNode->id, 30);
+        QCOMPARE(wkgEventNode->timeStamp, "0:01:15");
+        QCOMPARE(wkgEventNode->eventString, "Sample Test message 1");
+
+        wkgEventNode = wkgEventNode->nextPtr;
+        QCOMPARE(wkgEventNode->id, 31);
+        QCOMPARE(wkgEventNode->timeStamp, "0:02:31");
+        QCOMPARE(wkgEventNode->eventString, "Sample Test message 2");
+
+        QCOMPARE(eventObj->totalEvents, 2);
+        QCOMPARE(eventObj->totalNodes, 2);
+    }
+    else
+    {
+        // force this test to fail, since we know it is null
+        QVERIFY(wkgEventNode != nullptr);
+    }
+
+    // free
+    delete eventObj;
+}
+
+/**
+ * Test case for loadErrorDump() in events.cpp
+ */
+void tst_events::test_loadErrorDump()
+{
+    // create a new events class object
+    Events *eventObj = new Events();
+
+    // set up some variables
+    QString exampleMsg = "30,0:01:15,Sample Test message 1,1,,31,0:02:31,Sample Test message 2,0";
+
+    // attempt to add the two nodes
+    eventObj->loadErrorDump(exampleMsg);
+
+    // test the head/last event node values
+    QVERIFY(eventObj->headErrorNode != nullptr);
+    QVERIFY(eventObj->lastErrorNode != nullptr);
+
+    // create a working node from the headEventNode
+    EventNode *wkgErrorNode = eventObj->headErrorNode;
+
+    // test the values
+    if (wkgErrorNode != nullptr && wkgErrorNode->nextPtr != nullptr)
+    {
+        // only access these values if loadEventData actually worked
+        // to avoid dereferencing a null pointer
+        QCOMPARE(wkgErrorNode->id, 30);
+        QCOMPARE(wkgErrorNode->timeStamp, "0:01:15");
+        QCOMPARE(wkgErrorNode->eventString, "Sample Test message 1");
+        QCOMPARE(wkgErrorNode->cleared, 1);
+
+        wkgErrorNode = wkgErrorNode->nextPtr;
+        QCOMPARE(wkgErrorNode->id, 31);
+        QCOMPARE(wkgErrorNode->timeStamp, "0:02:31");
+        QCOMPARE(wkgErrorNode->eventString, "Sample Test message 2");
+        QCOMPARE(wkgErrorNode->cleared, 0);
+
+        QCOMPARE(eventObj->totalErrors, 2);
+        QCOMPARE(eventObj->totalNodes, 2);
+        QCOMPARE(eventObj->totalCleared, 1);
+    }
+    else
+    {
+        // force this test to fail, since we know it is null
+        QVERIFY(wkgErrorNode != nullptr);
+    }
 
     // free
     delete eventObj;
