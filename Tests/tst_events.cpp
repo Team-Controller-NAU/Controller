@@ -206,11 +206,16 @@ void tst_events::test_clearError()
     QCOMPARE(eventObj->totalCleared, 0);
 
     // clear the error
-    eventObj->clearError(id);
+    bool result = eventObj->clearError(id);
 
     // verify that this error is now cleared
+    QCOMPARE(result, true);
     QCOMPARE(wkgErrorNode->cleared, true);
     QCOMPARE(eventObj->totalCleared, 1);
+
+    // confirm the test fails with improper input
+    result = eventObj->clearError(15);
+    QCOMPARE(result, false);
 
     // free
     delete eventObj;
@@ -337,6 +342,10 @@ void tst_events::test_stringToNode()
         QVERIFY(wkgEventNode != nullptr);
     }
 
+    // confirm the test fails with improper input
+    result = eventObj->stringToNode("fail");
+    QCOMPARE(result, false);
+
     // free
     delete eventObj;
 }
@@ -353,9 +362,10 @@ void tst_events::test_loadEventData()
     QString exampleMsg = "30,0:01:15,Sample Test message 1,\n";
 
     // attempt to add the node
-    eventObj->loadEventData(exampleMsg);
+    bool result = eventObj->loadEventData(exampleMsg);
 
     // test the head/last event node values
+    QCOMPARE(result, true);
     QVERIFY(eventObj->headEventNode != nullptr);
     QVERIFY(eventObj->lastEventNode != nullptr);
 
@@ -379,6 +389,10 @@ void tst_events::test_loadEventData()
         QVERIFY(wkgEventNode != nullptr);
     }
 
+    // confirm the test fails with improper input
+    result = eventObj->loadEventData("fail");
+    QCOMPARE(result, false);
+
     // free
     delete eventObj;
 }
@@ -395,9 +409,10 @@ void tst_events::test_loadErrorData()
     QString exampleMsg = "30,0:01:15,Sample Test message 1,1,\n";
 
     // attempt to add the node
-    eventObj->loadErrorData(exampleMsg);
+    bool result = eventObj->loadErrorData(exampleMsg);
 
     // test the head/last event node values
+    QCOMPARE(result, true);
     QVERIFY(eventObj->headErrorNode != nullptr);
     QVERIFY(eventObj->lastErrorNode != nullptr);
 
@@ -423,6 +438,10 @@ void tst_events::test_loadErrorData()
         QVERIFY(wkgErrorNode != nullptr);
     }
 
+    // confirm the test fails with improper input
+    result = eventObj->loadErrorData("fail");
+    QCOMPARE(result, false);
+
     // free
     delete eventObj;
 }
@@ -439,9 +458,10 @@ void tst_events::test_loadEventDump()
     QString exampleMsg = "30,0:01:15,Sample Test message 1,,31,0:02:31,Sample Test message 2";
 
     // attempt to add the two nodes
-    eventObj->loadEventDump(exampleMsg);
+    bool result = eventObj->loadEventDump(exampleMsg);
 
     // test the head/last event node values
+    QCOMPARE(result, true);
     QVERIFY(eventObj->headEventNode != nullptr);
     QVERIFY(eventObj->lastEventNode != nullptr);
 
@@ -471,6 +491,10 @@ void tst_events::test_loadEventDump()
         QVERIFY(wkgEventNode != nullptr);
     }
 
+    // confirm the test fails with improper input
+    result = eventObj->loadEventDump("fail");
+    QCOMPARE(result, false);
+
     // free
     delete eventObj;
 }
@@ -487,9 +511,10 @@ void tst_events::test_loadErrorDump()
     QString exampleMsg = "30,0:01:15,Sample Test message 1,1,,31,0:02:31,Sample Test message 2,0";
 
     // attempt to add the two nodes
-    eventObj->loadErrorDump(exampleMsg);
+    bool result = eventObj->loadErrorDump(exampleMsg);
 
     // test the head/last event node values
+    QCOMPARE(result, true);
     QVERIFY(eventObj->headErrorNode != nullptr);
     QVERIFY(eventObj->lastErrorNode != nullptr);
 
@@ -521,6 +546,10 @@ void tst_events::test_loadErrorDump()
         // force this test to fail, since we know it is null
         QVERIFY(wkgErrorNode != nullptr);
     }
+
+    // confirm the test fails with improper input
+    result = eventObj->loadErrorDump("fail");
+    QCOMPARE(result, false);
 
     // free
     delete eventObj;
