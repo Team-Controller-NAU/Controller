@@ -21,7 +21,7 @@
 const QString DELIMETER = ",";
 
 // the max number of electrical componenets to expect from a weapon
-const int MAX_ELECTRICAL_COMPONENTS = 120;
+const int MAX_ELECTRICAL_COMPONENTS = 100;
 
 //======================================================================================
 // Enumerations and enum related vals
@@ -51,6 +51,7 @@ enum SerialMessageIdentifier { /*the following identifiers are used to id contro
 
 //for filtering the event page output
 enum EventFilter {ALL=0, EVENTS=1, ERRORS=2, CLEARED_ERRORS=3, NON_CLEARED_ERRORS=4};
+
 enum Parity {NO_PARITY, EVEN_PARITY, ODD_PARITY};
 enum StopBits {ONE, ONE_AND_A_HALF, TWO};
 
@@ -68,7 +69,7 @@ const bool INITIAL_COLORED_EVENTS_OUTPUT = true;
 const QString INITIAL_LOGFILE_LOCATION = "WSSS_Logfiles/";
 const int INITIAL_AUTO_SAVE_LIMIT = 5;
 const QString INITIAL_DDM_PORT = "COM5";
-//if a message is not received from controller in 20 seconds, timeout connection
+//if a message is not received from controller in 20 seconds, connection times out
 const int INITIAL_CONNECTION_TIMEOUT = 20000; // 20 seconds
 
 //======================================================================================
@@ -108,8 +109,8 @@ const QString QDEBUG_OUTPUT_FORMAT = "[%{time h:mm:ss}] %{message}";
 
 const QString INITIAL_CSIM_PORT = "COM4";
 
-//rate at which the csim thread will update the status class and send data through serial port (in seconds)
-const double CSIM_GENERATION_INTERVAL = 2;
+//rate at which the csim thread will update the status class and send data through serial port (in msec)
+const int CSIM_GENERATION_INTERVAL = 2000;
 
 const int NUM_EVENT_MESSAGES = 3;
 const QString EVENT_MESSAGES[NUM_EVENT_MESSAGES] = {"Sample event message 1", "Sample event message 2; 76; 55.4", "Sample event message 3; 2"};
