@@ -143,7 +143,6 @@ private slots:
     //========================================================================================================
 
 
-
     //================================================================================
     //gui triggered slots (should be declared in mainwindow_gui_slots.cpp)
     //====================================================================================
@@ -177,6 +176,7 @@ private slots:
         void on_DevPageButton_clicked();
         void on_output_messages_sent_button_clicked();
         void on_toggle_num_triggers_clicked();
+        void on_csim_generation_interval_selection_valueChanged(int arg1);
     #endif
     //=========================================================================================================
 

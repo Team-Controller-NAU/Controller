@@ -656,4 +656,9 @@ void MainWindow::on_send_message_button_clicked()
         conn->transmit(userInput);
     }
 }
+
+void MainWindow::on_csim_generation_interval_selection_valueChanged(int arg1)
+{
+    csimHandle->generationInterval = arg1;
+}
 #endif
