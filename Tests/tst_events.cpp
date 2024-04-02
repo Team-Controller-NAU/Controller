@@ -214,7 +214,7 @@ void tst_events::test_clearError()
     QCOMPARE(eventObj->totalCleared, 1);
 
     // confirm the test fails with improper input
-    result = eventObj->clearError(15);
+    result = eventObj->clearError(500);
     QCOMPARE(result, false);
 
     // free
