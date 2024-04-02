@@ -60,6 +60,10 @@ MainWindow::MainWindow(QWidget *parent)
         //init csim class, assign serial port
         csimHandle = new CSim(nullptr, csimPortName);
 
+        //init generation interval
+        csimHandle->generationInterval = CSIM_GENERATION_INTERVAL;
+        ui->csim_generation_interval_selection->setValue(csimHandle->generationInterval);
+
         //CSIM control slots ==============================================================
 
         //connect custom transmission requests from ddm to csims execution slot
@@ -75,9 +79,6 @@ MainWindow::MainWindow(QWidget *parent)
     #else
         ui->DevPageButton->setVisible(false);
     #endif
-
-    //update class port name values
-    ddmPortName = ui->ddm_port_selection->currentText();
 
     //set handshake timer interval
     handshakeTimer->setInterval(HANDSHAKE_INTERVAL);
@@ -239,7 +240,7 @@ void MainWindow::createDDMCon()
     if (ddmCon != nullptr)
     {
         //notify user of closed connection class
-        notifyUser(ui->ddm_port_selection->currentText() + "Serial port closed",  false);
+        notifyUser(ddmPortName + " closed",  false);
         delete ddmCon;
         ddmCon = nullptr;
     }
@@ -540,7 +541,10 @@ void MainWindow::readSerialData()
                 if (!status->loadVersionData(message))
                 {
                     //report
-                    notifyUser("Invalid 'begin' message received", message, true);                   
+                    notifyUser("Invalid 'begin' message received", message, true);
+
+                    //end connection attempt
+                    ddmCon->transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + DELIMETER + "\n");
                 }
                 //otherwise success
                 else

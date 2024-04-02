@@ -107,7 +107,7 @@ void Connection::transmit(QString message)
     qint64 bytesWritten = serialPort.write(data);
 
     // wait for full message to be sent before continuing
-    serialPort.waitForBytesWritten(100);
+    serialPort.waitForBytesWritten(500);
 
     // check for failure
     if (bytesWritten == -1)
@@ -139,7 +139,7 @@ Connection::~Connection()
     if ( connected )
     {
         // transmit closing message through port
-        transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + DELIMETER + '\n');
+        transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + DELIMETER + "\n");
     }
 
     // close the port
