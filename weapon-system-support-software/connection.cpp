@@ -107,7 +107,7 @@ void Connection::transmit(QString message)
     qint64 bytesWritten = serialPort.write(data);
 
     // wait for full message to be sent before continuing
-    serialPort.waitForBytesWritten(100);
+    serialPort.waitForBytesWritten(500);
 
     // check for failure
     if (bytesWritten == -1)

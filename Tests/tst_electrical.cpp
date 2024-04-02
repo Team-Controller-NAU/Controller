@@ -8,9 +8,6 @@ class tst_electrical : public QObject
 {
     Q_OBJECT
 
-private:
-    electrical *electricalObject;
-
 private slots:
     void electrical_constructor();
     void test_addNode();
