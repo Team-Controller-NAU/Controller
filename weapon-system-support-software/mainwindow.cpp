@@ -63,6 +63,10 @@ MainWindow::MainWindow(QWidget *parent)
         //init csim class, assign serial port
         csimHandle = new CSim(nullptr, csimPortName);
 
+        //init generation interval
+        csimHandle->generationInterval = CSIM_GENERATION_INTERVAL;
+        ui->csim_generation_interval_selection->setValue(csimHandle->generationInterval);
+
         //CSIM control slots ==============================================================
 
         //connect custom transmission requests from ddm to csims execution slot

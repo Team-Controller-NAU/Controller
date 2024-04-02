@@ -40,6 +40,8 @@ public:
     QString eventDumpMessage;
     QString errorDumpMessage;
 
+    //delay between iterations of csim (in msec)
+    int generationInterval;
 
     //used for the electrical data dump at beginning of run
     QString electricalDumpMessage;

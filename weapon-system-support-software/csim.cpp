@@ -453,8 +453,8 @@ void CSim::run()
             //check for signals from ddm
             QCoreApplication::processEvents();
 
-            //wait for 2 seconds while monitoring serial port
-            conn->serialPort.waitForReadyRead(2000);
+            //wait for interval while monitoring serial port
+            conn->serialPort.waitForReadyRead(generationInterval);
 
         } //end main execution loop
 
