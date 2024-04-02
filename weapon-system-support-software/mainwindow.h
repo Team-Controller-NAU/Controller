@@ -14,6 +14,7 @@
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QObject>
+#include <QtCore>
 #include "./ui_mainwindow.h"
 
 #if DEV_MODE
@@ -51,10 +52,12 @@ public:
     QDateTime timeLastReceived;
     EventFilter eventFilter;
     QString autosaveLogFile;
+    bool allowPortSelection;
 
     //user managed settings
     bool coloredEventOutput;
     int autoSaveLimit;
+    int connectionTimeout;
 
     //creates a new connection using currently selected serial port settings
     void createDDMCon();
@@ -75,21 +78,23 @@ public:
 
     #if DEV_MODE
         //csim simulator is contained within this class. It makes thread that can be managed through the handle
-    CSim *csimHandle;
-    QString csimPortName;
-    //logs empty line to qDebug() output
-    void logEmptyLine();
+        CSim *csimHandle;
+        QString csimPortName;
+        //logs empty line to qDebug() output
+        void logEmptyLine();
+    #endif
 
 signals:
-    //signal to be connected to csim's completeTransmissionRequest() slot
-    //will tell csim to send the message
-    void transmissionRequest(QString message);
+    #if DEV_MODE
+        //signal to be connected to csim's completeTransmissionRequest() slot
+        //will tell csim to send the message
+        void transmissionRequest(QString message);
 
-    //signal will be connected to csims clearError() slot.
-    void clearErrorRequest(int clearedId);
+        //signal will be connected to csims clearError() slot.
+        void clearErrorRequest(int clearedId);
 
-    //signal will be connected to csims outputSessionString() slot.
-    void outputMessagesSentRequest();
+        //signal will be connected to csims outputSessionString() slot.
+        void outputMessagesSentRequest();
     #endif
 
 private slots:
@@ -97,9 +102,10 @@ private slots:
     //non-gui triggered slots (should be defined in mainwindow.cpp)
     //==========================================================================
     void updateTimeSinceLastMessage();
+    void notifyUser(QString notificationText, bool error);
+    void notifyUser(QString notificationText, QString logText, bool error);
     void updateElapsedTime();
     void readSerialData();
-    void displaySavedSettings();
     void updateStatusDisplay();
     void handshake();
     void resetPageButton();
@@ -116,6 +122,10 @@ private slots:
     //oldest one each iteration until the limit is enforced
     void enforceAutoSaveLimit();
     void updateConnectionStatus(bool connectionStatus);
+
+    #if DEV_MODE
+        void displaySavedSettings();
+    #endif
     //==================================================================================
 
 
@@ -129,8 +139,8 @@ private slots:
     void setup_ddm_port_selection(int index);
     void setup_logfile_location();
     void setupSettings();
+    void setupConnectionPage();
     //========================================================================================================
-
 
 
     //================================================================================
@@ -166,8 +176,11 @@ private slots:
         void on_DevPageButton_clicked();
         void on_output_messages_sent_button_clicked();
         void on_toggle_num_triggers_clicked();
+        void on_csim_generation_interval_selection_valueChanged(int arg1);
     #endif
     //=========================================================================================================
+
+        void on_NotificationPageButton_clicked();
 
     private:
     Ui::MainWindow *ui;

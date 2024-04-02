@@ -1,5 +1,7 @@
 #include "csim.h"
+//this file wont compile if dev mode is inactive
 #if DEV_MODE
+
 //constructor
 CSim::CSim(QObject *parent, QString portName)
     : QThread(parent), stop(false), portName(portName),
@@ -36,15 +38,17 @@ void CSim::clearError(int clearedId)
         qDebug() << "Unable to clear error, no events class declared";
         return;
     }
+    else if (connPtr->connected)
+    {
+        //free the error from the linked list
+        eventsPtr->freeError(clearedId);
 
-    //free the error from the linked list
-    eventsPtr->freeError(clearedId);
+        //transmit "error cleared" message to ddm
+        connPtr->transmit(QString::number(CLEAR_ERROR) + DELIMETER + QString::number(clearedId) + DELIMETER + "\n");
 
-    //transmit error cleared message to ddm
-    connPtr->transmit(QString::number(CLEAR_ERROR) + DELIMETER + QString::number(clearedId) + DELIMETER + "\n");
-
-    //store message
-    messagesSent += QString::number(CLEAR_ERROR) + DELIMETER + QString::number(clearedId) + DELIMETER + "\n";
+        //store message
+        messagesSent += QString::number(CLEAR_ERROR) + DELIMETER + QString::number(clearedId) + DELIMETER + "\n";
+    }
 }
 
 //slot connected to transmissionRequest signal in ddm,
@@ -77,7 +81,6 @@ void CSim::completeTransmissionRequest(const QString &message)
 
     qDebug() << "[CSIM] transmission request declined, no active CSIM connection";
 }
-
 
 //can be called to end the csim event loop
 void CSim::stopSimulation()
@@ -140,6 +143,9 @@ void CSim::checkConnection(Connection *conn)
 
             // Update flag
             conn->connected = false;
+
+            //erase existing events to prevent unrecognized messages in next session
+            eventsPtr->freeLinkedLists();
 
             break;
 
@@ -208,21 +214,19 @@ void CSim::checkConnection(Connection *conn)
     }
 }
 
-//returns a qstring containing the time since start up in D:H:M:S
+//returns a qstring containing the time since start up in H:M:S
 QString CSim::getTimeStamp()
 {
     // Calculate elapsed time since startup
     qint64 elapsedTime = QDateTime::currentMSecsSinceEpoch() - startupTime;
 
-    // Convert milliseconds to days, hours, minutes, and seconds
-    int days = elapsedTime / (1000 * 60 * 60 * 24);
-    int hours = (elapsedTime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60);
+    // Convert milliseconds to hours, minutes, and seconds
+    int hours = elapsedTime / (1000 * 60 * 60);
     int minutes = (elapsedTime % (1000 * 60 * 60)) / (1000 * 60);
     int seconds = (elapsedTime % (1000 * 60)) / 1000;
 
-    // Format the timestamp as "D:H:M:S" and return
-    return QString("%1:%2:%3:%4").arg(days).arg(hours, 2, 10, QLatin1Char('0')).arg(minutes, 2, 10,
-                                     QLatin1Char('0')).arg(seconds, 2, 10, QLatin1Char('0'));
+    // Format the timestamp as "H:M:S" and return
+    return QString("%1:%2:%3").arg(hours, 2, 10, QLatin1Char('0')).arg(minutes, 2, 10, QLatin1Char('0')).arg(seconds, 2, 10, QLatin1Char('0'));
 }
 
 //this function contains main event loop for simulating weapon controller.
@@ -237,11 +241,17 @@ void CSim::run()
         Connection *conn(new Connection(portName));
         connPtr = conn;
 
+        if (!connPtr->serialPort.isOpen())
+        {
+            delete connPtr;
+            connPtr = nullptr;
+            return;
+        }
+
         //init events class (csim only uses this to store non cleared errors so that it can
         //clear them later)
         Events *events(new Events());
         eventsPtr = events;
-
 
         //for status use smart pointer for automatic memory management (resources auto free when function exits)
         std::unique_ptr<Status> status(new Status());
@@ -443,8 +453,8 @@ void CSim::run()
             //check for signals from ddm
             QCoreApplication::processEvents();
 
-            //wait for 2 seconds while monitoring serial port
-            conn->serialPort.waitForReadyRead(2000);
+            //wait for interval while monitoring serial port
+            conn->serialPort.waitForReadyRead(generationInterval);
 
         } //end main execution loop
 

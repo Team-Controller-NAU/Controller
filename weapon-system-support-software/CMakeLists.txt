@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+
 # Find required Qt modules, including QtConcurrent
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets SerialPort Concurrent)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets SerialPort Concurrent)
@@ -33,6 +34,7 @@ set(PROJECT_SOURCES
     electrical.cpp
     feedposition.cpp
     feedposition.h
+    mainwindow_connection_settings.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

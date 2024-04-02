@@ -65,7 +65,6 @@ bool Connection::checkForValidMessage()
         //copy data from serial port buffer without altering buffer
         QByteArray serializedMessage = serialPort.peek(serialPort.bytesAvailable());
 
-        //deserialize the message
         QString message = QString::fromUtf8(serializedMessage);
 
         //check for complete message
@@ -108,7 +107,7 @@ void Connection::transmit(QString message)
     qint64 bytesWritten = serialPort.write(data);
 
     // wait for full message to be sent before continuing
-    serialPort.waitForBytesWritten(100);
+    serialPort.waitForBytesWritten(500);
 
     // check for failure
     if (bytesWritten == -1)
@@ -137,10 +136,10 @@ Connection::~Connection()
     qDebug() << "Closing connection on port " << portName << qPrintable("\n");
 
     // confirm connection to another port
-    if (connected)
+    if ( connected )
     {
         // transmit closing message through port
-        transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + DELIMETER + '\n');
+        transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + DELIMETER + "\n");
     }
 
     // close the port

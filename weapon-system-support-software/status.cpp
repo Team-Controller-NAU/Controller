@@ -7,7 +7,7 @@ Status::Status(QObject *parent)
 }
 
 //given a status message, update status class with new data
-void Status::loadData(QString statusMessage)
+bool Status::loadData(QString statusMessage)
 {
     /* the statusMessage contains csv data in the following order
      *
@@ -27,6 +27,12 @@ void Status::loadData(QString statusMessage)
     bool result = true;
 
     QStringList values = statusMessage.split(DELIMETER);
+
+    // check if message contains too few or too many items
+    if (values.length()-1 != NUM_STATUS_ELEMENTS)
+    {
+        return false;
+    }
 
     //extract armed value from message
     armed = (values[0] == "1");
@@ -54,16 +60,40 @@ void Status::loadData(QString statusMessage)
 
     //extract
     firingRate = values[8].toDouble(&result);
+
+    return true;
 }
 
 //given a message containing the controller version and crc updates corresponding class variables
-void Status::loadVersionData(QString versionMessage)
+bool Status::loadVersionData(QString versionMessage)
 {
+    //split along delimeter
     QStringList values = versionMessage.split(DELIMETER);
 
-    elapsedControllerTime = values[0];
+    //ensure message has correct format
+    if(values.length()-1 != NUM_BEGIN_ELEMENTS)
+    {
+        return false;
+    }
+
+    //message is valid, load data
+
+    // Split time string
+    QStringList parts = values[0].split(':');
+    if (parts.size() != 3) {
+        qDebug() << "Invalid time string format in load version data";
+        return false;
+    }
+
+    // Calculate total milliseconds
+    qint64 totalMilliseconds = parts[0].toInt() * 3600000LL + parts[1].toInt() * 60000LL + parts[2].toInt() * 1000LL;
+
+    // Initialize elapsedControllerTime
+    elapsedControllerTime = QTime::fromMSecsSinceStartOfDay(totalMilliseconds);
+
     version = values[1];
     crc = values[2];
+    return true;
 }
 
 //======================================================================================

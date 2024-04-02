@@ -1,6 +1,4 @@
 #include "mainwindow.h"
-#include "constants.h"
-#include <QtCore>
 
 MainWindow::MainWindow(QWidget *parent)
 
@@ -27,6 +25,9 @@ MainWindow::MainWindow(QWidget *parent)
     //init user settings to our organization and project
     userSettings("Team Controller", "WSSS"),
 
+    //init to false until connection page is setup
+    allowPortSelection(false),
+
     //Load graphical resources
     BLANK_LIGHT(":/resources/Images/blankButton.png"),
 
@@ -38,6 +39,12 @@ MainWindow::MainWindow(QWidget *parent)
 {
     //init gui
     ui->setupUi(this);
+
+    //set status labels invisable
+    ui->trigger1_label->setVisible(false);
+    ui->trigger2_label->setVisible(false);
+    ui->armed_label->setVisible(false);
+    ui->feed_position_label->setVisible(false);
 
     //setup user settings and init settings related gui elements
     setupSettings();
@@ -56,6 +63,10 @@ MainWindow::MainWindow(QWidget *parent)
         //init csim class, assign serial port
         csimHandle = new CSim(nullptr, csimPortName);
 
+        //init generation interval
+        csimHandle->generationInterval = CSIM_GENERATION_INTERVAL;
+        ui->csim_generation_interval_selection->setValue(csimHandle->generationInterval);
+
         //CSIM control slots ==============================================================
 
         //connect custom transmission requests from ddm to csims execution slot
@@ -67,24 +78,10 @@ MainWindow::MainWindow(QWidget *parent)
         //connect output session string to ddm output session string slot
         connect(this, &MainWindow::outputMessagesSentRequest, csimHandle, &CSim::outputMessagesSent);
         //=================================================================================
+    //dev mode is not active, hide dev page button
     #else
         ui->DevPageButton->setVisible(false);
     #endif
-
-    //update class port name values
-    ddmPortName = ui->ddm_port_selection->currentText();
-
-    //init ddm connection using the current values set in connection settings
-    ddmCon = new Connection(ui->ddm_port_selection->currentText(),
-                            fromStringBaudRate(ui->baud_rate_selection->currentText()),
-                            fromStringDataBits(ui->data_bits_selection->currentText()),
-                            fromStringParity(ui->parity_selection->currentText()),
-                            fromStringStopBits(ui->stop_bit_selection->currentText()),
-                            fromStringFlowControl(ui->flow_control_selection->currentText()));
-
-    //set up signal and slot (when a message is sent to DDMs serial port, the readyRead signal is emitted and
-    //readSerialData() is called)
-    connect(&ddmCon->serialPort, &QSerialPort::readyRead, this, &MainWindow::readSerialData);
 
     //set handshake timer interval
     handshakeTimer->setInterval(HANDSHAKE_INTERVAL);
@@ -97,17 +94,9 @@ MainWindow::MainWindow(QWidget *parent)
     lastMessageTimer->setInterval(ONE_SECOND);
     connect(lastMessageTimer, &QTimer::timeout, this, &MainWindow::updateTimeSinceLastMessage);
 
-    // connect running controller timer
+    //connect running controller timer to slot
     runningControllerTimer->setInterval(ONE_SECOND);
     connect(runningControllerTimer, &QTimer::timeout, this, &MainWindow::updateElapsedTime);
-
-    qDebug() << "GUI is now listening to port " << ddmCon->portName;
-
-    //set feed pos to be measured in 360 degrees
-    ui->feedPosition->setMaximum(360);
-
-    //set feed pos to be non-editable by user
-    ui->feedPosition->setEnabled(false);
 
     //init trigger to grey buttons until updated by serial status updates
     ui->trigger1->setPixmap(BLANK_LIGHT);
@@ -151,6 +140,11 @@ MainWindow::~MainWindow()
 //sets connection status, updates gui and timers
 void MainWindow::updateConnectionStatus(bool connectionStatus)
 {
+    if (ddmCon == nullptr)
+    {
+        return;
+    }
+
     //update connection status
     ddmCon->connected = connectionStatus;
 
@@ -170,14 +164,24 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
             runningControllerTimer->start();
 
             // update elapsed time
-            ui->elapsedTime->setText("Elapsed Time: " + status->elapsedControllerTime);
-            ui->elapsedTime->setAlignment(Qt::AlignRight);
+            ui->elapsed_time_label->setText("Elapsed Time: ");
+            ui->elapsedTime->setText( status->elapsedControllerTime.toString("HH:mm:ss"));
         }
+
+        //free old electrical data if any exists
+        electricalObject->freeLL();
+
+        //set status labels visable
+        ui->trigger1_label->setVisible(true);
+        ui->trigger2_label->setVisible(true);
+        ui->armed_label->setVisible(true);
+        ui->feed_position_label->setVisible(true);
+
 
         //start last message timer
         timeLastReceived = QDateTime::currentDateTime();
-        ui->DDMTimer->setText("Time Since Last Message: 00:00:00");
-        ui->DDMTimer->setAlignment(Qt::AlignRight);
+        ui->DDM_timer_label->setText("Time Since Last Message: ");
+        ui->DDMTimer->setText("00:00:00");
         lastMessageTimer->start();
 
         // update ui
@@ -235,31 +239,57 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
 //apply serial settings from settings page
 void MainWindow::createDDMCon()
 {
-    //check if ddmCon is allocated
+    //close current connection
     if (ddmCon != nullptr)
     {
-        //close current connection
+        //notify user of closed connection class
+        notifyUser(ddmPortName + " closed",  false);
         delete ddmCon;
+        ddmCon = nullptr;
+    }
 
-        //open new connection
-        ddmCon = new Connection(ui->ddm_port_selection->currentText(),
-                                fromStringBaudRate(ui->baud_rate_selection->currentText()),
-                                fromStringDataBits(ui->data_bits_selection->currentText()),
-                                fromStringParity(ui->parity_selection->currentText()),
-                                fromStringStopBits(ui->stop_bit_selection->currentText()),
-                                fromStringFlowControl(ui->flow_control_selection->currentText()));
+    //open new connection
+    ddmCon = new Connection(ui->ddm_port_selection->currentText(),
+                            fromStringBaudRate(ui->baud_rate_selection->currentText()),
+                            fromStringDataBits(ui->data_bits_selection->currentText()),
+                            fromStringParity(ui->parity_selection->currentText()),
+                            fromStringStopBits(ui->stop_bit_selection->currentText()),
+                            fromStringFlowControl(ui->flow_control_selection->currentText()));
 
+    if (ddmCon == nullptr)
+    {
+        notifyUser("Failed to open " + ui->ddm_port_selection->currentText(), true);
+    }
+    //check for failure to open
+    else if (!ddmCon->serialPort.isOpen())
+    {
+        delete ddmCon;
+        ddmCon = nullptr;
+
+        //generate notification
+        notifyUser("Failed to open " + ui->ddm_port_selection->currentText(), true);
+    }
+    else
+    {
         //set up signal and slot (when a message is sent to DDMs serial port, the readyRead signal is emitted and
         //readSerialData() is called)
         connect(&ddmCon->serialPort, &QSerialPort::readyRead, this, &MainWindow::readSerialData);
 
         qDebug() << "GUI is now listening to port " << ddmCon->portName;
+
+        notifyUser(ui->ddm_port_selection->currentText() + " opened", false);
     }
 }
 
 //initial synchronization between controller and ddm
 void MainWindow::handshake()
 {
+    if (ddmCon == nullptr)
+    {
+        notifyUser("Handshake failed", "Connection class is not declared", true);
+        return;
+    }
+
     // Send handshake message
     ddmCon->transmit(QString::number(LISTENING) + '\n');
 }
@@ -268,6 +298,12 @@ void MainWindow::handshake()
 //in other words, this function is called whenever ddm port receives a new message
 void MainWindow::readSerialData()
 {
+    if (ddmCon == nullptr)
+    {
+        notifyUser("Could not read serial data", "Connection class is not declared", true);
+        return;
+    }
+
     //read lines until all data in buffer is processed
     while (ddmCon->checkForValidMessage())
     {
@@ -304,7 +340,10 @@ void MainWindow::readSerialData()
                 qDebug() <<  "Message id: status update" << qPrintable("\n");
 
                 //update status class with new data
-                status->loadData(message);
+                if (!status->loadData(message))
+                {
+                    notifyUser("Invalid status message received", message, true);
+                }
 
                 //update gui
                 updateStatusDisplay();
@@ -315,14 +354,20 @@ void MainWindow::readSerialData()
 
                 qDebug() <<  "Message id: event update" << qPrintable("\n");
 
-                //add new event to event ll
-                events->loadEventData(message);
+                //add new event to event ll, check for fail
+                if (!events->loadEventData(message))
+                {
+                    notifyUser("Invalid event message received", message, true);
+                }
+                //otherwise success
+                else
+                {
+                    // update log file
+                    events->appendToLogfile(autosaveLogFile, events->lastEventNode);
 
-                // update log file
-                events->appendToLogfile(autosaveLogFile, events->lastEventNode);
-
-                // update GUI elements
-                updateEventsOutput(events->lastEventNode);
+                    // update GUI elements
+                    updateEventsOutput(events->lastEventNode);
+                }
 
                 break;
 
@@ -331,20 +376,26 @@ void MainWindow::readSerialData()
                 // status
                 qDebug() <<  "Message id: error update" << qPrintable("\n");
 
-                //add new error to error ll
-                events->loadErrorData( message );
+                //add new error to error ll, check for fail
+                if (!events->loadErrorData( message ))
+                {
+                    notifyUser("Invalid error message received", message, true);
+                }
+                //otherwise success
+                else
+                {
+                    // update log file
+                    events->appendToLogfile(autosaveLogFile, events->lastErrorNode);
 
-                // update log file
-                events->appendToLogfile(autosaveLogFile, events->lastErrorNode);
+                    //update gui elements
+                    updateEventsOutput(events->lastErrorNode);
 
-                //update gui elements
-                updateEventsOutput(events->lastErrorNode);
-
-                #if DEV_MODE
-                    //update the cleared error selection box in dev tools
-                    //(this can be removed when dev page is removed)
-                    update_non_cleared_error_selection();
-                #endif
+                    #if DEV_MODE
+                        //update the cleared error selection box in dev tools
+                        //(this can be removed when dev page is removed)
+                        update_non_cleared_error_selection();
+                    #endif
+                }
 
                 break;
 
@@ -352,66 +403,69 @@ void MainWindow::readSerialData()
 
                 qDebug() <<  "Message id: electrical" << qPrintable("\n");
 
-                // clear electrical ll
-                electricalObject->freeLL();
-
-                //load new data into electrical ll
-                electricalObject->loadElecDump(message);
-
-                //get head node into wkg ptr
-                wkgElecPtr = electricalObject->headNode;
-
-                // loop through each electrical data box
-                for (boxIndex = 1; boxIndex <= MAX_ELECTRICAL_COMPONENTS; boxIndex++)
+                //load new data into electrical ll, notify if fail
+                if (!electricalObject->loadElecDump(message))
                 {
-                    // get the current box name
-                    QString widgetName = "box" + QString::number(boxIndex) + "_widget";
-
-                    // get the current box based off name
-                    QWidget *widget = findChild<QWidget *>(widgetName);
-
-                    // check if widget exists, and hide it
-                    if(widget) widget->hide();
+                    notifyUser("Invalid electrical dump received", message, true);
                 }
-
-                // loop through each electrical data box
-                for (boxIndex = 1; boxIndex <= MAX_ELECTRICAL_COMPONENTS; boxIndex++)
+                //otherwise success
+                else
                 {
-                    // get the current box name
-                    QString widgetName = "box" + QString::number(boxIndex) + "_widget";
+                    //get head node into wkg ptr
+                    wkgElecPtr = electricalObject->headNode;
 
-                    // get the names of the labels for this box
-                    QString labelName = "box" + QString::number(boxIndex) + "_label";
-                    QString statsName = "box" + QString::number(boxIndex) + "_stats";
-
-                    // get the current box based off name
-                    QWidget *widget = findChild<QWidget *>(widgetName);
-
-                    // find the label objects with findChild
-                    QLabel *boxLabel = findChild<QLabel *>(labelName);
-                    QTextEdit *boxStats = findChild<QTextEdit *>(statsName);
-
-                    // check if the current electrical node exists
-                    if (wkgElecPtr != nullptr)
+                    // loop through each electrical data box
+                    for (boxIndex = 1; boxIndex <= MAX_ELECTRICAL_COMPONENTS; boxIndex++)
                     {
-                        // update label with name if it exists
-                        if (boxLabel) boxLabel->setText(" " + wkgElecPtr->name);
+                        // get the current box name
+                        QString widgetName = "box" + QString::number(boxIndex) + "_widget";
 
-                        // update stats with voltage and amps if it exists
-                        if (boxStats) boxStats->setPlainText("Voltage: " + QString::number(wkgElecPtr->voltage) +
-                                              '\n' + "Amps: " + QString::number(wkgElecPtr->amps));
+                        // get the current box based off name
+                        QWidget *widget = findChild<QWidget *>(widgetName);
 
-                        // check if the box exists, and show it
-                        if(widget) widget->show();
-
-                        // move to next electrical node
-                        wkgElecPtr = wkgElecPtr->nextNode;
+                        // check if widget exists, and hide it
+                        if(widget) widget->hide();
                     }
-                    // else, there are no more electrical nodes
-                    else
+
+                    // loop through each electrical data box
+                    for (boxIndex = 1; boxIndex <= MAX_ELECTRICAL_COMPONENTS; boxIndex++)
                     {
-                        // break once we are done
-                        break;
+                        // get the current box name
+                        QString widgetName = "box" + QString::number(boxIndex) + "_widget";
+
+                        // get the names of the labels for this box
+                        QString labelName = "box" + QString::number(boxIndex) + "_label";
+                        QString statsName = "box" + QString::number(boxIndex) + "_stats";
+
+                        // get the current box based off name
+                        QWidget *widget = findChild<QWidget *>(widgetName);
+
+                        // find the label objects with findChild
+                        QLabel *boxLabel = findChild<QLabel *>(labelName);
+                        QTextEdit *boxStats = findChild<QTextEdit *>(statsName);
+
+                        // check if the current electrical node exists
+                        if (wkgElecPtr != nullptr)
+                        {
+                            // update label with name if it exists
+                            if (boxLabel) boxLabel->setText(" " + wkgElecPtr->name);
+
+                            // update stats with voltage and amps if it exists
+                            if (boxStats) boxStats->setPlainText("Voltage: " + QString::number(wkgElecPtr->voltage) +
+                                                       '\n' + "Amps: " + QString::number(wkgElecPtr->amps));
+
+                            // check if the box exists, and show it
+                            if(widget) widget->show();
+
+                            // move to next electrical node
+                            wkgElecPtr = wkgElecPtr->nextNode;
+                        }
+                        // else, there are no more electrical nodes
+                        else
+                        {
+                            // break once we are done
+                            break;
+                        }
                     }
                 }
 
@@ -422,8 +476,11 @@ void MainWindow::readSerialData()
 
                 qDebug() <<  "Message id: event dump" << qPrintable("\n");
 
-                // load all events to event linked list
-                events->loadEventDump(message);
+                // load all events to event linked list, notify if fail
+                if (!events->loadEventDump(message))
+                {
+                    notifyUser("Invalid event dump received", message, true);
+                }
 
                 // create log file
                 events->outputToLogFile( autosaveLogFile );
@@ -440,8 +497,11 @@ void MainWindow::readSerialData()
 
                 qDebug() <<  "Message id: error dump" << qPrintable("\n");
 
-                // load all errors to error linked list
-                events->loadErrorDump(message);
+                // load all errors to error linked list, notify if fail
+                if (!events->loadErrorDump(message))
+                {
+                    notifyUser("Invalid error dump received", message, true);
+                }
 
                 // create log file
                 events->outputToLogFile( autosaveLogFile );
@@ -457,49 +517,74 @@ void MainWindow::readSerialData()
             case CLEAR_ERROR:
                 qDebug() << "Message id: clear error " << message << qPrintable("\n");
 
-                //update cleared status of error with given id
-                events->clearError(message.left(message.indexOf(DELIMETER)).toInt());
+                //update cleared status of error with given id, notify if fail
+                if (!events->clearError(message.left(message.indexOf(DELIMETER)).toInt()))
+                {
+                    notifyUser("Failed to clear error", message, true);
+                }
+                //otherwise success
+                else
+                {
+                    #if DEV_MODE
+                        //update the cleared error selection box in dev tools (can be removed when dev page is removed)
+                        update_non_cleared_error_selection();
+                    #endif
 
-                #if DEV_MODE
-                    //update the cleared error selection box in dev tools (can be removed when dev page is removed)
-                    update_non_cleared_error_selection();
-                #endif
-
-                //refresh the events output with newly cleared error
-                refreshEventsOutput();
+                    //refresh the events output with newly cleared error
+                    refreshEventsOutput();
+                }
 
                 break;
 
             case BEGIN:
 
-                //load controller crc and version
-                status->loadVersionData(message);
+                qDebug() << "Message id: begin " << message << qPrintable("\n");
 
-                //set connection status to connected and update related objects
-                updateConnectionStatus(true);
+                //load controller crc and version, check for fail
+                if (!status->loadVersionData(message))
+                {
+                    //report
+                    notifyUser("Invalid 'begin' message received", message, true);
 
-                // update controller version and crc on gui
-                ui->controllerLabel->setText("Controller Version: " + status->version);
-                ui->crcLabel->setText("CRC: " + status->crc);
+                    //end connection attempt
+                    ddmCon->transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + DELIMETER + "\n");
+                }
+                //otherwise success
+                else
+                {
+                    notifyUser("Handshake complete", "Session start", false);
 
-                //check for empty logfile location and sets to default
-                setup_logfile_location();
+                    //set connection status to connected and update related objects
+                    updateConnectionStatus(true);
 
-                qDebug() << "Begin signal received, handshake complete";
+                    // update controller version and crc on gui
+                    ui->controllerLabel->setText("Controller Version: " + status->version);
+                    ui->crcLabel->setText("CRC: " + status->crc);
+
+                    //init logfile location (user setting)
+                    setup_logfile_location();
+
+                    qDebug() << "Begin signal received, handshake complete";
+                }
 
                 break;
 
             case CLOSING_CONNECTION:
 
+                qDebug() << "Disconnect message received from Controller";
+
+                notifyUser("Controller disconnected.", "Session end", false);
+
                 //set connection status false and update related objects
                 updateConnectionStatus(false);
-
-                qDebug() << "Disconnect message received from Controller";
 
                 break;
 
             default:
                 qDebug() << "ERROR: message from controller is not recognized";
+
+                //report
+                notifyUser("Unrecognized message received", message, true);
 
                 break;
             }
@@ -511,6 +596,7 @@ void MainWindow::readSerialData()
         else
         {
             qDebug() << "Unrecognized serial message received : " << message;
+            notifyUser("Unrecognized serial message received", message, true);
         }
     }
 }
@@ -518,6 +604,15 @@ void MainWindow::readSerialData()
 //scans for available serial ports and adds them to ddm port selection box
 void MainWindow::setup_ddm_port_selection(int index)
 {
+    // Check and set initial value for "portName"
+    if (userSettings.value("portName").toString().isEmpty())
+        userSettings.setValue("portName", INITIAL_DDM_PORT);
+
+    //this is checked within the current index changed slot of ddm combo box
+    //start false prevents an accidental selection of the first
+    //index added.
+    allowPortSelection = false;
+
     // Fetch available serial ports and add their names to the combo box
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
     {
@@ -527,10 +622,15 @@ void MainWindow::setup_ddm_port_selection(int index)
         // Check if the current port name matches the one declared in settings
         if (portName == userSettings.value("portName").toString())
         {
+            //allow us to select this port
+            allowPortSelection = true;
+
             // If a match is found, set the current index of the combo box
             ui->ddm_port_selection->setCurrentIndex(ui->ddm_port_selection->count() - 1);
         }
     }
+    //initialization finished, allow port selection
+    allowPortSelection = true;
 }
 
 //makes all settings in connection settings uneditable (call when ddm connection
@@ -544,6 +644,7 @@ void MainWindow::disableConnectionChanges()
     ui->stop_bit_selection->setDisabled(true);
     ui->flow_control_selection->setDisabled(true);
     ui->load_events_from_logfile->setDisabled(true);
+    ui->restore_Button->setDisabled(true);
 }
 
 //makes all settings in connection settings editable (call when ddm connection
@@ -557,28 +658,7 @@ void MainWindow::enableConnectionChanges()
     ui->stop_bit_selection->setEnabled(true);
     ui->flow_control_selection->setEnabled(true);
     ui->load_events_from_logfile->setEnabled(true);
-}
-
-//support function, outputs usersettings values to qdebug
-void MainWindow::displaySavedSettings()
-{
-    #if DEV_MODE
-        logEmptyLine();
-    #endif
-    qDebug() << "Connection Settings Saved Cross Session:";
-    // Print the values of each setting
-    qDebug() << "DDM Port: " << userSettings.value("portName").toString();
-    #if DEV_MODE
-        qDebug() << "CSIM Port: " << userSettings.value("csimPortName").toString();
-    #endif
-    qDebug() << "baudRate:" << userSettings.value("baudRate").toString();
-    qDebug() << "dataBits:" << userSettings.value("dataBits").toString();
-    qDebug() << "parity:" << userSettings.value("parity").toString();
-    qDebug() << "stopBits:" << userSettings.value("stopBits").toString();
-    qDebug() << "flowControl:" << userSettings.value("flowControl").toString();
-    qDebug() << "logfile location: " << userSettings.value("logfileLocation").toString();
-    qDebug() << "Colored Event Output: " << userSettings.value("coloredEventOutput").toBool();
-    qDebug() << "Auto Save Limit: " << userSettings.value("autoSaveLimit").toInt() << Qt::endl;
+    ui->restore_Button->setEnabled(true);
 }
 
 //checks if user has setup a custom log file directory, if not, the default directory is selected
@@ -621,6 +701,7 @@ void MainWindow::setup_logfile_location()
     autosaveLogFile += QString::number(secsSinceEpoch) + "-logfile-A.txt";
 
     qDebug() << "Auto Save log file for this session: " << autosaveLogFile;
+    notifyUser("Auto save log set", autosaveLogFile, false);
 }
 
 //checks if the number of auto saved log files is greater than the user
@@ -708,47 +789,9 @@ void MainWindow::enforceAutoSaveLimit()
 //are loaded with Qt serial options.
 void MainWindow::setupSettings()
 {
-    int i;
-
-    //Connection Setttings
-
-    // Check and set initial value for "portName"
-    if (userSettings.value("portName").toString().isEmpty())
-        userSettings.setValue("portName", INITIAL_DDM_PORT);
-
-    #if DEV_MODE
-        // Check and set initial value for "csimPortName"
-        if (userSettings.value("csimPortName").toString().isEmpty())
-            userSettings.setValue("csimPortName", INITIAL_CSIM_PORT);
-    #endif
-
-    // Check and set initial value for "baudRate"
-    if (userSettings.value("baudRate").toString().isEmpty())
-        userSettings.setValue("baudRate", toString(INITIAL_BAUD_RATE));
-
-    // Check and set initial value for "dataBits"
-    if (userSettings.value("dataBits").toString().isEmpty())
-        userSettings.setValue("dataBits", toString(INITIAL_DATA_BITS));
-
-    // Check and set initial value for "parity"
-    if (userSettings.value("parity").toString().isEmpty())
-        userSettings.setValue("parity", toString(INITIAL_PARITY));
-
-    // Check and set initial value for "stopBits"
-    if (userSettings.value("stopBits").toString().isEmpty())
-        userSettings.setValue("stopBits", toString(INITIAL_STOP_BITS));
-
-    // Check and set initial value for "flowControl"
-    if (userSettings.value("flowControl").toString().isEmpty())
-        userSettings.setValue("flowControl", toString(INITIAL_FLOW_CONTROL));
-
-
-    //Misc. Settings
-
-
-    // Check if the setting exists and is valid
+    // Check if colored event setting does not exist
     if (!userSettings.contains("coloredEventOutput") || !userSettings.value("coloredEventOutput").isValid()) {
-        // If it doesn't exist or is not valid, set the default value
+        // set the default value
         userSettings.setValue("coloredEventOutput", INITIAL_COLORED_EVENTS_OUTPUT);
     }
 
@@ -758,9 +801,9 @@ void MainWindow::setupSettings()
     //set gui display to match
     ui->colored_events_output->setChecked(coloredEventOutput);
 
-    // Check if the setting exists and is valid
+    // Check if the setting does not exist
     if (!userSettings.contains("autoSaveLimit") || !userSettings.value("autoSaveLimit").isValid()) {
-        // If it doesn't exist or is not valid, set the default value
+        // set the default value
         userSettings.setValue("autoSaveLimit", INITIAL_AUTO_SAVE_LIMIT);
     }
 
@@ -770,68 +813,34 @@ void MainWindow::setupSettings()
     //update gui to match
     ui->auto_save_limit->setValue(autoSaveLimit);
 
-    // Display user settings
-    displaySavedSettings();
+    //check if the timeout setting does not exist
+    if (!userSettings.contains("connectionTimeout") || !userSettings.value("connectionTimeout").isValid()) {
+        // If it doesn't exist or is not valid, set the default value
+        userSettings.setValue("connectionTimeout", INITIAL_CONNECTION_TIMEOUT);
+    }
+
+    //set session variable based on setting
+    connectionTimeout = userSettings.value("connectionTimeout").toInt();
+
+    //update gui to match
+    ui->connection_timeout->setValue(connectionTimeout);
+
+    //sets up text options in connection settings drop down boxes
+    setupConnectionPage();
 
     //setup port name selections on gui (scans for available ports)
     setup_ddm_port_selection(0);
+
     #if DEV_MODE
+        //load port names for csim port selection
         setup_csim_port_selection(0);
+
+        // Display user settings
+        displaySavedSettings();
     #endif
 
-    // Add baud rate settings
-    ui->baud_rate_selection->addItem(toString(QSerialPort::Baud1200));
-    ui->baud_rate_selection->addItem(toString(QSerialPort::Baud2400));
-    ui->baud_rate_selection->addItem(toString(QSerialPort::Baud4800));
-    ui->baud_rate_selection->addItem(toString(QSerialPort::Baud9600));
-    ui->baud_rate_selection->addItem(toString(QSerialPort::Baud19200));
-    ui->baud_rate_selection->addItem(toString(QSerialPort::Baud38400));
-    ui->baud_rate_selection->addItem(toString(QSerialPort::Baud57600));
-    ui->baud_rate_selection->addItem(toString(QSerialPort::Baud115200));
-
-    // Add data bits settings
-    ui->data_bits_selection->addItem(toString(QSerialPort::Data5));
-    ui->data_bits_selection->addItem(toString(QSerialPort::Data6));
-    ui->data_bits_selection->addItem(toString(QSerialPort::Data7));
-    ui->data_bits_selection->addItem(toString(QSerialPort::Data8));
-
-    // Add parity settings
-    ui->parity_selection->addItem(toString(QSerialPort::NoParity));
-    ui->parity_selection->addItem(toString(QSerialPort::EvenParity));
-    ui->parity_selection->addItem(toString(QSerialPort::OddParity));
-    ui->parity_selection->addItem(toString(QSerialPort::SpaceParity));
-    ui->parity_selection->addItem(toString(QSerialPort::MarkParity));
-
-    // Add stop bits settings
-    ui->stop_bit_selection->addItem(toString(QSerialPort::OneStop));
-    ui->stop_bit_selection->addItem(toString(QSerialPort::OneAndHalfStop));
-    ui->stop_bit_selection->addItem(toString(QSerialPort::TwoStop));
-
-    // Add flow control settings
-    ui->flow_control_selection->addItem(toString(QSerialPort::NoFlowControl));
-    ui->flow_control_selection->addItem(toString(QSerialPort::HardwareControl));
-    ui->flow_control_selection->addItem(toString(QSerialPort::SoftwareControl));
-
-    // Set initial values for the q combo boxes
-    ui->baud_rate_selection->setCurrentIndex(ui->baud_rate_selection->findText(userSettings.value("baudRate").toString()));
-    ui->data_bits_selection->setCurrentIndex(ui->data_bits_selection->findText(userSettings.value("dataBits").toString()));
-    ui->parity_selection->setCurrentIndex(ui->parity_selection->findText(userSettings.value("parity").toString()));
-    ui->stop_bit_selection->setCurrentIndex(ui->stop_bit_selection->findText(userSettings.value("stopBits").toString()));
-    ui->flow_control_selection->setCurrentIndex(ui->flow_control_selection->findText(userSettings.value("flowControl").toString()));
-
-
-    // Set initial stop bits value
-    switch (fromStringStopBits(userSettings.value("stopBits").toString())) {
-    case QSerialPort::OneStop:
-        ui->stop_bit_selection->setCurrentIndex(ui->stop_bit_selection->findText(toString(QSerialPort::OneStop)));
-        break;
-    case QSerialPort::OneAndHalfStop:
-        ui->stop_bit_selection->setCurrentIndex(ui->stop_bit_selection->findText(toString(QSerialPort::OneAndHalfStop)));
-        break;
-    case QSerialPort::TwoStop:
-        ui->stop_bit_selection->setCurrentIndex(ui->stop_bit_selection->findText(toString(QSerialPort::TwoStop)));
-        break;
-    }
+    //in case settings were loaded from initial constants, sync settings to registry
+    userSettings.sync();
 }
 
 //displays the current values of the status class onto the gui status page
@@ -859,49 +868,58 @@ void MainWindow::updateStatusDisplay()
 
     //update feed position
     ui->feedPosition->setValue(status->feedPosition);
+    ui->feed_position_label->setText(FEED_POSITION_NAMES[status->feedPosition/FEED_POSITION_INCREMENT_VALUE]);
 
-    //update trigger 1 light
+    //update trigger 1
     switch (status->trigger1)
     {
     case ENGAGED:
         ui->trigger1->setPixmap(GREEN_LIGHT);
+        ui->trigger1_label->setText("Engaged");
 
         break;
 
     case DISENGAGED:
         ui->trigger1->setPixmap(RED_LIGHT);
+        ui->trigger1_label->setText("Disengaged");
 
         break;
 
     default:
         ui->trigger1->setPixmap(BLANK_LIGHT);
+        ui->trigger1_label->setText("NA");
     }
 
-    //update trigger 2 light
+    //update trigger 2
     switch (status->trigger2)
     {
         case ENGAGED:
             ui->trigger2->setPixmap(GREEN_LIGHT);
+            ui->trigger2_label->setText("Engaged");
 
             break;
 
         case DISENGAGED:
             ui->trigger2->setPixmap(RED_LIGHT);
+            ui->trigger2_label->setText("Disengaged");
 
             break;
 
         default:
             ui->trigger2->setPixmap(BLANK_LIGHT);
+            ui->trigger2_label->setText("NA");
     }
 
     //update the armed light
     if(status->armed)
     {
         ui->armedOutput->setPixmap(GREEN_LIGHT);
+        ui->armed_label->setText("Armed");
     }
     else
     {
         ui->armedOutput->setPixmap(RED_LIGHT);
+        ui->armed_label->setText("Disarmed");
     }
 
     ui->fireRateOutput->setText(QString::number(status->firingRate));
@@ -939,33 +957,11 @@ void MainWindow::updateStatusDisplay()
 // method updates the running elapsed controller time
 void MainWindow::updateElapsedTime()
 {
-    // get the current timestamp
-    QString timestamp = ui->elapsedTime->toPlainText();
-
-    // extract the time, remove "ELapsed Time: "
-    timestamp = timestamp.mid(14); // assuming this will always be in position 14, it should never change
-
-    // split up the day and time components
-    // this is required because a QTime object does not support days (more than 24hrs)
-    QStringList timeParts = timestamp.split(":");
-    int days = timeParts.takeFirst().toInt(); // removes the days from the list as well
-
-    // convert to QTime and add one second
-    QTime currentTime = QTime::fromString(timeParts.join(":"), "HH:mm:ss");
-    currentTime = currentTime.addSecs(1);
-
-    // check if the time exceeds 23:59:59
-    // when it does, the entire timestamp will be reset since QTime can not exceed 24 hours
-    if (currentTime.hour() == 0 && currentTime.minute() == 0 && currentTime.second() == 0)
-    {
-        // increment number of days
-        days++;
-    }
+    // add 1 second to timer
+    status->elapsedControllerTime = status->elapsedControllerTime.addSecs(1);
 
     // update the GUI
-    status->elapsedControllerTime = QString::number(days) + ":" + currentTime.toString("HH:mm:ss");
-    ui->elapsedTime->setText("Elapsed Time: " + QString::number(days) + ":" + currentTime.toString("HH:mm:ss"));
-    ui->elapsedTime->setAlignment(Qt::AlignRight);
+    ui->elapsedTime->setText(status->elapsedControllerTime.toString("HH:mm:ss"));
 }
 
 // method updates the elapsed time since last message received to DDM
@@ -973,7 +969,6 @@ void MainWindow::updateTimeSinceLastMessage()
 {
     // initialize variables
     QTime elapsedTime;
-    QString message;
 
     // calculate time elapsed since the last time DDM received a message
     QDateTime currentTime = QDateTime::currentDateTime();
@@ -991,6 +986,12 @@ void MainWindow::updateTimeSinceLastMessage()
     {
         qDebug() << "Error: either datetime is invalid.\n";
     }
+    //check if timeout was reached
+    else if (elapsedMs >= connectionTimeout)
+    {
+        //run disconnect method
+        on_handshake_button_clicked();
+    }
     // assume positive elapsed time
     else
     {
@@ -998,9 +999,8 @@ void MainWindow::updateTimeSinceLastMessage()
         elapsedTime = QTime(0, 0, 0).addMSecs(elapsedMs);
 
         // update gui
-        message = "Time Since Last Message: " + elapsedTime.toString("HH:mm:ss");
-        ui->DDMTimer->setText(message);
-        ui->DDMTimer->setAlignment(Qt::AlignRight);
+        ui->DDMTimer->setText(elapsedTime.toString("HH:mm:ss"));
+        //ui->DDMTimer->setAlignment(Qt::AlignRight);
     }
 }
 
@@ -1137,153 +1137,71 @@ void MainWindow::refreshEventsOutput()
     }
 }
 
-//======================================================================================
-// To string methods for QSerialPortEnumeratedValues
-//======================================================================================
-// Convert QSerialPort::BaudRate to string
-QString MainWindow::toString(QSerialPort::BaudRate baudRate) {
-    switch (baudRate) {
-    case QSerialPort::Baud1200: return "1200";
-    case QSerialPort::Baud2400: return "2400";
-    case QSerialPort::Baud4800: return "4800";
-    case QSerialPort::Baud9600: return "9600";
-    case QSerialPort::Baud19200: return "19200";
-    case QSerialPort::Baud38400: return "38400";
-    case QSerialPort::Baud57600: return "57600";
-    case QSerialPort::Baud115200: return "115200";
-    default:
-        // Invalid input, throw an exception with the parameter value
-        throw std::invalid_argument("Invalid baud rate enum value: " + QString::number(baudRate).toStdString());
-    }
+//overloaded function for convenience
+void MainWindow::notifyUser(QString notificationText, bool error)
+{
+    notifyUser(notificationText, "", error);
 }
 
-QString MainWindow::toString(QSerialPort::DataBits dataBits) {
-    switch (dataBits) {
-    case QSerialPort::Data5: return "5";
-    case QSerialPort::Data6: return "6";
-    case QSerialPort::Data7: return "7";
-    case QSerialPort::Data8: return "8";
-    default:
-        // Invalid input, throw an exception with the parameter value
-        throw std::invalid_argument("Invalid data bits enum value: " + QString::number(dataBits).toStdString());
+//renders a notification for the user that lasts 3 seconds. Updates the
+//notification page button to indicate unread messages. bool urgent is used to
+//toggle the notification outline from orange to red
+void MainWindow::notifyUser(QString notificationText, QString logText, bool error)
+{
+    // Get the current timestamp
+    QString timeStamp = QDateTime::currentDateTime().toString("[hh:mm:ss] ");
+
+    QString notificationRichText = "<p style='color: white; font-size: 16px'>" + timeStamp +
+                                   " " + "<span style='color: ";
+
+    QString popUpStyle = "border: 3px solid ";
+
+    // get new lines as literals
+    notificationText.replace("\n", "\\n");
+    logText.replace("\n", "\\n");
+
+    if (error)
+    {
+        notificationRichText += "red";
+        popUpStyle += "red";
     }
+    else
+    {
+        notificationRichText += "green";
+        popUpStyle += "green";
+    }
+    notificationRichText += "; font-size: 16px'>" + notificationText;
+    popUpStyle += "; color: white; text-align: center; font-size: 16px;";
+
+    if (logText != "")
+    {
+        notificationRichText += " : " + logText;
+    }
+    notificationRichText+= + "</span></p>";
+
+    //set pop up style
+    ui->notificationPopUp->setStyleSheet(popUpStyle);
+
+    //add full notification to notification page output
+    ui->notificationOutput->append(notificationRichText);
+
+    //display notification on "navbar"
+    ui->notificationPopUp->setText(notificationText);
+
+    //check if user is on notification page, and if this is an error
+    if (ui->Flow_Label->currentIndex() != 6 && error)
+    {
+        //update the notification icon to get user attention
+        ui->NotificationPageButton->setStyleSheet("border-image: url(://resources/Images/newNotification.png);");
+    }
+
+    // Create a QTimer to clear the notification pop-up after NOTIFICATION_DURATION
+    QTimer::singleShot(NOTIFICATION_DURATION, this, [this]() {
+        ui->notificationPopUp->setStyleSheet("background-color: transparent; border: none;");
+        ui->notificationPopUp->clear();
+    });
 }
 
-QString MainWindow::toString(QSerialPort::Parity parity) {
-    switch (parity) {
-    case QSerialPort::NoParity: return "No Parity";
-    case QSerialPort::EvenParity: return "Even Parity";
-    case QSerialPort::OddParity: return "Odd Parity";
-    case QSerialPort::SpaceParity: return "Space Parity";
-    case QSerialPort::MarkParity: return "Mark Parity";
-    default:
-        // Invalid input, throw an exception with the parameter value
-        throw std::invalid_argument("Invalid parity enum value: " + QString::number(parity).toStdString());
-    }
-}
-
-QString MainWindow::toString(QSerialPort::StopBits stopBits) {
-    switch (stopBits) {
-    case QSerialPort::OneStop: return "1";
-    case QSerialPort::OneAndHalfStop: return "1.5";
-    case QSerialPort::TwoStop: return "2";
-    default:
-        // Invalid input, throw an exception with the parameter value
-        throw std::invalid_argument("Invalid stop bits enum value: " + QString::number(stopBits).toStdString());
-    }
-}
-
-QString MainWindow::toString(QSerialPort::FlowControl flowControl) {
-    switch (flowControl) {
-    case QSerialPort::NoFlowControl: return "No Flow Control";
-    case QSerialPort::HardwareControl: return "Hardware Control";
-    case QSerialPort::SoftwareControl: return "Software Control";
-    default:
-        // Invalid input, throw an exception with the parameter value
-        throw std::invalid_argument("Invalid flow control enum value: " + QString::number(flowControl).toStdString());
-    }
-}
-
-
-
-//======================================================================================
-//From string methods for QSerialPortEnumeratedValues
-//======================================================================================
-QSerialPort::BaudRate MainWindow::fromStringBaudRate(QString baudRateStr) {
-    if (baudRateStr == "1200") {
-        return QSerialPort::Baud1200;
-    } else if (baudRateStr == "2400") {
-        return QSerialPort::Baud2400;
-    } else if (baudRateStr == "4800") {
-        return QSerialPort::Baud4800;
-    } else if (baudRateStr == "9600") {
-        return QSerialPort::Baud9600;
-    } else if (baudRateStr == "19200") {
-        return QSerialPort::Baud19200;
-    } else if (baudRateStr == "38400") {
-        return QSerialPort::Baud38400;
-    } else if (baudRateStr == "57600") {
-        return QSerialPort::Baud57600;
-    } else if (baudRateStr == "115200") {
-        return QSerialPort::Baud115200;
-    } else {
-        throw std::invalid_argument("Invalid baud rate string: " + baudRateStr.toStdString());
-    }
-}
-
-QSerialPort::DataBits MainWindow::fromStringDataBits(QString dataBitsStr) {
-    if (dataBitsStr == "5") {
-        return QSerialPort::Data5;
-    } else if (dataBitsStr == "6") {
-        return QSerialPort::Data6;
-    } else if (dataBitsStr == "7") {
-        return QSerialPort::Data7;
-    } else if (dataBitsStr == "8") {
-        return QSerialPort::Data8;
-    } else {
-        throw std::invalid_argument("Invalid data bits string: " + dataBitsStr.toStdString());
-    }
-}
-
-QSerialPort::Parity MainWindow::fromStringParity(QString parityStr) {
-    if (parityStr == "No Parity") {
-        return QSerialPort::NoParity;
-    } else if (parityStr == "Even Parity") {
-        return QSerialPort::EvenParity;
-    } else if (parityStr == "Odd Parity") {
-        return QSerialPort::OddParity;
-    } else if (parityStr == "Space Parity") {
-        return QSerialPort::SpaceParity;
-    } else if (parityStr == "Mark Parity") {
-        return QSerialPort::MarkParity;
-    } else {
-        throw std::invalid_argument("Invalid parity string: " + parityStr.toStdString());
-    }
-}
-
-QSerialPort::StopBits MainWindow::fromStringStopBits(QString stopBitsStr) {
-    if (stopBitsStr == "1") {
-        return QSerialPort::OneStop;
-    } else if (stopBitsStr == "1.5") {
-        return QSerialPort::OneAndHalfStop;
-    } else if (stopBitsStr == "2") {
-        return QSerialPort::TwoStop;
-    } else {
-        throw std::invalid_argument("Invalid stop bits string: " + stopBitsStr.toStdString());
-    }
-}
-
-QSerialPort::FlowControl MainWindow::fromStringFlowControl(QString flowControlStr) {
-    if (flowControlStr == "No Flow Control") {
-        return QSerialPort::NoFlowControl;
-    } else if (flowControlStr == "Hardware Control") {
-        return QSerialPort::HardwareControl;
-    } else if (flowControlStr == "Software Control") {
-        return QSerialPort::SoftwareControl;
-    } else {
-        throw std::invalid_argument("Invalid flow control string: " + flowControlStr.toStdString());
-    }
-}
 
 //======================================================================================
 //DEV_MODE exclusive methods
@@ -1293,6 +1211,10 @@ QSerialPort::FlowControl MainWindow::fromStringFlowControl(QString flowControlSt
 //scans for available serial ports and adds them to csim port selection box
 void MainWindow::setup_csim_port_selection(int index)
 {
+    // Check and set initial value for "csimPortName"
+    if (userSettings.value("csimPortName").toString().isEmpty())
+        userSettings.setValue("csimPortName", INITIAL_CSIM_PORT);
+
     // Fetch available serial ports and add their names to the combo box
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
     {
@@ -1331,14 +1253,6 @@ void MainWindow::update_non_cleared_error_selection()
         }
     }
 }
-//sends user to developer page when clicked
-void MainWindow::on_DevPageButton_clicked()
-{
-    qDebug() << "Dev Page clicked";
-    ui->Flow_Label->setCurrentIndex(1);
-    resetPageButton();
-    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
-}
 
 //writes empty line to qdebug
 void MainWindow::logEmptyLine()
@@ -1351,6 +1265,24 @@ void MainWindow::logEmptyLine()
 
     //enable custom message format
     qSetMessagePattern(QDEBUG_OUTPUT_FORMAT);
+}
+
+//support function, outputs usersettings values to qdebug
+void MainWindow::displaySavedSettings()
+{
+    logEmptyLine();
+    qDebug() << "Connection Settings Saved Cross Session:";
+    // Print the values of each setting
+    qDebug() << "DDM Port: " << userSettings.value("portName").toString();
+    qDebug() << "CSIM Port: " << userSettings.value("csimPortName").toString();
+    qDebug() << "baudRate:" << userSettings.value("baudRate").toString();
+    qDebug() << "dataBits:" << userSettings.value("dataBits").toString();
+    qDebug() << "parity:" << userSettings.value("parity").toString();
+    qDebug() << "stopBits:" << userSettings.value("stopBits").toString();
+    qDebug() << "flowControl:" << userSettings.value("flowControl").toString();
+    qDebug() << "logfile location: " << userSettings.value("logfileLocation").toString();
+    qDebug() << "Colored Event Output: " << userSettings.value("coloredEventOutput").toBool();
+    qDebug() << "Auto Save Limit: " << userSettings.value("autoSaveLimit").toInt() << Qt::endl;
 }
 #endif
 
