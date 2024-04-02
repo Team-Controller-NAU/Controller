@@ -11,5 +11,6 @@
         <file>Images/notificationBell.png</file>
         <file>Images/purpleSettings.png</file>
         <file>Images/newNotification.png</file>
+        <file>Images/white-down-arrow.png</file>
     </qresource>
 </RCC>

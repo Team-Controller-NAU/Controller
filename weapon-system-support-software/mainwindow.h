@@ -111,7 +111,6 @@ private slots:
     void resetPageButton();
     void disableConnectionChanges();
     void enableConnectionChanges();
-    void resetFiringMode();
     void updateEventsOutput(QString outString, bool error, bool cleared);
     //overloaded function
     void updateEventsOutput(EventNode *event);

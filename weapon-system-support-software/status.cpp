@@ -161,7 +161,26 @@ void Status::randomize(bool secondTrigger)
 
     controllerState = static_cast<ControllerState>(QRandomGenerator::global()->bounded(0, NUM_CONTROLLER_STATE));
 
-    firingMode = static_cast<FiringMode>(QRandomGenerator::global()->bounded(0, NUM_FIRING_MODE));
+    //firingMode = static_cast<FiringMode>(QRandomGenerator::global()->bounded(0, NUM_FIRING_MODE));
+
+    switch(firingMode)
+    {
+        case SAFE:
+            firingMode = SINGLE;
+            break;
+        case SINGLE:
+            firingMode = BURST;
+            break;
+        case BURST:
+            firingMode = FULL_AUTO;
+            break;
+        case FULL_AUTO:
+            firingMode = SAFE;
+            break;
+        default:
+            firingMode = SAFE;
+            break;
+    }
 
     //new randomization method to iterate feed position smoothly
     switch (feedPosition)
