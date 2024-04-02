@@ -41,9 +41,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     //set status labels invisable
-    ui->trigger1_label->setVisible(false);
-    ui->trigger2_label->setVisible(false);
-    ui->armed_label->setVisible(false);
     ui->feed_position_label->setVisible(false);
 
     //setup user settings and init settings related gui elements
@@ -842,29 +839,12 @@ void MainWindow::setupSettings()
 //displays the current values of the status class onto the gui status page
 void MainWindow::updateStatusDisplay()
 {
-    resetFiringMode();
-
-    //update font color of the active firing mode
-    if(status->firingMode == SAFE)
-    {
-        ui->safeLabel->setStyleSheet("color: #FF7518;font: 20pt Segoe UI;");
-    }
-    else if(status->firingMode == SINGLE)
-    {
-        ui->singleLabel->setStyleSheet("color: #FF7518;font: 20pt Segoe UI;");
-    }
-    else if(status->firingMode == BURST)
-    {
-        ui->burstLabel->setStyleSheet("color: #FF7518;font: 20pt Segoe UI;");
-    }
-    else
-    {
-        ui->automaticLabel->setStyleSheet("color: #FF7518;font: 20pt Segoe UI;");
-    }
-
     //update feed position
     ui->feedPosition->setValue(status->feedPosition);
     ui->feed_position_label->setText(FEED_POSITION_NAMES[status->feedPosition/FEED_POSITION_INCREMENT_VALUE]);
+    ui->feed_position_label->setAlignment(Qt::AlignCenter);
+
+    ui->fireMode->setValue(status->firingMode);
 
     //update trigger 1
     switch (status->trigger1)
@@ -872,12 +852,14 @@ void MainWindow::updateStatusDisplay()
     case ENGAGED:
         ui->trigger1->setPixmap(GREEN_LIGHT);
         ui->trigger1_label->setText("Engaged");
+        ui->trigger1_label->setAlignment(Qt::AlignCenter);
 
         break;
 
     case DISENGAGED:
         ui->trigger1->setPixmap(RED_LIGHT);
         ui->trigger1_label->setText("Disengaged");
+        ui->trigger1_label->setAlignment(Qt::AlignCenter);
 
         break;
 
@@ -892,12 +874,14 @@ void MainWindow::updateStatusDisplay()
         case ENGAGED:
             ui->trigger2->setPixmap(GREEN_LIGHT);
             ui->trigger2_label->setText("Engaged");
+            ui->trigger2_label->setAlignment(Qt::AlignCenter);
 
             break;
 
         case DISENGAGED:
             ui->trigger2->setPixmap(RED_LIGHT);
             ui->trigger2_label->setText("Disengaged");
+            ui->trigger2_label->setAlignment(Qt::AlignCenter);
 
             break;
 
@@ -911,11 +895,13 @@ void MainWindow::updateStatusDisplay()
     {
         ui->armedOutput->setPixmap(GREEN_LIGHT);
         ui->armed_label->setText("Armed");
+        ui->armed_label->setAlignment(Qt::AlignCenter);
     }
     else
     {
         ui->armedOutput->setPixmap(RED_LIGHT);
         ui->armed_label->setText("Disarmed");
+        ui->armed_label->setAlignment(Qt::AlignCenter);
     }
 
     ui->fireRateOutput->setText(QString::number(status->firingRate));
@@ -958,6 +944,7 @@ void MainWindow::updateElapsedTime()
 
     // update the GUI
     ui->elapsedTime->setText(status->elapsedControllerTime.toString("HH:mm:ss"));
+    //ui->elapsedTime->setAlignment(Qt::AlignLeft);
 }
 
 // method updates the elapsed time since last message received to DDM
@@ -998,14 +985,6 @@ void MainWindow::updateTimeSinceLastMessage()
         ui->DDMTimer->setText(elapsedTime.toString("HH:mm:ss"));
         //ui->DDMTimer->setAlignment(Qt::AlignRight);
     }
-}
-
-void MainWindow::resetFiringMode()
-{
-    ui->automaticLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
-    ui->burstLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
-    ui->safeLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
-    ui->singleLabel->setStyleSheet("color: rgb(255, 255, 255);font: 20pt Segoe UI;");
 }
 
 //overloaded function to add simplicity when possible
@@ -1101,6 +1080,8 @@ void MainWindow::updateEventsOutput(QString outString, bool error, bool cleared)
         // update cleared errors gui
         ui->ClearedErrorsOutput->setText(QString::number(events->totalCleared));
         ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
+        ui->statusClearedErrors->setText(QString::number(events->totalCleared));
+        ui->statusClearedErrors->setAlignment(Qt::AlignCenter);
     }
     else
     {

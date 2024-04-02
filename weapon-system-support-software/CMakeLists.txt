@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.5)
 
 project(WSSS VERSION 0.1 LANGUAGES CXX)
 
+#set DEV_MODE to 1 to compile for dev release
+#set DEV_MODE to 0 to compile for user release
+add_compile_definitions(DEV_MODE=1)
+
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -35,6 +39,8 @@ set(PROJECT_SOURCES
     feedposition.cpp
     feedposition.h
     mainwindow_connection_settings.cpp
+    firemode.h
+    firemode.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -42,8 +48,6 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         resources.qrc
-
-
     )
 else()
     if(ANDROID)

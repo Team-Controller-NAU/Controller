@@ -250,6 +250,8 @@ void CSim::run()
         //manually set feed position to starting val
         status->feedPosition = FEEDING;
 
+        status->firingMode = SAFE;
+
         // Get time based seed for rng
         qint64 seed = QDateTime::currentMSecsSinceEpoch();
 
