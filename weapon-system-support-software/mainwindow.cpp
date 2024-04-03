@@ -16,6 +16,9 @@ MainWindow::MainWindow(QWidget *parent)
     //timer is used to repeatedly transmit handshake signals
     handshakeTimer( new QTimer(this) ),
 
+    //timer is used to hide notifications some time after they are displayed
+    notificationTimer(new QTimer(this)),
+
     // timer is used to update last message received time
     lastMessageTimer( new QTimer(this) ),
 
@@ -86,6 +89,13 @@ MainWindow::MainWindow(QWidget *parent)
     //connect handshake function to a timer. After each interval handshake will be called.
     //this is necessary to prevent the gui from freezing. signals stop when timer is stoped
     connect(handshakeTimer, &QTimer::timeout, this, &MainWindow::handshake);
+
+    //connect clear notification process to the notification timer. If run, the process
+    //will trigger after a given timeout
+    connect(notificationTimer, &QTimer::timeout, this, [this]() {
+        ui->notificationPopUp->setStyleSheet("background-color: transparent; border: none;");
+        ui->notificationPopUp->clear();
+    });
 
     // connect update elapsed time function to a timer
     lastMessageTimer->setInterval(ONE_SECOND);
@@ -229,6 +239,9 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
                                             "QPushButton::pressed { background-color: #76efae;}");
         ui->connectionStatus->setPixmap(RED_LIGHT);
         ui->connectionLabel->setText("Disconnected ");
+
+        //output session stats
+        notifyUser("Session statistics ready", getSessionStatistics(), false);
     }
 }
 
@@ -610,6 +623,9 @@ void MainWindow::setup_ddm_port_selection(int index)
     //index added.
     allowPortSelection = false;
 
+    //clear any current selections
+    ui->ddm_port_selection->clear();
+
     // Fetch available serial ports and add their names to the combo box
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())
     {
@@ -642,6 +658,7 @@ void MainWindow::disableConnectionChanges()
     ui->flow_control_selection->setDisabled(true);
     ui->load_events_from_logfile->setDisabled(true);
     ui->restore_Button->setDisabled(true);
+    ui->refresh_serial_port_selections->setDisabled(true);
 }
 
 //makes all settings in connection settings editable (call when ddm connection
@@ -656,6 +673,7 @@ void MainWindow::enableConnectionChanges()
     ui->flow_control_selection->setEnabled(true);
     ui->load_events_from_logfile->setEnabled(true);
     ui->restore_Button->setEnabled(true);
+    ui->refresh_serial_port_selections->setEnabled(true);
 }
 
 //checks if user has setup a custom log file directory, if not, the default directory is selected
@@ -948,7 +966,6 @@ void MainWindow::updateElapsedTime()
 
     // update the GUI
     ui->elapsedTime->setText(status->elapsedControllerTime.toString("HH:mm:ss"));
-    //ui->elapsedTime->setAlignment(Qt::AlignLeft);
 }
 
 // method updates the elapsed time since last message received to DDM
@@ -987,7 +1004,6 @@ void MainWindow::updateTimeSinceLastMessage()
 
         // update gui
         ui->DDMTimer->setText(elapsedTime.toString("HH:mm:ss"));
-        //ui->DDMTimer->setAlignment(Qt::AlignRight);
     }
 }
 
@@ -1139,10 +1155,10 @@ void MainWindow::notifyUser(QString notificationText, QString logText, bool erro
 
     // get new lines as literals
     notificationText.replace("\n", "\\n");
-    logText.replace("\n", "\\n");
 
     if (error)
     {
+        logText.replace("\n", "\\n");
         notificationRichText += "red";
         popUpStyle += "red";
     }
@@ -1176,13 +1192,19 @@ void MainWindow::notifyUser(QString notificationText, QString logText, bool erro
         ui->NotificationPageButton->setStyleSheet("border-image: url(://resources/Images/newNotification.png);");
     }
 
-    // Create a QTimer to clear the notification pop-up after NOTIFICATION_DURATION
-    QTimer::singleShot(NOTIFICATION_DURATION, this, [this]() {
-        ui->notificationPopUp->setStyleSheet("background-color: transparent; border: none;");
-        ui->notificationPopUp->clear();
-    });
+    //stop old timer if running
+    notificationTimer->stop();
+
+    //give fresh timeout to avoid premature notification clearing
+    notificationTimer->start(NOTIFICATION_DURATION);
 }
 
+QString MainWindow::getSessionStatistics()
+{
+    return "Session Duration: " + status->elapsedControllerTime.toString("HH:mm:ss") + ", Total Events: " +
+           QString::number(events->totalEvents) + ", Total Errors: " + QString::number(events->totalErrors)
+           + ", Non-cleared errors: " + QString::number(events->totalCleared);
+}
 
 //======================================================================================
 //DEV_MODE exclusive methods
@@ -1195,6 +1217,8 @@ void MainWindow::setup_csim_port_selection(int index)
     // Check and set initial value for "csimPortName"
     if (userSettings.value("csimPortName").toString().isEmpty())
         userSettings.setValue("csimPortName", INITIAL_CSIM_PORT);
+
+    ui->csim_port_selection->clear();
 
     // Fetch available serial ports and add their names to the combo box
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts())

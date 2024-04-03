@@ -286,7 +286,7 @@ void MainWindow::on_handshake_button_clicked()
     {
         qDebug() << "Sending disconnect message to controller" << Qt::endl;
 
-        ddmCon->transmit(QString::number(CLOSING_CONNECTION) + '\n');
+        ddmCon->transmit(QString::number(CLOSING_CONNECTION) + DELIMETER + "\n");
 
         if (ddmCon->connected)
         {
@@ -493,6 +493,17 @@ void MainWindow::on_auto_save_limit_valueChanged(int arg1)
 
     //write changes to the registry
     userSettings.sync();
+}
+
+//refreshes the serial port selections, useful in case an adaptor is plugged in after
+//program launch (also updates dev page selection if dev mode is active)
+void MainWindow::on_refresh_serial_port_selections_clicked()
+{
+    notifyUser("Scanning for serial ports", false);
+    setup_ddm_port_selection(0);
+    #if DEV_MODE
+        setup_csim_port_selection(0);
+    #endif
 }
 
 //======================================================================================
