@@ -16,6 +16,8 @@ private slots:
     void test_loadElecData_badInputLess();
     void test_loadElecData_badInputMore();
     void test_loadElecDump();
+    void test_loadElecDump_badInputLess();
+    void test_loadElecDump_badInputMore();
 };
 
 void tst_electrical::electrical_constructor()
@@ -159,6 +161,34 @@ void tst_electrical::test_loadElecDump()
     {
         QVERIFY(wkgNode != nullptr);
     }
+
+    delete elecObj;
+}
+
+void tst_electrical::test_loadElecDump_badInputLess()
+{
+    electrical *elecObj = new electrical();
+
+    QString dataMsg = " ";
+
+    bool result = elecObj->loadElecDump(dataMsg);
+    qDebug() << result;
+
+    QVERIFY(elecObj->loadElecDump(dataMsg) == false);
+
+    delete elecObj;
+}
+
+void tst_electrical::test_loadElecDump_badInputMore()
+{
+    electrical *elecObj = new electrical();
+
+    QString dataMsg = "name,17,17,17";
+
+    bool result = elecObj->loadElecDump(dataMsg);
+    qDebug() << result;
+
+    QVERIFY(elecObj->loadElecDump(dataMsg) == false);
 
     delete elecObj;
 }
