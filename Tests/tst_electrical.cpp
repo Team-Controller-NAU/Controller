@@ -15,6 +15,7 @@ private slots:
     void test_loadElecData();
     void test_loadElecData_badInputLess();
     void test_loadElecData_badInputMore();
+    void test_loadElecDump();
 };
 
 void tst_electrical::electrical_constructor()
@@ -106,6 +107,8 @@ void tst_electrical::test_loadElecData()
     {
         QVERIFY(wkgNode != nullptr);
     }
+
+    delete elecObj;
 }
 
 void tst_electrical::test_loadElecData_badInputLess()
@@ -115,6 +118,8 @@ void tst_electrical::test_loadElecData_badInputLess()
     QString dataMsg = "name, 17";
 
     QVERIFY(elecObj->loadElecData(dataMsg) == false);
+
+    delete elecObj;
 }
 
 void tst_electrical::test_loadElecData_badInputMore()
@@ -124,6 +129,38 @@ void tst_electrical::test_loadElecData_badInputMore()
     QString dataMsg = "name, name, 17, 38";
 
     QVERIFY(elecObj->loadElecData(dataMsg) == false);
+
+    delete elecObj;
+}
+
+void tst_electrical::test_loadElecDump()
+{
+    electrical *elecObj = new electrical();
+
+    QString dataMsg = "name,16,29,,name_two,14,12";
+
+    QVERIFY(elecObj->loadElecDump(dataMsg) == true);
+
+    electricalNode *wkgNode = elecObj->headNode;
+
+    if(wkgNode != nullptr)
+    {
+        QCOMPARE(wkgNode->name, "name");
+        QCOMPARE(wkgNode->voltage, 16);
+        QCOMPARE(wkgNode->amps, 29);
+
+        wkgNode = wkgNode->nextNode;
+
+        QCOMPARE(wkgNode->name, "name_two");
+        QCOMPARE(wkgNode->voltage, 14);
+        QCOMPARE(wkgNode->amps, 12);
+    }
+    else
+    {
+        QVERIFY(wkgNode != nullptr);
+    }
+
+    delete elecObj;
 }
 
 QTEST_MAIN(tst_electrical)
