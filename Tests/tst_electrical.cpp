@@ -12,6 +12,7 @@ private slots:
     void electrical_constructor();
     void test_addNode();
     void test_freeLL();
+    void test_loadElecData();
 };
 
 void tst_electrical::electrical_constructor()
@@ -80,6 +81,31 @@ void tst_electrical::test_freeLL()
     QVERIFY(elecObj->lastNode == nullptr);
 
     delete elecObj;
+}
+
+
+void tst_electrical::test_loadElecData()
+{
+    electrical *elecObj = new electrical();
+
+
+    QString dataMsg = "name, 17, 38";
+
+    QVERIFY(elecObj->loadElecData(dataMsg) == true);
+
+    electricalNode *wkgNode = elecObj->headNode;
+    //qDebug() << wkgNode->name;
+
+    if(wkgNode != nullptr)
+    {
+        QCOMPARE(wkgNode->name, "name");
+        QCOMPARE(wkgNode->voltage, 17);
+        QCOMPARE(wkgNode->amps, 38);
+    }
+    else
+    {
+        QVERIFY(wkgNode != nullptr);
+    }
 }
 
 QTEST_MAIN(tst_electrical)
