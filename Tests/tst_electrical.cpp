@@ -13,6 +13,8 @@ private slots:
     void test_addNode();
     void test_freeLL();
     void test_loadElecData();
+    void test_loadElecData_badInputLess();
+    void test_loadElecData_badInputMore();
 };
 
 void tst_electrical::electrical_constructor()
@@ -88,13 +90,11 @@ void tst_electrical::test_loadElecData()
 {
     electrical *elecObj = new electrical();
 
-
     QString dataMsg = "name, 17, 38";
 
     QVERIFY(elecObj->loadElecData(dataMsg) == true);
 
     electricalNode *wkgNode = elecObj->headNode;
-    //qDebug() << wkgNode->name;
 
     if(wkgNode != nullptr)
     {
@@ -106,6 +106,24 @@ void tst_electrical::test_loadElecData()
     {
         QVERIFY(wkgNode != nullptr);
     }
+}
+
+void tst_electrical::test_loadElecData_badInputLess()
+{
+    electrical *elecObj = new electrical();
+
+    QString dataMsg = "name, 17";
+
+    QVERIFY(elecObj->loadElecData(dataMsg) == false);
+}
+
+void tst_electrical::test_loadElecData_badInputMore()
+{
+    electrical *elecObj = new electrical();
+
+    QString dataMsg = "name, name, 17, 38";
+
+    QVERIFY(elecObj->loadElecData(dataMsg) == false);
 }
 
 QTEST_MAIN(tst_electrical)
