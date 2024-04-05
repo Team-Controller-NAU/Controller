@@ -665,6 +665,8 @@ void MainWindow::on_send_message_button_clicked()
 
         // Send message through csim port
         conn->transmit(userInput);
+
+        conn->serialPort.waitForReadyRead(1000);
     }
 }
 
