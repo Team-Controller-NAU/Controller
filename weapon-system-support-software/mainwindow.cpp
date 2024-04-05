@@ -559,6 +559,14 @@ void MainWindow::readSerialData()
                     //end connection attempt
                     ddmCon->transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + DELIMETER + "\n");
                 }
+                //if we didnt initiate a connection, tell controller to disconnect
+                else if (!handshakeTimer->isActive())
+                {
+                    notifyUser("Invalid connection attempt", "Controller attempted to connect despite no active handshake. Connection terminated", true);
+
+                    //end connection attempt
+                    ddmCon->transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + DELIMETER + "\n");
+                }
                 //otherwise success
                 else
                 {
