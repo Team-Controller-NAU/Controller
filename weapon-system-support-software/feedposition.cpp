@@ -88,7 +88,18 @@ void feedposition::paintEvent(QPaintEvent*)
 
     painter.setFont(textfont);
 
-    painter.drawText(QDial::height()/2.15,QDial::height()/2.15,QDial::height(),QDial::height(),0,QString::number(value));
+    if (value > 99)
+    {
+        painter.drawText(QDial::height()/2.15,QDial::height()/2.15,QDial::height(),QDial::height(),0,QString::number(value));
+    }
+    else if (value > 9)
+    {
+        painter.drawText((QDial::height()/2.15) + 2.5,QDial::height()/2.15,QDial::height(),QDial::height(),0,QString::number(value));
+    }
+    else
+    {
+        painter.drawText((QDial::height()/2.15) + 5,QDial::height()/2.15,QDial::height(),QDial::height(),0,QString::number(value));
+    }
 
     //disable user edits on feed pos
     setDisabled(true);

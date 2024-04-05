@@ -49,6 +49,7 @@ public:
     QTimer* handshakeTimer;
     QTimer* lastMessageTimer;
     QTimer* runningControllerTimer;
+    QTimer* notificationTimer;
     QDateTime timeLastReceived;
     EventFilter eventFilter;
     QString autosaveLogFile;
@@ -121,6 +122,7 @@ private slots:
     //oldest one each iteration until the limit is enforced
     void enforceAutoSaveLimit();
     void updateConnectionStatus(bool connectionStatus);
+    QString getSessionStatistics();
 
     #if DEV_MODE
         void displaySavedSettings();
@@ -152,6 +154,7 @@ private slots:
     void on_EventsPageButton_clicked();
     void on_StatusPageButton_clicked();
     void on_ElectricalPageButton_clicked();
+    void on_NotificationPageButton_clicked();
     void on_download_button_clicked();
     void on_baud_rate_selection_currentIndexChanged(int index);
     void on_stop_bit_selection_currentIndexChanged(int index);
@@ -167,6 +170,7 @@ private slots:
     void on_SettingsPageButton_clicked();
     void on_colored_events_output_stateChanged(int arg1);
     void on_auto_save_limit_valueChanged(int arg1);
+    void on_refresh_serial_port_selections_clicked();
 #if (DEV_MODE)
         void on_send_message_button_clicked();
         void on_csim_port_selection_currentIndexChanged(int index);
@@ -178,8 +182,6 @@ private slots:
         void on_csim_generation_interval_selection_valueChanged(int arg1);
     #endif
     //=========================================================================================================
-
-        void on_NotificationPageButton_clicked();
 
     private:
     Ui::MainWindow *ui;

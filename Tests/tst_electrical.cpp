@@ -12,6 +12,15 @@ private slots:
     void electrical_constructor();
     void test_addNode();
     void test_freeLL();
+
+    void test_loadElecData();
+    void test_loadElecData_badInputLess();
+    void test_loadElecData_badInputMore();
+
+    void test_loadElecDump();
+    void test_loadElecDump_badInputLess();
+    void test_loadElecDump_badInputMore();
+    void test_loadElecDump_badInputType();
 };
 
 void tst_electrical::electrical_constructor()
@@ -78,6 +87,105 @@ void tst_electrical::test_freeLL()
     elecObj->freeLL();
     QVERIFY(elecObj->headNode == nullptr);
     QVERIFY(elecObj->lastNode == nullptr);
+
+    delete elecObj;
+}
+
+
+void tst_electrical::test_loadElecData()
+{
+    electrical *elecObj = new electrical();
+
+    QString dataMsg = "name, 17, 38";
+
+    QVERIFY(elecObj->loadElecData(dataMsg) == true);
+
+    electricalNode *wkgNode = elecObj->headNode;
+
+    if(wkgNode != nullptr)
+    {
+        QCOMPARE(wkgNode->name, "name");
+        QCOMPARE(wkgNode->voltage, 17);
+        QCOMPARE(wkgNode->amps, 38);
+    }
+    else
+    {
+        QVERIFY(wkgNode != nullptr);
+    }
+
+    delete elecObj;
+}
+
+void tst_electrical::test_loadElecData_badInputLess()
+{
+    electrical *elecObj = new electrical();
+
+    QString dataMsg = "name, 17";
+
+    QVERIFY(elecObj->loadElecData(dataMsg) == false);
+
+    delete elecObj;
+}
+
+void tst_electrical::test_loadElecData_badInputMore()
+{
+    electrical *elecObj = new electrical();
+
+    QString dataMsg = "name, name, 17, 38";
+
+    QVERIFY(elecObj->loadElecData(dataMsg) == false);
+
+    delete elecObj;
+}
+
+void tst_electrical::test_loadElecDump()
+{
+    electrical *elecObj = new electrical();
+
+    QString dataMsg = "name,16,29,,name_two,14,12";
+
+    QVERIFY(elecObj->loadElecDump(dataMsg) == true);
+
+    electricalNode *wkgNode = elecObj->headNode;
+
+    if(wkgNode != nullptr)
+    {
+        QCOMPARE(wkgNode->name, "name");
+        QCOMPARE(wkgNode->voltage, 16);
+        QCOMPARE(wkgNode->amps, 29);
+
+        wkgNode = wkgNode->nextNode;
+
+        QCOMPARE(wkgNode->name, "name_two");
+        QCOMPARE(wkgNode->voltage, 14);
+        QCOMPARE(wkgNode->amps, 12);
+    }
+    else
+    {
+        QVERIFY(wkgNode != nullptr);
+    }
+
+    delete elecObj;
+}
+
+void tst_electrical::test_loadElecDump_badInputLess()
+{
+    electrical *elecObj = new electrical();
+
+    QString dataMsg = " ";
+
+    QVERIFY(elecObj->loadElecDump(dataMsg) == false);
+
+    delete elecObj;
+}
+
+void tst_electrical::test_loadElecDump_badInputMore()
+{
+    electrical *elecObj = new electrical();
+
+    QString dataMsg = "name,17,17,17";
+
+    QVERIFY(elecObj->loadElecDump(dataMsg) == false);
 
     delete elecObj;
 }

@@ -68,10 +68,20 @@ bool Connection::checkForValidMessage()
         QString message = QString::fromUtf8(serializedMessage);
 
         //check for complete message
-        if ( message.contains("\n") )
+        if ( message.contains("\n") || message.contains('\n') )
         {
             return true;
         }
+       /* else
+        {
+            qDebug() << "message: " + message;
+            // Display the contents of the QByteArray in hexadecimal format
+            qDebug() << "Data received (hex): ";
+            for (int i = 0; i < serializedMessage.size(); ++i)
+            {
+                qDebug().noquote() << QString("%1 ").arg((quint8)serializedMessage[i], 2, 16, QLatin1Char('0')).toUpper();
+            }
+        }*/
     }
     else
     {
@@ -110,7 +120,7 @@ void Connection::transmit(QString message)
     serialPort.waitForBytesWritten(500);
 
     // check for failure
-    if (bytesWritten == -1)
+    if (bytesWritten != data.size())
     {
         // notify
         qWarning() << "Failed to write to " << portName << " : " << serialPort.errorString();
@@ -121,6 +131,13 @@ void Connection::transmit(QString message)
         qDebug() << "Message sent through " << portName << " : " << message << qPrintable("\n");
         //qDebug() << bytesWritten << " bytes written to the serial port.";
     }
+
+    /* Display the contents of the QByteArray in hexadecimal format
+    qDebug() << "Data sent (hex): ";
+    for (int i = 0; i < data.size(); ++i)
+    {
+        qDebug().noquote() << QString("%1 ").arg((quint8)data[i], 2, 16, QLatin1Char('0')).toUpper();
+    }*/
 }
 
 /**
@@ -140,6 +157,9 @@ Connection::~Connection()
     {
         // transmit closing message through port
         transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + DELIMETER + "\n");
+
+        //avoid prematurely closing serial port before closing message is sent
+        serialPort.waitForReadyRead(1000);
     }
 
     // close the port
