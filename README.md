@@ -34,11 +34,53 @@ Additional documentation can be found in the project-docs directory.
 
 ## Version History
 
-* 0.2
+* v6.0.0-alpha
+    * In progress...
+* v5.0.0-alpha
     * Various bug fixes and optimizations
-    * See [commit change]() or See [release history]()
-* 0.1
-    * Initial Release
+    * Notifications page
+         * Notification pop up feature
+    * Session Timeout feature
+    * Polishing serial communication
+    * GUI enhancements
+    * Status page rework
+    * Continued testing
+* v4.0.0-alpha
+    * Various bug fixes and optimizations
+    * Added Settings page
+    * GUI enhancements
+    * Testing started
+    * Physical wires testing
+    * Added additional information to Status page
+* v3.0.0-alpha
+    * Various bug fixes and optimizations
+    * Events page search feature
+    * Tool tips
+    * Dynamic electrical page
+    * GUI enhancements
+    * Controller session timer
+    * Added feed position graphic
+* v2.0.0-alpha
+    * Various bug fixes and optimizations
+    * Initial settings added to constants.h
+    * GUI enhancements
+    * Added autosave feature
+    * Settings save cross session
+v1.0.0-alpha
+   * Added dev page
+        * Manual clear error
+        * CSim
+        * Custom message
+        * Output CSim messages button
+   * Added Connection page
+        * QT connection setting selection
+        * Connect button
+   * Added Events page
+        * Log file folder selection
+        * Manual log file download
+        * Filtering options
+   * Added Status page
+   * Added Electrical page
 
 ## License
 
