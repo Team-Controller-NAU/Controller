@@ -2,7 +2,6 @@
 #define FIREMODE_H
 
 #include <QDial>
-#include "constants.h"
 #include <QMouseEvent>
 #include <QPainter>
 #include <QColor>
