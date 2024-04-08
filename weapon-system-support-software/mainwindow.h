@@ -1,24 +1,28 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "constants.h"
+//QT libraries
 #include <QMainWindow>
-#include <QtConcurrent/QtConcurrent>
 #include <QDesktopServices>
-#include "connection.h"
-#include "events.h"
-#include "status.h"
-#include "electrical.h"
 #include <QShortcut>
 #include <QTextCursor>
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QObject>
 #include <QtCore>
+
+//Team Controller code
+#include "constants.h"
+#include "connection.h"
+#include "events.h"
+#include "status.h"
+#include "electrical.h"
 #include "./ui_mainwindow.h"
+
 
 #if DEV_MODE
     #include "csim.h"
+    #include <QtConcurrent/QtConcurrent>
 #endif
 
 QT_BEGIN_NAMESPACE

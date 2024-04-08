@@ -3,13 +3,6 @@
 
 #include <QString>
 #include <QtSerialPort/QtSerialPort>
-#include <QDir>
-#ifdef _WIN32 // check if we are compiling on Windows
-#include <QPixMap>
-#else
-#include <qpixmap.h> // for linux
-#endif
-#include <QRegularExpression>
 
 //this file will define enumerated values and constants used elsewhere in code
 

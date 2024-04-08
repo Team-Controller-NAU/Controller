@@ -2,12 +2,11 @@
 #define CSIM_H
 #if DEV_MODE
 #include <QThread>
-#include "status.h"
 #include "connection.h"
 #include "events.h"
-#include <electrical.h>
+#include "electrical.h"
+#include "status.h"
 #include <QDebug>
-#include "constants.h"
 
 // This class simulates the weapon controller, must be called in seperate thread so it doesnt
 // block mainwindow functions from running

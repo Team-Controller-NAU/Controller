@@ -14,7 +14,7 @@ Events::Events()
     headErrorNode= nullptr;
     lastErrorNode= nullptr;
 
-    dataLoadedFromLogFile = false;
+    //dataLoadedFromLogFile = false;
 }
 
 Events::~Events()
