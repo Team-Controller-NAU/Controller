@@ -11,7 +11,7 @@
 //======================================================================================
 
 //delimeter in serial messages
-const char DELIMETER = ',';
+const QString DELIMETER = ",";
 
 // the max number of electrical componenets to expect from a weapon
 const int MAX_ELECTRICAL_COMPONENTS = 100;
