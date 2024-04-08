@@ -20,21 +20,21 @@ void firemode::paintEvent(QPaintEvent*)
     painter.setRenderHint(QPainter::Antialiasing);
 
     // No border
-    painter.setPen(QPen("000000"));
+    painter.setPen(QPen(QColor(0, 0, 0))); // Black color represented by RGB integers
 
     //change brush color
-    painter.setBrush(QBrush("#ff8533"));
+    painter.setBrush(QBrush(QColor(255, 133, 51))); // #ff8533 color represented by RGB integers
 
     painter.setPen(QPen(Qt::NoPen));
 
     //change brush color
-    painter.setBrush(QBrush("#272727"));
+    painter.setBrush(QBrush(QColor(39, 39, 39))); // #272727 color represented by RGB integers
 
     //area of the pointer line
     QRectF positionLine(QDial::height()/4.9,  QDial::height()/4.55, QDial::height(), QDial::height());
 
     //change brush color
-    painter.setBrush(QBrush("#FFFFFF"));
+    painter.setBrush(QBrush(QColor(255, 255, 255))); // #FFFFFF color represented by RGB integers
 
     //draws knob for the pointer line
     painter.drawEllipse(QPointF(QDial::height()/1.425,QDial::height()/1.4),QDial::height()/15,QDial::height()/15);
@@ -45,7 +45,7 @@ void firemode::paintEvent(QPaintEvent*)
     //setting text
     painter.setPen(text);
 
-    painter.setPen(QPen("#FFFFFF"));
+    painter.setPen(QPen(QColor(255, 255, 255))); // White color represented by RGB integers
 
     QFont textfont = painter.font();
 
@@ -61,7 +61,7 @@ void firemode::paintEvent(QPaintEvent*)
 
     painter.drawText(QDial::height()*1.13,QDial::height()/3,QDial::height(),QDial::height(),0,"Auto");
 
-    painter.setPen(QPen("#ff8533"));
+    painter.setPen(QPen(QColor(255, 133, 51))); // #ff8533 color represented by RGB integers
 
     if(value == 305)
     {
@@ -80,7 +80,7 @@ void firemode::paintEvent(QPaintEvent*)
         painter.drawText(QDial::height()*1.13,QDial::height()/3,QDial::height(),QDial::height(),0,"Auto");
     }
 
-
     //disable user edits on feed pos
     setDisabled(true);
 }
+

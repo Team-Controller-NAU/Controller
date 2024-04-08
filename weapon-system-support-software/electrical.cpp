@@ -81,7 +81,7 @@ bool electrical::loadElecData(QString message)
         int voltage = values[1].toInt();
         int amps = values[2].toInt();
 
-        //using extracted data, add an error to the end of the electrical linked list
+        //using extracted data, add an error to the end of the error linked list
         addNode(name, voltage, amps);
         return true;
     }

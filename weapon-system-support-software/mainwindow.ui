@@ -1814,6 +1814,16 @@ font: 20pt &quot;Segoe UI&quot;;</string>
                  <height>40</height>
                 </size>
                </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Refresh serial ports&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QToolTip{
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid black;
+}</string>
+               </property>
                <property name="text">
                 <string/>
                </property>
@@ -1864,7 +1874,7 @@ border-color: rgb(255, 255, 255);</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>892</width>
+                  <width>1029</width>
                   <height>736</height>
                  </rect>
                 </property>
@@ -4362,6 +4372,16 @@ background-color: rgb(128,128,128);</string>
                  <height>250</height>
                 </size>
                </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Current firing mode&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QToolTip{
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid black;
+}</string>
+               </property>
               </widget>
              </item>
              <item row="4" column="2">
@@ -4397,9 +4417,16 @@ background-color: rgb(128,128,128);</string>
                 <bool>false</bool>
                </property>
                <property name="styleSheet">
-                <string notr="true">color: rgb(255, 255, 255);
+                <string notr="true">QDial { 
+color: rgb(255, 255, 255);
 background-color: #9747FF;
-border-color: rgb(255, 255, 255);</string>
+border-color: rgb(255, 255, 255);
+}
+QToolTip{
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid black;
+}</string>
                </property>
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>

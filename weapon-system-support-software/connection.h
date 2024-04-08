@@ -3,7 +3,7 @@
 
 #include <QDebug>
 #include <QtSerialPort/QtSerialPort>
-#include <constants.h>
+#include "constants.h"
 
 /********************************************************************************
 ** connection.h

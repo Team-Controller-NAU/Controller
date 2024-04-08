@@ -7,9 +7,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QSettings>
-#include <QRegularExpression>
 #include "constants.h"
-
 
 struct EventNode {
     int id;
@@ -31,7 +29,7 @@ public:
     int totalErrors;
     int totalNodes;
     int totalCleared;
-    bool dataLoadedFromLogFile;
+    //bool dataLoadedFromLogFile;
 
     EventNode *headEventNode;
     EventNode *lastEventNode;

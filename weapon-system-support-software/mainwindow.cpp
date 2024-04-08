@@ -339,8 +339,8 @@ void MainWindow::readSerialData()
             //extract message id
             messageId = static_cast<SerialMessageIdentifier>(QString(message[0]).toInt());
 
-            //remove message id from message
-            message = message.mid(1 + DELIMETER.length());
+            //remove message id from message (id has len=1 and delimeter has len=1 so 2 total)
+            message = message.mid(2);
 
             //determine what kind of message this is
             switch ( messageId )
@@ -528,7 +528,7 @@ void MainWindow::readSerialData()
                 qDebug() << "Message id: clear error " << message << qPrintable("\n");
 
                 //update cleared status of error with given id, notify if fail
-                if (!events->clearError(message.left(message.indexOf(DELIMETER)).toInt()))
+                if (!events->clearError(message.left(message.indexOf(DELIMETER)).toInt())) //ignore the suggestion leftRef is depreciated
                 {
                     notifyUser("Failed to clear error", message, true);
                 }
