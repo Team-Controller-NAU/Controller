@@ -31,7 +31,7 @@ void firemode::paintEvent(QPaintEvent*)
     painter.setBrush(QBrush(QColor(39, 39, 39))); // #272727 color represented by RGB integers
 
     //area of the pointer line
-    QRectF positionLine(QDial::height()/4.9,  QDial::height()/4.55, QDial::height(), QDial::height());
+    QRectF positionLine(QDial::height()/4.4,  QDial::height()/4.2, QDial::height()/1.05, QDial::height()/1.05);
 
     //change brush color
     painter.setBrush(QBrush(QColor(255, 255, 255))); // #FFFFFF color represented by RGB integers
