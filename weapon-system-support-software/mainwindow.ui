@@ -9,14 +9,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1100</width>
-    <height>610</height>
+    <width>1105</width>
+    <height>620</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>0</width>
-    <height>0</height>
+    <width>1105</width>
+    <height>620</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -92,10 +92,16 @@ border-color: rgb(255, 255, 255);</string>
           </size>
          </property>
          <property name="styleSheet">
-          <string notr="true">color: rgb(255, 255, 255);
+          <string notr="true">QPushButton {
+color: rgb(255, 255, 255);
 background-color: #9747FF;
 border-color: rgb(255, 255, 255);
-font: 16pt &quot;Segoe UI&quot;;</string>
+font: 16pt &quot;Segoe UI&quot;;
+}
+
+QPushButton::hover {
+	background-color: rgb(117, 117, 117);
+}</string>
          </property>
          <property name="text">
           <string>Events</string>
@@ -117,10 +123,16 @@ font: 16pt &quot;Segoe UI&quot;;</string>
           </size>
          </property>
          <property name="styleSheet">
-          <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(39, 39, 39);
-border-color: rgb(255, 255, 255);
-font: 14pt &quot;Segoe UI&quot;;</string>
+          <string notr="true">QPushButton {
+	color: rgb(255, 255, 255);
+	background-color: rgb(39, 39, 39);
+	border-color: rgb(255, 255, 255);
+	font: 16pt &quot;Segoe UI&quot;;
+}
+
+QPushButton::hover {
+	background-color: rgb(117, 117, 117);
+}</string>
          </property>
          <property name="text">
           <string>Status</string>
@@ -148,10 +160,16 @@ font: 14pt &quot;Segoe UI&quot;;</string>
           </size>
          </property>
          <property name="styleSheet">
-          <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(39, 39, 39);
-border-color: rgb(255, 255, 255);
-font: 16pt &quot;Segoe UI&quot;;</string>
+          <string notr="true">QPushButton {
+	color: rgb(255, 255, 255);
+	background-color: rgb(39, 39, 39);
+	border-color: rgb(255, 255, 255);
+	font: 16pt &quot;Segoe UI&quot;;
+}
+
+QPushButton::hover {
+	background-color: rgb(117, 117, 117);
+}</string>
          </property>
          <property name="text">
           <string>Electrical</string>
@@ -173,10 +191,16 @@ font: 16pt &quot;Segoe UI&quot;;</string>
           </size>
          </property>
          <property name="styleSheet">
-          <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(39, 39, 39);
-border-color: rgb(255, 255, 255);
-font: 16pt &quot;Segoe UI&quot;;</string>
+          <string notr="true">QPushButton {
+	color: rgb(255, 255, 255);
+	background-color: rgb(39, 39, 39);
+	border-color: rgb(255, 255, 255);
+	font: 16pt &quot;Segoe UI&quot;;
+}
+
+QPushButton::hover {
+	background-color: rgb(117, 117, 117);
+}</string>
          </property>
          <property name="text">
           <string>Developer</string>
@@ -198,10 +222,16 @@ font: 16pt &quot;Segoe UI&quot;;</string>
           </size>
          </property>
          <property name="styleSheet">
-          <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(39, 39, 39);
-border-color: rgb(255, 255, 255);
-font: 16pt &quot;Segoe UI&quot;;</string>
+          <string notr="true">QPushButton {
+	color: rgb(255, 255, 255);
+	background-color: rgb(39, 39, 39);
+	border-color: rgb(255, 255, 255);
+	font: 16pt &quot;Segoe UI&quot;;
+}
+
+QPushButton::hover {
+	background-color: rgb(117, 117, 117);
+}</string>
          </property>
          <property name="text">
           <string>Connection</string>
@@ -406,7 +436,7 @@ font: 16pt &quot;Segoe UI&quot;;</string>
             </sizepolicy>
            </property>
            <property name="currentIndex">
-            <number>5</number>
+            <number>4</number>
            </property>
            <widget class="QWidget" name="Events_page">
             <layout class="QGridLayout" name="gridLayout_3">
@@ -423,6 +453,10 @@ font: 16pt &quot;Segoe UI&quot;;</string>
 	border: 1px solid;
 	border-color: rgb(64, 64, 64);
 	font: 12pt &quot;Segoe UI&quot;;
+}
+
+QComboBox::hover {
+	background-color: rgb(117, 117, 117);
 }
 
 QComboBox::items {
@@ -1293,6 +1327,10 @@ li.checked::marker { content: &quot;\2612&quot;; }
 	padding-left: 5px;
 }
 
+QComboBox::hover {
+	background-color: rgb(117, 117, 117);
+}
+
 QComboBox::items {
 	color: rgb(255, 255, 255);
 }
@@ -1598,6 +1636,10 @@ QToolTip{
 	padding-left: 5px;
 }
 
+QComboBox::hover {
+	background-color: rgb(117, 117, 117);
+}
+
 QComboBox::items {
 	color: rgb(255, 255, 255);
 }
@@ -1658,6 +1700,10 @@ QComboBox::items {
 	color: rgb(255, 255, 255);
 }
 
+QComboBox::hover {
+	background-color: rgb(117, 117, 117);
+}
+
 QListView {
 	color: rgb(255, 255, 255);
 }
@@ -1692,6 +1738,10 @@ QComboBox::down-arrow {
 	border-color: rgb(64, 64, 64);
 	font: 20pt &quot;Segoe UI&quot;;
 	padding-left: 5px;
+}
+
+QComboBox::hover {
+	background-color: rgb(117, 117, 117);
 }
 
 QComboBox::items {
@@ -1742,8 +1792,8 @@ font: 20pt &quot;Segoe UI&quot;;</string>
               <widget class="QPushButton" name="refresh_serial_port_selections">
                <property name="minimumSize">
                 <size>
-                 <width>40</width>
-                 <height>40</height>
+                 <width>43</width>
+                 <height>43</height>
                 </size>
                </property>
                <property name="toolTip">
@@ -1759,8 +1809,8 @@ font: 20pt &quot;Segoe UI&quot;;</string>
 QPushButton {
 	padding-bottom: 3px;
 	color: rgb(255, 255, 255);
-	background-color: none;
-	border: none;
+	background-color: rgb(47, 47, 47);
+	border: 1px solid;
 	border-color: rgb(64, 64, 64);
 	font: 15pt &quot;Segoe UI&quot;;
 }
@@ -1789,8 +1839,8 @@ QPushButton::pressed {
                </property>
               </widget>
              </item>
-             <item row="2" column="1">
-              <widget class="QComboBox" name="baud_rate_selection">
+             <item row="4" column="1">
+              <widget class="QComboBox" name="stop_bit_selection">
                <property name="styleSheet">
                 <string notr="true">QComboBox {
 	padding-bottom: 3px;
@@ -1804,6 +1854,10 @@ QPushButton::pressed {
 
 QComboBox::items {
 	color: rgb(255, 255, 255);
+}
+
+QComboBox::hover {
+	background-color: rgb(117, 117, 117);
 }
 
 QListView {
@@ -1823,8 +1877,8 @@ QComboBox::down-arrow {
                </property>
               </widget>
              </item>
-             <item row="4" column="1">
-              <widget class="QComboBox" name="stop_bit_selection">
+             <item row="2" column="1">
+              <widget class="QComboBox" name="baud_rate_selection">
                <property name="styleSheet">
                 <string notr="true">QComboBox {
 	padding-bottom: 3px;
@@ -1834,6 +1888,10 @@ QComboBox::down-arrow {
 	border-color: rgb(64, 64, 64);
 	font: 20pt &quot;Segoe UI&quot;;
 	padding-left: 5px;
+}
+
+QComboBox::hover {
+	background-color: rgb(117, 117, 117);
 }
 
 QComboBox::items {
@@ -1902,7 +1960,7 @@ border-color: rgb(255, 255, 255);</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>892</width>
+                  <width>1033</width>
                   <height>736</height>
                  </rect>
                 </property>
@@ -2737,90 +2795,15 @@ color: rgb(255, 255, 255);
             </property>
             <layout class="QGridLayout" name="gridLayout_6">
              <item row="1" column="0" colspan="5">
-              <layout class="QGridLayout" name="NumberBox">
+              <layout class="QGridLayout" name="CounterBox">
                <property name="sizeConstraint">
                 <enum>QLayout::SetNoConstraint</enum>
                </property>
                <property name="spacing">
                 <number>0</number>
                </property>
-               <item row="0" column="15" rowspan="3">
-                <widget class="Line" name="line_11">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>1</width>
-                   <height>0</height>
-                  </size>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>1</width>
-                   <height>16777215</height>
-                  </size>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">color:rgb(128,128,128);
-background-color: rgb(128,128,128);</string>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="21">
-                <widget class="QTextEdit" name="burstOutput">
-                 <property name="enabled">
-                  <bool>true</bool>
-                 </property>
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>182</width>
-                   <height>50</height>
-                  </size>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>150</width>
-                   <height>50</height>
-                  </size>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(39, 39, 39);
-border: none;
-font: 20pt &quot;Segoe UI&quot;;</string>
-                 </property>
-                 <property name="markdown">
-                  <string>0
-
-</string>
-                 </property>
-                 <property name="html">
-                  <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:20pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:13px; margin-bottom:13px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;0&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="16">
-                <spacer name="horizontalSpacer_19">
+               <item row="2" column="3">
+                <spacer name="horizontalSpacer_8">
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
                  </property>
@@ -2831,144 +2814,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
                   </size>
                  </property>
                 </spacer>
-               </item>
-               <item row="2" column="2" alignment="Qt::AlignHCenter|Qt::AlignTop">
-                <widget class="QTextEdit" name="statusClearedErrors">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>182</width>
-                   <height>50</height>
-                  </size>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>182</width>
-                   <height>50</height>
-                  </size>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(39, 39, 39);
-border: none;
-font: 20pt &quot;Segoe UI&quot;;</string>
-                 </property>
-                 <property name="readOnly">
-                  <bool>true</bool>
-                 </property>
-                 <property name="markdown">
-                  <string>0
-
-</string>
-                 </property>
-                 <property name="html">
-                  <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:20pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:13px; margin-bottom:13px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;0&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="7" alignment="Qt::AlignTop">
-                <widget class="QTextEdit" name="statusEventOutput">
-                 <property name="enabled">
-                  <bool>true</bool>
-                 </property>
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>182</width>
-                   <height>50</height>
-                  </size>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>182</width>
-                   <height>50</height>
-                  </size>
-                 </property>
-                 <property name="contextMenuPolicy">
-                  <enum>Qt::NoContextMenu</enum>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(39, 39, 39);
-border: none;
-font: 20pt &quot;Segoe UI&quot;;</string>
-                 </property>
-                 <property name="readOnly">
-                  <bool>true</bool>
-                 </property>
-                 <property name="html">
-                  <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:20pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;0&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="5">
-                <spacer name="horizontalSpacer_14">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>13</width>
-                   <height>47</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item row="0" column="1" colspan="12">
-                <widget class="Line" name="line">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>0</width>
-                   <height>1</height>
-                  </size>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>16777215</width>
-                   <height>1</height>
-                  </size>
-                 </property>
-                 <property name="autoFillBackground">
-                  <bool>false</bool>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">color:rgb(128,128,128);
-background-color: rgb(128,128,128);</string>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                </widget>
                </item>
                <item row="1" column="9" rowspan="2">
                 <widget class="Line" name="line_10">
@@ -2996,23 +2841,6 @@ background-color: rgb(128,128,128);</string>
                  </property>
                  <property name="orientation">
                   <enum>Qt::Vertical</enum>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="21" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
-                <widget class="QLabel" name="burstLabel_2">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">color: rgb(255, 255, 255);
-font: 20pt &quot;Segoe UI&quot;;</string>
-                 </property>
-                 <property name="text">
-                  <string>Burst</string>
                  </property>
                 </widget>
                </item>
@@ -3045,7 +2873,83 @@ background-color: rgb(128,128,128);</string>
                  </property>
                 </widget>
                </item>
-               <item row="3" column="0" colspan="14">
+               <item row="2" column="8">
+                <spacer name="horizontalSpacer_9">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>13</width>
+                   <height>47</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item row="2" column="5">
+                <spacer name="horizontalSpacer_14">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>13</width>
+                   <height>47</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item row="2" column="16">
+                <spacer name="horizontalSpacer_20">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item row="2" column="12">
+                <spacer name="horizontalSpacer_11">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>13</width>
+                   <height>47</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item row="2" column="10">
+                <spacer name="horizontalSpacer_15">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>13</width>
+                   <height>47</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item row="1" column="15" alignment="Qt::AlignHCenter">
+                <widget class="QLabel" name="firingEventsLabel">
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(255, 255, 255);
+font: 20pt &quot;Segoe UI&quot;;</string>
+                 </property>
+                 <property name="text">
+                  <string>Firing Events</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="0" colspan="18">
                 <widget class="Line" name="line_6">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -3074,161 +2978,7 @@ background-color: rgb(128,128,128);</string>
                  </property>
                 </widget>
                </item>
-               <item row="1" column="17" alignment="Qt::AlignHCenter">
-                <widget class="QLabel" name="fireRateLabel">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">color: rgb(255, 255, 255);
-font: 20pt &quot;Segoe UI&quot;;</string>
-                 </property>
-                 <property name="text">
-                  <string>Fire Rate</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="2" alignment="Qt::AlignHCenter|Qt::AlignTop">
-                <widget class="QLabel" name="label_3">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">color: rgb(255, 255, 255);
-font: 20pt &quot;Segoe UI&quot;;</string>
-                 </property>
-                 <property name="text">
-                  <string>Cleared Errors</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="17">
-                <widget class="QTextEdit" name="fireRateOutput">
-                 <property name="enabled">
-                  <bool>true</bool>
-                 </property>
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>150</width>
-                   <height>50</height>
-                  </size>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>150</width>
-                   <height>50</height>
-                  </size>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(39, 39, 39);
-border: none;
-font: 20pt &quot;Segoe UI&quot;;</string>
-                 </property>
-                 <property name="readOnly">
-                  <bool>true</bool>
-                 </property>
-                 <property name="markdown">
-                  <string>0.0
-
-</string>
-                 </property>
-                 <property name="html">
-                  <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:20pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;center&quot; style=&quot; margin-top:13px; margin-bottom:13px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;0.0&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="15" colspan="8">
-                <widget class="Line" name="line_15">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>0</width>
-                   <height>1</height>
-                  </size>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>16777215</width>
-                   <height>1</height>
-                  </size>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">color:rgb(128,128,128);
-background-color: rgb(128,128,128);</string>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="18">
-                <spacer name="horizontalSpacer_20">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>13</width>
-                   <height>47</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item row="0" column="23" rowspan="4">
-                <widget class="Line" name="line_17">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>1</width>
-                   <height>0</height>
-                  </size>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>1</width>
-                   <height>16777215</height>
-                  </size>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">color:rgb(128,128,128);
-background-color: rgb(128,128,128);</string>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="13" rowspan="3">
+               <item row="0" column="17" rowspan="3">
                 <widget class="Line" name="line_9">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
@@ -3257,30 +3007,8 @@ background-color: rgb(128,128,128);</string>
                  </property>
                 </widget>
                </item>
-               <item row="1" column="14">
-                <spacer name="horizontalSpacer_7">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="sizeType">
-                  <enum>QSizePolicy::Fixed</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>13</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item row="1" column="19" rowspan="2">
-                <widget class="Line" name="line_12">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
+               <item row="1" column="13" rowspan="2">
+                <widget class="Line" name="line_14">
                  <property name="minimumSize">
                   <size>
                    <width>1</width>
@@ -3302,135 +3030,8 @@ background-color: rgb(128,128,128);</string>
                  </property>
                 </widget>
                </item>
-               <item row="0" column="16" colspan="7">
-                <widget class="Line" name="line_13">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>0</width>
-                   <height>1</height>
-                  </size>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>16777215</width>
-                   <height>1</height>
-                  </size>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">color:rgb(128,128,128);
-background-color: rgb(128,128,128);</string>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="20">
-                <spacer name="horizontalSpacer_21">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>13</width>
-                   <height>47</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
                <item row="2" column="1">
                 <spacer name="horizontalSpacer_10">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>13</width>
-                   <height>47</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item row="2" column="3">
-                <spacer name="horizontalSpacer_8">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>13</width>
-                   <height>47</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item row="2" column="22">
-                <spacer name="horizontalSpacer_22">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>13</width>
-                   <height>47</height>
-                  </size>
-                 </property>
-                </spacer>
-               </item>
-               <item row="1" column="11" alignment="Qt::AlignHCenter">
-                <widget class="QLabel" name="statusErrorLabel">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>16777215</width>
-                   <height>16777215</height>
-                  </size>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">color: rgb(255, 255, 255);
-font: 20pt &quot;Segoe UI&quot;;</string>
-                 </property>
-                 <property name="text">
-                  <string>Total Errors</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="7" alignment="Qt::AlignHCenter|Qt::AlignTop">
-                <widget class="QLabel" name="statusEventLabel">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>16777215</width>
-                   <height>16777215</height>
-                  </size>
-                 </property>
-                 <property name="styleSheet">
-                  <string notr="true">color: rgb(255, 255, 255);
-font: 20pt &quot;Segoe UI&quot;;</string>
-                 </property>
-                 <property name="text">
-                  <string>Total Events</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="12">
-                <spacer name="horizontalSpacer_11">
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
                  </property>
@@ -3471,8 +3072,114 @@ background-color: rgb(128,128,128);</string>
                  </property>
                 </widget>
                </item>
-               <item row="2" column="11">
-                <widget class="QTextEdit" name="statusErrorOutput">
+               <item row="2" column="14">
+                <spacer name="horizontalSpacer_7">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>40</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item row="0" column="1" colspan="16">
+                <widget class="Line" name="line">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>1</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>1</height>
+                  </size>
+                 </property>
+                 <property name="autoFillBackground">
+                  <bool>false</bool>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color:rgb(128,128,128);
+background-color: rgb(128,128,128);</string>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="15">
+                <widget class="QTextEdit" name="firingEventsOutput">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>185</width>
+                   <height>50</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>185</width>
+                   <height>50</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(255, 255, 255);
+background-color: rgb(39, 39, 39);
+border: none;
+font: 20pt &quot;Segoe UI&quot;;</string>
+                 </property>
+                 <property name="html">
+                  <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:20pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;0&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="2" alignment="Qt::AlignHCenter">
+                <widget class="QLabel" name="statusEventLabel">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(255, 255, 255);
+font: 20pt &quot;Segoe UI&quot;;</string>
+                 </property>
+                 <property name="text">
+                  <string>Total Events</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="2">
+                <widget class="QTextEdit" name="statusEventOutput">
                  <property name="enabled">
                   <bool>true</bool>
                  </property>
@@ -3484,13 +3191,13 @@ background-color: rgb(128,128,128);</string>
                  </property>
                  <property name="minimumSize">
                   <size>
-                   <width>182</width>
+                   <width>185</width>
                    <height>50</height>
                   </size>
                  </property>
                  <property name="maximumSize">
                   <size>
-                   <width>182</width>
+                   <width>185</width>
                    <height>50</height>
                   </size>
                  </property>
@@ -3518,36 +3225,632 @@ li.checked::marker { content: &quot;\2612&quot;; }
                  </property>
                 </widget>
                </item>
-               <item row="2" column="10">
-                <spacer name="horizontalSpacer_15">
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
+               <item row="1" column="7" alignment="Qt::AlignHCenter">
+                <widget class="QLabel" name="statusErrorLabel">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
                  </property>
-                 <property name="sizeHint" stdset="0">
+                 <property name="maximumSize">
                   <size>
-                   <width>13</width>
-                   <height>47</height>
+                   <width>16777215</width>
+                   <height>16777215</height>
                   </size>
                  </property>
-                </spacer>
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(255, 255, 255);
+font: 20pt &quot;Segoe UI&quot;;</string>
+                 </property>
+                 <property name="text">
+                  <string>Total Errors</string>
+                 </property>
+                </widget>
                </item>
-               <item row="2" column="8">
-                <spacer name="horizontalSpacer_9">
+               <item row="1" column="11" alignment="Qt::AlignHCenter">
+                <widget class="QLabel" name="statusClearedErrorsLabel">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(255, 255, 255);
+font: 20pt &quot;Segoe UI&quot;;</string>
+                 </property>
+                 <property name="text">
+                  <string>Cleared Errors</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="7">
+                <widget class="QTextEdit" name="statusErrorOutput">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>185</width>
+                   <height>50</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>185</width>
+                   <height>50</height>
+                  </size>
+                 </property>
+                 <property name="contextMenuPolicy">
+                  <enum>Qt::NoContextMenu</enum>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(255, 255, 255);
+background-color: rgb(39, 39, 39);
+border: none;
+font: 20pt &quot;Segoe UI&quot;;</string>
+                 </property>
+                 <property name="readOnly">
+                  <bool>true</bool>
+                 </property>
+                 <property name="html">
+                  <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:20pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;0&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="11">
+                <widget class="QTextEdit" name="statusClearedErrors">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>185</width>
+                   <height>50</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>185</width>
+                   <height>50</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(255, 255, 255);
+background-color: rgb(39, 39, 39);
+border: none;
+font: 20pt &quot;Segoe UI&quot;;</string>
+                 </property>
+                 <property name="readOnly">
+                  <bool>true</bool>
+                 </property>
+                 <property name="markdown">
+                  <string>0
+
+</string>
+                 </property>
+                 <property name="html">
+                  <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:20pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:13px; margin-bottom:13px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;0&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="2" column="4">
+              <widget class="firemode" name="fireMode">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>350</width>
+                 <height>250</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Current firing mode&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QToolTip{
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid black;
+}</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="4">
+              <layout class="QGridLayout" name="FiringBox">
+               <property name="spacing">
+                <number>0</number>
+               </property>
+               <item row="1" column="4" rowspan="2">
+                <widget class="Line" name="line_17">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>1</width>
+                   <height>50</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>1</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color:rgb(128,128,128);
+background-color: rgb(128,128,128);</string>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0" rowspan="2">
+                <widget class="Line" name="line_11">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>1</width>
+                   <height>50</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>1</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color:rgb(128,128,128);
+background-color: rgb(128,128,128);</string>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1">
+                <widget class="QTextEdit" name="fireRateOutput">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>100</width>
+                   <height>50</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>150</width>
+                   <height>50</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(255, 255, 255);
+background-color: rgb(39, 39, 39);
+border: none;
+font: 20pt &quot;Segoe UI&quot;;</string>
+                 </property>
+                 <property name="readOnly">
+                  <bool>true</bool>
+                 </property>
+                 <property name="markdown">
+                  <string>0.0
+
+</string>
+                 </property>
+                 <property name="html">
+                  <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:20pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:13px; margin-bottom:13px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;0.0&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="0" colspan="5">
+                <widget class="Line" name="line_13">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>1</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>1</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color:rgb(128,128,128);
+background-color: rgb(128,128,128);</string>
+                 </property>
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
                  </property>
-                 <property name="sizeHint" stdset="0">
+                </widget>
+               </item>
+               <item row="1" column="1" alignment="Qt::AlignHCenter">
+                <widget class="QLabel" name="fireRateLabel">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(255, 255, 255);
+font: 20pt &quot;Segoe UI&quot;;</string>
+                 </property>
+                 <property name="text">
+                  <string>Fire Rate</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="3">
+                <widget class="QTextEdit" name="burstOutput">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
                   <size>
-                   <width>13</width>
-                   <height>47</height>
+                   <width>100</width>
+                   <height>50</height>
                   </size>
                  </property>
-                </spacer>
+                 <property name="maximumSize">
+                  <size>
+                   <width>150</width>
+                   <height>50</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(255, 255, 255);
+background-color: rgb(39, 39, 39);
+border: none;
+font: 20pt &quot;Segoe UI&quot;;</string>
+                 </property>
+                 <property name="markdown">
+                  <string>0
+
+</string>
+                 </property>
+                 <property name="html">
+                  <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:20pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p align=&quot;center&quot; style=&quot; margin-top:13px; margin-bottom:13px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;0&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="3" alignment="Qt::AlignHCenter">
+                <widget class="QLabel" name="burstLabel_2">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(255, 255, 255);
+font: 20pt &quot;Segoe UI&quot;;</string>
+                 </property>
+                 <property name="text">
+                  <string>Burst Length</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="2" rowspan="2">
+                <widget class="Line" name="line_12">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>1</width>
+                   <height>50</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>1</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color:rgb(128,128,128);
+background-color: rgb(128,128,128);</string>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="0" colspan="5">
+                <widget class="Line" name="line_15">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>1</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>1</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color:rgb(128,128,128);
+background-color: rgb(128,128,128);</string>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item row="0" column="0">
+              <widget class="QLabel" name="statusTitleLabel">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>35</height>
+                </size>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 255, 255);
+font: 700 24pt &quot;Segoe UI&quot;;</string>
+               </property>
+               <property name="text">
+                <string>Status</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <spacer name="horizontalSpacer">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="3" column="2">
+              <layout class="QGridLayout" name="gridLayout_7">
+               <property name="spacing">
+                <number>0</number>
+               </property>
+               <item row="2" column="0" colspan="3">
+                <widget class="Line" name="line_28">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>1</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>1</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color:rgb(128,128,128);
+background-color: rgb(128,128,128);</string>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="0">
+                <widget class="Line" name="line_18">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>1</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>1</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color:rgb(128,128,128);
+background-color: rgb(128,128,128);</string>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="0" colspan="3">
+                <widget class="Line" name="line_16">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>1</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>1</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color:rgb(128,128,128);
+background-color: rgb(128,128,128);</string>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="1" alignment="Qt::AlignHCenter">
+                <widget class="QLabel" name="feed_position_label">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>296</width>
+                   <height>45</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color: rgb(255, 255, 255);
+font: 20pt &quot;Segoe UI&quot;;</string>
+                 </property>
+                 <property name="text">
+                  <string>N/A</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="2">
+                <widget class="Line" name="line_29">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>1</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>1</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
+                 <property name="styleSheet">
+                  <string notr="true">color:rgb(128,128,128);
+background-color: rgb(128,128,128);</string>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                </widget>
                </item>
               </layout>
              </item>
              <item row="2" column="0">
-              <layout class="QGridLayout" name="gridLayout_10">
+              <layout class="QGridLayout" name="TriggerBox">
                <property name="sizeConstraint">
                 <enum>QLayout::SetDefaultConstraint</enum>
                </property>
@@ -4078,19 +4381,6 @@ background-color: rgb(128,128,128);
                </item>
               </layout>
              </item>
-             <item row="2" column="1">
-              <spacer name="horizontalSpacer">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
              <item row="2" column="3">
               <spacer name="horizontalSpacer_3">
                <property name="orientation">
@@ -4105,7 +4395,7 @@ background-color: rgb(128,128,128);
               </spacer>
              </item>
              <item row="3" column="0">
-              <layout class="QGridLayout" name="gridLayout_7">
+              <layout class="QGridLayout" name="ProcessorBox">
                <property name="spacing">
                 <number>0</number>
                </property>
@@ -4336,78 +4626,6 @@ background-color: rgb(128,128,128);</string>
                </item>
               </layout>
              </item>
-             <item row="2" column="4">
-              <widget class="firemode" name="fireMode">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>350</width>
-                 <height>250</height>
-                </size>
-               </property>
-               <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Current firing mode&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">QToolTip{
-    background-color: #000000;
-    color: #FFFFFF;
-    border: 1px solid black;
-}</string>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="2">
-              <widget class="QLabel" name="feed_position_label">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>296</width>
-                 <height>45</height>
-                </size>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">color: rgb(255, 255, 255);
-font: 20pt &quot;Segoe UI&quot;;</string>
-               </property>
-               <property name="text">
-                <string>feed pos label</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0">
-              <widget class="QLabel" name="statusTitleLabel">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>35</height>
-                </size>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">color: rgb(255, 255, 255);
-font: 700 24pt &quot;Segoe UI&quot;;</string>
-               </property>
-               <property name="text">
-                <string>Status</string>
-               </property>
-              </widget>
-             </item>
              <item row="2" column="2">
               <widget class="feedposition" name="feedPosition">
                <property name="enabled">
@@ -4565,6 +4783,11 @@ QToolTip{
                 <string notr="true">QCheckBox {
 	color: white;
 	font: 20pt &quot;Segoe UI&quot;;
+}
+
+QCheckBox::indicator {
+	width: 20px;
+	height: 20px;
 }</string>
                </property>
                <property name="text">
@@ -4599,7 +4822,7 @@ QToolTip{
                <property name="sizeHint" stdset="0">
                 <size>
                  <width>20</width>
-                 <height>40</height>
+                 <height>10</height>
                 </size>
                </property>
               </spacer>
@@ -4613,6 +4836,12 @@ QToolTip{
                 <string notr="true">QCheckBox {
 	color: white;
 	font: 20pt &quot;Segoe UI&quot;;
+}
+
+
+QCheckBox::indicator {
+	width: 20px;
+	height: 20px;
 }</string>
                </property>
                <property name="text">
@@ -4687,6 +4916,55 @@ border-color: rgb(255, 255, 255);</string>
     </item>
     <item>
      <layout class="QGridLayout" name="gridLayout">
+      <item row="1" column="5" alignment="Qt::AlignLeft">
+       <widget class="QTextEdit" name="elapsedTime">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>50</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Controllers session duration&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QTextEdit {
+color: rgb(255, 255, 255);
+background-color: rgb(47, 47, 47);
+border:none;
+font: 9pt &quot;Segoe UI&quot;;
+}
+
+QToolTip{
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid black;
+}</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="markdown">
+         <string/>
+        </property>
+        <property name="html">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p align=&quot;right&quot; style=&quot;-qt-paragraph-type:empty; margin-top:6px; margin-bottom:6px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="0" alignment="Qt::AlignLeft">
        <widget class="QLabel" name="controllerLabel">
         <property name="sizePolicy">
@@ -4721,78 +4999,6 @@ QToolTip{
         </property>
         <property name="textInteractionFlags">
          <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <spacer name="horizontalSpacer_13">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>10</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="1" column="6" alignment="Qt::AlignRight">
-       <widget class="QTextEdit" name="DDM_timer_label">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>145</width>
-          <height>25</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Time since last message received from controller&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QTextEdit {
-color: rgb(255, 255, 255);
-background-color: rgb(47, 47, 47);
-border:none;
-font: 9pt &quot;Segoe UI&quot;;
-}
-
-QToolTip{
-    background-color: #000000;
-    color: #FFFFFF;
-    border: 1px solid black;
-}
-</string>
-        </property>
-        <property name="verticalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOff</enum>
-        </property>
-        <property name="horizontalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOff</enum>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-        <property name="html">
-         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;right&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="placeholderText">
-         <string/>
         </property>
        </widget>
       </item>
@@ -4851,6 +5057,78 @@ li.checked::marker { content: &quot;\2612&quot;; }
          <string/>
         </property>
        </widget>
+      </item>
+      <item row="1" column="6" alignment="Qt::AlignRight">
+       <widget class="QTextEdit" name="DDM_timer_label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>145</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Time since last message received from controller&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QTextEdit {
+color: rgb(255, 255, 255);
+background-color: rgb(47, 47, 47);
+border:none;
+font: 9pt &quot;Segoe UI&quot;;
+}
+
+QToolTip{
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid black;
+}
+</string>
+        </property>
+        <property name="verticalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOff</enum>
+        </property>
+        <property name="horizontalScrollBarPolicy">
+         <enum>Qt::ScrollBarAlwaysOff</enum>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="html">
+         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p align=&quot;right&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="placeholderText">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <spacer name="horizontalSpacer_13">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>10</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
       </item>
       <item row="1" column="3">
        <spacer name="horizontalSpacer_6">
@@ -4945,55 +5223,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
         </property>
        </widget>
       </item>
-      <item row="1" column="5" alignment="Qt::AlignLeft">
-       <widget class="QTextEdit" name="elapsedTime">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>50</width>
-          <height>25</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Controllers session duration&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QTextEdit {
-color: rgb(255, 255, 255);
-background-color: rgb(47, 47, 47);
-border:none;
-font: 9pt &quot;Segoe UI&quot;;
-}
-
-QToolTip{
-    background-color: #000000;
-    color: #FFFFFF;
-    border: 1px solid black;
-}</string>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-        <property name="markdown">
-         <string/>
-        </property>
-        <property name="html">
-         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;right&quot; style=&quot;-qt-paragraph-type:empty; margin-top:6px; margin-bottom:6px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
    </layout>
@@ -5003,7 +5232,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1100</width>
+     <width>1105</width>
      <height>21</height>
     </rect>
    </property>

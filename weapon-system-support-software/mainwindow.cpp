@@ -43,9 +43,6 @@ MainWindow::MainWindow(QWidget *parent)
     //init gui
     ui->setupUi(this);
 
-    //set status labels invisable
-    ui->feed_position_label->setVisible(false);
-
     //setup user settings and init settings related gui elements
     setupSettings();
 
@@ -909,6 +906,9 @@ void MainWindow::updateStatusDisplay()
 
     ui->fireRateOutput->setText(QString::number(status->firingRate));
     ui->fireRateOutput->setAlignment(Qt::AlignCenter);
+
+    ui->firingEventsOutput->setText(QString::number(status->totalFiringEvents));
+    ui->firingEventsOutput->setAlignment(Qt::AlignCenter);
 
     ui->burstOutput->setText(QString::number(status->burstLength));
     ui->burstOutput->setAlignment(Qt::AlignCenter);

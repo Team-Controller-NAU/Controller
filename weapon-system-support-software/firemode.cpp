@@ -15,32 +15,39 @@ void firemode::paintEvent(QPaintEvent*)
     //painter object
     QPainter painter(this);
     QPen text = painter.pen();
+    QPen lines = painter.pen();
 
     // Smooth out the circle
     painter.setRenderHint(QPainter::Antialiasing);
 
+    lines.setColor(QColor(255, 133, 51));
+    lines.setWidth(3);
+
+    painter.setPen(lines);
+
+    painter.setBrush(QBrush(QColor(27,27,27)));
+
+    QRectF outlineArea(-QDial::height()/14, QDial::height()/22, QDial::height()*1.55, QDial::height()*1.55);
+
+    //draws the outline
+    painter.drawPie(outlineArea, -(62.5-90)*16, 125*16);
+
+    painter.drawLine(QDial::height()/1.44, QDial::height()/20,QDial::height()/1.44,QDial::height()/5);
+
     // No border
-    painter.setPen(QPen(QColor(0, 0, 0))); // Black color represented by RGB integers
-
-    //change brush color
-    painter.setBrush(QBrush(QColor(255, 133, 51))); // #ff8533 color represented by RGB integers
-
     painter.setPen(QPen(Qt::NoPen));
 
-    //change brush color
-    painter.setBrush(QBrush(QColor(39, 39, 39))); // #272727 color represented by RGB integers
-
-    //area of the pointer line
-    QRectF positionLine(QDial::height()/4.4,  QDial::height()/4.2, QDial::height()/1.05, QDial::height()/1.05);
+    //area of the needle
+    QRectF needleArea(QDial::height()/4.31,  QDial::height()/3.2, QDial::height()/1.05, QDial::height()/1.05);
 
     //change brush color
     painter.setBrush(QBrush(QColor(255, 255, 255))); // #FFFFFF color represented by RGB integers
 
-    //draws knob for the pointer line
-    painter.drawEllipse(QPointF(QDial::height()/1.425,QDial::height()/1.4),QDial::height()/15,QDial::height()/15);
+    //draws knob for the needle
+    painter.drawEllipse(QPointF(QDial::height()/1.414,QDial::height()/1.28),QDial::height()/15,QDial::height()/15);
 
-    //draws the pointer line
-    painter.drawPie(positionLine, -(value-90)*16, 3*16);
+    //draws the needle
+    painter.drawPie(needleArea, -(value-90)*16, 3*16);
 
     //setting text
     painter.setPen(text);
