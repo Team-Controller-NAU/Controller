@@ -72,6 +72,7 @@ bool Connection::checkForValidMessage()
         {
             return true;
         }
+        //this is useful during debugging, it displays the data without deserialization
        /* else
         {
             qDebug() << "message: " + message;
@@ -140,6 +141,19 @@ void Connection::transmit(QString message)
     }*/
 }
 
+//send disconnect to communicating party
+void Connection::sendDisconnectMsg()
+{
+    transmit(QString::number(CLOSING_CONNECTION) + DELIMETER + "\n");
+}
+
+//send handshake attempt to communicating party
+void Connection::sendHandshakeMsg()
+{
+    // Send handshake message
+    transmit(QString::number(LISTENING) + '\n');
+}
+
 /**
  * Destructor for the Connection class.
  *
@@ -155,8 +169,8 @@ Connection::~Connection()
     // confirm connection to another port
     if ( connected )
     {
-        // transmit closing message through port
-        transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + DELIMETER + "\n");
+        //transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + DELIMETER + "\n");
+        sendDisconnectMsg();
 
         //avoid prematurely closing serial port before closing message is sent
         serialPort.waitForReadyRead(1000);

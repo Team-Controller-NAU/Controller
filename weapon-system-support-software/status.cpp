@@ -96,6 +96,31 @@ bool Status::loadVersionData(QString versionMessage)
     return true;
 }
 
+//converts the status class values to a string
+QString Status::toString()
+{
+    //add each value and a delimeter to the end of the string, then return the string
+    QString statusStr = "Armed: " + QString::number(armed) + DELIMETER;
+
+    statusStr += " Trigger 1: " + QString::number(trigger1) + DELIMETER;
+
+    statusStr += " Trigger 2: " + QString::number(trigger2) + DELIMETER;
+
+    statusStr += " Controller State: " + QString::number(controllerState) + DELIMETER;
+
+    statusStr += " Firing Mode: " + QString::number(firingMode) + DELIMETER;
+
+    statusStr += " Feed Position: " + QString::number(feedPosition) + DELIMETER;
+
+    statusStr += " Total Firing Events: " + QString::number(totalFiringEvents) + DELIMETER;
+
+    statusStr += " Burst Length: " + QString::number(burstLength) + DELIMETER;
+
+    statusStr += " Firing Rate: " + QString::number(firingRate) + DELIMETER;
+
+    return statusStr;
+}
+
 //======================================================================================
 //DEV_MODE exclusive methods
 //======================================================================================
