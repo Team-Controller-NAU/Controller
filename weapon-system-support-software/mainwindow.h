@@ -45,7 +45,7 @@ public:
     //data classes
     Status *status;
     Events *events;
-    electrical *electricalObject;
+    electrical *electricalData;
     QSettings userSettings;
 
     // vars
@@ -63,6 +63,7 @@ public:
     bool coloredEventOutput;
     int autoSaveLimit;
     int connectionTimeout;
+    bool advancedLogFile;
 
     //creates a new connection using currently selected serial port settings
     void createDDMCon();
@@ -127,6 +128,8 @@ private slots:
     void enforceAutoSaveLimit();
     void updateConnectionStatus(bool connectionStatus);
     QString getSessionStatistics();
+    void logAdvancedDetails(SerialMessageIdentifier id);
+    void renderElectricalPage();
 
     #if DEV_MODE
         void displaySavedSettings();
@@ -186,6 +189,8 @@ private slots:
         void on_csim_generation_interval_selection_valueChanged(int arg1);
     #endif
     //=========================================================================================================
+
+        void on_advanced_log_file_stateChanged(int arg1);
 
     private:
     Ui::MainWindow *ui;

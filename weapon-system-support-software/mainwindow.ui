@@ -406,7 +406,7 @@ font: 16pt &quot;Segoe UI&quot;;</string>
             </sizepolicy>
            </property>
            <property name="currentIndex">
-            <number>4</number>
+            <number>5</number>
            </property>
            <widget class="QWidget" name="Events_page">
             <layout class="QGridLayout" name="gridLayout_3">
@@ -1902,7 +1902,7 @@ border-color: rgb(255, 255, 255);</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>1029</width>
+                  <width>892</width>
                   <height>736</height>
                  </rect>
                 </property>
@@ -4464,7 +4464,62 @@ QToolTip{
            </widget>
            <widget class="QWidget" name="Settings_Page">
             <layout class="QGridLayout" name="gridLayout_5">
-             <item row="4" column="0">
+             <item row="6" column="1">
+              <widget class="QLabel" name="connection_timeout_label">
+               <property name="styleSheet">
+                <string notr="true">QLabel {
+	color: white;
+	font: 20pt &quot;Segoe UI&quot;;
+}</string>
+               </property>
+               <property name="text">
+                <string>Connection Timeout Duration (msec)</string>
+               </property>
+              </widget>
+             </item>
+             <item row="7" column="0">
+              <spacer name="verticalSpacer_9">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>10</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="8" column="1" alignment="Qt::AlignBottom">
+              <widget class="QLabel" name="auto_save_limit_label">
+               <property name="styleSheet">
+                <string notr="true">QLabel {
+	color: white;
+	font: 20pt &quot;Segoe UI&quot;;
+}</string>
+               </property>
+               <property name="text">
+                <string>Auto Saved Log File Limit</string>
+               </property>
+              </widget>
+             </item>
+             <item row="8" column="0">
+              <widget class="QSpinBox" name="auto_save_limit">
+               <property name="styleSheet">
+                <string notr="true">QSpinBox {
+	color: white;
+	font: 20pt &quot;Segoe UI&quot;;
+}</string>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::UpDownArrows</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="0">
               <widget class="QSpinBox" name="connection_timeout">
                <property name="toolTip">
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If no messages are received for this long, connection is terminated&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -4488,34 +4543,8 @@ QToolTip{
                </property>
               </widget>
              </item>
-             <item row="6" column="1" alignment="Qt::AlignBottom">
-              <widget class="QLabel" name="auto_save_limit_label">
-               <property name="styleSheet">
-                <string notr="true">QLabel {
-	color: white;
-	font: 20pt &quot;Segoe UI&quot;;
-}</string>
-               </property>
-               <property name="text">
-                <string>Auto Saved Log File Limit</string>
-               </property>
-              </widget>
-             </item>
-             <item row="7" column="0">
-              <spacer name="verticalSpacer_7">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>40</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
              <item row="5" column="0">
-              <spacer name="verticalSpacer_9">
+              <spacer name="verticalSpacer_10">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
                </property>
@@ -4526,35 +4555,6 @@ QToolTip{
                 <size>
                  <width>20</width>
                  <height>10</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="4" column="1">
-              <widget class="QLabel" name="connection_timeout_label">
-               <property name="styleSheet">
-                <string notr="true">QLabel {
-	color: white;
-	font: 20pt &quot;Segoe UI&quot;;
-}</string>
-               </property>
-               <property name="text">
-                <string>Connection Timeout Duration (msec)</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <spacer name="verticalSpacer_8">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeType">
-                <enum>QSizePolicy::Fixed</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>40</height>
                 </size>
                </property>
               </spacer>
@@ -4575,6 +4575,51 @@ QToolTip{
                </property>
               </widget>
              </item>
+             <item row="9" column="0">
+              <spacer name="verticalSpacer_7">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="1" column="0">
+              <spacer name="verticalSpacer_8">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="4" column="0">
+              <widget class="QCheckBox" name="advanced_log_file">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Logs status, electrical and session data.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QCheckBox {
+	color: white;
+	font: 20pt &quot;Segoe UI&quot;;
+}</string>
+               </property>
+               <property name="text">
+                <string>Advanced Log File</string>
+               </property>
+              </widget>
+             </item>
              <item row="0" column="0" alignment="Qt::AlignTop">
               <widget class="QLabel" name="label_2">
                <property name="styleSheet">
@@ -4587,7 +4632,7 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
               </widget>
              </item>
              <item row="3" column="0">
-              <spacer name="verticalSpacer_10">
+              <spacer name="verticalSpacer_3">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
                </property>
@@ -4601,19 +4646,6 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
                 </size>
                </property>
               </spacer>
-             </item>
-             <item row="6" column="0">
-              <widget class="QSpinBox" name="auto_save_limit">
-               <property name="styleSheet">
-                <string notr="true">QSpinBox {
-	color: white;
-	font: 20pt &quot;Segoe UI&quot;;
-}</string>
-               </property>
-               <property name="buttonSymbols">
-                <enum>QAbstractSpinBox::UpDownArrows</enum>
-               </property>
-              </widget>
              </item>
             </layout>
            </widget>
@@ -4686,6 +4718,9 @@ QToolTip{
         </property>
         <property name="text">
          <string/>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
         </property>
        </widget>
       </item>
@@ -4855,6 +4890,9 @@ QToolTip{
         </property>
         <property name="text">
          <string/>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
         </property>
        </widget>
       </item>

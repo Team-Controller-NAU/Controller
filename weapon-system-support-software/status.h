@@ -36,6 +36,9 @@ public:
     //reads a message containing controller version and crc and updates corresponding class variables
     bool loadVersionData(QString versionMessage);
 
+    //outputs values of status class to string format
+    QString toString();
+
     //======================================================================================
     //DEV_MODE exclusive methods
     //======================================================================================

@@ -56,7 +56,7 @@ public:
     bool clearError(int id);
 
     //log file utils
-    void outputToLogFile(QString logFileName);
+    bool outputToLogFile(QString logFileName);
     int loadDataFromLogFile(Events *&events, QString logFileName);
     void appendToLogfile(QString logfilePath, EventNode *event);
     QString nodeToString(EventNode *event);
