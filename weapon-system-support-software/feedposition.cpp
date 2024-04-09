@@ -60,7 +60,7 @@ void feedposition::paintEvent(QPaintEvent*)
     painter.setPen(QPen(Qt::NoPen));
 
     //change brush color
-    painter.setBrush(QBrush(QColor(39, 39, 39))); // #272727 color represented by RGB integers
+    painter.setBrush(QBrush(QColor(27,27,27))); // #272727 color represented by RGB integers
 
     //draws center circle to match program background
     painter.drawEllipse(QPointF(QDial::height()/2, QDial::height()/2), QDial::height()/3, QDial::height()/3);
