@@ -1,5 +1,14 @@
 #include "electrical.h"
 
+/********************************************************************************
+** electrical.cpp
+**
+** This file implements the logic of the weapon's simulated electrical data.
+**
+** @author Team Controller
+********************************************************************************/
+
+
 /**
  * Initialization constructor for an electrical object.
  *
