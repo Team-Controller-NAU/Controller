@@ -610,14 +610,12 @@ bool Events::loadEventData(QString message)
 }
 
 /**
- * Creates linked lists based on an imported logfile
+ * Creates linked lists based on a dump message (multiple errors)
  *
- * If the log file is valid, overwrites the contents of an already
- * made events with the log file contents. If invalid, dont alter
- * current events class.
+ * If dump message is valid, it parses through and creates
+ * error objects
  *
- * @param events pointer to the event linked list
- * @param logFileName The name of the log file that will be read in
+ * @param message The error dump message
  */
 bool Events::loadErrorDump(QString message)
 {
@@ -643,6 +641,14 @@ bool Events::loadErrorDump(QString message)
     return successfulLoad;
 }
 
+/**
+ * Creates linked lists based on a dump message (multiple events)
+ *
+ * If dump message is valid, it parses through and creates
+ * events objects
+ *
+ * @param message The event dump message
+ */
 bool Events::loadEventDump(QString message)
 {
     bool successfulLoad = true;
@@ -668,7 +674,14 @@ bool Events::loadEventDump(QString message)
     return successfulLoad;
 }
 
-// appends the given node to the log file
+/**
+ * Adds event/error data to an existing log file
+ *
+ * Given a log file path, append event/error data to the end of a log file
+ *
+ * @param logfilePath Path of the log file to append to
+ * @param *event The event/error node to be appended
+ */
 void Events::appendToLogfile(QString logfilePath, EventNode *event)
 {
     //retreive the given file
@@ -689,7 +702,13 @@ void Events::appendToLogfile(QString logfilePath, EventNode *event)
     file.close();
 }
 
-
+/**
+ * Translates node data into a QString
+ *
+ * Given a valid node, construct a string to be displayed on GUI
+ *
+ * @param *event Event/error Node to be translated to a string
+ */
 QString Events::nodeToString(EventNode *event)
 {
     QString nodeString;
