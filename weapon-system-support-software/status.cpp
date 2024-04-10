@@ -1,12 +1,32 @@
 #include "status.h"
+/********************************************************************************
+** status.cpp
+**
+** This file implements the logic of maintaining the status data
+**
+** @author Team Controller
+********************************************************************************/
 
+/**
+ * Initialization constructor for the status class
+ *
+ * Sets totalFiringEvents to default values
+ *
+ * @param parent Object used for GUI display
+ */
 Status::Status(QObject *parent)
     : QObject{parent}
 {
     totalFiringEvents = 0;
 }
 
-//given a status message, update status class with new data
+/**
+ * Loads data into the status class given a status message
+ *
+ * Parses statusMessage and updates status class variabels with new data
+ *
+ * @param statusMessage Message containing data to be parsed
+ */
 bool Status::loadData(QString statusMessage)
 {
     /* the statusMessage contains csv data in the following order
@@ -64,7 +84,13 @@ bool Status::loadData(QString statusMessage)
     return true;
 }
 
-//given a message containing the controller version and crc updates corresponding class variables
+/**
+ * Updates crc and controller versions at the bottom on GUI
+ *
+ * Given a message containing the controller version and crc updates corresponding class variables
+ *
+ * @param versionMessage Message containing the controller and crc data
+ */
 bool Status::loadVersionData(QString versionMessage)
 {
     //split along delimeter
