@@ -10,7 +10,7 @@
 ********************************************************************************/
 
 /**
- * Initialization constructor for a feeposition object
+ * Initialization constructor for a feedposition object
  *
  * Sets maximum position in degrees
  *
