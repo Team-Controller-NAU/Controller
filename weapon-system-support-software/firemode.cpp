@@ -34,37 +34,44 @@ void firemode::paintEvent(QPaintEvent*)
     //painter object
     QPainter painter(this);
     QPen text = painter.pen();
+    QPen lines = painter.pen();
 
     // Smooth out the circle
     painter.setRenderHint(QPainter::Antialiasing);
 
+    lines.setColor(QColor(255, 133, 51));
+    lines.setWidth(3);
+
+    painter.setPen(lines);
+
+    painter.setBrush(QBrush(QColor(27,27,27)));
+
+    QRectF outlineArea(-QDial::height()/14, QDial::height()/22, QDial::height()*1.55, QDial::height()*1.55);
+
+    //draws the outline
+    painter.drawPie(outlineArea, -(62.5-90)*16, 125*16);
+
+    painter.drawLine(QDial::height()/1.44, QDial::height()/20,QDial::height()/1.44,QDial::height()/5);
+
     // No border
-    painter.setPen(QPen("000000"));
-
-    //change brush color
-    painter.setBrush(QBrush("#ff8533"));
-
     painter.setPen(QPen(Qt::NoPen));
 
-    //change brush color
-    painter.setBrush(QBrush("#272727"));
-
-    //area of the pointer line
-    QRectF positionLine(QDial::height()/4.9,  QDial::height()/4.55, QDial::height(), QDial::height());
+    //area of the needle
+    QRectF needleArea(QDial::height()/4.31,  QDial::height()/3.2, QDial::height()/1.05, QDial::height()/1.05);
 
     //change brush color
-    painter.setBrush(QBrush("#FFFFFF"));
+    painter.setBrush(QBrush(QColor(255, 255, 255))); // #FFFFFF color represented by RGB integers
 
-    //draws knob for the pointer line
-    painter.drawEllipse(QPointF(QDial::height()/1.425,QDial::height()/1.4),QDial::height()/15,QDial::height()/15);
+    //draws knob for the needle
+    painter.drawEllipse(QPointF(QDial::height()/1.414,QDial::height()/1.28),QDial::height()/15,QDial::height()/15);
 
-    //draws the pointer line
-    painter.drawPie(positionLine, -(value-90)*16, 3*16);
+    //draws the needle
+    painter.drawPie(needleArea, -(value-90)*16, 3*16);
 
     //setting text
     painter.setPen(text);
 
-    painter.setPen(QPen("#FFFFFF"));
+    painter.setPen(QPen(QColor(255, 255, 255))); // White color represented by RGB integers
 
     QFont textfont = painter.font();
 
@@ -80,7 +87,7 @@ void firemode::paintEvent(QPaintEvent*)
 
     painter.drawText(QDial::height()*1.13,QDial::height()/3,QDial::height(),QDial::height(),0,"Auto");
 
-    painter.setPen(QPen("#ff8533"));
+    painter.setPen(QPen(QColor(255, 133, 51))); // #ff8533 color represented by RGB integers
 
     if(value == 305)
     {
@@ -99,7 +106,7 @@ void firemode::paintEvent(QPaintEvent*)
         painter.drawText(QDial::height()*1.13,QDial::height()/3,QDial::height(),QDial::height(),0,"Auto");
     }
 
-
     //disable user edits on feed pos
     setDisabled(true);
 }
+

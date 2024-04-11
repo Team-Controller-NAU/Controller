@@ -27,8 +27,6 @@ Events::Events()
 
     headErrorNode= nullptr;
     lastErrorNode= nullptr;
-
-    dataLoadedFromLogFile = false;
 }
 
 /**
@@ -85,7 +83,6 @@ void Events::addEvent(int id, QString timeStamp, QString eventString)
     {
         //append node to list
         lastEventNode->nextPtr = newNode;
-
         lastEventNode = newNode;
     }
 }
@@ -118,7 +115,6 @@ void Events::addError(int id, QString timeStamp, QString eventString, bool clear
     totalNodes++;
     totalErrors++;
     if(cleared) totalCleared++;
-
 
     //check if linked list is currently empty
     if (headErrorNode == nullptr)
@@ -187,6 +183,8 @@ void Events::freeLinkedLists()
 
     //ensure head and tail point to null symbolizing empty list
     headErrorNode = lastErrorNode = nullptr;
+
+    //clear counters
     totalErrors = 0;
     totalEvents = 0;
     totalNodes = 0;
@@ -332,14 +330,23 @@ int Events::loadDataFromLogFile(Events *&events, QString logFileName)
     //get log file contents
     QTextStream in(&file);
     Events *newEvents = new Events();
+    QString currentLine;
 
     //loop through log file contents
     while( !in.atEnd() )
     {
-        //check if we cant load this line into node
-        if ( !newEvents->stringToNode(in.readLine()) )
+        currentLine = in.readLine();
+
+        //check for advanced log file line
+        if (currentLine.startsWith(ADVANCED_LOG_FILE_INDICATOR))
+        {
+            //do nothing
+        }
+        //otherwise attempt to load current node, return if fail
+        else if ( !newEvents->stringToNode(currentLine) )
         {
             delete newEvents;
+            file.close();
             return INCORRECT_FORMAT;
         }
     }
@@ -437,8 +444,9 @@ bool Events::stringToNode(QString nodeString)
  * errors in order of id
  *
  * @param logFileName The name of the logfile to write to
+ * @param advancedLogFile setting which toggles verbose log file outputs
  */
-void Events::outputToLogFile(QString logFileName)
+bool Events::outputToLogFile(QString logFileName, bool advancedLogFile)
 {
     // retreive given file
     QFile file(logFileName);
@@ -447,7 +455,7 @@ void Events::outputToLogFile(QString logFileName)
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
     {
         qDebug() << "Error: Could not open " << logFileName << " for writing: " << file.errorString();
-        return;
+        return false;
     }
 
     // Create a QTextStream for writing to the file
@@ -459,6 +467,16 @@ void Events::outputToLogFile(QString logFileName)
     EventNode *eventPtr = headEventNode;
     bool error;
 
+    //display advanced log file value
+    if (advancedLogFile)
+    {
+        out << ADVANCED_LOG_FILE_INDICATOR + "ADVANCED LOG FILE ENABLED" << "\n";
+    }
+    else
+    {
+        out << ADVANCED_LOG_FILE_INDICATOR + "ADVANCED LOG FILE DISABLED" << "\n";
+    }
+
     //loop through the events struct to print all nodes in order
     while(errPtr!= nullptr || eventPtr != nullptr)
     {
@@ -469,8 +487,8 @@ void Events::outputToLogFile(QString logFileName)
         out << nodeToString(nextPrintPtr) << "\n";
     }
 
-    //close log file
     file.close();
+    return true;
 }
 
 /**
@@ -724,7 +742,7 @@ QString Events::nodeToString(EventNode *event)
         nodeString += (event->cleared ? DELIMETER + " CLEARED" : DELIMETER + " NOT CLEARED");
     }
 
-    return nodeString; // Return the concatenated QString
+    return nodeString;
 }
 
 //======================================================================================

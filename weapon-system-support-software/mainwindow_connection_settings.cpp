@@ -4,8 +4,8 @@
 //portion of the application. These settings are dependant on QT and care should be taken
 //when altering this file. The settings found here are what QT offers in its serial port
 //class, if the setting you want is not found here, its most likely not supported by QTs libraries.
-//Note that this file will cause intentional program termination if unsupported serial settings are
-//encountered.
+//Note that the toString() and fromString() methods will cause intentional program termination if
+//unsupported serial settings are encountered.
 
 //======================================================================================
 // GUI Drop boxes

@@ -3,13 +3,6 @@
 
 #include <QString>
 #include <QtSerialPort/QtSerialPort>
-#include <QDir>
-#ifdef _WIN32 // check if we are compiling on Windows
-#include <QPixMap>
-#else
-#include <qpixmap.h> // for linux
-#endif
-#include <QRegularExpression>
 
 //this file will define enumerated values and constants used elsewhere in code
 
@@ -22,6 +15,9 @@ const QString DELIMETER = ",";
 
 // the max number of electrical componenets to expect from a weapon
 const int MAX_ELECTRICAL_COMPONENTS = 100;
+
+//denotes advanced log file entries
+const QString ADVANCED_LOG_FILE_INDICATOR = "***";
 
 //======================================================================================
 // Enumerations and enum related vals
@@ -66,6 +62,7 @@ const QSerialPort::Parity INITIAL_PARITY = QSerialPort::NoParity;
 const QSerialPort::StopBits INITIAL_STOP_BITS = QSerialPort::OneStop;
 const QSerialPort::FlowControl INITIAL_FLOW_CONTROL = QSerialPort::NoFlowControl;
 const bool INITIAL_COLORED_EVENTS_OUTPUT = true;
+const bool INITIAL_ADVANCED_LOG_FILE = false;
 const QString INITIAL_LOGFILE_LOCATION = "WSSS_Logfiles/";
 const int INITIAL_AUTO_SAVE_LIMIT = 5;
 const QString INITIAL_DDM_PORT = "COM5";

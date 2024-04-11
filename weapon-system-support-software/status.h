@@ -2,10 +2,11 @@
 #define STATUS_H
 
 #include <QObject>
-#include <constants.h>
 #include <QString>
-#include <QRandomGenerator>
 #include "constants.h"
+#if DEV_MODE
+#include <QRandomGenerator>
+#endif
 
 class Status : public QObject
 {
@@ -34,6 +35,9 @@ public:
 
     //reads a message containing controller version and crc and updates corresponding class variables
     bool loadVersionData(QString versionMessage);
+
+    //outputs values of status class to string format
+    QString toString();
 
     //======================================================================================
     //DEV_MODE exclusive methods

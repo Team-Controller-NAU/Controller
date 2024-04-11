@@ -180,6 +180,13 @@ void MainWindow::on_ddm_port_selection_currentIndexChanged(int index)
 //download button for events in CSV format
 void MainWindow::on_download_button_clicked()
 {
+    //if total nodes is 0 prevent download
+    if (events->totalNodes == 0)
+    {
+        notifyUser("Download prevented", "No data is available to download.", true);
+        return;
+    }
+
     QString logFile;
 
     //check if user has set a custom log file output directory
@@ -196,10 +203,17 @@ void MainWindow::on_download_button_clicked()
     }
 
     qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
-    logFile += QString::number(secsSinceEpoch);
+    logFile += QString::number(secsSinceEpoch) + "-logfile-M.txt";
 
     // save logfile - mannually done
-    events->outputToLogFile(logFile + "-logfile-M.txt");
+    if (events->outputToLogFile(logFile, false))
+    {
+       notifyUser("Download complete", "Log file loction: " + logFile, false);
+    }
+    else
+    {
+       notifyUser("Download failed", "Could not open " + logFile + " for writing", true);
+    }
 }
 
 void MainWindow::on_FilterBox_currentIndexChanged(int index)
@@ -236,6 +250,7 @@ void MainWindow::on_FilterBox_currentIndexChanged(int index)
         qDebug() << "Error: Unrecognized filter index.";
     }
 
+    //refresh to display with filter
     refreshEventsOutput();
 }
 
@@ -286,7 +301,7 @@ void MainWindow::on_handshake_button_clicked()
     {
         qDebug() << "Sending disconnect message to controller" << Qt::endl;
 
-        ddmCon->transmit(QString::number(CLOSING_CONNECTION) + DELIMETER + "\n");
+        ddmCon->sendDisconnectMsg();
 
         if (ddmCon->connected)
         {
@@ -480,6 +495,60 @@ void MainWindow::on_colored_events_output_stateChanged(int arg1)
 
     userSettings.setValue("coloredEventOutput", coloredEventOutput);
     refreshEventsOutput();
+
+    //write changes to the registry
+    userSettings.sync();
+}
+
+void MainWindow::on_advanced_log_file_stateChanged(int arg1)
+{
+    //arg1 represents the state of the checkbox
+    switch(arg1)
+    {
+        //unchecked
+        case 0:
+            advancedLogFile = false;
+
+            break;
+
+        //checked
+        default:
+            advancedLogFile = true;
+    }
+
+    userSettings.setValue("advancedLogFile", advancedLogFile);
+
+    //check if ddmCon does not exist
+    if (ddmCon == NULL)
+    {
+        return;
+    }
+
+    //if connected, add updated advanced log file setting notification to logfile
+    if (ddmCon->connected)
+    {
+        QFile file(autosaveLogFile);
+
+        //attempt to open in append mode
+        if (!file.open(QIODevice::Append | QIODevice::Text))
+        {
+            qDebug() <<  "Could not open log file for appending: " << autosaveLogFile;
+        }
+        else
+        {
+            QTextStream out(&file);
+
+            if (advancedLogFile)
+            {
+                out << ADVANCED_LOG_FILE_INDICATOR + "ADVANCED LOG FILE ENABLED" << "\n";
+            }
+            else
+            {
+                out << ADVANCED_LOG_FILE_INDICATOR + "ADVANCED LOG FILE DISABLED" << "\n";
+            }
+            file.close();
+        }
+    }
 
     //write changes to the registry
     userSettings.sync();

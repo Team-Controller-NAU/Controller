@@ -32,7 +32,7 @@ void feedposition::paintEvent(QPaintEvent*)
     int startAngle;
     int index;
 
-    //arc length of the dial backgournd
+    //arc length of the dial background
     int spanAngle = 45 * 16;
 
     //dial value
@@ -46,10 +46,10 @@ void feedposition::paintEvent(QPaintEvent*)
     painter.setRenderHint(QPainter::Antialiasing);
 
     // No border
-    painter.setPen(QPen("000000"));
+    painter.setPen(QPen(QColor(0, 0, 0))); // Black color represented by RGB integers
 
     //change brush color
-    painter.setBrush(QBrush("#ff8533"));
+    painter.setBrush(QBrush(QColor(255, 133, 51))); // #ff8533 color represented by RGB integers
 
     //area of the dial background
     QRectF dialBackground(0, 0, QDial::height(), QDial::height());
@@ -67,39 +67,39 @@ void feedposition::paintEvent(QPaintEvent*)
         if(index > 5)
         {
             //change brush color
-            painter.setBrush(QBrush("#ff8533"));
+            painter.setBrush(QBrush(QColor(255, 133, 51))); // #ff8533 color represented by RGB integers
         }
         else
         {
             //change brush color
-            painter.setBrush(QBrush("#9747FF"));
+            painter.setBrush(QBrush(QColor(151, 71, 255))); // #9747FF color represented by RGB integers
         }
     }
 
     painter.setPen(QPen(Qt::NoPen));
 
     //change brush color
-    painter.setBrush(QBrush("#272727"));
+    painter.setBrush(QBrush(QColor(27,27,27))); // #272727 color represented by RGB integers
 
     //draws center circle to match program background
-    painter.drawEllipse(QPointF(QDial::height()/2,QDial::height()/2),QDial::height()/3,QDial::height()/3);
+    painter.drawEllipse(QPointF(QDial::height()/2, QDial::height()/2), QDial::height()/3, QDial::height()/3);
 
     //area of the pointer line
-    QRectF positionLine(QDial::height()/8,  QDial::height()/8, QDial::height()/1.33, QDial::height()/1.33);
+    QRectF positionLine(QDial::height()/8, QDial::height()/8, QDial::height()/1.33, QDial::height()/1.33);
 
     //change brush color
-    painter.setBrush(QBrush("#FFFFFF"));
+    painter.setBrush(QBrush(QColor(255, 255, 255))); // #FFFFFF color represented by RGB integers
 
     //draws knob for the pointer line
-    painter.drawEllipse(QPointF(QDial::height()/2,QDial::height()/2),QDial::height()/10,QDial::height()/10);
+    painter.drawEllipse(QPointF(QDial::height()/2, QDial::height()/2), QDial::height()/10, QDial::height()/10);
 
     //draws the pointer line
-    painter.drawPie(positionLine, -(value-90)*16, 3*16);
+    painter.drawPie(positionLine, -(value - 90) * 16, 3 * 16);
 
     //setting text
     painter.setPen(text);
 
-    painter.setPen(QPen("#000000"));
+    painter.setPen(QPen(QColor(0, 0, 0))); // Black color represented by RGB integers
 
     QFont textfont = painter.font();
 
@@ -123,3 +123,17 @@ void feedposition::paintEvent(QPaintEvent*)
     //disable user edits on feed pos
     setDisabled(true);
 }
+
+//misc event processor for feed pos
+bool feedposition::event(QEvent* event)
+{
+    //process tool tip event
+    if (event->type() == QEvent::ToolTip)
+    {
+        // Show the static tooltip message (we could make it dynamic depending on feed pos value as well)
+        QToolTip::showText(mapToGlobal(rect().center()), "Feed position display");
+        return true;
+    }
+    return QDial::event(event);
+}
+

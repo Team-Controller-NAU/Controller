@@ -17,10 +17,6 @@
 electrical::electrical()
 {
     //initialize variables
-    name = "";
-    voltage = 0;
-    amps = 0;
-
     numNodes = 0;
     headNode = nullptr;
     lastNode = nullptr;
@@ -123,7 +119,7 @@ bool electrical::loadElecData(QString message)
         int voltage = values[1].toInt();
         int amps = values[2].toInt();
 
-        //using extracted data, add an error to the end of the electrical linked list
+        //using extracted data, add an error to the end of the error linked list
         addNode(name, voltage, amps);
         return true;
     }
@@ -161,6 +157,28 @@ bool electrical::loadElecDump(QString message)
         }
     }
     return true;
+}
+
+//converts the current contents of electrical class to a string
+QString electrical::toString()
+{
+    electricalNode *wkgNode = headNode;
+    QString electricalString;
+
+    while(wkgNode != nullptr)
+    {
+        electricalString += wkgNode->name + DELIMETER + " Voltage: " +
+                            QString::number(wkgNode->voltage) + DELIMETER
+                            + " Amps: " + QString::number(wkgNode->amps);
+        wkgNode = wkgNode->nextNode;
+
+        if (wkgNode != nullptr)
+        {
+            electricalString += DELIMETER + " ";
+        }
+    }
+
+    return electricalString;
 }
 
 //======================================================================================

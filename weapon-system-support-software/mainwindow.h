@@ -1,24 +1,28 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "constants.h"
+//QT libraries
 #include <QMainWindow>
-#include <QtConcurrent/QtConcurrent>
 #include <QDesktopServices>
-#include "connection.h"
-#include "events.h"
-#include "status.h"
-#include "electrical.h"
 #include <QShortcut>
 #include <QTextCursor>
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QObject>
 #include <QtCore>
+
+//Team Controller code
+#include "constants.h"
+#include "connection.h"
+#include "events.h"
+#include "status.h"
+#include "electrical.h"
 #include "./ui_mainwindow.h"
+
 
 #if DEV_MODE
     #include "csim.h"
+    #include <QtConcurrent/QtConcurrent>
 #endif
 
 QT_BEGIN_NAMESPACE
@@ -41,7 +45,7 @@ public:
     //data classes
     Status *status;
     Events *events;
-    electrical *electricalObject;
+    electrical *electricalData;
     QSettings userSettings;
 
     // vars
@@ -59,6 +63,7 @@ public:
     bool coloredEventOutput;
     int autoSaveLimit;
     int connectionTimeout;
+    bool advancedLogFile;
 
     //creates a new connection using currently selected serial port settings
     void createDDMCon();
@@ -123,6 +128,8 @@ private slots:
     void enforceAutoSaveLimit();
     void updateConnectionStatus(bool connectionStatus);
     QString getSessionStatistics();
+    void logAdvancedDetails(SerialMessageIdentifier id);
+    void renderElectricalPage();
 
     #if DEV_MODE
         void displaySavedSettings();
@@ -182,6 +189,8 @@ private slots:
         void on_csim_generation_interval_selection_valueChanged(int arg1);
     #endif
     //=========================================================================================================
+
+        void on_advanced_log_file_stateChanged(int arg1);
 
     private:
     Ui::MainWindow *ui;

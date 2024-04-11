@@ -25,6 +25,7 @@ public:
     bool loadElecData(QString message);
     bool loadElecDump(QString message);
     void createElectricalLL();
+    QString toString();
 
     //variables
     QString name;

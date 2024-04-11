@@ -8,7 +8,7 @@ MainWindow::MainWindow(QWidget *parent)
     ddmCon(nullptr),
     status(new Status()),
     events(new Events()),
-    electricalObject(new electrical()),
+    electricalData(new electrical()),
 
     //this determines what will be shown on the events page
     eventFilter(ALL),
@@ -42,9 +42,6 @@ MainWindow::MainWindow(QWidget *parent)
 {
     //init gui
     ui->setupUi(this);
-
-    //set status labels invisable
-    ui->feed_position_label->setVisible(false);
 
     //setup user settings and init settings related gui elements
     setupSettings();
@@ -138,7 +135,7 @@ MainWindow::~MainWindow()
     delete ddmCon;
     delete status;
     delete events;
-    delete electricalObject;
+    delete electricalData;
     #if DEV_MODE
         delete csimHandle;
     #endif
@@ -176,7 +173,7 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
         }
 
         //free old electrical data if any exists
-        electricalObject->freeLL();
+        electricalData->freeLL();
 
         //set status labels visable
         ui->trigger1_label->setVisible(true);
@@ -228,6 +225,7 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
         lastMessageTimer->stop();
         handshakeTimer->stop();
         ui->DDMTimer->clear();
+        ui->DDM_timer_label->clear();
 
         //enable changes to connection related settings
         enableConnectionChanges();
@@ -242,6 +240,15 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
 
         //output session stats
         notifyUser("Session statistics ready", getSessionStatistics(), false);
+
+        //if advanced log file is enabled, add electrical data
+        if (advancedLogFile)
+        {
+            logAdvancedDetails(ELECTRICAL);
+            logAdvancedDetails(CLOSING_CONNECTION);
+        }
+
+
     }
 }
 
@@ -300,8 +307,7 @@ void MainWindow::handshake()
         return;
     }
 
-    // Send handshake message
-    ddmCon->transmit(QString::number(LISTENING) + '\n');
+    ddmCon->sendHandshakeMsg();
 }
 
 //this function is called as a result of the readyRead signal being emmited by a connected serial port
@@ -318,9 +324,7 @@ void MainWindow::readSerialData()
     while (ddmCon->checkForValidMessage())
     {
         // declare variables
-        electricalNode* wkgElecPtr;
         SerialMessageIdentifier messageId;
-        int boxIndex;
 
         //get serialized string from port
         QByteArray serializedMessage = ddmCon->serialPort.readLine();
@@ -339,8 +343,8 @@ void MainWindow::readSerialData()
             //extract message id
             messageId = static_cast<SerialMessageIdentifier>(QString(message[0]).toInt());
 
-            //remove message id from message
-            message = message.mid(1 + DELIMETER.length());
+            //remove message id from message (id has len=1 and delimeter has len=1 so 2 total)
+            message = message.mid(2);
 
             //determine what kind of message this is
             switch ( messageId )
@@ -357,6 +361,9 @@ void MainWindow::readSerialData()
 
                 //update gui
                 updateStatusDisplay();
+
+                //if advanced log file is enabled, log the status
+                if (advancedLogFile) logAdvancedDetails(STATUS);
 
                 break;
 
@@ -414,72 +421,17 @@ void MainWindow::readSerialData()
                 qDebug() <<  "Message id: electrical" << qPrintable("\n");
 
                 //load new data into electrical ll, notify if fail
-                if (!electricalObject->loadElecDump(message))
+                if (!electricalData->loadElecDump(message))
                 {
                     notifyUser("Invalid electrical dump received", message, true);
                 }
                 //otherwise success
                 else
                 {
-                    //get head node into wkg ptr
-                    wkgElecPtr = electricalObject->headNode;
-
-                    // loop through each electrical data box
-                    for (boxIndex = 1; boxIndex <= MAX_ELECTRICAL_COMPONENTS; boxIndex++)
-                    {
-                        // get the current box name
-                        QString widgetName = "box" + QString::number(boxIndex) + "_widget";
-
-                        // get the current box based off name
-                        QWidget *widget = findChild<QWidget *>(widgetName);
-
-                        // check if widget exists, and hide it
-                        if(widget) widget->hide();
-                    }
-
-                    // loop through each electrical data box
-                    for (boxIndex = 1; boxIndex <= MAX_ELECTRICAL_COMPONENTS; boxIndex++)
-                    {
-                        // get the current box name
-                        QString widgetName = "box" + QString::number(boxIndex) + "_widget";
-
-                        // get the names of the labels for this box
-                        QString labelName = "box" + QString::number(boxIndex) + "_label";
-                        QString statsName = "box" + QString::number(boxIndex) + "_stats";
-
-                        // get the current box based off name
-                        QWidget *widget = findChild<QWidget *>(widgetName);
-
-                        // find the label objects with findChild
-                        QLabel *boxLabel = findChild<QLabel *>(labelName);
-                        QTextEdit *boxStats = findChild<QTextEdit *>(statsName);
-
-                        // check if the current electrical node exists
-                        if (wkgElecPtr != nullptr)
-                        {
-                            // update label with name if it exists
-                            if (boxLabel) boxLabel->setText(" " + wkgElecPtr->name);
-
-                            // update stats with voltage and amps if it exists
-                            if (boxStats) boxStats->setPlainText("Voltage: " + QString::number(wkgElecPtr->voltage) +
-                                                       '\n' + "Amps: " + QString::number(wkgElecPtr->amps));
-
-                            // check if the box exists, and show it
-                            if(widget) widget->show();
-
-                            // move to next electrical node
-                            wkgElecPtr = wkgElecPtr->nextNode;
-                        }
-                        // else, there are no more electrical nodes
-                        else
-                        {
-                            // break once we are done
-                            break;
-                        }
-                    }
+                    //dynamically generate nodes on electrical page
+                    renderElectricalPage();
                 }
 
-                // break if we have reached the max number of electrical boxes to fill
                 break;
 
             case EVENT_DUMP:
@@ -493,7 +445,10 @@ void MainWindow::readSerialData()
                 }
 
                 // create log file
-                events->outputToLogFile( autosaveLogFile );
+                if (!events->outputToLogFile( autosaveLogFile, advancedLogFile ))
+                {
+                    notifyUser("Failed to open logfile","Manual download could save the data.", true);
+                }
 
                 //new auto save file created, enforce auto save limit
                 enforceAutoSaveLimit();
@@ -514,7 +469,10 @@ void MainWindow::readSerialData()
                 }
 
                 // create log file
-                events->outputToLogFile( autosaveLogFile );
+                if (!events->outputToLogFile( autosaveLogFile, advancedLogFile ))
+                {
+                    notifyUser("Failed to open logfile","Manual download could save the data.", true);
+                }
 
                 //new auto save file created, enforce auto save limit
                 enforceAutoSaveLimit();
@@ -528,7 +486,7 @@ void MainWindow::readSerialData()
                 qDebug() << "Message id: clear error " << message << qPrintable("\n");
 
                 //update cleared status of error with given id, notify if fail
-                if (!events->clearError(message.left(message.indexOf(DELIMETER)).toInt()))
+                if (!events->clearError(message.left(message.indexOf(DELIMETER)).toInt())) //ignore the suggestion leftRef is depreciated
                 {
                     notifyUser("Failed to clear error", message, true);
                 }
@@ -557,7 +515,7 @@ void MainWindow::readSerialData()
                     notifyUser("Invalid 'begin' message received", message, true);
 
                     //end connection attempt
-                    ddmCon->transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + DELIMETER + "\n");
+                    ddmCon->sendDisconnectMsg();
                 }
                 //if we didnt initiate a connection, tell controller to disconnect
                 else if (!handshakeTimer->isActive())
@@ -565,7 +523,7 @@ void MainWindow::readSerialData()
                     notifyUser("Invalid connection attempt", "Controller attempted to connect despite no active handshake. Connection terminated", true);
 
                     //end connection attempt
-                    ddmCon->transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + DELIMETER + "\n");
+                    ddmCon->sendDisconnectMsg();
                 }
                 //otherwise success
                 else
@@ -591,7 +549,7 @@ void MainWindow::readSerialData()
 
                 qDebug() << "Disconnect message received from Controller";
 
-                notifyUser("Controller disconnected.", "Session end", false);
+                notifyUser("Controller disconnected", "Session end", false);
 
                 //set connection status false and update related objects
                 updateConnectionStatus(false);
@@ -824,7 +782,19 @@ void MainWindow::setupSettings()
     //set gui display to match
     ui->colored_events_output->setChecked(coloredEventOutput);
 
-    // Check if the setting does not exist
+    // Check if advanced log file setting does not exist
+    if (!userSettings.contains("advancedLogFile") || !userSettings.value("advancedLogFile").isValid()) {
+        // set the default value
+        userSettings.setValue("advancedLogFile", INITIAL_ADVANCED_LOG_FILE);
+    }
+
+    //set session variable based on setting
+    advancedLogFile = userSettings.value("advancedLogFile").toBool();
+
+    //set gui display to match
+    ui->advanced_log_file->setChecked(advancedLogFile);
+
+    // Check if the auto save setting does not exist
     if (!userSettings.contains("autoSaveLimit") || !userSettings.value("autoSaveLimit").isValid()) {
         // set the default value
         userSettings.setValue("autoSaveLimit", INITIAL_AUTO_SAVE_LIMIT);
@@ -936,6 +906,9 @@ void MainWindow::updateStatusDisplay()
 
     ui->fireRateOutput->setText(QString::number(status->firingRate));
     ui->fireRateOutput->setAlignment(Qt::AlignCenter);
+
+    ui->firingEventsOutput->setText(QString::number(status->totalFiringEvents));
+    ui->firingEventsOutput->setAlignment(Qt::AlignCenter);
 
     ui->burstOutput->setText(QString::number(status->burstLength));
     ui->burstOutput->setAlignment(Qt::AlignCenter);
@@ -1209,9 +1182,116 @@ void MainWindow::notifyUser(QString notificationText, QString logText, bool erro
 
 QString MainWindow::getSessionStatistics()
 {
-    return "Session Duration: " + status->elapsedControllerTime.toString("HH:mm:ss") + ", Total Events: " +
+    return "Duration: " + status->elapsedControllerTime.toString("HH:mm:ss") + ", Total Events: " +
            QString::number(events->totalEvents) + ", Total Errors: " + QString::number(events->totalErrors)
-           + ", Non-cleared errors: " + QString::number(events->totalCleared);
+           + ", Non-cleared errors: " + QString::number(events->totalCleared)
+           + ", Total Firing events: " + QString::number(status->totalFiringEvents);
+}
+
+//called when advanced log file setting is active, meant to log status updates and electrical data
+void MainWindow::logAdvancedDetails(SerialMessageIdentifier id)
+{
+    //retreive the given file
+    QFile file(autosaveLogFile);
+    QString outString;
+
+    //get proper msg id
+    switch(id)
+    {
+        case ELECTRICAL:
+            outString = ADVANCED_LOG_FILE_INDICATOR + "Electrical Data: " + electricalData->toString();
+
+            break;
+
+        case STATUS:
+            outString = ADVANCED_LOG_FILE_INDICATOR + "Status Update: " + status->toString();
+
+            break;
+
+        case CLOSING_CONNECTION:
+            outString = ADVANCED_LOG_FILE_INDICATOR + "Session Statistics: " + getSessionStatistics();
+
+            break;
+
+        default:
+            break;
+    }
+
+    //attempt to open in append mode
+    if (!file.open(QIODevice::Append | QIODevice::Text))
+    {
+        qDebug() <<  "Could not open log file for appending: " << autosaveLogFile;
+        notifyUser("Failed to open logfile", "log text \"" + outString + "\" discarded", true);
+    }
+    else
+    {
+        //append the text to the log file
+        QTextStream out(&file);
+        out << outString + "\n";
+        file.close();
+    }
+}
+
+//uses data in electrical class to render electrical page
+void MainWindow::renderElectricalPage()
+{
+    int boxIndex;
+    //get head node into wkg ptr
+    electricalNode* wkgElecPtr = electricalData->headNode;
+
+    // loop through each electrical data box
+    for (boxIndex = 1; boxIndex <= MAX_ELECTRICAL_COMPONENTS; boxIndex++)
+    {
+        // get the current box name
+        QString widgetName = "box" + QString::number(boxIndex) + "_widget";
+
+        // get the current box based off name
+        QWidget *widget = findChild<QWidget *>(widgetName);
+
+        // check if widget exists, and hide it
+        if(widget) widget->hide();
+    }
+
+    // loop through each electrical data box
+    for (boxIndex = 1; boxIndex <= MAX_ELECTRICAL_COMPONENTS; boxIndex++)
+    {
+        // get the current box name
+        QString widgetName = "box" + QString::number(boxIndex) + "_widget";
+
+        // get the names of the labels for this box
+        QString labelName = "box" + QString::number(boxIndex) + "_label";
+        QString statsName = "box" + QString::number(boxIndex) + "_stats";
+
+        // get the current box based off name
+        QWidget *widget = findChild<QWidget *>(widgetName);
+
+        // find the label objects with findChild
+        QLabel *boxLabel = findChild<QLabel *>(labelName);
+        QTextEdit *boxStats = findChild<QTextEdit *>(statsName);
+
+        // check if the current electrical node exists
+        if (wkgElecPtr != nullptr)
+        {
+            // update label with name if it exists
+            if (boxLabel) boxLabel->setText(" " + wkgElecPtr->name);
+
+            // update stats with voltage and amps if it exists
+            if (boxStats) boxStats->setPlainText("Voltage: " + QString::number(wkgElecPtr->voltage) +
+                                       '\n' + "Amps: " + QString::number(wkgElecPtr->amps));
+
+            // check if the box exists, and show it
+            if(widget) widget->show();
+
+            // move to next electrical node
+            wkgElecPtr = wkgElecPtr->nextNode;
+        }
+        // else, there are no more electrical nodes
+        else
+        {
+            // break once we are done
+            break;
+        }
+    }
 }
 
 //======================================================================================
