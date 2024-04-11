@@ -29,7 +29,6 @@ public:
     int totalErrors;
     int totalNodes;
     int totalCleared;
-    //bool dataLoadedFromLogFile;
 
     EventNode *headEventNode;
     EventNode *lastEventNode;
@@ -56,7 +55,7 @@ public:
     bool clearError(int id);
 
     //log file utils
-    bool outputToLogFile(QString logFileName);
+    bool outputToLogFile(QString logFileName, bool advancedLogFile);
     int loadDataFromLogFile(Events *&events, QString logFileName);
     void appendToLogfile(QString logfilePath, EventNode *event);
     QString nodeToString(EventNode *event);

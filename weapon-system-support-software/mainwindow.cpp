@@ -445,7 +445,7 @@ void MainWindow::readSerialData()
                 }
 
                 // create log file
-                if (!events->outputToLogFile( autosaveLogFile ))
+                if (!events->outputToLogFile( autosaveLogFile, advancedLogFile ))
                 {
                     notifyUser("Failed to open logfile","Manual download could save the data.", true);
                 }
@@ -469,7 +469,7 @@ void MainWindow::readSerialData()
                 }
 
                 // create log file
-                if (!events->outputToLogFile( autosaveLogFile ))
+                if (!events->outputToLogFile( autosaveLogFile, advancedLogFile ))
                 {
                     notifyUser("Failed to open logfile","Manual download could save the data.", true);
                 }
@@ -549,7 +549,7 @@ void MainWindow::readSerialData()
 
                 qDebug() << "Disconnect message received from Controller";
 
-                notifyUser("Controller disconnected.", "Session end", false);
+                notifyUser("Controller disconnected", "Session end", false);
 
                 //set connection status false and update related objects
                 updateConnectionStatus(false);
@@ -1184,7 +1184,8 @@ QString MainWindow::getSessionStatistics()
 {
     return "Duration: " + status->elapsedControllerTime.toString("HH:mm:ss") + ", Total Events: " +
            QString::number(events->totalEvents) + ", Total Errors: " + QString::number(events->totalErrors)
-           + ", Non-cleared errors: " + QString::number(events->totalCleared);
+           + ", Non-cleared errors: " + QString::number(events->totalCleared)
+           + ", Total Firing events: " + QString::number(status->totalFiringEvents);
 }
 
 //called when advanced log file setting is active, meant to log status updates and electrical data
@@ -1198,17 +1199,17 @@ void MainWindow::logAdvancedDetails(SerialMessageIdentifier id)
     switch(id)
     {
         case ELECTRICAL:
-            outString = "***Electrical Data: " + electricalData->toString();
+            outString = ADVANCED_LOG_FILE_INDICATOR + "Electrical Data: " + electricalData->toString();
 
             break;
 
         case STATUS:
-            outString = "***Status Update: " + status->toString();
+            outString = ADVANCED_LOG_FILE_INDICATOR + "Status Update: " + status->toString();
 
             break;
 
         case CLOSING_CONNECTION:
-            outString = "***Session Statistics: " + getSessionStatistics();
+            outString = ADVANCED_LOG_FILE_INDICATOR + "Session Statistics: " + getSessionStatistics();
 
             break;
 

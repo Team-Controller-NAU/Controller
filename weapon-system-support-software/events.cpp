@@ -275,7 +275,7 @@ int Events::loadDataFromLogFile(Events *&events, QString logFileName)
         currentLine = in.readLine();
 
         //check for advanced log file line
-        if (currentLine[0]=='*')
+        if (currentLine.startsWith(ADVANCED_LOG_FILE_INDICATOR))
         {
             //do nothing
         }
@@ -370,7 +370,7 @@ bool Events::stringToNode(QString nodeString)
 }
 
 // opens log file in overwrite mode and outputs currently saved events and errors in order of id
-bool Events::outputToLogFile(QString logFileName)
+bool Events::outputToLogFile(QString logFileName, bool advancedLogFile)
 {
     // retreive given file
     QFile file(logFileName);
@@ -390,6 +390,16 @@ bool Events::outputToLogFile(QString logFileName)
     EventNode *errPtr = headErrorNode;
     EventNode *eventPtr = headEventNode;
     bool error;
+
+    //display advanced log file value
+    if (advancedLogFile)
+    {
+        out << ADVANCED_LOG_FILE_INDICATOR + "ADVANCED LOG FILE ENABLED" << "\n";
+    }
+    else
+    {
+        out << ADVANCED_LOG_FILE_INDICATOR + "ADVANCED LOG FILE DISABLED" << "\n";
+    }
 
     //loop through the events struct to print all nodes in order
     while(errPtr!= nullptr || eventPtr != nullptr)

@@ -16,6 +16,9 @@ const QString DELIMETER = ",";
 // the max number of electrical componenets to expect from a weapon
 const int MAX_ELECTRICAL_COMPONENTS = 100;
 
+//denotes advanced log file entries
+const QString ADVANCED_LOG_FILE_INDICATOR = "***";
+
 //======================================================================================
 // Enumerations and enum related vals
 //======================================================================================

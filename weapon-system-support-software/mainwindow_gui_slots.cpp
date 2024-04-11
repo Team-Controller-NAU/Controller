@@ -203,10 +203,17 @@ void MainWindow::on_download_button_clicked()
     }
 
     qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
-    logFile += QString::number(secsSinceEpoch);
+    logFile += QString::number(secsSinceEpoch) + "-logfile-M.txt";
 
     // save logfile - mannually done
-    events->outputToLogFile(logFile + "-logfile-M.txt");
+    if (events->outputToLogFile(logFile, false))
+    {
+       notifyUser("Download complete", "Log file loction: " + logFile, false);
+    }
+    else
+    {
+       notifyUser("Download failed", "Could not open " + logFile + " for writing", true);
+    }
 }
 
 void MainWindow::on_FilterBox_currentIndexChanged(int index)
@@ -501,6 +508,7 @@ void MainWindow::on_advanced_log_file_stateChanged(int arg1)
         //unchecked
         case 0:
             advancedLogFile = false;
+
             break;
 
         //checked
@@ -509,6 +517,38 @@ void MainWindow::on_advanced_log_file_stateChanged(int arg1)
     }
 
     userSettings.setValue("advancedLogFile", advancedLogFile);
+
+    //check if ddmCon does not exist
+    if (ddmCon == NULL)
+    {
+        return;
+    }
+
+    //if connected, add updated advanced log file setting notification to logfile
+    if (ddmCon->connected)
+    {
+        QFile file(autosaveLogFile);
+
+        //attempt to open in append mode
+        if (!file.open(QIODevice::Append | QIODevice::Text))
+        {
+            qDebug() <<  "Could not open log file for appending: " << autosaveLogFile;
+        }
+        else
+        {
+            QTextStream out(&file);
+
+            if (advancedLogFile)
+            {
+                out << ADVANCED_LOG_FILE_INDICATOR + "ADVANCED LOG FILE ENABLED" << "\n";
+            }
+            else
+            {
+                out << ADVANCED_LOG_FILE_INDICATOR + "ADVANCED LOG FILE DISABLED" << "\n";
+            }
+            file.close();
+        }
+    }
 
     //write changes to the registry
     userSettings.sync();
