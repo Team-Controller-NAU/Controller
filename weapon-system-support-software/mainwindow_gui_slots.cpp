@@ -540,11 +540,11 @@ void MainWindow::on_advanced_log_file_stateChanged(int arg1)
 
             if (advancedLogFile)
             {
-                out << "***ADVANCED LOG FILE ENABLED" << "\n";
+                out << ADVANCED_LOG_FILE_INDICATOR + "ADVANCED LOG FILE ENABLED" << "\n";
             }
             else
             {
-                out << "***ADVANCED LOG FILE DISABLED" << "\n";
+                out << ADVANCED_LOG_FILE_INDICATOR + "ADVANCED LOG FILE DISABLED" << "\n";
             }
             file.close();
         }
