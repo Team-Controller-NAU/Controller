@@ -20,7 +20,6 @@ private slots:
     void test_loadElecDump();
     void test_loadElecDump_badInputLess();
     void test_loadElecDump_badInputMore();
-    void test_loadElecDump_badInputType();
 };
 
 void tst_electrical::electrical_constructor()

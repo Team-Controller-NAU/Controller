@@ -1,5 +1,19 @@
 #include "electrical.h"
 
+/********************************************************************************
+** electrical.cpp
+**
+** This file implements the logic of the weapon's simulated electrical data.
+**
+** @author Team Controller
+********************************************************************************/
+
+
+/**
+ * Initialization constructor for an electrical object.
+ *
+ * This initializes the default values for an electrical node
+ */
 electrical::electrical()
 {
     //initialize variables
@@ -9,6 +23,11 @@ electrical::electrical()
 
 }
 
+/**
+ * Deconstructor for an electrical object.
+ *
+ * This deletes the electrical linked list.
+ */
 electrical::~electrical()
 {
     //call free ll
@@ -16,6 +35,16 @@ electrical::~electrical()
     freeLL();
 }
 
+/**
+ * Adds a node to the electrical linked list
+ *
+ * This takes in below parameters and adds a node with those values.
+ * Either creates a single node, or adds to an existing linked list.
+ *
+ * @param name The name of the electrical component.
+ * @param voltage The voltage amount of the electrical component.
+ * @param amps The amp amount of the electrical component
+ */
 void electrical::addNode(QString name, int voltage, int amps)
 {
     //create new node
@@ -27,7 +56,7 @@ void electrical::addNode(QString name, int voltage, int amps)
     wkgNode->amps = amps;
     wkgNode->nextNode = nullptr;
 
-    //add node to ll, check if ll is empty
+    // add node to ll, check if ll is empty
     if (headNode == nullptr)
     {
         //set node to head
@@ -36,16 +65,21 @@ void electrical::addNode(QString name, int voltage, int amps)
         //assign tail
         lastNode = wkgNode;
     }
-    //otherwise, assume ll contains nodes
+
+    // otherwise, assume ll contains nodes
     else
     {
         lastNode->nextNode = wkgNode;
 
         lastNode = wkgNode;
     }
-    //qDebug() << "Electrical node created";
 }
 
+/**
+ * Frees the memory associated with the linked list.
+ *
+ * This deletes all nodes in the electrical linked list.
+ */
 void electrical::freeLL()
 {
     electricalNode *wkgNode = headNode;
@@ -64,6 +98,14 @@ void electrical::freeLL()
     headNode = lastNode = nullptr;
 }
 
+/**
+ * Takes in a message and converts to a linked list
+ *
+ * Divides message into its delimeted parts (ex: name, (amps) 12, (volts) 14)
+ * checks for a valid message and then creates a new node from those inputed values.
+ *
+ * @param message Electrical data message to be parsed into electrical linked list node.
+ */
 bool electrical::loadElecData(QString message)
 {
     // parse message
@@ -88,7 +130,14 @@ bool electrical::loadElecData(QString message)
     }
 }
 
-
+/**
+ * Takes in a dump message with multiple electrical messages and converts to electrical linked list.
+ *
+ * Divides message into its delimeted parts (ex: name, (amps) 12, (volts) 14,, name2,(amps) 12,(volts) 14),
+ * checks for a valid message and then creates a new node from those inputed values.
+ *
+ * @param message Electrical data messages to be parsed to electrical linked list.
+ */
 bool electrical::loadElecDump(QString message)
 {
     // Split the dump messages into individual error sets
@@ -136,6 +185,13 @@ QString electrical::toString()
 //DEV_MODE exclusive methods
 //======================================================================================
 #if DEV_MODE
+/**
+ * Generates an electrical message (not used)
+ *
+ * Generates a message with randomized values.
+ *
+ * Returns the created, randomized message.
+ */
 QString electrical::generateElectricalMessage()
 {
     // electrical components have:
@@ -155,6 +211,9 @@ QString electrical::generateElectricalMessage()
     return message + '\n';
 }
 
+/**
+ * Diagnostic function: used to output the entire electrical linked list (not used)
+ */
 void electrical::printNodes()
 {
     electricalNode *wkgNode = headNode;
