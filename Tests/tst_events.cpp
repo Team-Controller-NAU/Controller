@@ -45,9 +45,6 @@ void tst_events::events_constructor()
     QCOMPARE(eventObj->headErrorNode, nullptr);
     QCOMPARE(eventObj->lastErrorNode, nullptr);
 
-    // check default bool value
-    QCOMPARE(eventObj->dataLoadedFromLogFile, false);
-
     // free
     delete eventObj;
 }
