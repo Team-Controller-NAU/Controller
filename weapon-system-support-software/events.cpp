@@ -613,8 +613,16 @@ bool Events::loadEventData(QString message)
     {
         // get values
         int id = values[0].toInt();
+        if(id <= -1){return false;}
+
         QString timeStamp = values[1];
+
+        QStringList timeValues = timeStamp.split(':');
+        if(timeValues[0].toInt() <= -1 || timeValues[1].toInt() <= -1
+            || timeValues[2].toInt() <= -1) {return false;}
+
         QString eventString = values[2];
+        if(eventString == ""){return false;}
 
         // using extracted data add a new event to the end of the events linked list
         addEvent( id, timeStamp, eventString);
