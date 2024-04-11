@@ -492,9 +492,6 @@ void tst_events::test_loadErrorData_badInput_correctDelim()
     dataMsg = "30,0:01:15,,1,\n";
     QVERIFY(eventObj->loadErrorData(dataMsg) == false);
 
-    //dataMsg = "-30,0:01:15,Sample Test message 1,5,\n";
-    // QVERIFY(eventObj->loadErrorData(dataMsg) == false);
-
     delete eventObj;
 }
 
