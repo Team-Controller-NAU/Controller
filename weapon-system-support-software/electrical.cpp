@@ -116,8 +116,22 @@ bool electrical::loadElecData(QString message)
     {
         // get values
         QString name = values[0];
+        if(name == "")
+        {
+            return false;
+        }
+
         int voltage = values[1].toInt();
+        if(voltage <= -1)
+        {
+            return false;
+        }
+
         int amps = values[2].toInt();
+        if(amps <= -1)
+        {
+            return false;
+        }
 
         //using extracted data, add an error to the end of the error linked list
         addNode(name, voltage, amps);
