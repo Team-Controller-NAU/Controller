@@ -21,6 +21,8 @@ private slots:
     void test_loadEventData_badInput_correctDelim();
 
     void test_loadErrorData();
+    void test_loadErrorData_badInput_correctDelim();
+
     void test_loadEventDump();
     void test_loadErrorDump();
 };
@@ -467,6 +469,32 @@ void tst_events::test_loadErrorData()
     QCOMPARE(result, false);
 
     // free
+    delete eventObj;
+}
+
+void tst_events::test_loadErrorData_badInput_correctDelim()
+{
+    Events *eventObj = new Events();
+
+    //check for invalid id
+    QString dataMsg = "-30,0:01:15,Sample Test message 1,1,\n";
+    QVERIFY(eventObj->loadErrorData(dataMsg) == false);
+
+    dataMsg = "30,-2:01:15,Sample Test message 1,1,\n";
+    QVERIFY(eventObj->loadErrorData(dataMsg) == false);
+
+    dataMsg = "30,0:-01:15,Sample Test message 1,1,\n";
+    QVERIFY(eventObj->loadErrorData(dataMsg) == false);
+
+    dataMsg = "30,0:01:-15,Sample Test message 1,1,\n";
+    QVERIFY(eventObj->loadErrorData(dataMsg) == false);
+
+    dataMsg = "30,0:01:15,,1,\n";
+    QVERIFY(eventObj->loadErrorData(dataMsg) == false);
+
+    //dataMsg = "-30,0:01:15,Sample Test message 1,5,\n";
+    // QVERIFY(eventObj->loadErrorData(dataMsg) == false);
+
     delete eventObj;
 }
 
