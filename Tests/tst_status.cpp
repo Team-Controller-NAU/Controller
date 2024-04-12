@@ -48,7 +48,7 @@ void tst_status::test_loadData()
         double firingRate;
      */
     Status status;
-    QString dataMsg = "0,1,0,1,1,90,6,23,1636.14,\n";
+    QString dataMsg = "0,1,0,1,330,90,6,23,1636.14,\n";
     QStringList values = dataMsg.split(DELIMETER);
     int totalFiringEvents_testData = values[6].toInt();
     int burstLength_testData = values[7].toInt();
@@ -63,7 +63,7 @@ void tst_status::test_loadData()
     QCOMPARE(status.trigger2, DISENGAGED);
     QCOMPARE(status.controllerState, BLOCKED);
     QCOMPARE(status.firingMode, SINGLE);
-    QCOMPARE(status.feedPosition, UNLOCKING);
+    QCOMPARE(status.feedPosition, FIRING);
     QCOMPARE(status.totalFiringEvents, totalFiringEvents_testData);
     QCOMPARE(status.burstLength, burstLength_testData);
     QCOMPARE(status.firingRate, firingRate_testData);

@@ -21,6 +21,9 @@ electrical::electrical()
     headNode = nullptr;
     lastNode = nullptr;
 
+    name = "";
+    voltage = 0;
+    amps = 0;
 }
 
 /**
