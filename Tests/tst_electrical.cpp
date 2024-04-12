@@ -16,6 +16,7 @@ private slots:
     void test_loadElecData();
     void test_loadElecData_badInputLess();
     void test_loadElecData_badInputMore();
+    void test_loadElecData_badInputLess_correctDelim();
 
     void test_loadElecDump();
     void test_loadElecDump_badInputLess();
@@ -111,6 +112,25 @@ void tst_electrical::test_loadElecData()
     {
         QVERIFY(wkgNode != nullptr);
     }
+
+    delete elecObj;
+}
+
+void tst_electrical::test_loadElecData_badInputLess_correctDelim()
+{
+    electrical *elecObj = new electrical();
+
+    // check invalid string
+    QString dataMsg = ", 17, 38";
+    QVERIFY(!elecObj->loadElecData(dataMsg));
+
+    // check invalid voltage
+    dataMsg = "name, -17, 38";
+    QVERIFY(!elecObj->loadElecData(dataMsg));
+
+    // check invalid amps
+    dataMsg = "name, 17, -38";
+    QVERIFY(!elecObj->loadElecData(dataMsg));
 
     delete elecObj;
 }

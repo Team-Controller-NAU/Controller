@@ -578,10 +578,27 @@ bool Events::loadErrorData(QString message)
     // check for real error (allows new line at the end or no new line at the end)
     if(values.length()-1 == NUM_ERROR_ELEMENTS || values.length() == NUM_ERROR_ELEMENTS)
     {
-        // get values
+        // get values and check for validity
         int id = values[0].toInt();
+        if(id <= -1)
+        {
+            return false;
+        }
+
         QString timeStamp = values[1];
+        QStringList timeValues = timeStamp.split(':');
+        if(timeValues[0].toInt() <= -1 || timeValues[1].toInt() <= -1
+            || timeValues[2].toInt() <= -1)
+        {
+            return false;
+        }
+
         QString eventString = values[2];
+        if(eventString == "")
+        {
+            return false;
+        }
+
         bool cleared = (values[3] == "1");
 
         //using extracted data, add an error to the end of the error linked list
@@ -611,10 +628,26 @@ bool Events::loadEventData(QString message)
     // check for real event (allows new line at the end or no new line at the end)
     if(values.length()-1 == NUM_EVENT_ELEMENTS || values.length() == NUM_EVENT_ELEMENTS)
     {
-        // get values
+        // get values and check for validity
         int id = values[0].toInt();
+        if(id <= -1)
+        {
+            return false;
+        }
+
         QString timeStamp = values[1];
+        QStringList timeValues = timeStamp.split(':');
+        if(timeValues[0].toInt() <= -1 || timeValues[1].toInt() <= -1
+            || timeValues[2].toInt() <= -1)
+        {
+            return false;
+        }
+
         QString eventString = values[2];
+        if(eventString == "")
+        {
+            return false;
+        }
 
         // using extracted data add a new event to the end of the events linked list
         addEvent( id, timeStamp, eventString);

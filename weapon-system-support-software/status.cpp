@@ -57,20 +57,52 @@ bool Status::loadData(QString statusMessage)
     //extract armed value from message
     armed = (values[0] == "1");
 
+
+
     //extract trigger1 status
     trigger1 = static_cast<TriggerStatus>(values[1].toInt());
 
     //extract trigger2
     trigger2 = static_cast<TriggerStatus>(values[2].toInt());
 
+    // check if trigger1 and trigger2 are valid
+    if(!(trigger1 == ENGAGED || trigger1 == DISENGAGED || trigger1 == NA) ||
+        !(trigger2 == ENGAGED || trigger2 == DISENGAGED || trigger2 == NA))
+    {
+        return false;
+    }
+
     //extract controller state
     controllerState = static_cast<ControllerState>(values[3].toInt());
+
+    // check if controllerState is valid
+    if(!(controllerState == RUNNING || controllerState == BLOCKED
+          || controllerState == TERMINATED || controllerState == SUSPENDED))
+    {
+        return false;
+    }
 
     //extract firing mode
     firingMode = static_cast<FiringMode>(values[4].toInt());
 
+    // check for valid firingMode
+    if(!(firingMode == SAFE || firingMode == SINGLE
+          || firingMode == BURST || firingMode == FULL_AUTO))
+    {
+        return false;
+    }
+
     //extract feed pos
     feedPosition = static_cast<FeedPosition>(values[5].toInt());
+
+    // check for valid feedPos
+    if(!(feedPosition == CHAMBERING || feedPosition == LOCKING
+          || feedPosition == FIRING || feedPosition == UNLOCKING
+          || feedPosition == EXTRACTING || feedPosition == EJECTING
+          || feedPosition == COCKING || feedPosition == FEEDING))
+    {
+        return false;
+    }
 
     //extract
     totalFiringEvents = values[6].toInt();
