@@ -57,6 +57,15 @@ Connection::Connection(QString portName, QSerialPort::BaudRate baudRate,
 }
 
 //returns true if a valid message is in the serial port, false otherwise
+
+/**
+ * Verifies that the incomming serialized message is valid
+ *
+ * The function first checks the serial port is open, then captures the
+ * the message to check for expected end of message character (\n).
+ *
+ * Returns true if the message is valid, false otherwise
+ */
 bool Connection::checkForValidMessage()
 {
     //ensure port is open to prevent possible errors

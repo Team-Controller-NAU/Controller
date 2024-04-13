@@ -1,5 +1,21 @@
 #include "feedposition.h"
 
+/********************************************************************************
+** feeposition.cpp
+**
+** This file implements the functionality of the feed position graphic located on the
+** status page
+**
+** @author Team Controller
+********************************************************************************/
+
+/**
+ * Initialization constructor for a feedposition object
+ *
+ * Sets maximum position in degrees
+ *
+ * @param parent Object used for GUI display
+ */
 feedposition::feedposition(QWidget* parent)
     : QDial(parent)
 {
@@ -7,6 +23,9 @@ feedposition::feedposition(QWidget* parent)
     QDial::setMaximum(360);
 }
 
+/**
+ * Paints the feed position graphic
+ */
 void feedposition::paintEvent(QPaintEvent*)
 {
     //variables

@@ -1,12 +1,32 @@
 #include "status.h"
+/********************************************************************************
+** status.cpp
+**
+** This file implements the logic of maintaining the status data
+**
+** @author Team Controller
+********************************************************************************/
 
+/**
+ * Initialization constructor for the status class
+ *
+ * Sets totalFiringEvents to default values
+ *
+ * @param parent Object used for GUI display
+ */
 Status::Status(QObject *parent)
     : QObject{parent}
 {
     totalFiringEvents = 0;
 }
 
-//given a status message, update status class with new data
+/**
+ * Loads data into the status class given a status message
+ *
+ * Parses statusMessage and updates status class variabels with new data
+ *
+ * @param statusMessage Message containing data to be parsed
+ */
 bool Status::loadData(QString statusMessage)
 {
     /* the statusMessage contains csv data in the following order
@@ -37,20 +57,52 @@ bool Status::loadData(QString statusMessage)
     //extract armed value from message
     armed = (values[0] == "1");
 
+
+
     //extract trigger1 status
     trigger1 = static_cast<TriggerStatus>(values[1].toInt());
 
     //extract trigger2
     trigger2 = static_cast<TriggerStatus>(values[2].toInt());
 
+    // check if trigger1 and trigger2 are valid
+    if(!(trigger1 == ENGAGED || trigger1 == DISENGAGED || trigger1 == NA) ||
+        !(trigger2 == ENGAGED || trigger2 == DISENGAGED || trigger2 == NA))
+    {
+        return false;
+    }
+
     //extract controller state
     controllerState = static_cast<ControllerState>(values[3].toInt());
+
+    // check if controllerState is valid
+    if(!(controllerState == RUNNING || controllerState == BLOCKED
+          || controllerState == TERMINATED || controllerState == SUSPENDED))
+    {
+        return false;
+    }
 
     //extract firing mode
     firingMode = static_cast<FiringMode>(values[4].toInt());
 
+    // check for valid firingMode
+    if(!(firingMode == SAFE || firingMode == SINGLE
+          || firingMode == BURST || firingMode == FULL_AUTO))
+    {
+        return false;
+    }
+
     //extract feed pos
     feedPosition = static_cast<FeedPosition>(values[5].toInt());
+
+    // check for valid feedPos
+    if(!(feedPosition == CHAMBERING || feedPosition == LOCKING
+          || feedPosition == FIRING || feedPosition == UNLOCKING
+          || feedPosition == EXTRACTING || feedPosition == EJECTING
+          || feedPosition == COCKING || feedPosition == FEEDING))
+    {
+        return false;
+    }
 
     //extract
     totalFiringEvents = values[6].toInt();
@@ -64,7 +116,13 @@ bool Status::loadData(QString statusMessage)
     return true;
 }
 
-//given a message containing the controller version and crc updates corresponding class variables
+/**
+ * Updates crc and controller versions at the bottom on GUI
+ *
+ * Given a message containing the controller version and crc updates corresponding class variables
+ *
+ * @param versionMessage Message containing the controller and crc data
+ */
 bool Status::loadVersionData(QString versionMessage)
 {
     //split along delimeter

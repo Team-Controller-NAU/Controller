@@ -1,6 +1,25 @@
 #include "firemode.h"
 #include "constants.h"
 
+
+/********************************************************************************
+** firemode.cpp
+**
+** This class implements the logic to draw/re-draw the firemode graphic on the
+** status page.
+**
+** @author Team Controller
+********************************************************************************/
+
+
+/**
+ * Initialization constructor for a firemode object
+ *
+ * Sets maximum position in degrees
+ *
+ * @param parent Object used for GUI display
+ */
+
 firemode::firemode(QWidget* parent)
     : QDial(parent)
 {
@@ -8,6 +27,9 @@ firemode::firemode(QWidget* parent)
     QDial::setMaximum(360);
 }
 
+/**
+ * Paints the firemode graphic
+ */
 void firemode::paintEvent(QPaintEvent*)
 {
     //dial value
