@@ -106,11 +106,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->trigger1->setPixmap(BLANK_LIGHT);
     ui->trigger2->setPixmap(BLANK_LIGHT);
 
-   //ui->armed_label->setDefaultAlignment(Qt::AlignCenter);
-
-
     // create a shortcut for ctrl + f
-    QShortcut *find = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_F), this);
+    find = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_F), this);
     connect(find, &QShortcut::activated, this, &MainWindow::findText);
 
     // ensures that the application will open on the events page
@@ -134,10 +131,15 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     //call destructors for classes declared in main window
+    delete find;
     delete ui;
     delete ddmCon;
     delete status;
     delete events;
+    delete handshakeTimer;
+    delete notificationTimer;
+    delete lastMessageTimer;
+    delete runningControllerTimer;
     delete electricalData;
     #if DEV_MODE
         delete csimHandle;
