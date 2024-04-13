@@ -106,6 +106,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->trigger1->setPixmap(BLANK_LIGHT);
     ui->trigger2->setPixmap(BLANK_LIGHT);
 
+   //ui->armed_label->setDefaultAlignment(Qt::AlignCenter);
+
+
     // create a shortcut for ctrl + f
     QShortcut *find = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_F), this);
     connect(find, &QShortcut::activated, this, &MainWindow::findText);
@@ -175,13 +178,6 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
         //free old electrical data if any exists
         electricalData->freeLL();
 
-        //set status labels visable
-        ui->trigger1_label->setVisible(true);
-        ui->trigger2_label->setVisible(true);
-        ui->armed_label->setVisible(true);
-        ui->feed_position_label->setVisible(true);
-
-
         //start last message timer
         timeLastReceived = QDateTime::currentDateTime();
         ui->DDM_timer_label->setText("Time Since Last Message: ");
@@ -202,20 +198,14 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
 
         //reset event counters
         ui->TotalEventsOutput->setText("0");
-        ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
         ui->statusEventOutput->setText("0");
-        ui->statusEventOutput->setAlignment(Qt::AlignCenter);
 
         ui->TotalErrorsOutput->setText("0");
-        ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
         ui->statusErrorOutput->setText("0");
-        ui->statusErrorOutput->setAlignment(Qt::AlignCenter);
 
         ui->ClearedErrorsOutput->setText("0");
-        ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
 
         ui->ActiveErrorsOutput->setText("0");
-        ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
     }
     //otherwise we are disconnected
     else
@@ -839,104 +829,69 @@ void MainWindow::setupSettings()
 //displays the current values of the status class onto the gui status page
 void MainWindow::updateStatusDisplay()
 {
-    //update feed position
+    //update feed position text and graphic
     ui->feedPosition->setValue(status->feedPosition);
     ui->feed_position_label->setText(FEED_POSITION_NAMES[status->feedPosition/FEED_POSITION_INCREMENT_VALUE]);
-    ui->feed_position_label->setAlignment(Qt::AlignCenter);
 
+    //update fire mode graphic
     ui->fireMode->setValue(status->firingMode);
 
-    //update trigger 1
+    //update text (fire rate, firing events, burst length, processor state)
+    ui->fireRateOutput->setText(QString::number(status->firingRate));
+    ui->firingEventsOutput->setText(QString::number(status->totalFiringEvents));
+    ui->burstOutput->setText(QString::number(status->burstLength));
+    ui->processorOutput->setText(CONTROLLER_STATE_NAMES[status->controllerState]);
+
+    //update trigger 1 text
+    ui->trigger1_label->setText(TRIGGER_STATUS_NAMES[status->trigger1]);
+
+    //update trigger 1 graphic
     switch (status->trigger1)
     {
     case ENGAGED:
         ui->trigger1->setPixmap(GREEN_LIGHT);
-        ui->trigger1_label->setText("Engaged");
-        ui->trigger1_label->setAlignment(Qt::AlignCenter);
 
         break;
 
     case DISENGAGED:
         ui->trigger1->setPixmap(RED_LIGHT);
-        ui->trigger1_label->setText("Disengaged");
-        ui->trigger1_label->setAlignment(Qt::AlignCenter);
 
         break;
 
     default:
         ui->trigger1->setPixmap(BLANK_LIGHT);
-        ui->trigger1_label->setText("NA");
     }
 
-    //update trigger 2
+    //update trigger 2 text
+    ui->trigger2_label->setText(TRIGGER_STATUS_NAMES[status->trigger2]);
+
+    //update trigger 2 graphic
     switch (status->trigger2)
     {
         case ENGAGED:
             ui->trigger2->setPixmap(GREEN_LIGHT);
-            ui->trigger2_label->setText("Engaged");
-            ui->trigger2_label->setAlignment(Qt::AlignCenter);
-
             break;
 
         case DISENGAGED:
             ui->trigger2->setPixmap(RED_LIGHT);
-            ui->trigger2_label->setText("Disengaged");
-            ui->trigger2_label->setAlignment(Qt::AlignCenter);
-
             break;
 
         default:
             ui->trigger2->setPixmap(BLANK_LIGHT);
-            ui->trigger2_label->setText("NA");
     }
 
-    //update the armed light
+    //update armed text
+    ui->armed_label->setText(ARMED_NAMES[status->armed]);
+
+    //update the armed graphic
     if(status->armed)
     {
         ui->armedOutput->setPixmap(GREEN_LIGHT);
-        ui->armed_label->setText("Armed");
-        ui->armed_label->setAlignment(Qt::AlignCenter);
     }
     else
     {
         ui->armedOutput->setPixmap(RED_LIGHT);
-        ui->armed_label->setText("Disarmed");
-        ui->armed_label->setAlignment(Qt::AlignCenter);
     }
-
-    ui->fireRateOutput->setText(QString::number(status->firingRate));
-    ui->fireRateOutput->setAlignment(Qt::AlignCenter);
-
-    ui->firingEventsOutput->setText(QString::number(status->totalFiringEvents));
-    ui->firingEventsOutput->setAlignment(Qt::AlignCenter);
-
-    ui->burstOutput->setText(QString::number(status->burstLength));
-    ui->burstOutput->setAlignment(Qt::AlignCenter);
-
-    switch(status->controllerState)
-    {
-        case RUNNING:
-            ui->processorOutput->setText("Running");
-
-            break;
-
-        case BLOCKED:
-            ui->processorOutput->setText("Blocked");
-
-            break;
-
-        case TERMINATED:
-            ui->processorOutput->setText("Terminated");
-
-            break;
-
-        case SUSPENDED:
-            ui->processorOutput->setText("Suspended");
-
-            break;
-    }
-
-    ui->processorOutput->setAlignment(Qt::AlignCenter);
 }
 
 // method updates the running elapsed controller time
@@ -1064,31 +1019,24 @@ void MainWindow::updateEventsOutput(QString outString, bool error, bool cleared)
 
     // update total events gui
     ui->TotalEventsOutput->setText(QString::number(events->totalEvents));
-    ui->TotalEventsOutput->setAlignment(Qt::AlignCenter);
     ui->statusEventOutput->setText(QString::number(events->totalEvents));
-    ui->statusEventOutput->setAlignment(Qt::AlignCenter);
 
     if (!error) return;
 
     // update total errors gui
     ui->TotalErrorsOutput->setText(QString::number(events->totalErrors));
-    ui->TotalErrorsOutput->setAlignment(Qt::AlignCenter);
     ui->statusErrorOutput->setText(QString::number(events->totalErrors));
-    ui->statusErrorOutput->setAlignment(Qt::AlignCenter);
 
     if ( cleared )
     {
         // update cleared errors gui
         ui->ClearedErrorsOutput->setText(QString::number(events->totalCleared));
-        ui->ClearedErrorsOutput->setAlignment(Qt::AlignCenter);
         ui->statusClearedErrors->setText(QString::number(events->totalCleared));
-        ui->statusClearedErrors->setAlignment(Qt::AlignCenter);
     }
     else
     {
         // update active errors gui
         ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
-        ui->ActiveErrorsOutput->setAlignment(Qt::AlignCenter);
     }
 }
 

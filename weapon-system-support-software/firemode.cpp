@@ -1,4 +1,5 @@
 #include "firemode.h"
+#include "constants.h"
 
 firemode::firemode(QWidget* parent)
     : QDial(parent)
@@ -70,19 +71,19 @@ void firemode::paintEvent(QPaintEvent*)
 
     painter.setPen(QPen(QColor(255, 133, 51))); // #ff8533 color represented by RGB integers
 
-    if(value == 305)
+    if(value == SAFE)
     {
         painter.drawText(QDial::height()/13,QDial::height()/3,QDial::height(),QDial::height(),0,"Safe");
     }
-    else if(value == 330)
+    else if(value == SINGLE)
     {
         painter.drawText(QDial::height()/3.5,QDial::height()/6.7,QDial::height(),QDial::height(),0,"Single");
     }
-    else if(value == 30)
+    else if(value == BURST)
     {
         painter.drawText(QDial::height()/1.2,QDial::height()/6.7,QDial::height(),QDial::height(),0,"Burst");
     }
-    else if(value == 55)
+    else if(value == FULL_AUTO)
     {
         painter.drawText(QDial::height()*1.13,QDial::height()/3,QDial::height(),QDial::height(),0,"Auto");
     }
