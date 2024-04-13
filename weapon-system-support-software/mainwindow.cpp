@@ -106,10 +106,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->trigger1->setPixmap(BLANK_LIGHT);
     ui->trigger2->setPixmap(BLANK_LIGHT);
 
-    // create a shortcut for ctrl + f
-    find = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_F), this);
-    connect(find, &QShortcut::activated, this, &MainWindow::findText);
-
     // ensures that the application will open on the events page
     on_EventsPageButton_clicked();
 
@@ -1328,4 +1324,3 @@ void MainWindow::displaySavedSettings()
     qDebug() << "Auto Save Limit: " << userSettings.value("autoSaveLimit").toInt() << Qt::endl;
 }
 #endif
-

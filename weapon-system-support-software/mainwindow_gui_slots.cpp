@@ -70,98 +70,6 @@ void MainWindow::resetPageButton()
 }
 
 //======================================================================================
-// Hotkeys
-//======================================================================================
-
-// (ctrl + f) opens search box for searching for text in events output
-void MainWindow::findText()
-{
-    // make sure the user is in the events_output box
-    if (qApp->focusWidget() != ui->events_output) return;
-
-    // get the text to find from the user by opening an inputdialog box
-    QString searchText;
-    QInputDialog inputDialog = QInputDialog(this);
-    inputDialog.setInputMode(QInputDialog::TextInput);
-    inputDialog.setLabelText("Search for some text:");
-    inputDialog.setOkButtonText("Find Next");
-    inputDialog.setWindowTitle("Search");
-    inputDialog.setStyleSheet("color:white;");
-    QSize minSize = inputDialog.minimumSizeHint();
-    inputDialog.setFixedSize(minSize);
-
-    // use findChild to get the QLineEdit instance of the QInputDialog so we can set placeholder text
-    QLineEdit *lineEdit = inputDialog.findChild<QLineEdit *>();
-    if (lineEdit) lineEdit->setPlaceholderText("Enter text to find...");
-
-    bool windowOpen = true;
-
-    // start loop for continuous search until the user presses cancel or closes the window
-    while (windowOpen)
-    {
-        // open the dialog box and get the user input
-        windowOpen = inputDialog.exec();
-
-        // get text from user input
-        searchText = inputDialog.textValue();
-        int index = 0;
-
-        // check if the window is still open and the search text is not empty
-        if (windowOpen && !searchText.isEmpty())
-        {
-            // get all the text content from events_output
-            QString eventsText = ui->events_output->toPlainText();
-
-            // set up cursor object
-            QTextCursor cursor = ui->events_output->textCursor();
-
-            // check if we have done a search in this loop
-            if (cursor.hasSelection())
-            {
-                // set index to current position
-                index = cursor.position() + 1;
-            }
-
-            // find the next occurrence of the text in the events_output, ignoring caps
-            int position = eventsText.indexOf(searchText, index, Qt::CaseInsensitive);
-
-            // check if we have actually found the text
-            if (position != -1) {
-                // if the text is found, move the cursor to the found position and highlight it
-                cursor.setPosition(position);
-                cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor, searchText.length());
-                ui->events_output->setTextCursor(cursor);
-            }
-            // otherwise, assume we have not found the text
-            else
-            {
-                // reset cursor selection
-                cursor.clearSelection();
-                cursor.setPosition(0);
-                ui->events_output->setTextCursor(cursor);
-
-                // show error message
-                QMessageBox informationBox = QMessageBox(this);
-                informationBox.setWindowTitle("Search");
-                informationBox.setText("Next occurrence not found.");
-                informationBox.setIcon(QMessageBox::Information);
-                informationBox.setStyleSheet("color: white;");
-                informationBox.exec();
-            }
-        }
-        else
-        {
-            // break the loop if the window is closed or the search text is empty
-            QTextCursor cursor = ui->events_output->textCursor();
-            cursor.clearSelection();
-            cursor.setPosition(0);
-            ui->events_output->setTextCursor(cursor);
-            break;
-        }
-    }
-}
-
-//======================================================================================
 // General GUI slots
 //======================================================================================
 
@@ -573,6 +481,90 @@ void MainWindow::on_refresh_serial_port_selections_clicked()
     #if DEV_MODE
         setup_csim_port_selection(0);
     #endif
+}
+
+void MainWindow::on_searchButton_clicked()
+{
+    // get the text to find from the user by opening an inputdialog box
+    QString searchText;
+    QInputDialog inputDialog = QInputDialog(this);
+    inputDialog.setInputMode(QInputDialog::TextInput);
+    inputDialog.setLabelText("Search for some text:");
+    inputDialog.setOkButtonText("Find Next");
+    inputDialog.setWindowTitle("Search");
+    inputDialog.setStyleSheet("color:white;");
+    QSize minSize = inputDialog.minimumSizeHint();
+    inputDialog.setFixedSize(minSize);
+
+    // use findChild to get the QLineEdit instance of the QInputDialog so we can set placeholder text
+    QLineEdit *lineEdit = inputDialog.findChild<QLineEdit *>();
+    if (lineEdit) lineEdit->setPlaceholderText("Enter text to find...");
+
+    bool windowOpen = true;
+
+    // start loop for continuous search until the user presses cancel or closes the window
+    while (windowOpen)
+    {
+        // open the dialog box and get the user input
+        windowOpen = inputDialog.exec();
+
+        // get text from user input
+        searchText = inputDialog.textValue();
+        int index = 0;
+
+        // check if the window is still open and the search text is not empty
+        if (windowOpen && !searchText.isEmpty())
+        {
+            // get all the text content from events_output
+            QString eventsText = ui->events_output->toPlainText();
+
+            // set up cursor object
+            QTextCursor cursor = ui->events_output->textCursor();
+
+            // check if we have done a search in this loop
+            if (cursor.hasSelection())
+            {
+                // set index to current position
+                index = cursor.position() + 1;
+            }
+
+            // find the next occurrence of the text in the events_output, ignoring caps
+            int position = eventsText.indexOf(searchText, index, Qt::CaseInsensitive);
+
+            // check if we have actually found the text
+            if (position != -1) {
+                // if the text is found, move the cursor to the found position and highlight it
+                cursor.setPosition(position);
+                cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor, searchText.length());
+                ui->events_output->setTextCursor(cursor);
+            }
+            // otherwise, assume we have not found the text
+            else
+            {
+                // reset cursor selection
+                cursor.clearSelection();
+                cursor.setPosition(0);
+                ui->events_output->setTextCursor(cursor);
+
+                // show error message
+                QMessageBox informationBox = QMessageBox(this);
+                informationBox.setWindowTitle("Search");
+                informationBox.setText("Next occurrence not found.");
+                informationBox.setIcon(QMessageBox::Information);
+                informationBox.setStyleSheet("color: white;");
+                informationBox.exec();
+            }
+        }
+        else
+        {
+            // break the loop if the window is closed or the search text is empty
+            QTextCursor cursor = ui->events_output->textCursor();
+            cursor.clearSelection();
+            cursor.setPosition(0);
+            ui->events_output->setTextCursor(cursor);
+            break;
+        }
+    }
 }
 
 //======================================================================================

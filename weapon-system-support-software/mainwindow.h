@@ -157,7 +157,6 @@ private slots:
     //================================================================================
     //gui triggered slots (should be declared in mainwindow_gui_slots.cpp)
     //====================================================================================
-    void findText();
     void on_ddm_port_selection_currentIndexChanged(int index);
     void on_handshake_button_clicked();
     void on_ConnectionPageButton_clicked();
@@ -194,6 +193,8 @@ private slots:
     //=========================================================================================================
 
         void on_advanced_log_file_stateChanged(int arg1);
+
+        void on_searchButton_clicked();
 
     private:
     Ui::MainWindow *ui;
