@@ -436,12 +436,24 @@ font: 16pt &quot;Segoe UI&quot;;</string>
             </sizepolicy>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>5</number>
            </property>
            <widget class="QWidget" name="Events_page">
             <layout class="QGridLayout" name="gridLayout_3">
              <item row="0" column="5" alignment="Qt::AlignBottom">
               <widget class="QComboBox" name="FilterBox">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>30</height>
+                </size>
+               </property>
                <property name="toolTip">
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Filter the events output&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
@@ -905,6 +917,68 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
                </property>
                <property name="text">
                 <string>Events</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="4" alignment="Qt::AlignBottom">
+              <widget class="QPushButton" name="searchButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>30</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>30</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Filtered Search&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QPushButton {
+	padding-bottom: 3px;
+	color: rgb(255, 255, 255);
+	background-color: rgb(47, 47, 47);
+	border: 1px solid;
+	border-color: rgb(64, 64, 64);
+	font: 12pt &quot;Segoe UI&quot;;
+}
+
+QPushButton::hover {
+	background-color: rgb(117, 117, 117);
+}
+
+QPushButton::pressed {
+	background-color: rgb(45, 45, 45);
+}
+
+QToolTip{
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid black;
+}</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset resource="resources.qrc">
+                 <normaloff>:/resources/Images/search.png</normaloff>:/resources/Images/search.png</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>30</width>
+                 <height>30</height>
+                </size>
                </property>
               </widget>
              </item>
@@ -4480,6 +4554,9 @@ QToolTip{
                 <enum>Qt::Horizontal</enum>
                </property>
                <property name="invertedAppearance">
+                <bool>false</bool>
+               </property>
+               <property name="wrapping">
                 <bool>false</bool>
                </property>
               </widget>

@@ -13,5 +13,6 @@
         <file>Images/newNotification.png</file>
         <file>Images/white-down-arrow.png</file>
         <file>Images/refresh.png</file>
+        <file>Images/search.png</file>
     </qresource>
 </RCC>
