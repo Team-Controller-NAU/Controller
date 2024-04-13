@@ -449,7 +449,6 @@ void CSim::run()
                     //remove error from linked list and transmit clear error msg to ddm
                     clearError(clearedId);
                 }
-
             }
 
             //check for signals from ddm

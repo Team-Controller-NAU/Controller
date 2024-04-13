@@ -48,6 +48,9 @@ public:
     electrical *electricalData;
     QSettings userSettings;
 
+    //shortcut for searching using ctrl+f on events page
+    QShortcut *find;
+
     // vars
     QString ddmPortName;
     QTimer* handshakeTimer;
