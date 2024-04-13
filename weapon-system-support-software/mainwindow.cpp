@@ -106,9 +106,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->trigger1->setPixmap(BLANK_LIGHT);
     ui->trigger2->setPixmap(BLANK_LIGHT);
 
-   //ui->armed_label->setDefaultAlignment(Qt::AlignCenter);
-
-
     // create a shortcut for ctrl + f
     QShortcut *find = new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_F), this);
     connect(find, &QShortcut::activated, this, &MainWindow::findText);
