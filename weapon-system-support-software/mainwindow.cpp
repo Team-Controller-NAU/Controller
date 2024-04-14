@@ -235,8 +235,6 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
             logAdvancedDetails(ELECTRICAL);
             logAdvancedDetails(CLOSING_CONNECTION);
         }
-
-
     }
 }
 
@@ -474,20 +472,22 @@ void MainWindow::readSerialData()
                 qDebug() << "Message id: clear error " << message << qPrintable("\n");
 
                 //update cleared status of error with given id, notify if fail
-                if (!events->clearError(message.left(message.indexOf(DELIMETER)).toInt())) //ignore the suggestion leftRef is depreciated
+                if (!events->clearError(message.left(message.indexOf(DELIMETER)).toInt(), autosaveLogFile)) //ignore the suggestion leftRef is depreciated
                 {
                     notifyUser("Failed to clear error", message, true);
                 }
                 //otherwise success
                 else
                 {
-                    #if DEV_MODE
-                        //update the cleared error selection box in dev tools (can be removed when dev page is removed)
-                        update_non_cleared_error_selection();
-                    #endif
+                    if (notifyOnErrorCleared) notifyUser("Error " + message.left(message.indexOf(DELIMETER)) + " Cleared", false);
 
                     //refresh the events output with newly cleared error
                     refreshEventsOutput();
+
+                    #if DEV_MODE
+                    //update the cleared error selection box in dev tools (can be removed when dev page is removed)
+                    update_non_cleared_error_selection();
+                    #endif
                 }
 
                 break;
@@ -770,6 +770,8 @@ void MainWindow::setupSettings()
     //set gui display to match
     ui->colored_events_output->setChecked(coloredEventOutput);
 
+    //==============================================================
+
     // Check if advanced log file setting does not exist
     if (!userSettings.contains("advancedLogFile") || !userSettings.value("advancedLogFile").isValid()) {
         // set the default value
@@ -781,6 +783,22 @@ void MainWindow::setupSettings()
 
     //set gui display to match
     ui->advanced_log_file->setChecked(advancedLogFile);
+
+    //==============================================================
+
+    // Check if the cleared error notification setting does not exist
+    if (!userSettings.contains("notifyOnErrorCleared") || !userSettings.value("notifyOnErrorCleared").isValid()) {
+        // set the default value
+        userSettings.setValue("notifyOnErrorCleared", INITIAL_NOTIFY_ON_ERROR_CLEARED);
+    }
+
+    //set session variable based on setting
+    notifyOnErrorCleared = userSettings.value("notifyOnErrorCleared").toInt();
+
+    //update gui to match
+    ui->notify_error_cleared->setChecked(notifyOnErrorCleared);
+
+    //==============================================================
 
     // Check if the auto save setting does not exist
     if (!userSettings.contains("autoSaveLimit") || !userSettings.value("autoSaveLimit").isValid()) {
@@ -794,6 +812,8 @@ void MainWindow::setupSettings()
     //update gui to match
     ui->auto_save_limit->setValue(autoSaveLimit);
 
+    //==============================================================
+
     //check if the timeout setting does not exist
     if (!userSettings.contains("connectionTimeout") || !userSettings.value("connectionTimeout").isValid()) {
         // If it doesn't exist or is not valid, set the default value
@@ -805,6 +825,8 @@ void MainWindow::setupSettings()
 
     //update gui to match
     ui->connection_timeout->setValue(connectionTimeout);
+
+    //==============================================================
 
     //sets up text options in connection settings drop down boxes
     setupConnectionPage();
@@ -1324,3 +1346,4 @@ void MainWindow::displaySavedSettings()
     qDebug() << "Auto Save Limit: " << userSettings.value("autoSaveLimit").toInt() << Qt::endl;
 }
 #endif
+

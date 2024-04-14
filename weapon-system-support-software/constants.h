@@ -73,6 +73,7 @@ const QSerialPort::StopBits INITIAL_STOP_BITS = QSerialPort::OneStop;
 const QSerialPort::FlowControl INITIAL_FLOW_CONTROL = QSerialPort::NoFlowControl;
 const bool INITIAL_COLORED_EVENTS_OUTPUT = true;
 const bool INITIAL_ADVANCED_LOG_FILE = false;
+const bool INITIAL_NOTIFY_ON_ERROR_CLEARED = false;
 const QString INITIAL_LOGFILE_LOCATION = "WSSS_Logfiles/";
 const int INITIAL_AUTO_SAVE_LIMIT = 5;
 const QString INITIAL_DDM_PORT = "COM5";

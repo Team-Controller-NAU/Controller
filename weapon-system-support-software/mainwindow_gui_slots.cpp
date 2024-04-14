@@ -567,6 +567,27 @@ void MainWindow::on_searchButton_clicked()
     }
 }
 
+void MainWindow::on_notify_error_cleared_stateChanged(int arg1)
+{
+    //arg1 represents the state of the checkbox
+    switch(arg1)
+    {
+    //unchecked
+    case 0:
+        notifyOnErrorCleared = false;
+
+        break;
+
+        //checked
+    default:
+        notifyOnErrorCleared = true;
+    }
+
+    userSettings.setValue("notifyOnErrorCleared", notifyOnErrorCleared);
+
+    userSettings.sync();
+}
+
 //======================================================================================
 //DEV_MODE exclusive methods
 //======================================================================================
@@ -615,6 +636,8 @@ void MainWindow::on_CSim_button_clicked()
 
         //enable csim port selection
         ui->csim_port_selection->setEnabled(true);
+
+        ui->non_cleared_error_selection->clear();
     }
     //csim is not running, start it
     else

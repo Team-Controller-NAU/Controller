@@ -67,6 +67,7 @@ public:
     int autoSaveLimit;
     int connectionTimeout;
     bool advancedLogFile;
+    bool notifyOnErrorCleared;
 
     //creates a new connection using currently selected serial port settings
     void createDDMCon();
@@ -195,6 +196,8 @@ private slots:
         void on_advanced_log_file_stateChanged(int arg1);
 
         void on_searchButton_clicked();
+
+        void on_notify_error_cleared_stateChanged(int arg1);
 
     private:
     Ui::MainWindow *ui;

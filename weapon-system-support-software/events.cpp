@@ -198,7 +198,7 @@ void Events::freeLinkedLists()
  *
  *@param id The identification number of the error node to be cleared
  */
-bool Events::clearError(int id)
+bool Events::clearError(int id, QString logfileName)
 {
     //check for invalid format
     if (id == -1)
@@ -208,20 +208,62 @@ bool Events::clearError(int id)
 
     //init vars
     EventNode *wkgPtr = headErrorNode;
+    bool logfileUpdated = false;
 
     //loop through error linked list
     while (wkgPtr != nullptr)
     {
-        //if id is found update cleared status and return success
+        //if id is found update cleared status
         if (wkgPtr->id == id)
         {
             wkgPtr->cleared = true;
 
-            qDebug() << "Error " << id << " cleared";
+            qDebug() << "Error " << id << " cleared in linked list";
 
             totalCleared++;
 
-            return true;
+            // Open the log file for modification
+            QFile file(logfileName);
+            if (!file.open(QIODevice::ReadWrite | QIODevice::Text))
+            {
+                qDebug() << "Failed to open the log file:" << file.errorString();
+                return -1;
+            }
+
+            // Create a QTextStream to read from and write to the file
+            QTextStream stream(&file);
+
+            QStringList lines; // To store modified lines
+
+            // Read the file line by line
+            while (!stream.atEnd())
+            {
+                // Read a line and remove leading and trailing whitespace
+                QString line = stream.readLine().trimmed();
+
+                // Check if the line is the cleared error
+                if (line.startsWith("ID: "+QString::number(id) +","))
+                {
+                    qDebug() << "Clearing error in log file : " << line;
+                    line = nodeToString(wkgPtr); // Replace the line with the new line
+                    //set return flag
+                    logfileUpdated=true;
+                }
+
+                lines.append(line); // Store the line (modified or not
+            }
+
+            file.resize(0); // Clear the file contents
+
+            // Write the modified lines back to the file
+            for (const QString& line : lines)
+            {
+                stream << line << Qt::endl;
+            }
+
+            file.close(); // Close the file when done
+
+            return logfileUpdated;
         }
 
         //iterate to next error node

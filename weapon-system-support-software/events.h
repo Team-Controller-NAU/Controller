@@ -52,7 +52,7 @@ public:
     bool loadEventData(QString message);
     bool loadEventDump(QString message);
     bool loadErrorDump(QString message);
-    bool clearError(int id);
+    bool clearError(int id, QString logfileName);
 
     //log file utils
     bool outputToLogFile(QString logFileName, bool advancedLogFile);
