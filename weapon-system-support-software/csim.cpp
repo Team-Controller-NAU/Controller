@@ -250,7 +250,7 @@ void CSim::run()
 
         //init events class (csim only uses this to store non cleared errors so that it can
         //clear them later)
-        Events *events(new Events());
+        Events *events(new Events(false, 0));
         eventsPtr = events;
 
         //for status use smart pointer for automatic memory management (resources auto free when function exits)

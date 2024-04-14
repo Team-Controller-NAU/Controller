@@ -18,17 +18,21 @@ struct EventNode {
     struct EventNode *nextPtr;
 };
 
-class Events
+class Events : public QObject
 {
+    Q_OBJECT
 public:
-    Events();
+    Events(bool EventRAMClearing, int maxDataNodes);
     ~Events();
 
     //class variables
     int totalEvents;
     int totalErrors;
     int totalNodes;
-    int totalCleared;
+    int totalClearedErrors;
+    bool RAMClearing;
+    int maxNodes;
+    int storedNodes;
 
     EventNode *headEventNode;
     EventNode *lastEventNode;
@@ -75,6 +79,9 @@ public:
 
         int getErrorIdByPosition(int pos);
     #endif
+
+signals:
+    void RAMCleared();
 };
 
 #endif // EVENTS_H

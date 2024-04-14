@@ -78,7 +78,7 @@ void MainWindow::resetPageButton()
 void MainWindow::on_ddm_port_selection_currentIndexChanged(int index)
 {
     //create connection on selected port if combo box is set up
-    if (allowPortSelection)
+    if (allowSettingChanges)
     {
         createDDMCon();
         ddmPortName = ui->ddm_port_selection->currentText();
@@ -364,6 +364,8 @@ void MainWindow::on_load_events_from_logfile_clicked()
     // Pass the selected file name to the loadDataFromLogFile function
     int result = events->loadDataFromLogFile(events, selectedFile);
 
+    ui->truncated_label->setVisible(false);
+
     // Handle the result if needed
     if (result == INCORRECT_FORMAT)
     {
@@ -383,93 +385,6 @@ void MainWindow::on_load_events_from_logfile_clicked()
 
     //refresh the events output
     refreshEventsOutput();
-}
-
-//toggle colored events output (from settings page)
-void MainWindow::on_colored_events_output_stateChanged(int arg1)
-{
-    //arg1 represents the state of the checkbox
-    switch(arg1)
-    {
-        //unchecked
-        case 0:
-            coloredEventOutput = false;
-            break;
-
-        //checked
-        default:
-            coloredEventOutput = true;
-    }
-
-    userSettings.setValue("coloredEventOutput", coloredEventOutput);
-    refreshEventsOutput();
-
-    //write changes to the registry
-    userSettings.sync();
-}
-
-void MainWindow::on_advanced_log_file_stateChanged(int arg1)
-{
-    //arg1 represents the state of the checkbox
-    switch(arg1)
-    {
-        //unchecked
-        case 0:
-            advancedLogFile = false;
-
-            break;
-
-        //checked
-        default:
-            advancedLogFile = true;
-    }
-
-    userSettings.setValue("advancedLogFile", advancedLogFile);
-
-    //check if ddmCon does not exist
-    if (ddmCon == NULL)
-    {
-        return;
-    }
-
-    //if connected, add updated advanced log file setting notification to logfile
-    if (ddmCon->connected)
-    {
-        QFile file(autosaveLogFile);
-
-        //attempt to open in append mode
-        if (!file.open(QIODevice::Append | QIODevice::Text))
-        {
-            qDebug() <<  "Could not open log file for appending: " << autosaveLogFile;
-        }
-        else
-        {
-            QTextStream out(&file);
-
-            if (advancedLogFile)
-            {
-                out << ADVANCED_LOG_FILE_INDICATOR + "ADVANCED LOG FILE ENABLED" << "\n";
-            }
-            else
-            {
-                out << ADVANCED_LOG_FILE_INDICATOR + "ADVANCED LOG FILE DISABLED" << "\n";
-            }
-            file.close();
-        }
-    }
-
-    //write changes to the registry
-    userSettings.sync();
-}
-
-//choose the number of auto save log files before overwrites occur (from settings page)
-void MainWindow::on_auto_save_limit_valueChanged(int arg1)
-{
-    autoSaveLimit = arg1;
-    userSettings.setValue("autoSaveLimit", autoSaveLimit);
-
-    //write changes to the registry
-    userSettings.sync();
 }
 
 //refreshes the serial port selections, useful in case an adaptor is plugged in after
@@ -567,6 +482,54 @@ void MainWindow::on_searchButton_clicked()
     }
 }
 
+//======================================================================================
+// User settings
+//======================================================================================
+
+//toggle colored events output (from settings page)
+void MainWindow::on_colored_events_output_stateChanged(int arg1)
+{
+    //arg1 represents the state of the checkbox
+    switch(arg1)
+    {
+    //unchecked
+    case 0:
+        coloredEventOutput = false;
+        break;
+
+        //checked
+    default:
+        coloredEventOutput = true;
+    }
+
+    userSettings.setValue("coloredEventOutput", coloredEventOutput);
+
+    if (!allowSettingChanges) return;
+    refreshEventsOutput();
+
+    //write changes to the registry
+    userSettings.sync();
+}
+
+//choose the number of auto save log files before overwrites occur (from settings page)
+void MainWindow::on_auto_save_limit_valueChanged(int arg1)
+{
+    autoSaveLimit = arg1;
+    userSettings.setValue("autoSaveLimit", autoSaveLimit);
+
+    //write changes to the registry
+    userSettings.sync();
+}
+
+void MainWindow::on_connection_timeout_valueChanged(int arg1)
+{
+    connectionTimeout = arg1;
+    userSettings.setValue("connectionTimeout", connectionTimeout);
+
+    //write changes to the registry
+    userSettings.sync();
+}
+
 void MainWindow::on_notify_error_cleared_stateChanged(int arg1)
 {
     //arg1 represents the state of the checkbox
@@ -585,6 +548,101 @@ void MainWindow::on_notify_error_cleared_stateChanged(int arg1)
 
     userSettings.setValue("notifyOnErrorCleared", notifyOnErrorCleared);
 
+    userSettings.sync();
+}
+
+void MainWindow::on_advanced_log_file_stateChanged(int arg1)
+{
+    //arg1 represents the state of the checkbox
+    switch(arg1)
+    {
+    //unchecked
+    case 0:
+        advancedLogFile = false;
+
+        break;
+
+        //checked
+    default:
+        advancedLogFile = true;
+    }
+
+    userSettings.setValue("advancedLogFile", advancedLogFile);
+
+    //check if ddmCon does not exist
+    if (ddmCon == NULL)
+    {
+        return;
+    }
+
+    //if connected, add updated advanced log file setting notification to logfile
+    if (ddmCon->connected)
+    {
+        QFile file(autosaveLogFile);
+
+        //attempt to open in append mode
+        if (!file.open(QIODevice::Append | QIODevice::Text))
+        {
+            qDebug() <<  "Could not open log file for appending: " << autosaveLogFile;
+        }
+        else
+        {
+            QTextStream out(&file);
+
+            if (advancedLogFile)
+            {
+                out << ADVANCED_LOG_FILE_INDICATOR + "ADVANCED LOG FILE ENABLED" << "\n";
+            }
+            else
+            {
+                out << ADVANCED_LOG_FILE_INDICATOR + "ADVANCED LOG FILE DISABLED" << "\n";
+            }
+            file.close();
+        }
+    }
+
+    //write changes to the registry
+    userSettings.sync();
+}
+
+//toggle for ram clearing on events class
+void MainWindow::on_ram_clearing_stateChanged(int arg1)
+{
+    //arg1 represents the state of the checkbox
+    switch(arg1)
+    {
+    //unchecked
+    case 0:
+         userSettings.setValue("RAMClearing", false);
+
+        break;
+
+        //checked
+    default:
+        userSettings.setValue("RAMClearing", true);
+    }
+
+    if (!allowSettingChanges) return;
+
+    //update value in events class
+    events->RAMClearing = userSettings.value("RAMClearing").toBool();
+
+    //set visibility of max nodes based on ram clearing setting
+    ui->max_data_nodes->setVisible(events->RAMClearing);
+    ui->max_data_nodes_label->setVisible(events->RAMClearing);
+
+    userSettings.sync();
+}
+
+//updates value of max data nodes for events class
+void MainWindow::on_max_data_nodes_valueChanged(int arg1)
+{
+    if (!allowSettingChanges) return;
+
+    events->maxNodes = arg1;
+    userSettings.setValue("maxDataNodes", events->maxNodes);
+
+    //write changes to the registry
     userSettings.sync();
 }
 

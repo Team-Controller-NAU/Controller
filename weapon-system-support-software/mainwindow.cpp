@@ -7,7 +7,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui(new Ui::MainWindow),
     ddmCon(nullptr),
     status(new Status()),
-    events(new Events()),
     electricalData(new electrical()),
 
     //this determines what will be shown on the events page
@@ -29,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent)
     userSettings("Team Controller", "WSSS"),
 
     //init to false until connection page is setup
-    allowPortSelection(false),
+    allowSettingChanges(false),
 
     //Load graphical resources
     BLANK_LIGHT(":/resources/Images/blankButton.png"),
@@ -45,6 +44,21 @@ MainWindow::MainWindow(QWidget *parent)
 
     //setup user settings and init settings related gui elements
     setupSettings();
+
+    //setup events with ram clearing and max nodes taken from settings
+    events = new Events(userSettings.value("RAMClearing").toBool(), userSettings.value("maxDataNodes").toInt());
+
+        //setup signal and slot to notify user when ram is cleared from events
+        connect(events, &Events::RAMCleared, this, [=]() {
+        notifyUser("Event class cleared",
+        "Events and errors were removed from RAM to improve performance. "
+        "They are still being counted by counters and will be visible if you "
+        "load this session again after it ends", false);
+
+        ui->truncated_label->setVisible(true);
+
+        refreshEventsOutput();
+    });
 
     //if dev mode is active, init CSim
     #if DEV_MODE
@@ -106,6 +120,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->trigger1->setPixmap(BLANK_LIGHT);
     ui->trigger2->setPixmap(BLANK_LIGHT);
 
+    //will be displayed if ram is cleared
+    ui->truncated_label->setVisible(false);
+
     // ensures that the application will open on the events page
     on_EventsPageButton_clicked();
 
@@ -127,7 +144,6 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
     //call destructors for classes declared in main window
-    delete find;
     delete ui;
     delete ddmCon;
     delete status;
@@ -158,6 +174,8 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
     {
         //disable changes to connection related settings
         disableConnectionChanges();
+
+        ui->truncated_label->setVisible(false);
 
         //stop handshake protocols
         handshakeTimer->stop();
@@ -227,8 +245,8 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
         ui->connectionLabel->setText("Disconnected ");
 
         //output session stats
-        notifyUser("Session statistics ready", getSessionStatistics(), false);
-
+        //notifyUser("Session statistics ready", getSessionStatistics(), false);
+        qDebug() << "Here";
         //if advanced log file is enabled, add electrical data
         if (advancedLogFile)
         {
@@ -575,7 +593,7 @@ void MainWindow::setup_ddm_port_selection(int index)
     //this is checked within the current index changed slot of ddm combo box
     //start false prevents an accidental selection of the first
     //index added.
-    allowPortSelection = false;
+    allowSettingChanges = false;
 
     //clear any current selections
     ui->ddm_port_selection->clear();
@@ -590,14 +608,14 @@ void MainWindow::setup_ddm_port_selection(int index)
         if (portName == userSettings.value("portName").toString())
         {
             //allow us to select this port
-            allowPortSelection = true;
+            allowSettingChanges = true;
 
             // If a match is found, set the current index of the combo box
             ui->ddm_port_selection->setCurrentIndex(ui->ddm_port_selection->count() - 1);
         }
     }
     //initialization finished, allow port selection
-    allowPortSelection = true;
+    allowSettingChanges = true;
 }
 
 //makes all settings in connection settings uneditable (call when ddm connection
@@ -793,7 +811,7 @@ void MainWindow::setupSettings()
     }
 
     //set session variable based on setting
-    notifyOnErrorCleared = userSettings.value("notifyOnErrorCleared").toInt();
+    notifyOnErrorCleared = userSettings.value("notifyOnErrorCleared").toBool();
 
     //update gui to match
     ui->notify_error_cleared->setChecked(notifyOnErrorCleared);
@@ -825,6 +843,33 @@ void MainWindow::setupSettings()
 
     //update gui to match
     ui->connection_timeout->setValue(connectionTimeout);
+
+    //==============================================================
+qDebug() << "here";
+    // Check if ram clearing setting does not exist
+    if (!userSettings.contains("RAMClearing") || !userSettings.value("RAMClearing").isValid()) {
+        // set the default value
+        userSettings.setValue("RAMClearing", INITIAL_RAM_CLEARING);
+    }
+
+    //set gui display to match
+    ui->ram_clearing->setChecked(userSettings.value("RAMClearing").toBool());
+
+    //check if the max nodes setting does not exist
+    if (!userSettings.contains("maxDataNodes") || !userSettings.value("maxDataNodes").isValid()) {
+        // If it doesn't exist or is not valid, set the default value
+        userSettings.setValue("maxDataNodes", INITIAL_MAX_DATA_NODES);
+    }
+
+    //update gui to match
+    ui->max_data_nodes->setValue(userSettings.value("maxDataNodes").toInt());
+
+    //dont allow the user to go below this value for max data nodes
+    ui->max_data_nodes->setMinimum(MIN_DATA_NODES_BEFORE_RAM_CLEAR);
+
+    //set max node visibility based on ram clearing setting
+    ui->max_data_nodes->setVisible(userSettings.value("RAMClearing").toBool());
+    ui->max_data_nodes_label->setVisible(userSettings.value("RAMClearing").toBool());
 
     //==============================================================
 
@@ -1050,13 +1095,13 @@ void MainWindow::updateEventsOutput(QString outString, bool error, bool cleared)
     if ( cleared )
     {
         // update cleared errors gui
-        ui->ClearedErrorsOutput->setText(QString::number(events->totalCleared));
-        ui->statusClearedErrors->setText(QString::number(events->totalCleared));
+        ui->ClearedErrorsOutput->setText(QString::number(events->totalClearedErrors));
+        ui->statusClearedErrors->setText(QString::number(events->totalClearedErrors));
     }
     else
     {
         // update active errors gui
-        ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalCleared));
+        ui->ActiveErrorsOutput->setText(QString::number(events->totalErrors - events->totalClearedErrors));
     }
 }
 
@@ -1152,7 +1197,7 @@ QString MainWindow::getSessionStatistics()
 {
     return "Duration: " + status->elapsedControllerTime.toString("HH:mm:ss") + ", Total Events: " +
            QString::number(events->totalEvents) + ", Total Errors: " + QString::number(events->totalErrors)
-           + ", Non-cleared errors: " + QString::number(events->totalCleared)
+           + ", Non-cleared errors: " + QString::number(events->totalClearedErrors)
            + ", Total Firing events: " + QString::number(status->totalFiringEvents);
 }
 
@@ -1343,7 +1388,12 @@ void MainWindow::displaySavedSettings()
     qDebug() << "flowControl:" << userSettings.value("flowControl").toString();
     qDebug() << "logfile location: " << userSettings.value("logfileLocation").toString();
     qDebug() << "Colored Event Output: " << userSettings.value("coloredEventOutput").toBool();
-    qDebug() << "Auto Save Limit: " << userSettings.value("autoSaveLimit").toInt() << Qt::endl;
+    qDebug() << "Auto Save Limit: " << userSettings.value("autoSaveLimit").toInt();
+    qDebug() << "Notify on error cleared: " << userSettings.value("notifyOnErrorCleared").toBool();
+    qDebug() << "Advanced log file: " << userSettings.value("advancedLogFile").toBool();
+    qDebug() << "Connection Timeout duration: " << userSettings.value("connectionTimeout").toInt();
+    qDebug() << "RAM Clearing: " << userSettings.value("RAMClearing").toBool();
+    qDebug() << "Max Data Nodes: " << userSettings.value("maxDataNodes").toInt() << Qt::endl;
 }
 #endif
 

@@ -19,6 +19,9 @@ const int MAX_ELECTRICAL_COMPONENTS = 100;
 //denotes advanced log file entries
 const QString ADVANCED_LOG_FILE_INDICATOR = "***";
 
+//minimum value allowed to be set for max data nodes
+const int MIN_DATA_NODES_BEFORE_RAM_CLEAR = 700;
+
 //======================================================================================
 // Enumerations and enum related vals
 //======================================================================================
@@ -79,6 +82,8 @@ const int INITIAL_AUTO_SAVE_LIMIT = 5;
 const QString INITIAL_DDM_PORT = "COM5";
 //if a message is not received from controller in 20 seconds, connection times out
 const int INITIAL_CONNECTION_TIMEOUT = 20000; // 20 seconds
+const bool INITIAL_RAM_CLEARING = false;
+const int INITIAL_MAX_DATA_NODES = 1400;
 
 //======================================================================================
 // Timer vals

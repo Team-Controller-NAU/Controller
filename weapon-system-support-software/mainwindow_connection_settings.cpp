@@ -93,7 +93,7 @@ void MainWindow::on_baud_rate_selection_currentIndexChanged(int index)
 {
     if (ddmCon == nullptr) {
         // Handle case where ddmCon pointer is not initialized after setup is done
-        if (allowPortSelection)
+        if (allowSettingChanges)
         {
             notifyUser("Connection setting can't be applied", "Connection class is not declared", true);
         }
@@ -136,7 +136,7 @@ void MainWindow::on_data_bits_selection_currentIndexChanged(int index)
 {
     if (ddmCon == nullptr) {
         // Handle case where ddmCon pointer is not initialized after setup is done
-        if (allowPortSelection)
+        if (allowSettingChanges)
         {
             notifyUser("Connection setting can't be applied", "Connection class is not declared", true);
         }
@@ -167,7 +167,7 @@ void MainWindow::on_flow_control_selection_currentIndexChanged(int index)
 {
     if (ddmCon == nullptr) {
         // Handle case where ddmCon pointer is not initialized after setup is done
-        if (allowPortSelection)
+        if (allowSettingChanges)
         {
             notifyUser("Connection setting can't be applied", "Connection class is not declared", true);
         }
@@ -195,7 +195,7 @@ void MainWindow::on_stop_bit_selection_currentIndexChanged(int index)
 {
     if (ddmCon == nullptr) {
         // Handle case where ddmCon pointer is not initialized after setup is done
-        if (allowPortSelection)
+        if (allowSettingChanges)
         {
             notifyUser("Connection setting can't be applied", "Connection class is not declared", true);
         }
@@ -223,7 +223,7 @@ void MainWindow::on_parity_selection_currentIndexChanged(int index)
 {
     if (ddmCon == nullptr) {
         // Handle case where ddmCon pointer is not initialized after setup is done
-        if (allowPortSelection)
+        if (allowSettingChanges)
         {
             notifyUser("Connection setting can't be applied", "Connection class is not declared", true);
         }

@@ -48,9 +48,6 @@ public:
     electrical *electricalData;
     QSettings userSettings;
 
-    //shortcut for searching using ctrl+f on events page
-    QShortcut *find;
-
     // vars
     QString ddmPortName;
     QTimer* handshakeTimer;
@@ -60,7 +57,7 @@ public:
     QDateTime timeLastReceived;
     EventFilter eventFilter;
     QString autosaveLogFile;
-    bool allowPortSelection;
+    bool allowSettingChanges;
 
     //user managed settings
     bool coloredEventOutput;
@@ -198,6 +195,12 @@ private slots:
         void on_searchButton_clicked();
 
         void on_notify_error_cleared_stateChanged(int arg1);
+
+        void on_connection_timeout_valueChanged(int arg1);
+
+        void on_ram_clearing_stateChanged(int arg1);
+
+        void on_max_data_nodes_valueChanged(int arg1);
 
     private:
     Ui::MainWindow *ui;

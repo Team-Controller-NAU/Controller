@@ -14,13 +14,16 @@
  *
  * This initializes the parameters into a linked list object
  */
-Events::Events()
+Events::Events(bool EventRAMClearing, int maxDataNodes)
 {
     //initialize variables
     totalEvents = 0;
     totalErrors= 0;
     totalNodes= 0;
-    totalCleared = 0;
+    totalClearedErrors = 0;
+    storedNodes=0;
+    maxNodes = maxDataNodes;
+    RAMClearing = EventRAMClearing;
 
     headEventNode= nullptr;
     lastEventNode= nullptr;
@@ -64,7 +67,18 @@ void Events::addEvent(int id, QString timeStamp, QString eventString)
 
     //increment counters
     totalNodes++;
+    storedNodes++;
     totalEvents++;
+
+    //check if we have exceeded max nodes and if ram clearing is enabled
+    if (RAMClearing && storedNodes > maxNodes)
+    {
+        //free the linked lists
+        freeLinkedLists();
+
+        //notify parent
+        emit RAMCleared();
+    }
 
     //log: new event created
     qDebug() << "New event node created. Total nodes: " << totalNodes;
@@ -114,7 +128,18 @@ void Events::addError(int id, QString timeStamp, QString eventString, bool clear
     //increment counters
     totalNodes++;
     totalErrors++;
-    if(cleared) totalCleared++;
+    storedNodes++;
+    if(cleared) totalClearedErrors++;
+
+    //check if we have exceeded max nodes and if ram clearing is enabled
+    if (RAMClearing && (storedNodes > maxNodes))
+    {
+        //free the linked lists
+        freeLinkedLists();
+
+        //notify parent
+        emit RAMCleared();
+    }
 
     //check if linked list is currently empty
     if (headErrorNode == nullptr)
@@ -185,18 +210,16 @@ void Events::freeLinkedLists()
     headErrorNode = lastErrorNode = nullptr;
 
     //clear counters
-    totalErrors = 0;
-    totalEvents = 0;
-    totalNodes = 0;
-    totalCleared = 0;
+    storedNodes=0;
 }
 
 /**
  * Attempts to find the error using its id and switches the bool to cleared
- *
- * If error node cannot be found, the function will return false
+ * Both the linked list and the logfile are searched.
+ * If error node cannot be found in ll or logfile, the function will return false
  *
  *@param id The identification number of the error node to be cleared
+ *@param the logfile to modify
  */
 bool Events::clearError(int id, QString logfileName)
 {
@@ -209,6 +232,7 @@ bool Events::clearError(int id, QString logfileName)
     //init vars
     EventNode *wkgPtr = headErrorNode;
     bool logfileUpdated = false;
+    bool linkedListUpdated = false;
 
     //loop through error linked list
     while (wkgPtr != nullptr)
@@ -220,60 +244,70 @@ bool Events::clearError(int id, QString logfileName)
 
             qDebug() << "Error " << id << " cleared in linked list";
 
-            totalCleared++;
+            totalClearedErrors++;
 
-            // Open the log file for modification
-            QFile file(logfileName);
-            if (!file.open(QIODevice::ReadWrite | QIODevice::Text))
-            {
-                qDebug() << "Failed to open the log file:" << file.errorString();
-                return -1;
-            }
+            linkedListUpdated = true;
 
-            // Create a QTextStream to read from and write to the file
-            QTextStream stream(&file);
-
-            QStringList lines; // To store modified lines
-
-            // Read the file line by line
-            while (!stream.atEnd())
-            {
-                // Read a line and remove leading and trailing whitespace
-                QString line = stream.readLine().trimmed();
-
-                // Check if the line is the cleared error
-                if (line.startsWith("ID: "+QString::number(id) +","))
-                {
-                    qDebug() << "Clearing error in log file : " << line;
-                    line = nodeToString(wkgPtr); // Replace the line with the new line
-                    //set return flag
-                    logfileUpdated=true;
-                }
-
-                lines.append(line); // Store the line (modified or not
-            }
-
-            file.resize(0); // Clear the file contents
-
-            // Write the modified lines back to the file
-            for (const QString& line : lines)
-            {
-                stream << line << Qt::endl;
-            }
-
-            file.close(); // Close the file when done
-
-            return logfileUpdated;
+            goto UPDATE_LOG_FILE;
         }
 
         //iterate to next error node
         wkgPtr = wkgPtr->nextPtr;
     }
 
-    qDebug() << "Error " << id << " was not found and could not be cleared";
+    //set label to jump to after error is modified in ll
+    UPDATE_LOG_FILE:
 
-    //no id was found and we reached end of list, return failure
-    return false;
+    // Open the log file for modification
+    QFile file(logfileName);
+    if (!file.open(QIODevice::ReadWrite | QIODevice::Text))
+    {
+        qDebug() << "Failed to open the log file:" << file.errorString();
+        return false;
+    }
+
+    // Create a QTextStream to read from and write to the file
+    QTextStream stream(&file);
+
+    QStringList lines; // To store modified lines
+
+    // Read the file line by line
+    while (!stream.atEnd())
+    {
+        // Read a line and remove leading and trailing whitespace
+        QString line = stream.readLine().trimmed();
+
+        // Check if the line is the cleared error
+        if (line.startsWith("ID: "+QString::number(id) +","))
+        {
+            qDebug() << "Clearing error in log file : " << line;
+            line = line.replace("NOT CLEARED", "CLEARED"); // Replace the line with the new line
+            //set return flag
+            logfileUpdated=true;
+        }
+
+        lines.append(line); // Store the line (modified or not)
+    }
+
+    file.resize(0); // Clear the file contents
+
+    // Write the modified lines back to the file
+    for (const QString& line : lines)
+    {
+        stream << line << Qt::endl;
+    }
+
+    file.close(); // Close the file when done
+
+    //check if we found the node in the log file but not linked list
+    if (!linkedListUpdated && logfileUpdated)
+    {
+        qDebug() << "Error " << id << " was not found in the linked list and could not be cleared."
+                                      "It is possible that RAM was cleared to improve performance";
+    }
+
+    //return result of clear attempt on log file
+    return logfileUpdated;
 }
 
 /**
@@ -371,7 +405,7 @@ int Events::loadDataFromLogFile(Events *&events, QString logFileName)
 
     //get log file contents
     QTextStream in(&file);
-    Events *newEvents = new Events();
+    Events *newEvents = new Events(false, maxNodes);
     QString currentLine;
 
     //loop through log file contents
@@ -420,7 +454,7 @@ bool Events::stringToNode(QString nodeString)
     //ensure the input has at least 3 parts
     if ( parts.size() < 3)
     {
-        qDebug() << "string has <3 parts: " << nodeString;
+        qDebug() << "string has < 3 parts: " << nodeString;
         return false;
     }
 
@@ -433,7 +467,6 @@ bool Events::stringToNode(QString nodeString)
 
     //extract ID
     int idStartIndex = parts[0].indexOf(" ") + 1;
-    qDebug() << parts[0].mid(idStartIndex);
     id = parts[0].mid(idStartIndex).toInt(&conversionError);
 
     //check for int conversion error
@@ -580,7 +613,7 @@ void Events::freeError(int id)
             }
 
             // update total cleared (error does not exist, therefore it can not be cleared)
-            if(wkgPtr->cleared) totalCleared--;
+            if(wkgPtr->cleared) totalClearedErrors--;
 
             //delete the node
             free(wkgPtr);
@@ -799,6 +832,8 @@ void Events::appendToLogfile(QString logfilePath, EventNode *event)
  * Translates node data into a QString
  *
  * Given a valid node, construct a string to be displayed on GUI
+ *
+ * Note: changes here will require equivalent changes to the clearError function
  *
  * @param *event Event/error Node to be translated to a string
  */
