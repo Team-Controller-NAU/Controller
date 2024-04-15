@@ -10,6 +10,7 @@
 #include <QInputDialog>
 #include <QObject>
 #include <QtCore>
+#include <QTextDocument>
 
 //Team Controller code
 #include "constants.h"
@@ -124,6 +125,8 @@ private slots:
     //clears current content of the events page text output and replaces
     //it with freshly generated data based on current contents of events class
     void refreshEventsOutput();
+    //clears error in events output
+    void clearErrorFromEventsOutput(int errorId);
     //checks if the current number of auto saved files is higher than the limit, deletes the
     //oldest one each iteration until the limit is enforced
     void enforceAutoSaveLimit();

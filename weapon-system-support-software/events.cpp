@@ -810,7 +810,8 @@ void Events::appendToLogfile(QString logfilePath, EventNode *event)
  *
  * Given a valid node, construct a string to be displayed on GUI
  *
- * Note: changes here will require equivalent changes to the clearError function
+ * Note: changes here will require equivalent changes to the Events::clearError
+ * and void MainWindow::clearErrorFromEventsOutput functions
  *
  * @param *event Event/error Node to be translated to a string
  */

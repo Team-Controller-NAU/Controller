@@ -1,4 +1,6 @@
 #include "mainwindow.h"
+#include <QTextDocument>
+#include <QTextCursor>
 
 MainWindow::MainWindow(QWidget *parent)
 
@@ -522,15 +524,15 @@ void MainWindow::readSerialData()
                 }
 
                 //clear error with given id on ll and log file, notify if fail
-                if (!events->clearError(errorId))
+                if (!events->clearError(errorId) && ui->truncated_label->isHidden())
                 {
                     notifyUser("Failed to clear error", message, true);
                 }
                 //otherwise success
                 else
                 {
-                    //refresh the events output with newly cleared error
-                    refreshEventsOutput();
+                    //clear error in events output
+                    clearErrorFromEventsOutput(errorId);
 
                     if (notifyOnErrorCleared) notifyUser("Error " + message.left(message.indexOf(DELIMETER)) + " Cleared", false);
 
@@ -1166,6 +1168,69 @@ void MainWindow::refreshEventsOutput()
 
         //update events output if filter allows
         updateEventsOutput(nextPrintPtr);
+    }
+
+    #if DEV_MODE && GUI_DEBUG
+    qDebug() << "Events output refreshed";
+    #endif
+}
+
+//clears error in event output by replacing activeIndicator with clearedIndicator
+//also changes color of text if coloredEventOutput is on
+void MainWindow::clearErrorFromEventsOutput(int errorId)
+{
+    //if user is on specific error filter, refresh to update their screen
+    if (eventFilter == NON_CLEARED_ERRORS || eventFilter == CLEARED_ERRORS)
+    {
+        refreshEventsOutput();
+        return;
+    }
+
+    QTextCharFormat newColor;
+    if (coloredEventOutput)
+    {
+        newColor.setForeground(QColor("#14ae5c"));
+    }
+
+    // Get the QTextDocument of the QTextEdit
+    QTextDocument *document = ui->events_output->document();
+
+    // Create a QTextCursor to manipulate the text
+    QTextCursor cursor(document);
+
+    // Move to the beginning of the document
+    cursor.movePosition(QTextCursor::Start);
+
+    cursor = document->find("ID: " + QString::number(errorId) + ",", cursor, QTextDocument::FindWholeWords);
+    if (!cursor.isNull())
+    {
+        if (coloredEventOutput)
+        {
+            //store our starting place
+            QTextCursor tmpCursor = cursor;
+
+            //highlight the entire line
+            cursor.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
+
+            // Apply new color to the highlighted text
+            cursor.mergeCharFormat(newColor);
+
+            //move cursor to prev position
+            cursor = tmpCursor;
+        }
+
+        //find active error indicator
+        cursor = document->find(events->activeIndicator, cursor, QTextDocument::FindWholeWords);
+        // Replace active indicator with cleared indicator
+        cursor.insertText(events->clearedIndicator);
+
+        #if DEV_MODE && (EVENTS_DEBUG || GUI_DEBUG)
+        qDebug() << "Cleared error " << errorId << " on events output";
+        #endif
+    }
+    else
+    {
+        qDebug() << "Error: clearErrorFromEventsOutput failed to find error" << errorId;
     }
 }
 
