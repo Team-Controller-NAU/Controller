@@ -18,7 +18,8 @@ add_executable(status_tests tst_status.cpp
     ../weapon-system-support-software/status.h
     ../weapon-system-support-software/constants.h)
 add_executable(electrical_tests tst_electrical.cpp)
-add_executable(event_tests tst_events.cpp)
+add_executable(event_tests tst_events.cpp
+    ../weapon-system-support-software/events.h)
 
 # Add include directories for mainwindow.h
 target_include_directories(status_tests PRIVATE ../weapon-system-support-software)
