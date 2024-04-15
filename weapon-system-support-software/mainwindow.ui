@@ -436,7 +436,7 @@ font: 16pt &quot;Segoe UI&quot;;</string>
             </sizepolicy>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>2</number>
            </property>
            <widget class="QWidget" name="Events_page">
             <layout class="QGridLayout" name="gridLayout_3">
@@ -1473,28 +1473,39 @@ QPushButton::pressed {
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Save these settings for next login&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="styleSheet">
-                <string notr="true">QPushButton {
-	padding-bottom: 3px;
-	color: rgb(255, 255, 255);
-	background-color: rgb(47, 47, 47);
-	border: 1px solid;
-	border-color: rgb(64, 64, 64);
-	font: 15pt &quot;Segoe UI&quot;;
+                <string notr="true">/* Base style for QPushButton */
+QPushButton {
+    padding-bottom: 3px;
+    color: rgb(255, 255, 255);
+    background-color: rgb(47, 47, 47);
+    border: 1px solid;
+    border-color: rgb(64, 64, 64);
+    font: 15pt &quot;Segoe UI&quot;;
 }
 
-QPushButton::hover {
-	background-color: rgb(117, 117, 117);
+/* Styling for disabled QPushButton */
+QPushButton:disabled {
+    color: black; /* text color */
+    background-color: lightgray; /* background color */
 }
 
-QPushButton::pressed {
-	background-color: rgb(45, 45, 45);
+/* Styling for hover state */
+QPushButton:hover {
+    background-color: rgb(117, 117, 117);
 }
 
-QToolTip{
+/* Styling for pressed state */
+QPushButton:pressed {
+    background-color: rgb(45, 45, 45);
+}
+
+/* Tooltips styling */
+QToolTip {
     background-color: #000000;
     color: #FFFFFF;
     border: 1px solid black;
-}</string>
+}
+</string>
                </property>
                <property name="text">
                 <string> Save as Default</string>
@@ -4822,7 +4833,7 @@ QCheckBox::indicator {
                 </size>
                </property>
                <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Causes notification when an error is retroactively cleared by controller&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;When number of nodes gets high clear them out of RAM to improve performance. They will remain in the log file just not in the event page output.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="styleSheet">
                 <string notr="true">QCheckBox {
@@ -4887,6 +4898,9 @@ QCheckBox::indicator {
                  <height>16777215</height>
                 </size>
                </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;The number of nodes allowed before RAM is cleared&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="styleSheet">
                 <string notr="true">QSpinBox {
 	color: white;
@@ -4903,6 +4917,9 @@ QCheckBox::indicator {
              </item>
              <item row="13" column="1">
               <widget class="QLabel" name="max_data_nodes_label">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;The number of nodes allowed before RAM is cleared&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="styleSheet">
                 <string notr="true">	color: white;
 	font: 20pt &quot;Segoe UI&quot;;</string>

@@ -139,7 +139,7 @@ bool Status::loadVersionData(QString versionMessage)
     // Split time string
     QStringList parts = values[0].split(':');
     if (parts.size() != 3) {
-        qDebug() << "Invalid time string format in load version data";
+        qDebug() << "Error: loadVersionData: Invalid time string format in load version data";
         return false;
     }
 

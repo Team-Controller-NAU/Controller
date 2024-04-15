@@ -13,6 +13,13 @@
 //delimeter in serial messages
 const QString DELIMETER = ",";
 
+//these are the strings which denote cleared vs not cleared errors
+//in the log file. In order to make them interchangable in the log file
+//we have to add spaces to the end of the shorter string. This is done in events
+//constructor
+const QString CLEARED_INDICATOR = "CLEARED";
+const QString ACTIVE_INDICATOR = "ACTIVE";
+
 // the max number of electrical componenets to expect from a weapon
 const int MAX_ELECTRICAL_COMPONENTS = 100;
 

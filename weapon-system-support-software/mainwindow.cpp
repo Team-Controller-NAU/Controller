@@ -48,15 +48,19 @@ MainWindow::MainWindow(QWidget *parent)
     //setup events with ram clearing and max nodes taken from settings
     events = new Events(userSettings.value("RAMClearing").toBool(), userSettings.value("maxDataNodes").toInt());
 
-        //setup signal and slot to notify user when ram is cleared from events
-        connect(events, &Events::RAMCleared, this, [=]() {
+    //setup signal and slot to notify user when ram is cleared from events
+    //this signal connects to a lambda function so we can call more than 1 function
+    //using 1 signal-slot connection
+    connect(events, &Events::RAMCleared, this, [=]() {
         notifyUser("Event class cleared",
         "Events and errors were removed from RAM to improve performance. "
         "They are still being counted by counters and will be visible if you "
         "load this session again after it ends", false);
 
+        //show truncated label on the events page to tell user not all nodes are displayed
         ui->truncated_label->setVisible(true);
 
+        //get rid of outdated display
         refreshEventsOutput();
     });
 
@@ -66,7 +70,9 @@ MainWindow::MainWindow(QWidget *parent)
         //set output settings for qDebug
         qSetMessagePattern(QDEBUG_OUTPUT_FORMAT);
 
+        #if GENERAL_DEBUG
         qDebug() << "Dev mode active";
+        #endif
 
         //get csimPortName from port selection
         csimPortName = ui->csim_port_selection->currentText();
@@ -102,7 +108,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(handshakeTimer, &QTimer::timeout, this, &MainWindow::handshake);
 
     //connect clear notification process to the notification timer. If run, the process
-    //will trigger after a given timeout
+    //will trigger after the notification timeout
     connect(notificationTimer, &QTimer::timeout, this, [this]() {
         ui->notificationPopUp->setStyleSheet("background-color: transparent; border: none;");
         ui->notificationPopUp->clear();
@@ -120,7 +126,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->trigger1->setPixmap(BLANK_LIGHT);
     ui->trigger2->setPixmap(BLANK_LIGHT);
 
-    //will be displayed if ram is cleared
+    //will be disabled until RAM is cleared
     ui->truncated_label->setVisible(false);
 
     // ensures that the application will open on the events page
@@ -230,6 +236,8 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
         runningControllerTimer->stop();
         lastMessageTimer->stop();
         handshakeTimer->stop();
+
+        //clear time since last message
         ui->DDMTimer->clear();
         ui->DDM_timer_label->clear();
 
@@ -245,9 +253,9 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
         ui->connectionLabel->setText("Disconnected ");
 
         //output session stats
-        //notifyUser("Session statistics ready", getSessionStatistics(), false);
-        qDebug() << "Here";
-        //if advanced log file is enabled, add electrical data
+        notifyUser("Session statistics ready", getSessionStatistics(), false);
+
+        //if advanced log file is enabled, add details to log file
         if (advancedLogFile)
         {
             logAdvancedDetails(ELECTRICAL);
@@ -329,6 +337,7 @@ void MainWindow::readSerialData()
     {
         // declare variables
         SerialMessageIdentifier messageId;
+        int errorId;
 
         //get serialized string from port
         QByteArray serializedMessage = ddmCon->serialPort.readLine();
@@ -336,7 +345,9 @@ void MainWindow::readSerialData()
         //deserialize string
         QString message = QString::fromUtf8(serializedMessage);
 
+        #if DEV_MODE && SERIAL_COMM_DEBUG
         qDebug() << "message: " << message;
+        #endif
 
         //update gui with new message
         ui->stdout_label->setText(message);
@@ -355,7 +366,9 @@ void MainWindow::readSerialData()
             {
             case STATUS:
 
+                #if DEV_MODE && SERIAL_COMM_DEBUG
                 qDebug() <<  "Message id: status update" << qPrintable("\n");
+                #endif
 
                 //update status class with new data
                 if (!status->loadData(message))
@@ -373,7 +386,9 @@ void MainWindow::readSerialData()
 
             case EVENT:
 
+                #if DEV_MODE && SERIAL_COMM_DEBUG
                 qDebug() <<  "Message id: event update" << qPrintable("\n");
+                #endif
 
                 //add new event to event ll, check for fail
                 if (!events->loadEventData(message))
@@ -394,8 +409,9 @@ void MainWindow::readSerialData()
 
             case ERROR:
 
-                // status
+                #if DEV_MODE && SERIAL_COMM_DEBUG
                 qDebug() <<  "Message id: error update" << qPrintable("\n");
+                #endif
 
                 //add new error to error ll, check for fail
                 if (!events->loadErrorData( message ))
@@ -422,7 +438,9 @@ void MainWindow::readSerialData()
 
             case ELECTRICAL:
 
+                #if DEV_MODE && SERIAL_COMM_DEBUG
                 qDebug() <<  "Message id: electrical" << qPrintable("\n");
+                #endif
 
                 //load new data into electrical ll, notify if fail
                 if (!electricalData->loadElecDump(message))
@@ -440,7 +458,9 @@ void MainWindow::readSerialData()
 
             case EVENT_DUMP:
 
+                #if DEV_MODE && SERIAL_COMM_DEBUG
                 qDebug() <<  "Message id: event dump" << qPrintable("\n");
+                #endif
 
                 // load all events to event linked list, notify if fail
                 if (!events->loadEventDump(message))
@@ -464,7 +484,9 @@ void MainWindow::readSerialData()
 
             case ERROR_DUMP:
 
+                #if DEV_MODE && SERIAL_COMM_DEBUG
                 qDebug() <<  "Message id: error dump" << qPrintable("\n");
+                #endif
 
                 // load all errors to error linked list, notify if fail
                 if (!events->loadErrorDump(message))
@@ -487,20 +509,30 @@ void MainWindow::readSerialData()
                 break;
 
             case CLEAR_ERROR:
-                qDebug() << "Message id: clear error " << message << qPrintable("\n");
 
-                //update cleared status of error with given id, notify if fail
-                if (!events->clearError(message.left(message.indexOf(DELIMETER)).toInt(), autosaveLogFile)) //ignore the suggestion leftRef is depreciated
+                #if DEV_MODE && SERIAL_COMM_DEBUG
+                qDebug() << "Message id: clear error " << message << qPrintable("\n");
+                #endif
+
+                errorId = message.left(message.indexOf(DELIMETER)).toInt();
+
+                if (!events->clearErrorInLogFile(autosaveLogFile, errorId))
+                {
+                    notifyUser("Failed to clear error in logfile", QString::number(errorId),true);
+                }
+
+                //clear error with given id on ll and log file, notify if fail
+                if (!events->clearError(errorId))
                 {
                     notifyUser("Failed to clear error", message, true);
                 }
                 //otherwise success
                 else
                 {
-                    if (notifyOnErrorCleared) notifyUser("Error " + message.left(message.indexOf(DELIMETER)) + " Cleared", false);
-
                     //refresh the events output with newly cleared error
                     refreshEventsOutput();
+
+                    if (notifyOnErrorCleared) notifyUser("Error " + message.left(message.indexOf(DELIMETER)) + " Cleared", false);
 
                     #if DEV_MODE
                     //update the cleared error selection box in dev tools (can be removed when dev page is removed)
@@ -512,7 +544,9 @@ void MainWindow::readSerialData()
 
             case BEGIN:
 
+                #if DEV_MODE && SERIAL_COMM_DEBUG
                 qDebug() << "Message id: begin " << message << qPrintable("\n");
+                #endif
 
                 //load controller crc and version, check for fail
                 if (!status->loadVersionData(message))
@@ -546,14 +580,18 @@ void MainWindow::readSerialData()
                     //init logfile location (user setting)
                     setup_logfile_location();
 
+                    #if DEV_MODE && SERIAL_COMM_DEBUG
                     qDebug() << "Begin signal received, handshake complete";
+                    #endif
                 }
 
                 break;
 
             case CLOSING_CONNECTION:
 
+                #if DEV_MODE && SERIAL_COMM_DEBUG
                 qDebug() << "Disconnect message received from Controller";
+                #endif
 
                 notifyUser("Controller disconnected", "Session end", false);
 
@@ -563,7 +601,7 @@ void MainWindow::readSerialData()
                 break;
 
             default:
-                qDebug() << "ERROR: message from controller is not recognized";
+                qDebug() << "ERROR: readSerialData message from controller is not recognized";
 
                 //report
                 notifyUser("Unrecognized message received", message, true);
@@ -577,7 +615,7 @@ void MainWindow::readSerialData()
         //invalid message id detected
         else
         {
-            qDebug() << "Unrecognized serial message received : " << message;
+            qDebug() << "Error: readSerialData Unrecognized serial message received : " << message;
             notifyUser("Unrecognized serial message received", message, true);
         }
     }
@@ -675,7 +713,7 @@ void MainWindow::setup_logfile_location()
         //attempt to create the directory
         if(!dir.mkpath(autosaveLogFile))
         {
-            qDebug() << "Failed to create logfile folder on startup" << autosaveLogFile;
+            qDebug() << "Error: setup_logfile_location Failed to create logfile folder on startup: " << autosaveLogFile;
             return;
         }
     }
@@ -687,7 +725,6 @@ void MainWindow::setup_logfile_location()
     qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
     autosaveLogFile += QString::number(secsSinceEpoch) + "-logfile-A.txt";
 
-    qDebug() << "Auto Save log file for this session: " << autosaveLogFile;
     notifyUser("Auto save log set", autosaveLogFile, false);
 }
 
@@ -757,12 +794,14 @@ void MainWindow::enforceAutoSaveLimit()
         // Remove the oldest file
         if (!QFile::remove(oldestFilePath))
         {
-            qDebug() << "Failed to delete file: " << oldestFilePath;
+            qDebug() << "Error: enforceAutoSaveLimit failed to delete file: " << oldestFilePath;
             return;
         }
         else
         {
-            qDebug() << "An autosave file was deleted";
+            #if DEV_MODE && GENERAL_DEBUG
+            qDebug() << "An autosave file was deleted: " << oldestFilePath;
+            #endif
         }
 
         // Remove the oldest file name from the list
@@ -845,7 +884,7 @@ void MainWindow::setupSettings()
     ui->connection_timeout->setValue(connectionTimeout);
 
     //==============================================================
-qDebug() << "here";
+
     // Check if ram clearing setting does not exist
     if (!userSettings.contains("RAMClearing") || !userSettings.value("RAMClearing").isValid()) {
         // set the default value
@@ -883,8 +922,10 @@ qDebug() << "here";
         //load port names for csim port selection
         setup_csim_port_selection(0);
 
+        #if GENERAL_DEBUG
         // Display user settings
         displaySavedSettings();
+        #endif
     #endif
 
     //in case settings were loaded from initial constants, sync settings to registry
@@ -984,12 +1025,12 @@ void MainWindow::updateTimeSinceLastMessage()
     // check for negative elapsed time
     if(elapsedMs < 0)
     {
-        qDebug() << "Error: time since last DDM message received is negative.\n";
+        qDebug() << "Error: updateTimeSinceLastMessage time since last DDM message received is negative.\n";
     }
     // check for invalid datetime
     else if(elapsedMs == 0)
     {
-        qDebug() << "Error: either datetime is invalid.\n";
+        qDebug() << "Error: updateTimeSinceLastMessage either datetime is invalid.\n";
     }
     //check if timeout was reached
     else if (elapsedMs >= connectionTimeout)
@@ -1233,7 +1274,7 @@ void MainWindow::logAdvancedDetails(SerialMessageIdentifier id)
     //attempt to open in append mode
     if (!file.open(QIODevice::Append | QIODevice::Text))
     {
-        qDebug() <<  "Could not open log file for appending: " << autosaveLogFile;
+        qDebug() <<  "Error: logAdvancedDetails Could not open log file for appending: " << autosaveLogFile;
         notifyUser("Failed to open logfile", "log text \"" + outString + "\" discarded", true);
     }
     else

@@ -130,32 +130,42 @@ void MainWindow::on_FilterBox_currentIndexChanged(int index)
     switch(index)
     {
     case ALL:
+        #if DEV_MODE && GUI_DEBUG
         qDebug() << "All filter selected";
+        #endif
         eventFilter = ALL;
         break;
 
     case EVENTS:
+        #if DEV_MODE && GUI_DEBUG
         qDebug() << "Events filter selected";
+        #endif
         eventFilter = EVENTS;
         break;
 
     case ERRORS:
+        #if DEV_MODE && GUI_DEBUG
         qDebug() << "Errors filter selected";
+        #endif
         eventFilter = ERRORS;
         break;
 
     case CLEARED_ERRORS:
+        #if DEV_MODE && GUI_DEBUG
         qDebug() << "Cleared errors filter selected";
+        #endif
         eventFilter = CLEARED_ERRORS;
         break;
 
     case NON_CLEARED_ERRORS:
+        #if DEV_MODE && GUI_DEBUG
         qDebug() << "Non-cleared errors filter selected";
+        #endif
         eventFilter = NON_CLEARED_ERRORS;
         break;
 
     default:
-        qDebug() << "Error: Unrecognized filter index.";
+        qDebug() << "Error: on_FilterBox_currentIndexChanged unrecognized filter index.";
     }
 
     //refresh to display with filter
@@ -189,7 +199,9 @@ void MainWindow::on_handshake_button_clicked()
     // check if handshake is not in progress and ddm is not connected
     if ( !handshakeTimer->isActive() && !ddmCon->connected )
     {
+        #if DEV_MODE && SERIAL_COMM_DEBUG
         qDebug() << "Beginning handshake with controller" << Qt::endl;
+        #endif
 
         // Start the timer to periodically check the handshake status
         handshakeTimer->start();
@@ -207,8 +219,6 @@ void MainWindow::on_handshake_button_clicked()
     }
     else
     {
-        qDebug() << "Sending disconnect message to controller" << Qt::endl;
-
         ddmCon->sendDisconnectMsg();
 
         if (ddmCon->connected)
@@ -239,7 +249,7 @@ void MainWindow::on_save_Button_clicked()
 
     notifyUser("Default settings saved.", false);
 
-    #if DEV_MODE
+    #if DEV_MODE && GUI_DEBUG
         //output new settings to qDebug()
         displaySavedSettings();
     #endif
@@ -286,22 +296,24 @@ void MainWindow::on_openLogfileFolder_clicked()
             // check if we can make path successfully
             if(path.mkpath("."))
             {
+                #if DEV_MODE && GUI_DEBUG
                 qDebug() << "Logfile directory created at: " << INITIAL_LOGFILE_LOCATION;
+                #endif
             }
-
             else
             {
-                qDebug() << "The log file directory failed to create";
+                qDebug() << "Error: on_openLogfileFolder_clicked() The log file directory failed to create";
             }
         }
         QDesktopServices::openUrl(QUrl::fromLocalFile(INITIAL_LOGFILE_LOCATION));
     }
-
     else
     {
         //open from the user settings
         QDesktopServices::openUrl(QUrl::fromLocalFile(userSettings.value("logfileLocation").toString()));
+        #if DEV_MODE && GUI_DEBUG
         qDebug() << "log file location opening: " << userSettings.value("logfileLocation").toString();
+        #endif
     }
     // save user settings
     userSettings.sync();
@@ -318,19 +330,21 @@ void MainWindow::on_setLogfileFolder_clicked()
     // check the success of saving settings
     if(userSettings.status() != QSettings::NoError)
     {
-        qDebug() << "Error while saving user settings: " << userSettings.status();
+        qDebug() << "Error: on_setLogfileFolder_clicked() failed to save logfile location: " << userSettings.status();
     }
     // check if user exited the dialog box
     else if(userSettings.value("logfileLocation").toString() == "/")
     {
         // revert to previous user setting
         userSettings.setValue("logfileLocation", previousPath);
-        qDebug() << "No logfile directory set. Reverting to previous path: " << previousPath;
+        qDebug() << "Error: on_setLogfileFolder_clicked() No logfile directory set. Reverting to previous path: " << previousPath;
     }
     // otherwise, assume successful logfile directory creation
     else
     {
+        #if DEV_MODE && GUI_DEBUG
         qDebug() << "New log file directory set: " << userSettings.value("logfileLocation").toString();
+        #endif
     }
 
     //sync user settings
@@ -356,10 +370,10 @@ void MainWindow::on_load_events_from_logfile_clicked()
         return;
     }
 
-    #if DEV_MODE
+    #if DEV_MODE && GUI_DEBUG
         logEmptyLine();
+        qDebug() << "Loading data from: " << selectedFile;
     #endif
-    qDebug() << "Loading data from: " << selectedFile;
 
     // Pass the selected file name to the loadDataFromLogFile function
     int result = events->loadDataFromLogFile(events, selectedFile);
@@ -369,13 +383,12 @@ void MainWindow::on_load_events_from_logfile_clicked()
     // Handle the result if needed
     if (result == INCORRECT_FORMAT)
     {
-        // Handle error
-        qDebug() << "Log file was of incorrect format.";
+        qDebug() << "Error: on_load_events_from_logfile_clicked() Log file was of incorrect format.";
         notifyUser("Load failed on corrupt logfile.", true);
     }
     else if (result == DATA_NOT_FOUND)
     {
-        qDebug() << "Log file could not be found";
+        qDebug() << "Error: on_load_events_from_logfile_clicked() Log file could not be found";
         notifyUser("Load failed on missing logfile.", true);
     }
     else
@@ -583,7 +596,7 @@ void MainWindow::on_advanced_log_file_stateChanged(int arg1)
         //attempt to open in append mode
         if (!file.open(QIODevice::Append | QIODevice::Text))
         {
-            qDebug() <<  "Could not open log file for appending: " << autosaveLogFile;
+            qDebug() <<  "Error: on_advanced_log_file_stateChanged could not open log file for appending: " << autosaveLogFile;
         }
         else
         {

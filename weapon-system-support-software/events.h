@@ -33,6 +33,10 @@ public:
     bool RAMClearing;
     int maxNodes;
     int storedNodes;
+    QString clearedIndicator;
+    QString activeIndicator;
+    QByteArray clearedIndicatorBytes;
+    QByteArray activeIndicatorBytes;
 
     EventNode *headEventNode;
     EventNode *lastEventNode;
@@ -56,7 +60,10 @@ public:
     bool loadEventData(QString message);
     bool loadEventDump(QString message);
     bool loadErrorDump(QString message);
-    bool clearError(int id, QString logfileName);
+    bool clearError(int id);
+    //searches through log file and replaces the active error indicator
+    //with the cleared error indicator
+    bool clearErrorInLogFile(QString logFileName, int errorId);
 
     //log file utils
     bool outputToLogFile(QString logFileName, bool advancedLogFile);
