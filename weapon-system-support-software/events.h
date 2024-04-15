@@ -18,17 +18,25 @@ struct EventNode {
     struct EventNode *nextPtr;
 };
 
-class Events
+class Events : public QObject
 {
+    Q_OBJECT
 public:
-    Events();
+    Events(bool EventRAMClearing, int maxDataNodes);
     ~Events();
 
     //class variables
     int totalEvents;
     int totalErrors;
     int totalNodes;
-    int totalCleared;
+    int totalClearedErrors;
+    bool RAMClearing;
+    int maxNodes;
+    int storedNodes;
+    QString clearedIndicator;
+    QString activeIndicator;
+    QByteArray clearedIndicatorBytes;
+    QByteArray activeIndicatorBytes;
 
     EventNode *headEventNode;
     EventNode *lastEventNode;
@@ -53,6 +61,9 @@ public:
     bool loadEventDump(QString message);
     bool loadErrorDump(QString message);
     bool clearError(int id);
+    //searches through log file and replaces the active error indicator
+    //with the cleared error indicator
+    bool clearErrorInLogFile(QString logFileName, int errorId);
 
     //log file utils
     bool outputToLogFile(QString logFileName, bool advancedLogFile);
@@ -75,6 +86,9 @@ public:
 
         int getErrorIdByPosition(int pos);
     #endif
+
+signals:
+    void RAMCleared();
 };
 
 #endif // EVENTS_H

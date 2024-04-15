@@ -81,17 +81,18 @@ bool Connection::checkForValidMessage()
         {
             return true;
         }
-        //this is useful during debugging, it displays the data without deserialization
-       /* else
+        #if DEV_MODE && SERIAL_COMM_DEBUG
+        else
         {
-            qDebug() << "message: " + message;
+            qDebug() << "checkForValidMessage returned false for: " + message;
             // Display the contents of the QByteArray in hexadecimal format
             qDebug() << "Data received (hex): ";
             for (int i = 0; i < serializedMessage.size(); ++i)
             {
                 qDebug().noquote() << QString("%1 ").arg((quint8)serializedMessage[i], 2, 16, QLatin1Char('0')).toUpper();
             }
-        }*/
+        }
+        #endif
     }
     else
     {
@@ -137,22 +138,28 @@ void Connection::transmit(QString message)
     }
     else
     {
-        // notify
+        #if DEV_MODE && SERIAL_COMM_DEBUG
         qDebug() << "Message sent through " << portName << " : " << message << qPrintable("\n");
-        //qDebug() << bytesWritten << " bytes written to the serial port.";
+        qDebug() << bytesWritten << " bytes written to the serial port.";
+        #endif
     }
 
-    /* Display the contents of the QByteArray in hexadecimal format
+    // Display the contents of the QByteArray in hexadecimal format
+    #if DEV_MODE && SERIAL_COMM_DEBUG
     qDebug() << "Data sent (hex): ";
     for (int i = 0; i < data.size(); ++i)
     {
         qDebug().noquote() << QString("%1 ").arg((quint8)data[i], 2, 16, QLatin1Char('0')).toUpper();
-    }*/
+    }
+    #endif
 }
 
 //send disconnect to communicating party
 void Connection::sendDisconnectMsg()
 {
+    #if DEV_MODE && SERIAL_COMM_DEBUG
+    qDebug() << "Sending disconnect message to controller" << Qt::endl;
+    #endif
     transmit(QString::number(CLOSING_CONNECTION) + DELIMETER + "\n");
 }
 
@@ -172,7 +179,6 @@ void Connection::sendHandshakeMsg()
  */
 Connection::~Connection()
 {
-    // send debug
     qDebug() << "Closing connection on port " << portName << qPrintable("\n");
 
     // confirm connection to another port

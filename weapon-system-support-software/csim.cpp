@@ -58,7 +58,9 @@ void CSim::completeTransmissionRequest(const QString &message)
     // Check if conn is active
     if (connPtr != nullptr)
     {
+        #if CSIM_DEBUG
         qDebug() << "[CSIM] transmission request received from DDM.";
+        #endif
 
         // Split the message into individual lines manually
         QStringList lines = message.split('\n', Qt::SkipEmptyParts);
@@ -139,8 +141,9 @@ void CSim::checkConnection(Connection *conn)
         {
         case CLOSING_CONNECTION:
             // Log
+            #if CSIM_DEBUG
             qDebug() << "[CSIM] Disconnect message received from DDM. Serial communication halted" << qPrintable("\n");
-
+            #endif
             // Update flag
             conn->connected = false;
 
@@ -157,8 +160,9 @@ void CSim::checkConnection(Connection *conn)
             randNum = std::rand() % 4;
 
             // Log
+            #if CSIM_DEBUG
             qDebug() << "[CSIM] DDM listening signal received. Serial communication beginning"<< qPrintable("\n");
-
+            #endif
             // Send message to begin serial comm (controller version and crc are included in the begin message)
             conn->transmit(QString::number(BEGIN) + DELIMETER + getTimeStamp() + DELIMETER + CONTROLLER_VERSION + DELIMETER + CRC_VERSION + DELIMETER + '\n');
 
@@ -250,7 +254,7 @@ void CSim::run()
 
         //init events class (csim only uses this to store non cleared errors so that it can
         //clear them later)
-        Events *events(new Events());
+        Events *events(new Events(false, 0));
         eventsPtr = events;
 
         //for status use smart pointer for automatic memory management (resources auto free when function exits)
@@ -268,7 +272,9 @@ void CSim::run()
         QRandomGenerator randomGenerator(seed);
 
         //init vars
+        #if CSIM_DEBUG
         int i = 0;
+        #endif
         QString message;
         int eventId = 0;
         stop = false;
@@ -284,12 +290,11 @@ void CSim::run()
         //loop until told to stop by owner of csim handle
         while (!stop)
         {
+            #if CSIM_DEBUG
             i++;
-
             logEmptyLine();
-
             qDebug() << "[CSIM] Iteration: " << i;
-
+            #endif
             //replace status values with randomized ones
             status->randomize(secondTrigger);
 
@@ -361,7 +366,9 @@ void CSim::run()
 
                     //add event to event dump
                     eventDumpMessage += message + DELIMETER;
+                    #if CSIM_DEBUG
                     qDebug() << "[CSIM] 1 event added to event dump";
+                    #endif
                 }
 
                 //clear message
@@ -433,7 +440,9 @@ void CSim::run()
 
                     //add error to event dump
                     errorDumpMessage += message + DELIMETER;
+                    #if CSIM_DEBUG
                     qDebug() << "[CSIM] 1 error added to error dump";
+                    #endif
                 }
             }
 

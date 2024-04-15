@@ -6,6 +6,15 @@ project(WSSS VERSION 0.1 LANGUAGES CXX)
 #set DEV_MODE to 0 to compile for user release
 add_compile_definitions(DEV_MODE=1)
 
+#set to 1 to enable qdebug outputs for specified components
+#some messages (such as errors) deemed essential are exempt from conditional compiling
+add_compile_definitions(SERIAL_COMM_DEBUG=0)
+add_compile_definitions(CSIM_DEBUG=0)
+add_compile_definitions(EVENTS_DEBUG=0)
+add_compile_definitions(STATUS_DEBUG=0)
+add_compile_definitions(GUI_DEBUG=1)
+add_compile_definitions(GENERAL_DEBUG=1)
+
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)

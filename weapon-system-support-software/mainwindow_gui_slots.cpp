@@ -12,7 +12,7 @@ void MainWindow::on_ElectricalPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(3);
     resetPageButton();
-    ui->ElectricalPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
+    ui->ElectricalPageButton->setStyleSheet(SELECTED_NAV_BUTTON_STYLE);
 }
 
 //sends user to events page when clicked
@@ -21,7 +21,7 @@ void MainWindow::on_EventsPageButton_clicked()
     // TODO: first visit refresh page with dump of whole LL??
     ui->Flow_Label->setCurrentIndex(0);
     resetPageButton();
-    ui->EventsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
+    ui->EventsPageButton->setStyleSheet(SELECTED_NAV_BUTTON_STYLE);
 }
 
 //sends user to settings page when clicked
@@ -29,7 +29,7 @@ void MainWindow::on_ConnectionPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(2);
     resetPageButton();
-    ui->ConnectionPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
+    ui->ConnectionPageButton->setStyleSheet(SELECTED_NAV_BUTTON_STYLE);
 }
 
 //sends user to status page when clicked
@@ -37,14 +37,14 @@ void MainWindow::on_StatusPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(4);
     resetPageButton();
-    ui->StatusPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
+    ui->StatusPageButton->setStyleSheet(SELECTED_NAV_BUTTON_STYLE);
 }
 
 void MainWindow::on_SettingsPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(5);
     resetPageButton();
-    ui->SettingsPageButton->setStyleSheet("border-image: url(://resources/Images/purpleSettings.png);");
+    ui->SettingsPageButton->setStyleSheet("border-image: url(://resources/Images/purpleSettings.png)");
 }
 
 void MainWindow::on_NotificationPageButton_clicked()
@@ -57,15 +57,15 @@ void MainWindow::on_NotificationPageButton_clicked()
 //reset all tab buttons to default style
 void MainWindow::resetPageButton()
 {
-    ui->ConnectionPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
-    ui->EventsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
-    ui->StatusPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
-    ui->ElectricalPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
+    ui->ConnectionPageButton->setStyleSheet(NAV_BUTTON_STYLE);
+    ui->EventsPageButton->setStyleSheet(NAV_BUTTON_STYLE);
+    ui->StatusPageButton->setStyleSheet(NAV_BUTTON_STYLE);
+    ui->ElectricalPageButton->setStyleSheet(NAV_BUTTON_STYLE);
     ui->SettingsPageButton->setStyleSheet("border-image: url(://resources/Images/whiteSettings.png)");
     ui->NotificationPageButton->setStyleSheet("border-image: url(://resources/Images/notificationBell.png);");
 
 #if DEV_MODE
-    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
+    ui->DevPageButton->setStyleSheet(NAV_BUTTON_STYLE);
 #endif
 }
 
@@ -78,7 +78,7 @@ void MainWindow::resetPageButton()
 void MainWindow::on_ddm_port_selection_currentIndexChanged(int index)
 {
     //create connection on selected port if combo box is set up
-    if (allowPortSelection)
+    if (allowSettingChanges)
     {
         createDDMCon();
         ddmPortName = ui->ddm_port_selection->currentText();
@@ -130,32 +130,42 @@ void MainWindow::on_FilterBox_currentIndexChanged(int index)
     switch(index)
     {
     case ALL:
+        #if DEV_MODE && GUI_DEBUG
         qDebug() << "All filter selected";
+        #endif
         eventFilter = ALL;
         break;
 
     case EVENTS:
+        #if DEV_MODE && GUI_DEBUG
         qDebug() << "Events filter selected";
+        #endif
         eventFilter = EVENTS;
         break;
 
     case ERRORS:
+        #if DEV_MODE && GUI_DEBUG
         qDebug() << "Errors filter selected";
+        #endif
         eventFilter = ERRORS;
         break;
 
     case CLEARED_ERRORS:
+        #if DEV_MODE && GUI_DEBUG
         qDebug() << "Cleared errors filter selected";
+        #endif
         eventFilter = CLEARED_ERRORS;
         break;
 
     case NON_CLEARED_ERRORS:
+        #if DEV_MODE && GUI_DEBUG
         qDebug() << "Non-cleared errors filter selected";
+        #endif
         eventFilter = NON_CLEARED_ERRORS;
         break;
 
     default:
-        qDebug() << "Error: Unrecognized filter index.";
+        qDebug() << "Error: on_FilterBox_currentIndexChanged unrecognized filter index.";
     }
 
     //refresh to display with filter
@@ -189,7 +199,9 @@ void MainWindow::on_handshake_button_clicked()
     // check if handshake is not in progress and ddm is not connected
     if ( !handshakeTimer->isActive() && !ddmCon->connected )
     {
+        #if DEV_MODE && SERIAL_COMM_DEBUG
         qDebug() << "Beginning handshake with controller" << Qt::endl;
+        #endif
 
         // Start the timer to periodically check the handshake status
         handshakeTimer->start();
@@ -207,8 +219,6 @@ void MainWindow::on_handshake_button_clicked()
     }
     else
     {
-        qDebug() << "Sending disconnect message to controller" << Qt::endl;
-
         ddmCon->sendDisconnectMsg();
 
         if (ddmCon->connected)
@@ -239,7 +249,7 @@ void MainWindow::on_save_Button_clicked()
 
     notifyUser("Default settings saved.", false);
 
-    #if DEV_MODE
+    #if DEV_MODE && GUI_DEBUG
         //output new settings to qDebug()
         displaySavedSettings();
     #endif
@@ -286,22 +296,24 @@ void MainWindow::on_openLogfileFolder_clicked()
             // check if we can make path successfully
             if(path.mkpath("."))
             {
+                #if DEV_MODE && GUI_DEBUG
                 qDebug() << "Logfile directory created at: " << INITIAL_LOGFILE_LOCATION;
+                #endif
             }
-
             else
             {
-                qDebug() << "The log file directory failed to create";
+                qDebug() << "Error: on_openLogfileFolder_clicked() The log file directory failed to create";
             }
         }
         QDesktopServices::openUrl(QUrl::fromLocalFile(INITIAL_LOGFILE_LOCATION));
     }
-
     else
     {
         //open from the user settings
         QDesktopServices::openUrl(QUrl::fromLocalFile(userSettings.value("logfileLocation").toString()));
+        #if DEV_MODE && GUI_DEBUG
         qDebug() << "log file location opening: " << userSettings.value("logfileLocation").toString();
+        #endif
     }
     // save user settings
     userSettings.sync();
@@ -318,19 +330,21 @@ void MainWindow::on_setLogfileFolder_clicked()
     // check the success of saving settings
     if(userSettings.status() != QSettings::NoError)
     {
-        qDebug() << "Error while saving user settings: " << userSettings.status();
+        qDebug() << "Error: on_setLogfileFolder_clicked() failed to save logfile location: " << userSettings.status();
     }
     // check if user exited the dialog box
     else if(userSettings.value("logfileLocation").toString() == "/")
     {
         // revert to previous user setting
         userSettings.setValue("logfileLocation", previousPath);
-        qDebug() << "No logfile directory set. Reverting to previous path: " << previousPath;
+        qDebug() << "Error: on_setLogfileFolder_clicked() No logfile directory set. Reverting to previous path: " << previousPath;
     }
     // otherwise, assume successful logfile directory creation
     else
     {
+        #if DEV_MODE && GUI_DEBUG
         qDebug() << "New log file directory set: " << userSettings.value("logfileLocation").toString();
+        #endif
     }
 
     //sync user settings
@@ -356,24 +370,25 @@ void MainWindow::on_load_events_from_logfile_clicked()
         return;
     }
 
-    #if DEV_MODE
+    #if DEV_MODE && GUI_DEBUG
         logEmptyLine();
+        qDebug() << "Loading data from: " << selectedFile;
     #endif
-    qDebug() << "Loading data from: " << selectedFile;
 
     // Pass the selected file name to the loadDataFromLogFile function
     int result = events->loadDataFromLogFile(events, selectedFile);
 
+    ui->truncated_label->setVisible(false);
+
     // Handle the result if needed
     if (result == INCORRECT_FORMAT)
     {
-        // Handle error
-        qDebug() << "Log file was of incorrect format.";
+        qDebug() << "Error: on_load_events_from_logfile_clicked() Log file was of incorrect format.";
         notifyUser("Load failed on corrupt logfile.", true);
     }
     else if (result == DATA_NOT_FOUND)
     {
-        qDebug() << "Log file could not be found";
+        qDebug() << "Error: on_load_events_from_logfile_clicked() Log file could not be found";
         notifyUser("Load failed on missing logfile.", true);
     }
     else
@@ -383,93 +398,6 @@ void MainWindow::on_load_events_from_logfile_clicked()
 
     //refresh the events output
     refreshEventsOutput();
-}
-
-//toggle colored events output (from settings page)
-void MainWindow::on_colored_events_output_stateChanged(int arg1)
-{
-    //arg1 represents the state of the checkbox
-    switch(arg1)
-    {
-        //unchecked
-        case 0:
-            coloredEventOutput = false;
-            break;
-
-        //checked
-        default:
-            coloredEventOutput = true;
-    }
-
-    userSettings.setValue("coloredEventOutput", coloredEventOutput);
-    refreshEventsOutput();
-
-    //write changes to the registry
-    userSettings.sync();
-}
-
-void MainWindow::on_advanced_log_file_stateChanged(int arg1)
-{
-    //arg1 represents the state of the checkbox
-    switch(arg1)
-    {
-        //unchecked
-        case 0:
-            advancedLogFile = false;
-
-            break;
-
-        //checked
-        default:
-            advancedLogFile = true;
-    }
-
-    userSettings.setValue("advancedLogFile", advancedLogFile);
-
-    //check if ddmCon does not exist
-    if (ddmCon == NULL)
-    {
-        return;
-    }
-
-    //if connected, add updated advanced log file setting notification to logfile
-    if (ddmCon->connected)
-    {
-        QFile file(autosaveLogFile);
-
-        //attempt to open in append mode
-        if (!file.open(QIODevice::Append | QIODevice::Text))
-        {
-            qDebug() <<  "Could not open log file for appending: " << autosaveLogFile;
-        }
-        else
-        {
-            QTextStream out(&file);
-
-            if (advancedLogFile)
-            {
-                out << ADVANCED_LOG_FILE_INDICATOR + "ADVANCED LOG FILE ENABLED" << "\n";
-            }
-            else
-            {
-                out << ADVANCED_LOG_FILE_INDICATOR + "ADVANCED LOG FILE DISABLED" << "\n";
-            }
-            file.close();
-        }
-    }
-
-    //write changes to the registry
-    userSettings.sync();
-}
-
-//choose the number of auto save log files before overwrites occur (from settings page)
-void MainWindow::on_auto_save_limit_valueChanged(int arg1)
-{
-    autoSaveLimit = arg1;
-    userSettings.setValue("autoSaveLimit", autoSaveLimit);
-
-    //write changes to the registry
-    userSettings.sync();
 }
 
 //refreshes the serial port selections, useful in case an adaptor is plugged in after
@@ -568,6 +496,170 @@ void MainWindow::on_searchButton_clicked()
 }
 
 //======================================================================================
+// User settings
+//======================================================================================
+
+//toggle colored events output (from settings page)
+void MainWindow::on_colored_events_output_stateChanged(int arg1)
+{
+    //arg1 represents the state of the checkbox
+    switch(arg1)
+    {
+    //unchecked
+    case 0:
+        coloredEventOutput = false;
+        break;
+
+        //checked
+    default:
+        coloredEventOutput = true;
+    }
+
+    userSettings.setValue("coloredEventOutput", coloredEventOutput);
+
+    if (!allowSettingChanges) return;
+    refreshEventsOutput();
+
+    //write changes to the registry
+    userSettings.sync();
+}
+
+//choose the number of auto save log files before overwrites occur (from settings page)
+void MainWindow::on_auto_save_limit_valueChanged(int arg1)
+{
+    autoSaveLimit = arg1;
+    userSettings.setValue("autoSaveLimit", autoSaveLimit);
+
+    //write changes to the registry
+    userSettings.sync();
+}
+
+void MainWindow::on_connection_timeout_valueChanged(int arg1)
+{
+    connectionTimeout = arg1;
+    userSettings.setValue("connectionTimeout", connectionTimeout);
+
+    //write changes to the registry
+    userSettings.sync();
+}
+
+void MainWindow::on_notify_error_cleared_stateChanged(int arg1)
+{
+    //arg1 represents the state of the checkbox
+    switch(arg1)
+    {
+    //unchecked
+    case 0:
+        notifyOnErrorCleared = false;
+
+        break;
+
+        //checked
+    default:
+        notifyOnErrorCleared = true;
+    }
+
+    userSettings.setValue("notifyOnErrorCleared", notifyOnErrorCleared);
+
+    userSettings.sync();
+}
+
+void MainWindow::on_advanced_log_file_stateChanged(int arg1)
+{
+    //arg1 represents the state of the checkbox
+    switch(arg1)
+    {
+    //unchecked
+    case 0:
+        advancedLogFile = false;
+
+        break;
+
+        //checked
+    default:
+        advancedLogFile = true;
+    }
+
+    userSettings.setValue("advancedLogFile", advancedLogFile);
+
+    //check if ddmCon does not exist
+    if (ddmCon == NULL)
+    {
+        return;
+    }
+
+    //if connected, add updated advanced log file setting notification to logfile
+    if (ddmCon->connected)
+    {
+        QFile file(autosaveLogFile);
+
+        //attempt to open in append mode
+        if (!file.open(QIODevice::Append | QIODevice::Text))
+        {
+            qDebug() <<  "Error: on_advanced_log_file_stateChanged could not open log file for appending: " << autosaveLogFile;
+        }
+        else
+        {
+            QTextStream out(&file);
+
+            if (advancedLogFile)
+            {
+                out << ADVANCED_LOG_FILE_INDICATOR + "ADVANCED LOG FILE ENABLED" << "\n";
+            }
+            else
+            {
+                out << ADVANCED_LOG_FILE_INDICATOR + "ADVANCED LOG FILE DISABLED" << "\n";
+            }
+            file.close();
+        }
+    }
+
+    //write changes to the registry
+    userSettings.sync();
+}
+
+//toggle for ram clearing on events class
+void MainWindow::on_ram_clearing_stateChanged(int arg1)
+{
+    //arg1 represents the state of the checkbox
+    switch(arg1)
+    {
+    //unchecked
+    case 0:
+         userSettings.setValue("RAMClearing", false);
+
+        break;
+
+        //checked
+    default:
+        userSettings.setValue("RAMClearing", true);
+    }
+
+    if (!allowSettingChanges) return;
+
+    //update value in events class
+    events->RAMClearing = userSettings.value("RAMClearing").toBool();
+
+    //set visibility of max nodes based on ram clearing setting
+    ui->max_data_nodes->setVisible(events->RAMClearing);
+    ui->max_data_nodes_label->setVisible(events->RAMClearing);
+
+    userSettings.sync();
+}
+
+//updates value of max data nodes for events class
+void MainWindow::on_max_data_nodes_valueChanged(int arg1)
+{
+    if (!allowSettingChanges) return;
+
+    events->maxNodes = arg1;
+    userSettings.setValue("maxDataNodes", events->maxNodes);
+
+    //write changes to the registry
+    userSettings.sync();
+}
+
+//======================================================================================
 //DEV_MODE exclusive methods
 //======================================================================================
 
@@ -578,7 +670,7 @@ void MainWindow::on_DevPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(1);
     resetPageButton();
-    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
+    ui->DevPageButton->setStyleSheet(SELECTED_NAV_BUTTON_STYLE);
 }
 
 //manually clear errors from dev page
@@ -615,6 +707,8 @@ void MainWindow::on_CSim_button_clicked()
 
         //enable csim port selection
         ui->csim_port_selection->setEnabled(true);
+
+        ui->non_cleared_error_selection->clear();
     }
     //csim is not running, start it
     else

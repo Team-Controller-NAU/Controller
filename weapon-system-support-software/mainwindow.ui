@@ -168,8 +168,10 @@ QPushButton::hover {
 }
 
 QPushButton::hover {
-	background-color: rgb(117, 117, 117);
-}</string>
+    background-color: #F44336;
+color: white;
+}
+</string>
          </property>
          <property name="text">
           <string>Electrical</string>
@@ -436,97 +438,20 @@ font: 16pt &quot;Segoe UI&quot;;</string>
             </sizepolicy>
            </property>
            <property name="currentIndex">
-            <number>5</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="Events_page">
             <layout class="QGridLayout" name="gridLayout_3">
-             <item row="0" column="5" alignment="Qt::AlignBottom">
-              <widget class="QComboBox" name="FilterBox">
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>30</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>30</height>
-                </size>
-               </property>
-               <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Filter the events output&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
+             <item row="3" column="0" rowspan="3" colspan="6">
+              <widget class="QTextEdit" name="events_output">
                <property name="styleSheet">
-                <string notr="true">QComboBox {
-	padding-bottom: 3px;
-	color: rgb(255, 255, 255);
-	background-color: rgb(47, 47, 47);
-	border: 1px solid;
-	border-color: rgb(64, 64, 64);
-	font: 12pt &quot;Segoe UI&quot;;
-}
-
-QComboBox::hover {
-	background-color: rgb(117, 117, 117);
-}
-
-QComboBox::items {
-	color: rgb(255, 255, 255);
-}
-
-QListView {
-	color: rgb(255, 255, 255);
-}
-
-QToolTip{
-    background-color: #000000;
-    color: #FFFFFF;
-    border: 1px solid black;
-}
-
-QComboBox::drop-down 
-{
-    border: 0px; 
-}
-
-QComboBox::down-arrow {
-    image: url(:/resources/Images/white-down-arrow.png);
-    width: 15px;
-    height: 15px;
-}</string>
+                <string notr="true">color: rgb(255, 255, 255);
+background-color: rgb(30, 30, 30);
+border-color: rgb(255, 255, 255);</string>
                </property>
-               <property name="editable">
-                <bool>false</bool>
+               <property name="readOnly">
+                <bool>true</bool>
                </property>
-               <property name="currentText">
-                <string> Default</string>
-               </property>
-               <item>
-                <property name="text">
-                 <string> Default</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string> All Events</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string> All Errors</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string> Cleared Errors</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string> Active Errors</string>
-                </property>
-               </item>
               </widget>
              </item>
              <item row="7" column="0" colspan="6">
@@ -786,6 +711,10 @@ font: 22pt &quot;Segoe UI&quot;;</string>
 	font: 12pt &quot;Segoe UI&quot;;
 }
 
+QPushButton:disabled {
+     color: #666666; 
+}
+
 QPushButton::hover {
 	background-color: rgb(117, 117, 117);
 }
@@ -883,43 +812,6 @@ font: 22pt &quot;Segoe UI&quot;;</string>
                </item>
               </layout>
              </item>
-             <item row="3" column="0" rowspan="3" colspan="6">
-              <widget class="QTextEdit" name="events_output">
-               <property name="styleSheet">
-                <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(30, 30, 30);
-border-color: rgb(255, 255, 255);</string>
-               </property>
-               <property name="readOnly">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0" alignment="Qt::AlignLeft">
-              <widget class="QLabel" name="Event_Header">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="font">
-                <font>
-                 <family>Segoe UI</family>
-                 <pointsize>24</pointsize>
-                 <italic>false</italic>
-                 <bold>true</bold>
-                </font>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">color: rgb(255, 255, 255);
-font: 700 24pt &quot;Segoe UI&quot;;</string>
-               </property>
-               <property name="text">
-                <string>Events</string>
-               </property>
-              </widget>
-             </item>
              <item row="0" column="4" alignment="Qt::AlignBottom">
               <widget class="QPushButton" name="searchButton">
                <property name="sizePolicy">
@@ -979,6 +871,149 @@ QToolTip{
                  <width>30</width>
                  <height>30</height>
                 </size>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="0" alignment="Qt::AlignLeft">
+              <widget class="QLabel" name="Event_Header">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <family>Segoe UI</family>
+                 <pointsize>24</pointsize>
+                 <italic>false</italic>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 255, 255);
+font: 700 24pt &quot;Segoe UI&quot;;</string>
+               </property>
+               <property name="text">
+                <string>Events</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="5" alignment="Qt::AlignBottom">
+              <widget class="QComboBox" name="FilterBox">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>16777215</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Filter the events output&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QComboBox {
+	padding-bottom: 3px;
+	color: rgb(255, 255, 255);
+	background-color: rgb(47, 47, 47);
+	border: 1px solid;
+	border-color: rgb(64, 64, 64);
+	font: 12pt &quot;Segoe UI&quot;;
+}
+
+QComboBox::hover {
+	background-color: rgb(117, 117, 117);
+}
+
+QComboBox::items {
+	color: rgb(255, 255, 255);
+}
+
+QListView {
+	color: rgb(255, 255, 255);
+}
+
+QToolTip{
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid black;
+}
+
+QComboBox::drop-down 
+{
+    border: 0px; 
+}
+
+QComboBox::down-arrow {
+    image: url(:/resources/Images/white-down-arrow.png);
+    width: 15px;
+    height: 15px;
+}</string>
+               </property>
+               <property name="editable">
+                <bool>false</bool>
+               </property>
+               <property name="currentText">
+                <string> Default</string>
+               </property>
+               <item>
+                <property name="text">
+                 <string> Default</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string> All Events</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string> All Errors</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string> Cleared Errors</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string> Active Errors</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="0" column="3">
+              <widget class="QLabel" name="truncated_label">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>130</width>
+                 <height>40</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Not all events are being displayed. This  improves performance.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">	color: orange;
+	font: 16pt &quot;Segoe UI&quot;;</string>
+               </property>
+               <property name="text">
+                <string>Truncated</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignBottom|Qt::AlignHCenter</set>
                </property>
               </widget>
              </item>
@@ -1368,6 +1403,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
 	font: 20pt &quot;Segoe UI&quot;;
 	padding-left: 5px;
 }
+QComboBox:disabled {
+  color: #666666; 
+}
 
 QComboBox::hover {
 	background-color: rgb(117, 117, 117);
@@ -1456,28 +1494,38 @@ QPushButton::pressed {
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Save these settings for next login&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="styleSheet">
-                <string notr="true">QPushButton {
-	padding-bottom: 3px;
-	color: rgb(255, 255, 255);
-	background-color: rgb(47, 47, 47);
-	border: 1px solid;
-	border-color: rgb(64, 64, 64);
-	font: 15pt &quot;Segoe UI&quot;;
+                <string notr="true">/* Base style for QPushButton */
+QPushButton {
+    padding-bottom: 3px;
+    color: rgb(255, 255, 255);
+    background-color: rgb(47, 47, 47);
+    border: 1px solid;
+    border-color: rgb(64, 64, 64);
+    font: 15pt &quot;Segoe UI&quot;;
 }
 
-QPushButton::hover {
-	background-color: rgb(117, 117, 117);
+QPushButton:disabled {
+    color: #666666;
+    background-color: lightgray;
 }
 
-QPushButton::pressed {
-	background-color: rgb(45, 45, 45);
+/* Styling for hover state */
+QPushButton:hover {
+    background-color: rgb(117, 117, 117);
 }
 
-QToolTip{
+/* Styling for pressed state */
+QPushButton:pressed {
+    background-color: rgb(45, 45, 45);
+}
+
+/* Tooltips styling */
+QToolTip {
     background-color: #000000;
     color: #FFFFFF;
     border: 1px solid black;
-}</string>
+}
+</string>
                </property>
                <property name="text">
                 <string> Save as Default</string>
@@ -1640,6 +1688,10 @@ font: 20pt &quot;Segoe UI&quot;;</string>
 	font: 15pt &quot;Segoe UI&quot;;
 }
 
+QPushButton:disabled {
+    color: #666666; 
+}
+
 QPushButton::hover {
 	background-color: rgb(117, 117, 117);
 }
@@ -1676,6 +1728,10 @@ QToolTip{
 	border-color: rgb(64, 64, 64);
 	font: 20pt &quot;Segoe UI&quot;;
 	padding-left: 5px;
+}
+
+QComboBox:disabled {
+                        color: #666666; 
 }
 
 QComboBox::hover {
@@ -1759,6 +1815,10 @@ QComboBox::down-arrow {
     image: url(:/resources/Images/white-down-arrow.png);
     width: 15px;
     height: 15px;
+}
+
+QComboBox:disabled {
+                        color: #666666; 
 }</string>
                </property>
               </widget>
@@ -1803,7 +1863,11 @@ QComboBox::down-arrow {
     image: url(:/resources/Images/white-down-arrow.png);
     width: 15px;
     height: 15px;
-}</string>
+}
+
+QComboBox:disabled {
+                        color: #666666; 
+                     };</string>
                </property>
               </widget>
              </item>
@@ -1846,6 +1910,10 @@ font: 20pt &quot;Segoe UI&quot;;</string>
     background-color: #000000;
     color: #FFFFFF;
     border: 1px solid black;
+}
+
+QPushButton:disabled {
+    background-color: rgba(128, 128, 128, 0.5); /* Semi-transparent gray overlay */
 }
 
 QPushButton {
@@ -1892,6 +1960,9 @@ QPushButton::pressed {
 	border-color: rgb(64, 64, 64);
 	font: 20pt &quot;Segoe UI&quot;;
 	padding-left: 5px;
+}
+QComboBox:disabled {
+    color: #666666; 
 }
 
 QComboBox::items {
@@ -1948,7 +2019,9 @@ QComboBox::drop-down
 {
     border: 0px; 
 }
-
+QComboBox:disabled {
+    color: #666666; 
+}
 QComboBox::down-arrow {
     image: url(:/resources/Images/white-down-arrow.png);
     width: 15px;
@@ -3674,6 +3747,9 @@ background-color: rgb(128,128,128);</string>
                    <height>45</height>
                   </size>
                  </property>
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Feed position display&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
                  <property name="styleSheet">
                   <string notr="true">color: rgb(255, 255, 255);
 font: 20pt &quot;Segoe UI&quot;;</string>
@@ -4565,20 +4641,56 @@ QToolTip{
            </widget>
            <widget class="QWidget" name="Settings_Page">
             <layout class="QGridLayout" name="gridLayout_5">
-             <item row="6" column="1">
-              <widget class="QLabel" name="connection_timeout_label">
+             <item row="3" column="0">
+              <spacer name="verticalSpacer_3">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>10</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="0" column="0" alignment="Qt::AlignTop">
+              <widget class="QLabel" name="label_2">
                <property name="styleSheet">
-                <string notr="true">QLabel {
-	color: white;
-	font: 20pt &quot;Segoe UI&quot;;
-}</string>
+                <string notr="true">color: rgb(255, 255, 255);
+font: 700 24pt &quot;Segoe UI&quot;;</string>
                </property>
                <property name="text">
-                <string>Connection Timeout Duration (msec)</string>
+                <string>User Settings</string>
                </property>
               </widget>
              </item>
-             <item row="7" column="0">
+             <item row="6" column="0">
+              <widget class="QCheckBox" name="notify_error_cleared">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Causes notification when an error is retroactively cleared by controller&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QCheckBox {
+	color: white;
+	font: 20pt &quot;Segoe UI&quot;;
+}
+
+
+QCheckBox::indicator {
+	width: 20px;
+	height: 20px;
+}</string>
+               </property>
+               <property name="text">
+                <string>Notify on Error Cleared</string>
+               </property>
+              </widget>
+             </item>
+             <item row="9" column="0">
               <spacer name="verticalSpacer_9">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
@@ -4594,33 +4706,23 @@ QToolTip{
                </property>
               </spacer>
              </item>
-             <item row="8" column="1" alignment="Qt::AlignBottom">
-              <widget class="QLabel" name="auto_save_limit_label">
-               <property name="styleSheet">
-                <string notr="true">QLabel {
-	color: white;
-	font: 20pt &quot;Segoe UI&quot;;
-}</string>
+             <item row="5" column="0">
+              <spacer name="verticalSpacer_10">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
                </property>
-               <property name="text">
-                <string>Auto Saved Log File Limit</string>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
                </property>
-              </widget>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>10</height>
+                </size>
+               </property>
+              </spacer>
              </item>
              <item row="8" column="0">
-              <widget class="QSpinBox" name="auto_save_limit">
-               <property name="styleSheet">
-                <string notr="true">QSpinBox {
-	color: white;
-	font: 20pt &quot;Segoe UI&quot;;
-}</string>
-               </property>
-               <property name="buttonSymbols">
-                <enum>QAbstractSpinBox::UpDownArrows</enum>
-               </property>
-              </widget>
-             </item>
-             <item row="6" column="0">
               <widget class="QSpinBox" name="connection_timeout">
                <property name="toolTip">
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If no messages are received for this long, connection is terminated&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -4642,10 +4744,35 @@ QToolTip{
                <property name="maximum">
                 <number>999999999</number>
                </property>
+               <property name="singleStep">
+                <number>100</number>
+               </property>
               </widget>
              </item>
-             <item row="5" column="0">
-              <spacer name="verticalSpacer_10">
+             <item row="10" column="0">
+              <widget class="QSpinBox" name="auto_save_limit">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Max number of auto saved log files to be kept before overwrites occur on the oldest one&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QSpinBox {
+	color: white;
+	font: 20pt &quot;Segoe UI&quot;;
+}</string>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::UpDownArrows</enum>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <spacer name="verticalSpacer_4">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
                </property>
@@ -4660,7 +4787,23 @@ QToolTip{
                </property>
               </spacer>
              </item>
-             <item row="2" column="0" colspan="2" alignment="Qt::AlignTop">
+             <item row="7" column="0">
+              <spacer name="verticalSpacer_11">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>10</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="2" column="0" colspan="4" alignment="Qt::AlignTop">
               <widget class="QCheckBox" name="colored_events_output">
                <property name="styleSheet">
                 <string notr="true">QCheckBox {
@@ -4680,35 +4823,6 @@ QCheckBox::indicator {
                 <bool>false</bool>
                </property>
               </widget>
-             </item>
-             <item row="9" column="0">
-              <spacer name="verticalSpacer_7">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>40</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="1" column="0">
-              <spacer name="verticalSpacer_8">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeType">
-                <enum>QSizePolicy::Fixed</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>10</height>
-                </size>
-               </property>
-              </spacer>
              </item>
              <item row="4" column="0">
               <widget class="QCheckBox" name="advanced_log_file">
@@ -4732,19 +4846,49 @@ QCheckBox::indicator {
                </property>
               </widget>
              </item>
-             <item row="0" column="0" alignment="Qt::AlignTop">
-              <widget class="QLabel" name="label_2">
+             <item row="12" column="0">
+              <widget class="QCheckBox" name="ram_clearing">
+               <property name="maximumSize">
+                <size>
+                 <width>400</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;When number of nodes gets high clear them out of RAM to improve performance. They will remain in the log file just not in the event page output.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="styleSheet">
-                <string notr="true">color: rgb(255, 255, 255);
-font: 700 24pt &quot;Segoe UI&quot;;</string>
+                <string notr="true">QCheckBox {
+	color: white;
+	font: 20pt &quot;Segoe UI&quot;;
+}
+
+
+QCheckBox::indicator {
+	width: 20px;
+	height: 20px;
+}</string>
                </property>
                <property name="text">
-                <string>User Settings</string>
+                <string>RAM Clearing</string>
                </property>
               </widget>
              </item>
-             <item row="3" column="0">
-              <spacer name="verticalSpacer_3">
+             <item row="13" column="0">
+              <spacer name="verticalSpacer_7">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>40</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="11" column="0">
+              <spacer name="verticalSpacer_12">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
                </property>
@@ -4758,6 +4902,77 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
                 </size>
                </property>
               </spacer>
+             </item>
+             <item row="12" column="1">
+              <widget class="QSpinBox" name="max_data_nodes">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>200</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;The number of nodes allowed before RAM is cleared&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QSpinBox {
+	color: white;
+	font: 20pt &quot;Segoe UI&quot;;
+}</string>
+               </property>
+               <property name="maximum">
+                <number>999999999</number>
+               </property>
+               <property name="singleStep">
+                <number>50</number>
+               </property>
+              </widget>
+             </item>
+             <item row="10" column="1">
+              <widget class="QLabel" name="auto_save_limit_label">
+               <property name="styleSheet">
+                <string notr="true">QLabel {
+	color: white;
+	font: 20pt &quot;Segoe UI&quot;;
+}</string>
+               </property>
+               <property name="text">
+                <string>Auto Saved Log File Limit</string>
+               </property>
+              </widget>
+             </item>
+             <item row="8" column="1">
+              <widget class="QLabel" name="connection_timeout_label">
+               <property name="styleSheet">
+                <string notr="true">QLabel {
+	color: white;
+	font: 20pt &quot;Segoe UI&quot;;
+}</string>
+               </property>
+               <property name="text">
+                <string>Connection Timeout Duration (msec)</string>
+               </property>
+              </widget>
+             </item>
+             <item row="13" column="1">
+              <widget class="QLabel" name="max_data_nodes_label">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;The number of nodes allowed before RAM is cleared&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">	color: white;
+	font: 20pt &quot;Segoe UI&quot;;</string>
+               </property>
+               <property name="text">
+                <string>Max Data Nodes</string>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>

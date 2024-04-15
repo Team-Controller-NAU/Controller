@@ -13,11 +13,21 @@
 //delimeter in serial messages
 const QString DELIMETER = ",";
 
+//these are the strings which denote cleared vs not cleared errors
+//in the log file. In order to make them interchangable in the log file
+//we have to add spaces to the end of the shorter string. This is done in events
+//constructor
+const QString CLEARED_INDICATOR = "CLEARED";
+const QString ACTIVE_INDICATOR = "ACTIVE";
+
 // the max number of electrical componenets to expect from a weapon
 const int MAX_ELECTRICAL_COMPONENTS = 100;
 
 //denotes advanced log file entries
 const QString ADVANCED_LOG_FILE_INDICATOR = "***";
+
+//minimum value allowed to be set for max data nodes
+const int MIN_DATA_NODES_BEFORE_RAM_CLEAR = 700;
 
 //======================================================================================
 // Enumerations and enum related vals
@@ -73,11 +83,14 @@ const QSerialPort::StopBits INITIAL_STOP_BITS = QSerialPort::OneStop;
 const QSerialPort::FlowControl INITIAL_FLOW_CONTROL = QSerialPort::NoFlowControl;
 const bool INITIAL_COLORED_EVENTS_OUTPUT = true;
 const bool INITIAL_ADVANCED_LOG_FILE = false;
+const bool INITIAL_NOTIFY_ON_ERROR_CLEARED = false;
 const QString INITIAL_LOGFILE_LOCATION = "WSSS_Logfiles/";
 const int INITIAL_AUTO_SAVE_LIMIT = 5;
 const QString INITIAL_DDM_PORT = "COM5";
 //if a message is not received from controller in 20 seconds, connection times out
 const int INITIAL_CONNECTION_TIMEOUT = 20000; // 20 seconds
+const bool INITIAL_RAM_CLEARING = false;
+const int INITIAL_MAX_DATA_NODES = 1400;
 
 //======================================================================================
 // Timer vals
@@ -110,6 +123,21 @@ const int NUM_STATUS_ELEMENTS = 9;
 const int DATA_NOT_FOUND = -101;
 const int INCORRECT_FORMAT = -102;
 const int SUCCESS = 1;
+
+//======================================================================================
+// GUI style sheets
+//======================================================================================
+
+const QString NAV_BUTTON_STYLE = "QPushButton {color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;} "
+                                 "QPushButton:hover {color: #9747FF;}";
+
+const QString SELECTED_NAV_BUTTON_STYLE = "color: rgb(210, 210, 210);background-color: #9747FF;font: 16pt Segoe UI; ";
+
+//colored output will apply these styles (toggle off to apply event color to all nodes)
+const QString EVENT_OUTPUT_SIZE = "16"; //px
+const QString EVENT_COLOR = "rgb(255, 255, 255)";
+const QString CLEARED_ERROR_COLOR = "rgb(20, 174, 92)"; //changes here must also be made in clearErrorFromEventsOutput
+const QString ACTIVE_ERROR_COLOR = "rgb(254, 28, 28)";
 
 //======================================================================================
 // CSIM exclusive constants

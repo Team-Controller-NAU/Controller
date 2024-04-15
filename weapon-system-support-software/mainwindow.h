@@ -10,6 +10,7 @@
 #include <QInputDialog>
 #include <QObject>
 #include <QtCore>
+#include <QTextDocument>
 
 //Team Controller code
 #include "constants.h"
@@ -48,9 +49,6 @@ public:
     electrical *electricalData;
     QSettings userSettings;
 
-    //shortcut for searching using ctrl+f on events page
-    QShortcut *find;
-
     // vars
     QString ddmPortName;
     QTimer* handshakeTimer;
@@ -60,13 +58,14 @@ public:
     QDateTime timeLastReceived;
     EventFilter eventFilter;
     QString autosaveLogFile;
-    bool allowPortSelection;
+    bool allowSettingChanges;
 
     //user managed settings
     bool coloredEventOutput;
     int autoSaveLimit;
     int connectionTimeout;
     bool advancedLogFile;
+    bool notifyOnErrorCleared;
 
     //creates a new connection using currently selected serial port settings
     void createDDMCon();
@@ -126,6 +125,8 @@ private slots:
     //clears current content of the events page text output and replaces
     //it with freshly generated data based on current contents of events class
     void refreshEventsOutput();
+    //clears error in events output
+    void clearErrorFromEventsOutput(int errorId);
     //checks if the current number of auto saved files is higher than the limit, deletes the
     //oldest one each iteration until the limit is enforced
     void enforceAutoSaveLimit();
@@ -195,6 +196,14 @@ private slots:
         void on_advanced_log_file_stateChanged(int arg1);
 
         void on_searchButton_clicked();
+
+        void on_notify_error_cleared_stateChanged(int arg1);
+
+        void on_connection_timeout_valueChanged(int arg1);
+
+        void on_ram_clearing_stateChanged(int arg1);
+
+        void on_max_data_nodes_valueChanged(int arg1);
 
     private:
     Ui::MainWindow *ui;
