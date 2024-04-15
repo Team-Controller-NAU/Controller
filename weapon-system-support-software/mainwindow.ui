@@ -438,7 +438,7 @@ font: 16pt &quot;Segoe UI&quot;;</string>
             </sizepolicy>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>4</number>
            </property>
            <widget class="QWidget" name="Events_page">
             <layout class="QGridLayout" name="gridLayout_3">
@@ -4588,7 +4588,7 @@ background-color: rgb(128,128,128);</string>
                 <bool>true</bool>
                </property>
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
                  <horstretch>20</horstretch>
                  <verstretch>20</verstretch>
                 </sizepolicy>
@@ -4597,6 +4597,12 @@ background-color: rgb(128,128,128);</string>
                 <size>
                  <width>250</width>
                  <height>250</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>500</width>
+                 <height>500</height>
                 </size>
                </property>
                <property name="sizeIncrement">
