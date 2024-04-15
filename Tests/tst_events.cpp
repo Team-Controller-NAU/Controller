@@ -171,10 +171,7 @@ void tst_events::test_freeLinkedLists()
     QCOMPARE(eventObj->lastErrorNode, nullptr);
 
     // ensure that member variables are reset back to 0
-    QCOMPARE(eventObj->totalEvents, 0);
-    QCOMPARE(eventObj->totalErrors, 0);
-    QCOMPARE(eventObj->totalNodes, 0);
-    QCOMPARE(eventObj->totalClearedErrors, 0);
+    QCOMPARE(eventObj->storedNodes, 0);
 
     // free
     delete eventObj;
