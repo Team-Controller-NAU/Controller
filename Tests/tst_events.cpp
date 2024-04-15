@@ -33,13 +33,13 @@ private slots:
 void tst_events::events_constructor()
 {
     // create a new events class object
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 50);
 
     // ensure that member variables are 0 upon initialization
     QCOMPARE(eventObj->totalEvents, 0);
     QCOMPARE(eventObj->totalErrors, 0);
     QCOMPARE(eventObj->totalNodes, 0);
-    QCOMPARE(eventObj->totalCleared, 0);
+    QCOMPARE(eventObj->totalClearedErrors, 0);
 
     // ensure event pointers are empty/null
     QCOMPARE(eventObj->headEventNode, nullptr);
@@ -63,7 +63,7 @@ void tst_events::events_constructor()
 void tst_events::test_addEvent()
 {
     // create a new events class object
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 50);
 
     // providing a seed value for random values
     srand((unsigned) time(nullptr));
@@ -101,7 +101,7 @@ void tst_events::test_addEvent()
 void tst_events::test_addError()
 {
     // create a new events class object
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 50);
 
     // providing a seed value for random values
     srand((unsigned) time(nullptr));
@@ -142,7 +142,7 @@ void tst_events::test_addError()
 void tst_events::test_freeLinkedLists()
 {
     // create event object
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 50);
 
     // providing a seed value for random values
     srand((unsigned) time(nullptr));
@@ -174,7 +174,7 @@ void tst_events::test_freeLinkedLists()
     QCOMPARE(eventObj->totalEvents, 0);
     QCOMPARE(eventObj->totalErrors, 0);
     QCOMPARE(eventObj->totalNodes, 0);
-    QCOMPARE(eventObj->totalCleared, 0);
+    QCOMPARE(eventObj->totalClearedErrors, 0);
 
     // free
     delete eventObj;
@@ -186,7 +186,7 @@ void tst_events::test_freeLinkedLists()
 void tst_events::test_clearError()
 {
     // create event object
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 50);
 
     // providing a seed value for random values
     srand((unsigned) time(nullptr));
@@ -208,7 +208,7 @@ void tst_events::test_clearError()
 
     // verify that this error is not cleared yet
     QCOMPARE(wkgErrorNode->cleared, false);
-    QCOMPARE(eventObj->totalCleared, 0);
+    QCOMPARE(eventObj->totalClearedErrors, 0);
 
     // clear the error
     bool result = eventObj->clearError(id);
@@ -216,7 +216,7 @@ void tst_events::test_clearError()
     // verify that this error is now cleared
     QCOMPARE(result, true);
     QCOMPARE(wkgErrorNode->cleared, true);
-    QCOMPARE(eventObj->totalCleared, 1);
+    QCOMPARE(eventObj->totalClearedErrors, 1);
 
     // confirm the test fails with improper input
     result = eventObj->clearError(500);
@@ -232,7 +232,7 @@ void tst_events::test_clearError()
 void tst_events::test_getNextNodeToPrint()
 {
     // create event object
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 50);
 
     // providing a seed value for random values
     srand((unsigned) time(nullptr));
@@ -278,7 +278,7 @@ void tst_events::test_getNextNodeToPrint()
 void tst_events::test_nodeToString()
 {
     // set up an example node
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 50);
     EventNode *exampleNode = new EventNode();
 
     // provide a seed value for random values
@@ -313,7 +313,7 @@ void tst_events::test_nodeToString()
 void tst_events::test_stringToNode()
 {
     // create event object
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 50);
 
     // create example string message
     QString exampleString = "ID: 5, 0:02:22, Sample test message 1";
@@ -361,7 +361,7 @@ void tst_events::test_stringToNode()
 void tst_events::test_loadEventData()
 {
     // create a new events class object
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 50);
 
     // set up some variables
     QString exampleMsg = "30,0:01:15,Sample Test message 1,\n";
@@ -404,7 +404,7 @@ void tst_events::test_loadEventData()
 
 void tst_events::test_loadEventData_badInput_correctDelim()
 {
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 50);
 
     // check out of bounds id
     QString dataMsg = "-30,0:01:15,Sample Test message 1,\n";
@@ -430,7 +430,7 @@ void tst_events::test_loadEventData_badInput_correctDelim()
 void tst_events::test_loadErrorData()
 {
     // create a new events class object
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 50);
 
     // set up some variables
     QString exampleMsg = "30,0:01:15,Sample Test message 1,1,\n";
@@ -457,7 +457,7 @@ void tst_events::test_loadErrorData()
         QCOMPARE(wkgErrorNode->cleared, 1);
         QCOMPARE(eventObj->totalErrors, 1);
         QCOMPARE(eventObj->totalNodes, 1);
-        QCOMPARE(eventObj->totalCleared, 1);
+        QCOMPARE(eventObj->totalClearedErrors, 1);
     }
     else
     {
@@ -475,7 +475,7 @@ void tst_events::test_loadErrorData()
 
 void tst_events::test_loadErrorData_badInput_correctDelim()
 {
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 50);
 
     //check for invalid id
     QString dataMsg = "-30,0:01:15,Sample Test message 1,1,\n";
@@ -502,7 +502,7 @@ void tst_events::test_loadErrorData_badInput_correctDelim()
 void tst_events::test_loadEventDump()
 {
     // create a new events class object
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 50);
 
     // set up some variables
     QString exampleMsg = "30,0:01:15,Sample Test message 1,,31,0:02:31,Sample Test message 2";
@@ -555,7 +555,7 @@ void tst_events::test_loadEventDump()
 void tst_events::test_loadErrorDump()
 {
     // create a new events class object
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 50);
 
     // set up some variables
     QString exampleMsg = "30,0:01:15,Sample Test message 1,1,,31,0:02:31,Sample Test message 2,0";
@@ -589,7 +589,7 @@ void tst_events::test_loadErrorDump()
 
         QCOMPARE(eventObj->totalErrors, 2);
         QCOMPARE(eventObj->totalNodes, 2);
-        QCOMPARE(eventObj->totalCleared, 1);
+        QCOMPARE(eventObj->totalClearedErrors, 1);
     }
     else
     {
