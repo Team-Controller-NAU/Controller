@@ -6,6 +6,12 @@
 #include <QColor>
 #include <QToolTip>
 #include <QEvent>
+#include "constants.h"
+
+/*
+ * TODO: Adjust this value to make the feed postion alternate colors
+ */
+const bool alternatingColors = false;
 
 class feedposition : public QDial
 {
