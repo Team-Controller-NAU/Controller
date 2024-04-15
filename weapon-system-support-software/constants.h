@@ -125,6 +125,21 @@ const int INCORRECT_FORMAT = -102;
 const int SUCCESS = 1;
 
 //======================================================================================
+// GUI style sheets
+//======================================================================================
+
+const QString NAV_BUTTON_STYLE = "QPushButton {color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;} "
+                                 "QPushButton:hover {color: #9747FF;}";
+
+const QString SELECTED_NAV_BUTTON_STYLE = "color: rgb(210, 210, 210);background-color: #9747FF;font: 16pt Segoe UI; ";
+
+//colored output will apply these styles (toggle off to apply event color to all nodes)
+const QString EVENT_OUTPUT_SIZE = "16"; //px
+const QString EVENT_COLOR = "rgb(255, 255, 255)";
+const QString CLEARED_ERROR_COLOR = "rgb(20, 174, 92)"; //changes here must also be made in clearErrorFromEventsOutput
+const QString ACTIVE_ERROR_COLOR = "rgb(254, 28, 28)";
+
+//======================================================================================
 // CSIM exclusive constants
 //======================================================================================
 #if DEV_MODE

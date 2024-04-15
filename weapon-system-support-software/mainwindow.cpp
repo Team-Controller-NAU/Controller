@@ -144,7 +144,7 @@ MainWindow::MainWindow(QWidget *parent)
         QWidget *widget = findChild<QWidget *>(widgetName);
 
         // check if widget exists, and hide it
-        if(widget) widget->hide();
+        //if(widget) widget->hide();
     }
 }
 
@@ -255,7 +255,10 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
         ui->connectionLabel->setText("Disconnected ");
 
         //output session stats
-        notifyUser("Session statistics ready", getSessionStatistics(), false);
+        if (events->totalNodes > 0 && autosaveLogFile != "")
+        {
+            notifyUser("Session statistics ready", getSessionStatistics(), false);
+        }
 
         //if advanced log file is enabled, add details to log file
         if (advancedLogFile)
@@ -670,7 +673,7 @@ void MainWindow::disableConnectionChanges()
     ui->flow_control_selection->setDisabled(true);
     ui->load_events_from_logfile->setDisabled(true);
     ui->restore_Button->setDisabled(true);
-    ui->refresh_serial_port_selections->setDisabled(true);
+    ui->refresh_serial_port_selections->setVisible(false);
 }
 
 //makes all settings in connection settings editable (call when ddm connection
@@ -685,7 +688,7 @@ void MainWindow::enableConnectionChanges()
     ui->flow_control_selection->setEnabled(true);
     ui->load_events_from_logfile->setEnabled(true);
     ui->restore_Button->setEnabled(true);
-    ui->refresh_serial_port_selections->setEnabled(true);
+    ui->refresh_serial_port_selections->setVisible(true);
 }
 
 //checks if user has setup a custom log file directory, if not, the default directory is selected
@@ -1072,7 +1075,7 @@ void MainWindow::updateEventsOutput(QString outString, bool error, bool cleared)
         if (eventFilter == EVENTS || eventFilter == ALL)
         {
             //change output text color to white
-            richText = "<p style='color: #FFFFFF; font-size: 16px'>"+ outString + "</p>";
+            richText = "<p style='color: "+EVENT_COLOR+"; font-size: "+EVENT_OUTPUT_SIZE+"px'>"+ outString + "</p>";
 
             //activate html for the output
             document.setHtml(richText);
@@ -1089,12 +1092,12 @@ void MainWindow::updateEventsOutput(QString outString, bool error, bool cleared)
             if (coloredEventOutput)
             {
                 //change output text color to green
-                richText = "<p style='color: #14AE5C; font-size: 16px'>"+ outString + "</p>";
+                richText = "<p style='color: "+CLEARED_ERROR_COLOR+"; font-size: "+EVENT_OUTPUT_SIZE+"px'>"+ outString + "</p>";
             }
             else
             {
                 //change output text color to white
-                richText = "<p style='color: #FFFFFF; font-size: 16px'>"+ outString + "</p>";
+                richText = "<p style='color: "+EVENT_COLOR+"; font-size: "+EVENT_OUTPUT_SIZE+"px'>"+ outString + "</p>";
             }
 
             //activate html for the output
@@ -1110,12 +1113,12 @@ void MainWindow::updateEventsOutput(QString outString, bool error, bool cleared)
         if (coloredEventOutput)
         {
             //change output text color to red
-            richText = "<p style='color: #FE1C1C; font-size: 16px'>"+ outString + "</p>";
+            richText = "<p style='color: "+ACTIVE_ERROR_COLOR+"; font-size: "+EVENT_OUTPUT_SIZE+"px'>"+ outString + "</p>";
         }
         else
         {
             //change output text color to white
-            richText = "<p style='color: #FFFFFF; font-size: 16px'>"+ outString + "</p>";
+            richText = "<p style='color: "+EVENT_COLOR+"; font-size: "+EVENT_OUTPUT_SIZE+"px'>"+ outString + "</p>";
         }
 
         //activate html for the output
@@ -1189,7 +1192,7 @@ void MainWindow::clearErrorFromEventsOutput(int errorId)
     QTextCharFormat newColor;
     if (coloredEventOutput)
     {
-        newColor.setForeground(QColor("#14ae5c"));
+        newColor.setForeground(QColor(20, 174, 92));
     }
 
     // Get the QTextDocument of the QTextEdit
@@ -1310,6 +1313,11 @@ QString MainWindow::getSessionStatistics()
 //called when advanced log file setting is active, meant to log status updates and electrical data
 void MainWindow::logAdvancedDetails(SerialMessageIdentifier id)
 {
+    if (autosaveLogFile == "")
+    {
+        return;
+    }
+
     //retreive the given file
     QFile file(autosaveLogFile);
     QString outString;

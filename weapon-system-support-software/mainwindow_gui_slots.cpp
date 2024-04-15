@@ -12,7 +12,7 @@ void MainWindow::on_ElectricalPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(3);
     resetPageButton();
-    ui->ElectricalPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
+    ui->ElectricalPageButton->setStyleSheet(SELECTED_NAV_BUTTON_STYLE);
 }
 
 //sends user to events page when clicked
@@ -21,7 +21,7 @@ void MainWindow::on_EventsPageButton_clicked()
     // TODO: first visit refresh page with dump of whole LL??
     ui->Flow_Label->setCurrentIndex(0);
     resetPageButton();
-    ui->EventsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
+    ui->EventsPageButton->setStyleSheet(SELECTED_NAV_BUTTON_STYLE);
 }
 
 //sends user to settings page when clicked
@@ -29,7 +29,7 @@ void MainWindow::on_ConnectionPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(2);
     resetPageButton();
-    ui->ConnectionPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
+    ui->ConnectionPageButton->setStyleSheet(SELECTED_NAV_BUTTON_STYLE);
 }
 
 //sends user to status page when clicked
@@ -37,14 +37,14 @@ void MainWindow::on_StatusPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(4);
     resetPageButton();
-    ui->StatusPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
+    ui->StatusPageButton->setStyleSheet(SELECTED_NAV_BUTTON_STYLE);
 }
 
 void MainWindow::on_SettingsPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(5);
     resetPageButton();
-    ui->SettingsPageButton->setStyleSheet("border-image: url(://resources/Images/purpleSettings.png);");
+    ui->SettingsPageButton->setStyleSheet("border-image: url(://resources/Images/purpleSettings.png)");
 }
 
 void MainWindow::on_NotificationPageButton_clicked()
@@ -57,15 +57,15 @@ void MainWindow::on_NotificationPageButton_clicked()
 //reset all tab buttons to default style
 void MainWindow::resetPageButton()
 {
-    ui->ConnectionPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
-    ui->EventsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
-    ui->StatusPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
-    ui->ElectricalPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
+    ui->ConnectionPageButton->setStyleSheet(NAV_BUTTON_STYLE);
+    ui->EventsPageButton->setStyleSheet(NAV_BUTTON_STYLE);
+    ui->StatusPageButton->setStyleSheet(NAV_BUTTON_STYLE);
+    ui->ElectricalPageButton->setStyleSheet(NAV_BUTTON_STYLE);
     ui->SettingsPageButton->setStyleSheet("border-image: url(://resources/Images/whiteSettings.png)");
     ui->NotificationPageButton->setStyleSheet("border-image: url(://resources/Images/notificationBell.png);");
 
 #if DEV_MODE
-    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
+    ui->DevPageButton->setStyleSheet(NAV_BUTTON_STYLE);
 #endif
 }
 
@@ -670,7 +670,7 @@ void MainWindow::on_DevPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(1);
     resetPageButton();
-    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
+    ui->DevPageButton->setStyleSheet(SELECTED_NAV_BUTTON_STYLE);
 }
 
 //manually clear errors from dev page
