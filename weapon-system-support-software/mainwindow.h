@@ -1,24 +1,29 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "constants.h"
+//QT libraries
 #include <QMainWindow>
-#include <QtConcurrent/QtConcurrent>
 #include <QDesktopServices>
-#include "connection.h"
-#include "events.h"
-#include "status.h"
-#include "electrical.h"
 #include <QShortcut>
 #include <QTextCursor>
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QObject>
 #include <QtCore>
+#include <QTextDocument>
+
+//Team Controller code
+#include "constants.h"
+#include "connection.h"
+#include "events.h"
+#include "status.h"
+#include "electrical.h"
 #include "./ui_mainwindow.h"
+
 
 #if DEV_MODE
     #include "csim.h"
+    #include <QtConcurrent/QtConcurrent>
 #endif
 
 QT_BEGIN_NAMESPACE
@@ -41,7 +46,7 @@ public:
     //data classes
     Status *status;
     Events *events;
-    electrical *electricalObject;
+    electrical *electricalData;
     QSettings userSettings;
 
     // vars
@@ -49,15 +54,18 @@ public:
     QTimer* handshakeTimer;
     QTimer* lastMessageTimer;
     QTimer* runningControllerTimer;
+    QTimer* notificationTimer;
     QDateTime timeLastReceived;
     EventFilter eventFilter;
     QString autosaveLogFile;
-    bool allowPortSelection;
+    bool allowSettingChanges;
 
     //user managed settings
     bool coloredEventOutput;
     int autoSaveLimit;
     int connectionTimeout;
+    bool advancedLogFile;
+    bool notifyOnErrorCleared;
 
     //creates a new connection using currently selected serial port settings
     void createDDMCon();
@@ -111,17 +119,21 @@ private slots:
     void resetPageButton();
     void disableConnectionChanges();
     void enableConnectionChanges();
-    void resetFiringMode();
     void updateEventsOutput(QString outString, bool error, bool cleared);
     //overloaded function
     void updateEventsOutput(EventNode *event);
     //clears current content of the events page text output and replaces
     //it with freshly generated data based on current contents of events class
     void refreshEventsOutput();
+    //clears error in events output
+    void clearErrorFromEventsOutput(int errorId);
     //checks if the current number of auto saved files is higher than the limit, deletes the
     //oldest one each iteration until the limit is enforced
     void enforceAutoSaveLimit();
     void updateConnectionStatus(bool connectionStatus);
+    QString getSessionStatistics();
+    void logAdvancedDetails(SerialMessageIdentifier id);
+    void renderElectricalPage();
 
     #if DEV_MODE
         void displaySavedSettings();
@@ -146,13 +158,13 @@ private slots:
     //================================================================================
     //gui triggered slots (should be declared in mainwindow_gui_slots.cpp)
     //====================================================================================
-    void findText();
     void on_ddm_port_selection_currentIndexChanged(int index);
     void on_handshake_button_clicked();
     void on_ConnectionPageButton_clicked();
     void on_EventsPageButton_clicked();
     void on_StatusPageButton_clicked();
     void on_ElectricalPageButton_clicked();
+    void on_NotificationPageButton_clicked();
     void on_download_button_clicked();
     void on_baud_rate_selection_currentIndexChanged(int index);
     void on_stop_bit_selection_currentIndexChanged(int index);
@@ -168,6 +180,7 @@ private slots:
     void on_SettingsPageButton_clicked();
     void on_colored_events_output_stateChanged(int arg1);
     void on_auto_save_limit_valueChanged(int arg1);
+    void on_refresh_serial_port_selections_clicked();
 #if (DEV_MODE)
         void on_send_message_button_clicked();
         void on_csim_port_selection_currentIndexChanged(int index);
@@ -180,7 +193,17 @@ private slots:
     #endif
     //=========================================================================================================
 
-        void on_NotificationPageButton_clicked();
+        void on_advanced_log_file_stateChanged(int arg1);
+
+        void on_searchButton_clicked();
+
+        void on_notify_error_cleared_stateChanged(int arg1);
+
+        void on_connection_timeout_valueChanged(int arg1);
+
+        void on_ram_clearing_stateChanged(int arg1);
+
+        void on_max_data_nodes_valueChanged(int arg1);
 
     private:
     Ui::MainWindow *ui;

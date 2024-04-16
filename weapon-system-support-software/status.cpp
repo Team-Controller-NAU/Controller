@@ -1,12 +1,32 @@
 #include "status.h"
+/********************************************************************************
+** status.cpp
+**
+** This file implements the logic of maintaining the status data
+**
+** @author Team Controller
+********************************************************************************/
 
+/**
+ * Initialization constructor for the status class
+ *
+ * Sets totalFiringEvents to default values
+ *
+ * @param parent Object used for GUI display
+ */
 Status::Status(QObject *parent)
     : QObject{parent}
 {
     totalFiringEvents = 0;
 }
 
-//given a status message, update status class with new data
+/**
+ * Loads data into the status class given a status message
+ *
+ * Parses statusMessage and updates status class variabels with new data
+ *
+ * @param statusMessage Message containing data to be parsed
+ */
 bool Status::loadData(QString statusMessage)
 {
     /* the statusMessage contains csv data in the following order
@@ -37,20 +57,52 @@ bool Status::loadData(QString statusMessage)
     //extract armed value from message
     armed = (values[0] == "1");
 
+
+
     //extract trigger1 status
     trigger1 = static_cast<TriggerStatus>(values[1].toInt());
 
     //extract trigger2
     trigger2 = static_cast<TriggerStatus>(values[2].toInt());
 
+    // check if trigger1 and trigger2 are valid
+    if(!(trigger1 == ENGAGED || trigger1 == DISENGAGED || trigger1 == NA) ||
+        !(trigger2 == ENGAGED || trigger2 == DISENGAGED || trigger2 == NA))
+    {
+        return false;
+    }
+
     //extract controller state
     controllerState = static_cast<ControllerState>(values[3].toInt());
+
+    // check if controllerState is valid
+    if(!(controllerState == RUNNING || controllerState == BLOCKED
+          || controllerState == TERMINATED || controllerState == SUSPENDED))
+    {
+        return false;
+    }
 
     //extract firing mode
     firingMode = static_cast<FiringMode>(values[4].toInt());
 
+    // check for valid firingMode
+    if(!(firingMode == SAFE || firingMode == SINGLE
+          || firingMode == BURST || firingMode == FULL_AUTO))
+    {
+        return false;
+    }
+
     //extract feed pos
     feedPosition = static_cast<FeedPosition>(values[5].toInt());
+
+    // check for valid feedPos
+    if(!(feedPosition == CHAMBERING || feedPosition == LOCKING
+          || feedPosition == FIRING || feedPosition == UNLOCKING
+          || feedPosition == EXTRACTING || feedPosition == EJECTING
+          || feedPosition == COCKING || feedPosition == FEEDING))
+    {
+        return false;
+    }
 
     //extract
     totalFiringEvents = values[6].toInt();
@@ -64,7 +116,13 @@ bool Status::loadData(QString statusMessage)
     return true;
 }
 
-//given a message containing the controller version and crc updates corresponding class variables
+/**
+ * Updates crc and controller versions at the bottom on GUI
+ *
+ * Given a message containing the controller version and crc updates corresponding class variables
+ *
+ * @param versionMessage Message containing the controller and crc data
+ */
 bool Status::loadVersionData(QString versionMessage)
 {
     //split along delimeter
@@ -81,7 +139,7 @@ bool Status::loadVersionData(QString versionMessage)
     // Split time string
     QStringList parts = values[0].split(':');
     if (parts.size() != 3) {
-        qDebug() << "Invalid time string format in load version data";
+        qDebug() << "Error: loadVersionData: Invalid time string format in load version data";
         return false;
     }
 
@@ -94,6 +152,31 @@ bool Status::loadVersionData(QString versionMessage)
     version = values[1];
     crc = values[2];
     return true;
+}
+
+//converts the status class values to a string
+QString Status::toString()
+{
+    //add each value and a delimeter to the end of the string, then return the string
+    QString statusStr = "Armed: " + QString::number(armed) + DELIMETER;
+
+    statusStr += " Trigger 1: " + QString::number(trigger1) + DELIMETER;
+
+    statusStr += " Trigger 2: " + QString::number(trigger2) + DELIMETER;
+
+    statusStr += " Controller State: " + QString::number(controllerState) + DELIMETER;
+
+    statusStr += " Firing Mode: " + QString::number(firingMode) + DELIMETER;
+
+    statusStr += " Feed Position: " + QString::number(feedPosition) + DELIMETER;
+
+    statusStr += " Total Firing Events: " + QString::number(totalFiringEvents) + DELIMETER;
+
+    statusStr += " Burst Length: " + QString::number(burstLength) + DELIMETER;
+
+    statusStr += " Firing Rate: " + QString::number(firingRate) + DELIMETER;
+
+    return statusStr;
 }
 
 //======================================================================================
@@ -161,7 +244,26 @@ void Status::randomize(bool secondTrigger)
 
     controllerState = static_cast<ControllerState>(QRandomGenerator::global()->bounded(0, NUM_CONTROLLER_STATE));
 
-    firingMode = static_cast<FiringMode>(QRandomGenerator::global()->bounded(0, NUM_FIRING_MODE));
+    //firingMode = static_cast<FiringMode>(QRandomGenerator::global()->bounded(0, NUM_FIRING_MODE));
+
+    switch(firingMode)
+    {
+        case SAFE:
+            firingMode = SINGLE;
+            break;
+        case SINGLE:
+            firingMode = BURST;
+            break;
+        case BURST:
+            firingMode = FULL_AUTO;
+            break;
+        case FULL_AUTO:
+            firingMode = SAFE;
+            break;
+        default:
+            firingMode = SAFE;
+            break;
+    }
 
     //new randomization method to iterate feed position smoothly
     switch (feedPosition)

@@ -3,7 +3,7 @@
 
 #include <QDebug>
 #include <QtSerialPort/QtSerialPort>
-#include <constants.h>
+#include "constants.h"
 
 /********************************************************************************
 ** connection.h
@@ -46,6 +46,11 @@ public slots:
     // sends message through port
     void transmit(QString message);
 
+    //sends disconnect message through port
+    void sendDisconnectMsg();
+
+    //sends disconnect message through port
+    void sendHandshakeMsg();
 };
 
 #endif // CONNECTION_H

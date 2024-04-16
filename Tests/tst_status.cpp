@@ -17,6 +17,7 @@ private:
 
 private slots:
     void test_loadData();
+    void test_loadData_badInput_correctDelim();
     void test_loadData_badInputLess();
     void test_loadData_badInputGreater();
     void test_loadData_badInputType();
@@ -47,7 +48,7 @@ void tst_status::test_loadData()
         double firingRate;
      */
     Status status;
-    QString dataMsg = "0,1,0,1,1,90,6,23,1636.14,\n";
+    QString dataMsg = "0,1,0,1,330,90,6,23,1636.14,\n";
     QStringList values = dataMsg.split(DELIMETER);
     int totalFiringEvents_testData = values[6].toInt();
     int burstLength_testData = values[7].toInt();
@@ -62,10 +63,38 @@ void tst_status::test_loadData()
     QCOMPARE(status.trigger2, DISENGAGED);
     QCOMPARE(status.controllerState, BLOCKED);
     QCOMPARE(status.firingMode, SINGLE);
-    QCOMPARE(status.feedPosition, UNLOCKING);
+    QCOMPARE(status.feedPosition, FIRING);
     QCOMPARE(status.totalFiringEvents, totalFiringEvents_testData);
     QCOMPARE(status.burstLength, burstLength_testData);
     QCOMPARE(status.firingRate, firingRate_testData);
+}
+
+/**
+ * Test case for loadData() in status.cpp
+ *
+ * - Tests the correct number of delimiters but bad input
+ */
+void tst_status::test_loadData_badInput_correctDelim()
+{
+    Status status;
+
+    // check correct input
+    QString dataMsg = "0,1,0,1,30,90,6,23,1636.14,\n";
+    QVERIFY(status.loadData(dataMsg) == true);
+
+    //test if the trigger checks returns false
+    dataMsg = "0,18,4,1,1,90,6,23,1636.14,\n";
+    QVERIFY(status.loadData(dataMsg) == false);
+
+    // test bad controllerState data
+    dataMsg = "0,1,0,19,1,90,6,23,1636.14,\n";
+    QVERIFY(status.loadData(dataMsg) == false);
+
+    dataMsg = "0,1,0,1,1,90,6,23,1636.14,\n";
+    QVERIFY(status.loadData(dataMsg) == false);
+
+    dataMsg = "0,1,0,1,30,20,6,23,1636.14,\n";
+    QVERIFY(status.loadData(dataMsg) == false);
 }
 
 /**

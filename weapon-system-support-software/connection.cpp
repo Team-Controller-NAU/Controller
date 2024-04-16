@@ -57,6 +57,15 @@ Connection::Connection(QString portName, QSerialPort::BaudRate baudRate,
 }
 
 //returns true if a valid message is in the serial port, false otherwise
+
+/**
+ * Verifies that the incomming serialized message is valid
+ *
+ * The function first checks the serial port is open, then captures the
+ * the message to check for expected end of message character (\n).
+ *
+ * Returns true if the message is valid, false otherwise
+ */
 bool Connection::checkForValidMessage()
 {
     //ensure port is open to prevent possible errors
@@ -68,10 +77,22 @@ bool Connection::checkForValidMessage()
         QString message = QString::fromUtf8(serializedMessage);
 
         //check for complete message
-        if ( message.contains("\n") )
+        if ( message.contains("\n") || message.contains('\n') )
         {
             return true;
         }
+        #if DEV_MODE && SERIAL_COMM_DEBUG
+        else
+        {
+            qDebug() << "checkForValidMessage returned false for: " + message;
+            // Display the contents of the QByteArray in hexadecimal format
+            qDebug() << "Data received (hex): ";
+            for (int i = 0; i < serializedMessage.size(); ++i)
+            {
+                qDebug().noquote() << QString("%1 ").arg((quint8)serializedMessage[i], 2, 16, QLatin1Char('0')).toUpper();
+            }
+        }
+        #endif
     }
     else
     {
@@ -110,17 +131,43 @@ void Connection::transmit(QString message)
     serialPort.waitForBytesWritten(500);
 
     // check for failure
-    if (bytesWritten == -1)
+    if (bytesWritten != data.size())
     {
         // notify
         qWarning() << "Failed to write to " << portName << " : " << serialPort.errorString();
     }
     else
     {
-        // notify
+        #if DEV_MODE && SERIAL_COMM_DEBUG
         qDebug() << "Message sent through " << portName << " : " << message << qPrintable("\n");
-        //qDebug() << bytesWritten << " bytes written to the serial port.";
+        qDebug() << bytesWritten << " bytes written to the serial port.";
+        #endif
     }
+
+    // Display the contents of the QByteArray in hexadecimal format
+    #if DEV_MODE && SERIAL_COMM_DEBUG
+    qDebug() << "Data sent (hex): ";
+    for (int i = 0; i < data.size(); ++i)
+    {
+        qDebug().noquote() << QString("%1 ").arg((quint8)data[i], 2, 16, QLatin1Char('0')).toUpper();
+    }
+    #endif
+}
+
+//send disconnect to communicating party
+void Connection::sendDisconnectMsg()
+{
+    #if DEV_MODE && SERIAL_COMM_DEBUG
+    qDebug() << "Sending disconnect message to controller" << Qt::endl;
+    #endif
+    transmit(QString::number(CLOSING_CONNECTION) + DELIMETER + "\n");
+}
+
+//send handshake attempt to communicating party
+void Connection::sendHandshakeMsg()
+{
+    // Send handshake message
+    transmit(QString::number(LISTENING) + '\n');
 }
 
 /**
@@ -132,14 +179,16 @@ void Connection::transmit(QString message)
  */
 Connection::~Connection()
 {
-    // send debug
     qDebug() << "Closing connection on port " << portName << qPrintable("\n");
 
     // confirm connection to another port
     if ( connected )
     {
-        // transmit closing message through port
-        transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + DELIMETER + "\n");
+        //transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + DELIMETER + "\n");
+        sendDisconnectMsg();
+
+        //avoid prematurely closing serial port before closing message is sent
+        serialPort.waitForReadyRead(1000);
     }
 
     // close the port

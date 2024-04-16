@@ -7,9 +7,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QSettings>
-#include <QRegularExpression>
 #include "constants.h"
-
 
 struct EventNode {
     int id;
@@ -20,18 +18,25 @@ struct EventNode {
     struct EventNode *nextPtr;
 };
 
-class Events
+class Events : public QObject
 {
+    Q_OBJECT
 public:
-    Events();
+    Events(bool EventRAMClearing, int maxDataNodes);
     ~Events();
 
     //class variables
     int totalEvents;
     int totalErrors;
     int totalNodes;
-    int totalCleared;
-    bool dataLoadedFromLogFile;
+    int totalClearedErrors;
+    bool RAMClearing;
+    int maxNodes;
+    int storedNodes;
+    QString clearedIndicator;
+    QString activeIndicator;
+    QByteArray clearedIndicatorBytes;
+    QByteArray activeIndicatorBytes;
 
     EventNode *headEventNode;
     EventNode *lastEventNode;
@@ -56,9 +61,12 @@ public:
     bool loadEventDump(QString message);
     bool loadErrorDump(QString message);
     bool clearError(int id);
+    //searches through log file and replaces the active error indicator
+    //with the cleared error indicator
+    bool clearErrorInLogFile(QString logFileName, int errorId);
 
     //log file utils
-    void outputToLogFile(QString logFileName);
+    bool outputToLogFile(QString logFileName, bool advancedLogFile);
     int loadDataFromLogFile(Events *&events, QString logFileName);
     void appendToLogfile(QString logfilePath, EventNode *event);
     QString nodeToString(EventNode *event);
@@ -78,6 +86,9 @@ public:
 
         int getErrorIdByPosition(int pos);
     #endif
+
+signals:
+    void RAMCleared();
 };
 
 #endif // EVENTS_H

@@ -4,8 +4,8 @@
 //portion of the application. These settings are dependant on QT and care should be taken
 //when altering this file. The settings found here are what QT offers in its serial port
 //class, if the setting you want is not found here, its most likely not supported by QTs libraries.
-//Note that this file will cause intentional program termination if unsupported serial settings are
-//encountered.
+//Note that the toString() and fromString() methods will cause intentional program termination if
+//unsupported serial settings are encountered.
 
 //======================================================================================
 // GUI Drop boxes
@@ -93,7 +93,7 @@ void MainWindow::on_baud_rate_selection_currentIndexChanged(int index)
 {
     if (ddmCon == nullptr) {
         // Handle case where ddmCon pointer is not initialized after setup is done
-        if (allowPortSelection)
+        if (allowSettingChanges)
         {
             notifyUser("Connection setting can't be applied", "Connection class is not declared", true);
         }
@@ -136,7 +136,7 @@ void MainWindow::on_data_bits_selection_currentIndexChanged(int index)
 {
     if (ddmCon == nullptr) {
         // Handle case where ddmCon pointer is not initialized after setup is done
-        if (allowPortSelection)
+        if (allowSettingChanges)
         {
             notifyUser("Connection setting can't be applied", "Connection class is not declared", true);
         }
@@ -167,7 +167,7 @@ void MainWindow::on_flow_control_selection_currentIndexChanged(int index)
 {
     if (ddmCon == nullptr) {
         // Handle case where ddmCon pointer is not initialized after setup is done
-        if (allowPortSelection)
+        if (allowSettingChanges)
         {
             notifyUser("Connection setting can't be applied", "Connection class is not declared", true);
         }
@@ -195,7 +195,7 @@ void MainWindow::on_stop_bit_selection_currentIndexChanged(int index)
 {
     if (ddmCon == nullptr) {
         // Handle case where ddmCon pointer is not initialized after setup is done
-        if (allowPortSelection)
+        if (allowSettingChanges)
         {
             notifyUser("Connection setting can't be applied", "Connection class is not declared", true);
         }
@@ -223,7 +223,7 @@ void MainWindow::on_parity_selection_currentIndexChanged(int index)
 {
     if (ddmCon == nullptr) {
         // Handle case where ddmCon pointer is not initialized after setup is done
-        if (allowPortSelection)
+        if (allowSettingChanges)
         {
             notifyUser("Connection setting can't be applied", "Connection class is not declared", true);
         }

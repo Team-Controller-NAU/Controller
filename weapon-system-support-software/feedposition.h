@@ -2,10 +2,16 @@
 #define FEEDPOSITION_H
 
 #include <QDial>
-#include "constants.h"
-#include <QMouseEvent>
 #include <QPainter>
 #include <QColor>
+#include <QToolTip>
+#include <QEvent>
+#include "constants.h"
+
+/*
+ * TODO: Adjust this value to make the feed postion alternate colors
+ */
+const bool alternatingColors = false;
 
 class feedposition : public QDial
 {
@@ -18,6 +24,7 @@ public:
 private:
 
     virtual void paintEvent(QPaintEvent*) override;
+    bool event(QEvent* event) override;
 
 };
 #endif // FEEDPOSITION_H

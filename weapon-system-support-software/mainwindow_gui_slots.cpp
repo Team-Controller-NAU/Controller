@@ -12,7 +12,7 @@ void MainWindow::on_ElectricalPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(3);
     resetPageButton();
-    ui->ElectricalPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
+    ui->ElectricalPageButton->setStyleSheet(SELECTED_NAV_BUTTON_STYLE);
 }
 
 //sends user to events page when clicked
@@ -21,7 +21,7 @@ void MainWindow::on_EventsPageButton_clicked()
     // TODO: first visit refresh page with dump of whole LL??
     ui->Flow_Label->setCurrentIndex(0);
     resetPageButton();
-    ui->EventsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
+    ui->EventsPageButton->setStyleSheet(SELECTED_NAV_BUTTON_STYLE);
 }
 
 //sends user to settings page when clicked
@@ -29,7 +29,7 @@ void MainWindow::on_ConnectionPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(2);
     resetPageButton();
-    ui->ConnectionPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
+    ui->ConnectionPageButton->setStyleSheet(SELECTED_NAV_BUTTON_STYLE);
 }
 
 //sends user to status page when clicked
@@ -37,14 +37,14 @@ void MainWindow::on_StatusPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(4);
     resetPageButton();
-    ui->StatusPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
+    ui->StatusPageButton->setStyleSheet(SELECTED_NAV_BUTTON_STYLE);
 }
 
 void MainWindow::on_SettingsPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(5);
     resetPageButton();
-    ui->SettingsPageButton->setStyleSheet("border-image: url(://resources/Images/purpleSettings.png);");
+    ui->SettingsPageButton->setStyleSheet("border-image: url(://resources/Images/purpleSettings.png)");
 }
 
 void MainWindow::on_NotificationPageButton_clicked()
@@ -57,28 +57,362 @@ void MainWindow::on_NotificationPageButton_clicked()
 //reset all tab buttons to default style
 void MainWindow::resetPageButton()
 {
-    ui->ConnectionPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
-    ui->EventsPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
-    ui->StatusPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
-    ui->ElectricalPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
+    ui->ConnectionPageButton->setStyleSheet(NAV_BUTTON_STYLE);
+    ui->EventsPageButton->setStyleSheet(NAV_BUTTON_STYLE);
+    ui->StatusPageButton->setStyleSheet(NAV_BUTTON_STYLE);
+    ui->ElectricalPageButton->setStyleSheet(NAV_BUTTON_STYLE);
     ui->SettingsPageButton->setStyleSheet("border-image: url(://resources/Images/whiteSettings.png)");
     ui->NotificationPageButton->setStyleSheet("border-image: url(://resources/Images/notificationBell.png);");
 
 #if DEV_MODE
-    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;");
+    ui->DevPageButton->setStyleSheet(NAV_BUTTON_STYLE);
 #endif
 }
 
 //======================================================================================
-// Hotkeys
+// General GUI slots
 //======================================================================================
 
-// (ctrl + f) opens search box for searching for text in events output
-void MainWindow::findText()
+//runs when user changes ddm port. Close old connection, make new one and connect to ready
+//read signal to listen for controller.
+void MainWindow::on_ddm_port_selection_currentIndexChanged(int index)
 {
-    // make sure the user is in the events_output box
-    if (qApp->focusWidget() != ui->events_output) return;
+    //create connection on selected port if combo box is set up
+    if (allowSettingChanges)
+    {
+        createDDMCon();
+        ddmPortName = ui->ddm_port_selection->currentText();
+    }
+}
 
+//download button for events in CSV format
+void MainWindow::on_download_button_clicked()
+{
+    //if total nodes is 0 prevent download
+    if (events->totalNodes == 0)
+    {
+        notifyUser("Download prevented", "No data is available to download.", true);
+        return;
+    }
+
+    QString logFile;
+
+    //check if user has set a custom log file output directory
+    if ( !userSettings.value("portName").toString().isEmpty() )
+    {
+        //initialize the logfile into this directory
+        logFile = userSettings.value("logfileLocation").toString();
+    }
+    //otherwise use default directory
+    else
+    {
+        //use the path of the exe and add a "Log Files" directory
+        logFile = QCoreApplication::applicationDirPath() + "/" + INITIAL_LOGFILE_LOCATION;
+    }
+
+    qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
+    logFile += QString::number(secsSinceEpoch) + "-logfile-M.txt";
+
+    // save logfile - mannually done
+    if (events->outputToLogFile(logFile, false))
+    {
+       notifyUser("Download complete", "Log file loction: " + logFile, false);
+    }
+    else
+    {
+       notifyUser("Download failed", "Could not open " + logFile + " for writing", true);
+    }
+}
+
+void MainWindow::on_FilterBox_currentIndexChanged(int index)
+{
+    // check for which filter the user selected
+    switch(index)
+    {
+    case ALL:
+        #if DEV_MODE && GUI_DEBUG
+        qDebug() << "All filter selected";
+        #endif
+        eventFilter = ALL;
+        break;
+
+    case EVENTS:
+        #if DEV_MODE && GUI_DEBUG
+        qDebug() << "Events filter selected";
+        #endif
+        eventFilter = EVENTS;
+        break;
+
+    case ERRORS:
+        #if DEV_MODE && GUI_DEBUG
+        qDebug() << "Errors filter selected";
+        #endif
+        eventFilter = ERRORS;
+        break;
+
+    case CLEARED_ERRORS:
+        #if DEV_MODE && GUI_DEBUG
+        qDebug() << "Cleared errors filter selected";
+        #endif
+        eventFilter = CLEARED_ERRORS;
+        break;
+
+    case NON_CLEARED_ERRORS:
+        #if DEV_MODE && GUI_DEBUG
+        qDebug() << "Non-cleared errors filter selected";
+        #endif
+        eventFilter = NON_CLEARED_ERRORS;
+        break;
+
+    default:
+        qDebug() << "Error: on_FilterBox_currentIndexChanged unrecognized filter index.";
+    }
+
+    //refresh to display with filter
+    refreshEventsOutput();
+}
+
+//toggles handshake process on and off. Once connected, allow for disconnect (send disconnect message to controller)
+//this button is seen as connect/connecting/disconnect on connection page
+void MainWindow::on_handshake_button_clicked()
+{
+    //if port isnt open, attempt to open it
+    if (ddmCon == nullptr)
+    {
+        createDDMCon();
+
+        //if unsuccessful, notify user of fail and return
+        if (ddmCon == nullptr)
+        {
+            notifyUser("Failed to open port " + ui->ddm_port_selection->currentText(), true);
+            return;
+        }
+    }
+
+    //catch possible errors
+    if (!ddmCon->serialPort.isOpen())
+    {
+        notifyUser("Failed to open port" + ui->ddm_port_selection->currentText(), true);
+        return;
+    }
+
+    // check if handshake is not in progress and ddm is not connected
+    if ( !handshakeTimer->isActive() && !ddmCon->connected )
+    {
+        #if DEV_MODE && SERIAL_COMM_DEBUG
+        qDebug() << "Beginning handshake with controller" << Qt::endl;
+        #endif
+
+        // Start the timer to periodically check the handshake status
+        handshakeTimer->start();
+
+        //refreshes connection button/displays
+        ui->handshake_button->setText("Connecting");
+        ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #FF7518; border: 1px solid; border-color: #e65c00; font: 15pt 'Segoe UI'; } "
+                                            "QPushButton::hover { background-color: #ff8533; } "
+                                            "QPushButton::pressed { background-color: #ffa366;}");
+
+        ui->connectionStatus->setPixmap(ORANGE_LIGHT);
+        ui->connectionLabel->setText("Connecting ");
+        //disable changes to connection settings
+        disableConnectionChanges();
+    }
+    else
+    {
+        ddmCon->sendDisconnectMsg();
+
+        if (ddmCon->connected)
+        {
+            notifyUser("User disconnect", "Session end",  false);
+        }
+
+        //update connection status to disconnected and update related objects
+        updateConnectionStatus(false);
+    }
+}
+
+//saves connection settings into the qSettings class for cross session storage
+void MainWindow::on_save_Button_clicked()
+{
+    // Load all of the current connection settings into the settings class
+    // Storing the enum values as strings
+    userSettings.setValue("baudRate", ui->baud_rate_selection->currentText());
+    userSettings.setValue("dataBits", ui->data_bits_selection->currentText());
+    userSettings.setValue("parity", ui->parity_selection->currentText());
+    userSettings.setValue("stopBits", ui->stop_bit_selection->currentText());
+    userSettings.setValue("flowControl", ui->flow_control_selection->currentText());
+    userSettings.setValue("portName", ui->ddm_port_selection->currentText());
+    userSettings.setValue("csimPortName", ui->csim_port_selection->currentText());
+
+    //write changes to the registry
+    userSettings.sync();
+
+    notifyUser("Default settings saved.", false);
+
+    #if DEV_MODE && GUI_DEBUG
+        //output new settings to qDebug()
+        displaySavedSettings();
+    #endif
+}
+
+//restores connection settings to the values saved to the system as default
+void MainWindow::on_restore_Button_clicked()
+{
+    // Retrieve the default connection settings from the settings class
+    QString defaultBaudRate = userSettings.value("baudRate").toString();
+    QString defaultDataBits = userSettings.value("dataBits").toString();
+    QString defaultParity = userSettings.value("parity").toString();
+    QString defaultStopBits = userSettings.value("stopBits").toString();
+    QString defaultFlowControl = userSettings.value("flowControl").toString();
+
+    // Set the default values to the GUI elements if they exist in the combo boxes
+    if (ui->baud_rate_selection->findText(defaultBaudRate) != -1)
+        ui->baud_rate_selection->setCurrentText(defaultBaudRate);
+
+    if (ui->data_bits_selection->findText(defaultDataBits) != -1)
+        ui->data_bits_selection->setCurrentText(defaultDataBits);
+
+    if (ui->parity_selection->findText(defaultParity) != -1)
+        ui->parity_selection->setCurrentText(defaultParity);
+
+    if (ui->stop_bit_selection->findText(defaultStopBits) != -1)
+        ui->stop_bit_selection->setCurrentText(defaultStopBits);
+
+    if (ui->flow_control_selection->findText(defaultFlowControl) != -1)
+        ui->flow_control_selection->setCurrentText(defaultFlowControl);
+}
+
+void MainWindow::on_openLogfileFolder_clicked()
+{
+    // if the user hasnt set log file location user settings, temp folder is opened
+    if (userSettings.value("logfileLocation").toString().isEmpty())
+    {
+        // create a QDir object for the path
+        QDir path(INITIAL_LOGFILE_LOCATION);
+
+        // check if the path does not lead to anything
+        if(!path.exists())
+        {
+            // check if we can make path successfully
+            if(path.mkpath("."))
+            {
+                #if DEV_MODE && GUI_DEBUG
+                qDebug() << "Logfile directory created at: " << INITIAL_LOGFILE_LOCATION;
+                #endif
+            }
+            else
+            {
+                qDebug() << "Error: on_openLogfileFolder_clicked() The log file directory failed to create";
+            }
+        }
+        QDesktopServices::openUrl(QUrl::fromLocalFile(INITIAL_LOGFILE_LOCATION));
+    }
+    else
+    {
+        //open from the user settings
+        QDesktopServices::openUrl(QUrl::fromLocalFile(userSettings.value("logfileLocation").toString()));
+        #if DEV_MODE && GUI_DEBUG
+        qDebug() << "log file location opening: " << userSettings.value("logfileLocation").toString();
+        #endif
+    }
+    // save user settings
+    userSettings.sync();
+}
+
+void MainWindow::on_setLogfileFolder_clicked()
+{
+    // save prev user settings value
+    QString previousPath = userSettings.value("logfileLocation").toString();
+
+    // set logfile location with the user choice
+    userSettings.setValue("logfileLocation", QFileDialog::getExistingDirectory(this, tr("Create or Select a logfolder directory")) + "/");
+
+    // check the success of saving settings
+    if(userSettings.status() != QSettings::NoError)
+    {
+        qDebug() << "Error: on_setLogfileFolder_clicked() failed to save logfile location: " << userSettings.status();
+    }
+    // check if user exited the dialog box
+    else if(userSettings.value("logfileLocation").toString() == "/")
+    {
+        // revert to previous user setting
+        userSettings.setValue("logfileLocation", previousPath);
+        qDebug() << "Error: on_setLogfileFolder_clicked() No logfile directory set. Reverting to previous path: " << previousPath;
+    }
+    // otherwise, assume successful logfile directory creation
+    else
+    {
+        #if DEV_MODE && GUI_DEBUG
+        qDebug() << "New log file directory set: " << userSettings.value("logfileLocation").toString();
+        #endif
+    }
+
+    //sync user settings
+    userSettings.sync();
+}
+
+//opens log file directory to prompt user to select log file. data from log file is then
+//loaded into events class and rendered in events page.
+void MainWindow::on_load_events_from_logfile_clicked()
+{
+    //declare file browser class
+    QFileDialog dialog(this);
+
+    //set initial directory to log file directory set by user
+    dialog.setDirectory(userSettings.value("logfileLocation").toString());
+
+    // Open a file dialog for the user to select a logfile
+    QString selectedFile = dialog.getOpenFileName(this, tr("Select Log File"), QString(), tr("Log Files (*.txt);;All Files (*)"));
+
+    // Check if the user canceled the dialog
+    if (selectedFile.isEmpty())
+    {
+        return;
+    }
+
+    #if DEV_MODE && GUI_DEBUG
+        logEmptyLine();
+        qDebug() << "Loading data from: " << selectedFile;
+    #endif
+
+    // Pass the selected file name to the loadDataFromLogFile function
+    int result = events->loadDataFromLogFile(events, selectedFile);
+
+    ui->truncated_label->setVisible(false);
+
+    // Handle the result if needed
+    if (result == INCORRECT_FORMAT)
+    {
+        qDebug() << "Error: on_load_events_from_logfile_clicked() Log file was of incorrect format.";
+        notifyUser("Load failed on corrupt logfile.", true);
+    }
+    else if (result == DATA_NOT_FOUND)
+    {
+        qDebug() << "Error: on_load_events_from_logfile_clicked() Log file could not be found";
+        notifyUser("Load failed on missing logfile.", true);
+    }
+    else
+    {
+        notifyUser("Logfile loaded.", selectedFile, false);
+    }
+
+    //refresh the events output
+    refreshEventsOutput();
+}
+
+//refreshes the serial port selections, useful in case an adaptor is plugged in after
+//program launch (also updates dev page selection if dev mode is active)
+void MainWindow::on_refresh_serial_port_selections_clicked()
+{
+    notifyUser("Scanning for serial ports", false);
+    setup_ddm_port_selection(0);
+    #if DEV_MODE
+        setup_csim_port_selection(0);
+    #endif
+}
+
+void MainWindow::on_searchButton_clicked()
+{
     // get the text to find from the user by opening an inputdialog box
     QString searchText;
     QInputDialog inputDialog = QInputDialog(this);
@@ -162,305 +496,8 @@ void MainWindow::findText()
 }
 
 //======================================================================================
-// General GUI slots
+// User settings
 //======================================================================================
-
-//runs when user changes ddm port. Close old connection, make new one and connect to ready
-//read signal to listen for controller.
-void MainWindow::on_ddm_port_selection_currentIndexChanged(int index)
-{
-    //create connection on selected port if combo box is set up
-    if (allowPortSelection)
-    {
-        createDDMCon();
-        ddmPortName = ui->ddm_port_selection->currentText();
-    }
-}
-
-//download button for events in CSV format
-void MainWindow::on_download_button_clicked()
-{
-    QString logFile;
-
-    //check if user has set a custom log file output directory
-    if ( !userSettings.value("portName").toString().isEmpty() )
-    {
-        //initialize the logfile into this directory
-        logFile = userSettings.value("logfileLocation").toString();
-    }
-    //otherwise use default directory
-    else
-    {
-        //use the path of the exe and add a "Log Files" directory
-        logFile = QCoreApplication::applicationDirPath() + "/" + INITIAL_LOGFILE_LOCATION;
-    }
-
-    qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
-    logFile += QString::number(secsSinceEpoch);
-
-    // save logfile - mannually done
-    events->outputToLogFile(logFile + "-logfile-M.txt");
-}
-
-void MainWindow::on_FilterBox_currentIndexChanged(int index)
-{
-    // check for which filter the user selected
-    switch(index)
-    {
-    case ALL:
-        qDebug() << "All filter selected";
-        eventFilter = ALL;
-        break;
-
-    case EVENTS:
-        qDebug() << "Events filter selected";
-        eventFilter = EVENTS;
-        break;
-
-    case ERRORS:
-        qDebug() << "Errors filter selected";
-        eventFilter = ERRORS;
-        break;
-
-    case CLEARED_ERRORS:
-        qDebug() << "Cleared errors filter selected";
-        eventFilter = CLEARED_ERRORS;
-        break;
-
-    case NON_CLEARED_ERRORS:
-        qDebug() << "Non-cleared errors filter selected";
-        eventFilter = NON_CLEARED_ERRORS;
-        break;
-
-    default:
-        qDebug() << "Error: Unrecognized filter index.";
-    }
-
-    refreshEventsOutput();
-}
-
-//toggles handshake process on and off. Once connected, allow for disconnect (send disconnect message to controller)
-//this button is seen as connect/connecting/disconnect on connection page
-void MainWindow::on_handshake_button_clicked()
-{
-    //if port isnt open, attempt to open it
-    if (ddmCon == nullptr)
-    {
-        createDDMCon();
-
-        //if unsuccessful, notify user of fail and return
-        if (ddmCon == nullptr)
-        {
-            notifyUser("Failed to open port " + ui->ddm_port_selection->currentText(), true);
-            return;
-        }
-    }
-
-    //catch possible errors
-    if (!ddmCon->serialPort.isOpen())
-    {
-        notifyUser("Failed to open port" + ui->ddm_port_selection->currentText(), true);
-        return;
-    }
-
-    // check if handshake is not in progress and ddm is not connected
-    if ( !handshakeTimer->isActive() && !ddmCon->connected )
-    {
-        qDebug() << "Beginning handshake with controller" << Qt::endl;
-
-        // Start the timer to periodically check the handshake status
-        handshakeTimer->start();
-
-        //refreshes connection button/displays
-        ui->handshake_button->setText("Connecting");
-        ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #FF7518; border: 1px solid; border-color: #e65c00; font: 15pt 'Segoe UI'; } "
-                                            "QPushButton::hover { background-color: #ff8533; } "
-                                            "QPushButton::pressed { background-color: #ffa366;}");
-
-        ui->connectionStatus->setPixmap(ORANGE_LIGHT);
-        ui->connectionLabel->setText("Connecting ");
-        //disable changes to connection settings
-        disableConnectionChanges();
-    }
-    else
-    {
-        qDebug() << "Sending disconnect message to controller" << Qt::endl;
-
-        ddmCon->transmit(QString::number(CLOSING_CONNECTION) + '\n');
-
-        if (ddmCon->connected)
-        {
-            notifyUser("User disconnect", "Session end",  false);
-        }
-
-        //update connection status to disconnected and update related objects
-        updateConnectionStatus(false);
-    }
-}
-
-//saves connection settings into the qSettings class for cross session storage
-void MainWindow::on_save_Button_clicked()
-{
-    // Load all of the current connection settings into the settings class
-    // Storing the enum values as strings
-    userSettings.setValue("baudRate", ui->baud_rate_selection->currentText());
-    userSettings.setValue("dataBits", ui->data_bits_selection->currentText());
-    userSettings.setValue("parity", ui->parity_selection->currentText());
-    userSettings.setValue("stopBits", ui->stop_bit_selection->currentText());
-    userSettings.setValue("flowControl", ui->flow_control_selection->currentText());
-    userSettings.setValue("portName", ui->ddm_port_selection->currentText());
-    userSettings.setValue("csimPortName", ui->csim_port_selection->currentText());
-
-    //write changes to the registry
-    userSettings.sync();
-
-    notifyUser("Default settings saved.", false);
-
-    #if DEV_MODE
-        //output new settings to qDebug()
-        displaySavedSettings();
-    #endif
-}
-
-//restores connection settings to the values saved to the system as default
-void MainWindow::on_restore_Button_clicked()
-{
-    // Retrieve the default connection settings from the settings class
-    QString defaultBaudRate = userSettings.value("baudRate").toString();
-    QString defaultDataBits = userSettings.value("dataBits").toString();
-    QString defaultParity = userSettings.value("parity").toString();
-    QString defaultStopBits = userSettings.value("stopBits").toString();
-    QString defaultFlowControl = userSettings.value("flowControl").toString();
-
-    // Set the default values to the GUI elements if they exist in the combo boxes
-    if (ui->baud_rate_selection->findText(defaultBaudRate) != -1)
-        ui->baud_rate_selection->setCurrentText(defaultBaudRate);
-
-    if (ui->data_bits_selection->findText(defaultDataBits) != -1)
-        ui->data_bits_selection->setCurrentText(defaultDataBits);
-
-    if (ui->parity_selection->findText(defaultParity) != -1)
-        ui->parity_selection->setCurrentText(defaultParity);
-
-    if (ui->stop_bit_selection->findText(defaultStopBits) != -1)
-        ui->stop_bit_selection->setCurrentText(defaultStopBits);
-
-    if (ui->flow_control_selection->findText(defaultFlowControl) != -1)
-        ui->flow_control_selection->setCurrentText(defaultFlowControl);
-}
-
-void MainWindow::on_openLogfileFolder_clicked()
-{
-    // if the user hasnt set log file location user settings, temp folder is opened
-    if (userSettings.value("logfileLocation").toString().isEmpty())
-    {
-        // create a QDir object for the path
-        QDir path(INITIAL_LOGFILE_LOCATION);
-
-        // check if the path does not lead to anything
-        if(!path.exists())
-        {
-            // check if we can make path successfully
-            if(path.mkpath("."))
-            {
-                qDebug() << "Logfile directory created at: " << INITIAL_LOGFILE_LOCATION;
-            }
-
-            else
-            {
-                qDebug() << "The log file directory failed to create";
-            }
-        }
-        QDesktopServices::openUrl(QUrl::fromLocalFile(INITIAL_LOGFILE_LOCATION));
-    }
-
-    else
-    {
-        //open from the user settings
-        QDesktopServices::openUrl(QUrl::fromLocalFile(userSettings.value("logfileLocation").toString()));
-        qDebug() << "log file location opening: " << userSettings.value("logfileLocation").toString();
-    }
-    // save user settings
-    userSettings.sync();
-}
-
-void MainWindow::on_setLogfileFolder_clicked()
-{
-    // save prev user settings value
-    QString previousPath = userSettings.value("logfileLocation").toString();
-
-    // set logfile location with the user choice
-    userSettings.setValue("logfileLocation", QFileDialog::getExistingDirectory(this, tr("Create or Select a logfolder directory")) + "/");
-
-    // check the success of saving settings
-    if(userSettings.status() != QSettings::NoError)
-    {
-        qDebug() << "Error while saving user settings: " << userSettings.status();
-    }
-    // check if user exited the dialog box
-    else if(userSettings.value("logfileLocation").toString() == "/")
-    {
-        // revert to previous user setting
-        userSettings.setValue("logfileLocation", previousPath);
-        qDebug() << "No logfile directory set. Reverting to previous path: " << previousPath;
-    }
-    // otherwise, assume successful logfile directory creation
-    else
-    {
-        qDebug() << "New log file directory set: " << userSettings.value("logfileLocation").toString();
-    }
-
-    //sync user settings
-    userSettings.sync();
-}
-
-//opens log file directory to prompt user to select log file. data from log file is then
-//loaded into events class and rendered in events page.
-void MainWindow::on_load_events_from_logfile_clicked()
-{
-    //declare file browser class
-    QFileDialog dialog(this);
-
-    //set initial directory to log file directory set by user
-    dialog.setDirectory(userSettings.value("logfileLocation").toString());
-
-    // Open a file dialog for the user to select a logfile
-    QString selectedFile = dialog.getOpenFileName(this, tr("Select Log File"), QString(), tr("Log Files (*.txt);;All Files (*)"));
-
-    // Check if the user canceled the dialog
-    if (selectedFile.isEmpty())
-    {
-        return;
-    }
-
-    #if DEV_MODE
-        logEmptyLine();
-    #endif
-    qDebug() << "Loading data from: " << selectedFile;
-
-    // Pass the selected file name to the loadDataFromLogFile function
-    int result = events->loadDataFromLogFile(events, selectedFile);
-
-    // Handle the result if needed
-    if (result == INCORRECT_FORMAT)
-    {
-        // Handle error
-        qDebug() << "Log file was of incorrect format.";
-        notifyUser("Load failed on corrupt logfile.", true);
-    }
-    else if (result == DATA_NOT_FOUND)
-    {
-        qDebug() << "Log file could not be found";
-        notifyUser("Load failed on missing logfile.", true);
-    }
-    else
-    {
-        notifyUser("Logfile loaded.", selectedFile, false);
-    }
-
-    //refresh the events output
-    refreshEventsOutput();
-}
 
 //toggle colored events output (from settings page)
 void MainWindow::on_colored_events_output_stateChanged(int arg1)
@@ -468,17 +505,19 @@ void MainWindow::on_colored_events_output_stateChanged(int arg1)
     //arg1 represents the state of the checkbox
     switch(arg1)
     {
-        //unchecked
-        case 0:
-            coloredEventOutput = false;
-            break;
+    //unchecked
+    case 0:
+        coloredEventOutput = false;
+        break;
 
         //checked
-        default:
-            coloredEventOutput = true;
+    default:
+        coloredEventOutput = true;
     }
 
     userSettings.setValue("coloredEventOutput", coloredEventOutput);
+
+    if (!allowSettingChanges) return;
     refreshEventsOutput();
 
     //write changes to the registry
@@ -495,6 +534,131 @@ void MainWindow::on_auto_save_limit_valueChanged(int arg1)
     userSettings.sync();
 }
 
+void MainWindow::on_connection_timeout_valueChanged(int arg1)
+{
+    connectionTimeout = arg1;
+    userSettings.setValue("connectionTimeout", connectionTimeout);
+
+    //write changes to the registry
+    userSettings.sync();
+}
+
+void MainWindow::on_notify_error_cleared_stateChanged(int arg1)
+{
+    //arg1 represents the state of the checkbox
+    switch(arg1)
+    {
+    //unchecked
+    case 0:
+        notifyOnErrorCleared = false;
+
+        break;
+
+        //checked
+    default:
+        notifyOnErrorCleared = true;
+    }
+
+    userSettings.setValue("notifyOnErrorCleared", notifyOnErrorCleared);
+
+    userSettings.sync();
+}
+
+void MainWindow::on_advanced_log_file_stateChanged(int arg1)
+{
+    //arg1 represents the state of the checkbox
+    switch(arg1)
+    {
+    //unchecked
+    case 0:
+        advancedLogFile = false;
+
+        break;
+
+        //checked
+    default:
+        advancedLogFile = true;
+    }
+
+    userSettings.setValue("advancedLogFile", advancedLogFile);
+
+    //check if ddmCon does not exist
+    if (ddmCon == NULL)
+    {
+        return;
+    }
+
+    //if connected, add updated advanced log file setting notification to logfile
+    if (ddmCon->connected)
+    {
+        QFile file(autosaveLogFile);
+
+        //attempt to open in append mode
+        if (!file.open(QIODevice::Append | QIODevice::Text))
+        {
+            qDebug() <<  "Error: on_advanced_log_file_stateChanged could not open log file for appending: " << autosaveLogFile;
+        }
+        else
+        {
+            QTextStream out(&file);
+
+            if (advancedLogFile)
+            {
+                out << ADVANCED_LOG_FILE_INDICATOR + "ADVANCED LOG FILE ENABLED" << "\n";
+            }
+            else
+            {
+                out << ADVANCED_LOG_FILE_INDICATOR + "ADVANCED LOG FILE DISABLED" << "\n";
+            }
+            file.close();
+        }
+    }
+
+    //write changes to the registry
+    userSettings.sync();
+}
+
+//toggle for ram clearing on events class
+void MainWindow::on_ram_clearing_stateChanged(int arg1)
+{
+    //arg1 represents the state of the checkbox
+    switch(arg1)
+    {
+    //unchecked
+    case 0:
+         userSettings.setValue("RAMClearing", false);
+
+        break;
+
+        //checked
+    default:
+        userSettings.setValue("RAMClearing", true);
+    }
+
+    if (!allowSettingChanges) return;
+
+    //update value in events class
+    events->RAMClearing = userSettings.value("RAMClearing").toBool();
+
+    //set visibility of max nodes based on ram clearing setting
+    ui->max_data_nodes->setVisible(events->RAMClearing);
+    ui->max_data_nodes_label->setVisible(events->RAMClearing);
+
+    userSettings.sync();
+}
+
+//updates value of max data nodes for events class
+void MainWindow::on_max_data_nodes_valueChanged(int arg1)
+{
+    if (!allowSettingChanges) return;
+
+    events->maxNodes = arg1;
+    userSettings.setValue("maxDataNodes", events->maxNodes);
+
+    //write changes to the registry
+    userSettings.sync();
+}
+
 //======================================================================================
 //DEV_MODE exclusive methods
 //======================================================================================
@@ -506,7 +670,7 @@ void MainWindow::on_DevPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(1);
     resetPageButton();
-    ui->DevPageButton->setStyleSheet("color: rgb(255, 255, 255);background-color: #9747FF;font: 16pt Segoe UI;");
+    ui->DevPageButton->setStyleSheet(SELECTED_NAV_BUTTON_STYLE);
 }
 
 //manually clear errors from dev page
@@ -543,6 +707,8 @@ void MainWindow::on_CSim_button_clicked()
 
         //enable csim port selection
         ui->csim_port_selection->setEnabled(true);
+
+        ui->non_cleared_error_selection->clear();
     }
     //csim is not running, start it
     else
@@ -654,6 +820,8 @@ void MainWindow::on_send_message_button_clicked()
 
         // Send message through csim port
         conn->transmit(userInput);
+
+        conn->serialPort.waitForReadyRead(1000);
     }
 }
 
