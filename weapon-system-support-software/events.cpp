@@ -169,23 +169,23 @@ void Events::addError(int id, QString timeStamp, QString eventString, bool clear
 void Events::freeLinkedLists()
 {
     // Free memory for the event linked list
-    //get ptr to head node
+    // get ptr to head node
     EventNode *wkgPtr = headEventNode;
     EventNode *wkgPtr2;
 
-    //loop through the list
+    // loop through the list
     while (wkgPtr != nullptr)
     {
-        //save location of next node
+        // save location of next node
         wkgPtr2 = wkgPtr->nextPtr;
 
-        //delete current node
+        // delete current node
         delete wkgPtr;
 
-        //iterate to next node
+        // iterate to next node
         wkgPtr = wkgPtr2;
     }
-    //ensure head and tail point to null symbolizing empty list
+    // ensure head and tail point to null symbolizing empty list
     headEventNode = lastEventNode = nullptr;
 
     // Free memory for the error linked list
@@ -205,15 +205,14 @@ void Events::freeLinkedLists()
         wkgErrPtr = wkgErrPtr2;
     }
 
-    //ensure head and tail point to null symbolizing empty list
+    // ensure head and tail point to null symbolizing empty list
     headErrorNode = lastErrorNode = nullptr;
-
+  
     //free counters
     totalEvents=0;
     totalErrors=0;
     totalNodes=0;
     totalClearedErrors=0;
-
 
     #if DEV_MODE && EVENTS_DEBUG
     qDebug() << "Event and error linked lists freed";

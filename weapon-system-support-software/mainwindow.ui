@@ -44,6 +44,9 @@ border-color: rgb(255, 255, 255);</string>
     </sizepolicy>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout_2">
+    <property name="spacing">
+     <number>2</number>
+    </property>
     <item>
      <widget class="QWidget" name="ButtonWidget" native="true">
       <property name="minimumSize">
@@ -75,7 +78,7 @@ border-color: rgb(255, 255, 255);</string>
         <number>0</number>
        </property>
        <property name="bottomMargin">
-        <number>9</number>
+        <number>0</number>
        </property>
        <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
         <widget class="QPushButton" name="EventsPageButton">
@@ -260,7 +263,7 @@ QPushButton::hover {
          <property name="maximumSize">
           <size>
            <width>16777215</width>
-           <height>35</height>
+           <height>40</height>
           </size>
          </property>
          <property name="styleSheet">
@@ -5006,7 +5009,7 @@ border-color: rgb(255, 255, 255);</string>
         </property>
         <property name="maximumSize">
          <size>
-          <width>80</width>
+          <width>100</width>
           <height>25</height>
          </size>
         </property>
@@ -5111,7 +5114,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
         </property>
         <property name="maximumSize">
          <size>
-          <width>50</width>
+          <width>80</width>
           <height>25</height>
          </size>
         </property>
@@ -5167,7 +5170,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
         </property>
         <property name="maximumSize">
          <size>
-          <width>50</width>
+          <width>80</width>
           <height>25</height>
          </size>
         </property>
