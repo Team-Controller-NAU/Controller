@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
     ddmCon(nullptr),
     status(new Status()),
     electricalData(new electrical()),
+    events(new Events()),
 
     //this determines what will be shown on the events page
     eventFilter(ALL),
@@ -25,6 +26,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     // timer is used to update controller running time
     runningControllerTimer( new QTimer(this) ),
+
+    //timer for preventing spam of handshake button
+    handshakeCooldownTimer(new QTimer(this)),
 
     //init user settings to our organization and project
     userSettings("Team Controller", "WSSS"),
@@ -46,25 +50,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     //setup user settings and init settings related gui elements
     setupSettings();
-
-    //setup events with ram clearing and max nodes taken from settings
-    events = new Events(userSettings.value("RAMClearing").toBool(), userSettings.value("maxDataNodes").toInt());
-
-    //setup signal and slot to notify user when ram is cleared from events
-    //this signal connects to a lambda function so we can call more than 1 function
-    //using 1 signal-slot connection
-    connect(events, &Events::RAMCleared, this, [=]() {
-        notifyUser("Event class cleared",
-        "Events and errors were removed from RAM to improve performance. "
-        "They are still being counted by counters and will be visible if you "
-        "load this session again after it ends", false);
-
-        //show truncated label on the events page to tell user not all nodes are displayed
-        ui->truncated_label->setVisible(true);
-
-        //get rid of outdated display
-        refreshEventsOutput();
-    });
 
     //if dev mode is active, init CSim
     #if DEV_MODE
@@ -102,12 +87,18 @@ MainWindow::MainWindow(QWidget *parent)
         ui->DevPageButton->setVisible(false);
     #endif
 
+    //Timers ===============================================================================
+
     //set handshake timer interval
     handshakeTimer->setInterval(HANDSHAKE_INTERVAL);
 
     //connect handshake function to a timer. After each interval handshake will be called.
     //this is necessary to prevent the gui from freezing. signals stop when timer is stoped
     connect(handshakeTimer, &QTimer::timeout, this, &MainWindow::handshake);
+
+    //prevents spamming of the handshake button which may cause crash
+    handshakeCooldownTimer->setInterval(HANDSHAKE_COOLDOWN_TIME);
+    handshakeCooldownTimer->setSingleShot(true);
 
     //connect clear notification process to the notification timer. If run, the process
     //will trigger after the notification timeout
@@ -123,13 +114,11 @@ MainWindow::MainWindow(QWidget *parent)
     //connect running controller timer to slot
     runningControllerTimer->setInterval(ONE_SECOND);
     connect(runningControllerTimer, &QTimer::timeout, this, &MainWindow::updateElapsedTime);
+    //======================================================================================
 
     //init trigger to grey buttons until updated by serial status updates
     ui->trigger1->setPixmap(BLANK_LIGHT);
     ui->trigger2->setPixmap(BLANK_LIGHT);
-
-    //will be disabled until RAM is cleared
-    ui->truncated_label->setVisible(false);
 
     // ensures that the application will open on the events page
     on_EventsPageButton_clicked();
@@ -160,6 +149,7 @@ MainWindow::~MainWindow()
     delete notificationTimer;
     delete lastMessageTimer;
     delete runningControllerTimer;
+    delete handshakeCooldownTimer;
     delete electricalData;
     #if DEV_MODE
         delete csimHandle;
@@ -182,8 +172,6 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
     {
         //disable changes to connection related settings
         disableConnectionChanges();
-
-        ui->truncated_label->setVisible(false);
 
         //stop handshake protocols
         handshakeTimer->stop();
@@ -343,6 +331,7 @@ void MainWindow::readSerialData()
         // declare variables
         SerialMessageIdentifier messageId;
         int errorId;
+        int result;
 
         //get serialized string from port
         QByteArray serializedMessage = ddmCon->serialPort.readLine();
@@ -519,23 +508,34 @@ void MainWindow::readSerialData()
                 qDebug() << "Message id: clear error " << message << qPrintable("\n");
                 #endif
 
-                errorId = message.left(message.indexOf(DELIMETER)).toInt();
+                //extract error id from message
+                errorId = message.left(message.indexOf(DELIMETER)).trimmed().toInt();
 
-                if (!events->clearErrorInLogFile(autosaveLogFile, errorId))
-                {
-                    notifyUser("Failed to clear error in logfile", QString::number(errorId),true);
-                }
+                //attempt clear
+                result = events->clearError(errorId, autosaveLogFile );
 
-                //clear error with given id on ll and log file, notify if fail
-                if (!events->clearError(errorId) && ui->truncated_label->isHidden())
+                //check for fail
+                if (result != SUCCESS )
                 {
-                    notifyUser("Failed to clear error", message, true);
+                    //notify user of fail type
+                    if (result == FAILED_TO_CLEAR)
+                    {
+                        notifyUser("Failed to clear error", message, true);
+                    }
+                    else if (result == FAILED_TO_CLEAR_FROM_LOGFILE)
+                    {
+                        notifyUser("Error "+ QString::number(errorId) + " can't be cleared from logfile", true);
+                    }
                 }
                 //otherwise success
                 else
                 {
-                    //clear error in events output
+                    //attempt to clear in events output
                     clearErrorFromEventsOutput(errorId);
+
+                    //update counters
+                    ui->ClearedErrorsOutput->setText(QString::number(events->totalClearedErrors));
+                    ui->statusClearedErrors->setText(QString::number(events->totalClearedErrors));
 
                     if (notifyOnErrorCleared) notifyUser("Error " + message.left(message.indexOf(DELIMETER)) + " Cleared", false);
 
@@ -674,6 +674,7 @@ void MainWindow::disableConnectionChanges()
     ui->load_events_from_logfile->setDisabled(true);
     ui->restore_Button->setDisabled(true);
     ui->refresh_serial_port_selections->setVisible(false);
+    ui->setLogfileFolder->setDisabled(true);
 }
 
 //makes all settings in connection settings editable (call when ddm connection
@@ -689,6 +690,7 @@ void MainWindow::enableConnectionChanges()
     ui->load_events_from_logfile->setEnabled(true);
     ui->restore_Button->setEnabled(true);
     ui->refresh_serial_port_selections->setVisible(true);
+    ui->setLogfileFolder->setEnabled(true);
 }
 
 //checks if user has setup a custom log file directory, if not, the default directory is selected
@@ -890,33 +892,6 @@ void MainWindow::setupSettings()
 
     //==============================================================
 
-    // Check if ram clearing setting does not exist
-    if (!userSettings.contains("RAMClearing") || !userSettings.value("RAMClearing").isValid()) {
-        // set the default value
-        userSettings.setValue("RAMClearing", INITIAL_RAM_CLEARING);
-    }
-
-    //set gui display to match
-    ui->ram_clearing->setChecked(userSettings.value("RAMClearing").toBool());
-
-    //check if the max nodes setting does not exist
-    if (!userSettings.contains("maxDataNodes") || !userSettings.value("maxDataNodes").isValid()) {
-        // If it doesn't exist or is not valid, set the default value
-        userSettings.setValue("maxDataNodes", INITIAL_MAX_DATA_NODES);
-    }
-
-    //update gui to match
-    ui->max_data_nodes->setValue(userSettings.value("maxDataNodes").toInt());
-
-    //dont allow the user to go below this value for max data nodes
-    ui->max_data_nodes->setMinimum(MIN_DATA_NODES_BEFORE_RAM_CLEAR);
-
-    //set max node visibility based on ram clearing setting
-    ui->max_data_nodes->setVisible(userSettings.value("RAMClearing").toBool());
-    ui->max_data_nodes_label->setVisible(userSettings.value("RAMClearing").toBool());
-
-    //==============================================================
-
     //sets up text options in connection settings drop down boxes
     setupConnectionPage();
 
@@ -1054,23 +1029,17 @@ void MainWindow::updateTimeSinceLastMessage()
     }
 }
 
-//overloaded function to add simplicity when possible
-void MainWindow::updateEventsOutput(EventNode *event)
-{
-    updateEventsOutput(events->nodeToString(event), event->error, event->cleared);
-}
-
-
 //updates gui with given message, dynamically colors output based on the type of outString
 //accounts for filtering settings and only renders the outString if it is being filtered for
 // by the user
-void MainWindow::updateEventsOutput(QString outString, bool error, bool cleared)
+void MainWindow::updateEventsOutput(EventNode *event)
 {
     QTextDocument document;
     QString richText;
+    QString outString = events->nodeToString(event);
 
     //check if we have an event as input and check if filter allows printing events
-    if (!error )
+    if (!event->isError() )
     {
         if (eventFilter == EVENTS || eventFilter == ALL)
         {
@@ -1085,7 +1054,7 @@ void MainWindow::updateEventsOutput(QString outString, bool error, bool cleared)
         }
     }
     //otherwise check for cleared error and if filter allows printing cleared errors
-    else if (cleared)
+    else if (static_cast<ErrorNode *>(event)->cleared)
     {
         if (eventFilter == ALL || eventFilter == ERRORS || eventFilter == CLEARED_ERRORS)
         {
@@ -1132,13 +1101,13 @@ void MainWindow::updateEventsOutput(QString outString, bool error, bool cleared)
     ui->TotalEventsOutput->setText(QString::number(events->totalEvents));
     ui->statusEventOutput->setText(QString::number(events->totalEvents));
 
-    if (!error) return;
+    if (!event->isError()) return;
 
     // update total errors gui
     ui->TotalErrorsOutput->setText(QString::number(events->totalErrors));
     ui->statusErrorOutput->setText(QString::number(events->totalErrors));
 
-    if ( cleared )
+    if ( static_cast<ErrorNode *>(event)->cleared )
     {
         // update cleared errors gui
         ui->ClearedErrorsOutput->setText(QString::number(events->totalClearedErrors));
@@ -1158,7 +1127,7 @@ void MainWindow::refreshEventsOutput()
     ui->events_output->clear();
 
     //init vars
-    EventNode *wkgErrPtr = events->headErrorNode;
+    ErrorNode *wkgErrPtr = events->headErrorNode;
     EventNode *wkgEventPtr = events->headEventNode;
     EventNode *nextPrintPtr;
     bool printErr;
@@ -1460,7 +1429,7 @@ void MainWindow::update_non_cleared_error_selection()
     if (csimHandle->eventsPtr != nullptr)
     {
         //get head node
-        EventNode *wkgPtr = csimHandle->eventsPtr->headErrorNode;
+        ErrorNode *wkgPtr = csimHandle->eventsPtr->headErrorNode;
 
         //loop until list ends
         while (wkgPtr != nullptr)

@@ -28,6 +28,7 @@ public:
     //specified by value in constants.h, generates events and errors randomly, clears non-cleared errors randomly
     //void simulateWeaponController();
     bool stop;
+    bool pause;
 
     //set true for csim to generate data for 2 triggers, false for 1 trigger
     bool secondTrigger;

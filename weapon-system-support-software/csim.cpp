@@ -6,7 +6,7 @@
 CSim::CSim(QObject *parent, QString portName)
     : QThread(parent), stop(false), portName(portName),
     connPtr(nullptr), eventsPtr(nullptr), startupTime(QDateTime::currentMSecsSinceEpoch()),
-    secondTrigger(true)
+    secondTrigger(true), pause(false)
 {
     // Avoid class initialization until thread is running
 }
@@ -254,7 +254,7 @@ void CSim::run()
 
         //init events class (csim only uses this to store non cleared errors so that it can
         //clear them later)
-        Events *events(new Events(false, 0));
+        Events *events(new Events());
         eventsPtr = events;
 
         //for status use smart pointer for automatic memory management (resources auto free when function exits)
@@ -405,7 +405,7 @@ void CSim::run()
                 message += errorMessage + DELIMETER;
 
                 //set cleared / not cleared
-                cleared = randomGenerator.bounded(0,2);
+                cleared = 0;//randomGenerator.bounded(0,2); //temporarily only send active errors
 
                 // append cleared val
                 message += QString::number(cleared) + DELIMETER;
@@ -465,6 +465,8 @@ void CSim::run()
 
             //wait for interval while monitoring serial port
             conn->serialPort.waitForReadyRead(generationInterval);
+
+            while (pause){QCoreApplication::processEvents();}
 
         } //end main execution loop
 
