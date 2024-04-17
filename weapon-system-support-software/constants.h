@@ -176,6 +176,8 @@ const QString ELECTRICAL_MESSAGES[NUM_ELECTRICAL_MESSAGES] = {"Servo Motor, 20, 
                                                               "Servo Motor, 19, 2,,Pump Cooler, 2, 3,,Internal Temp Sensor, 33, 4",
                                                               "Fuel Injector, 27, 1,,Voltage Regulator, 19, 3,,Rotor 1, 9, 13,,Rotor 3, 9, 9,,Exciter Stator, 19, 2"};
 
+const QString TEST_LOG_FILE = QDir::currentPath() + "/testLogFile.txt";
+
 const QString CRC_VERSION = "2F5A1D3E7B9";
 const QString CONTROLLER_VERSION = "6.7.2";
 #endif // DEV_MODE

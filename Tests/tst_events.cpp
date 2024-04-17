@@ -1,9 +1,9 @@
 #include <QCoreApplication>
 #include <QTest>
 #include "../weapon-system-support-software/events.cpp"
+#include "../weapon-system-support-software/constants.h"
 
 // add necessary includes here
-
 class tst_events : public QObject
 {
     Q_OBJECT
@@ -33,7 +33,7 @@ private slots:
 void tst_events::events_constructor()
 {
     // create a new events class object
-    Events *eventObj = new Events(false, 50);
+    Events *eventObj = new Events();
 
     // ensure that member variables are 0 upon initialization
     QCOMPARE(eventObj->totalEvents, 0);
@@ -63,7 +63,7 @@ void tst_events::events_constructor()
 void tst_events::test_addEvent()
 {
     // create a new events class object
-    Events *eventObj = new Events(false, 50);
+    Events *eventObj = new Events();
 
     // providing a seed value for random values
     srand((unsigned) time(nullptr));
@@ -101,7 +101,7 @@ void tst_events::test_addEvent()
 void tst_events::test_addError()
 {
     // create a new events class object
-    Events *eventObj = new Events(false, 50);
+    Events *eventObj = new Events();
 
     // providing a seed value for random values
     srand((unsigned) time(nullptr));
@@ -120,7 +120,7 @@ void tst_events::test_addError()
     QVERIFY(eventObj->lastErrorNode != nullptr);
 
     // create a working node from the headErrorNode
-    EventNode *wkgErrorNode = eventObj->headErrorNode;
+    ErrorNode *wkgErrorNode = eventObj->headErrorNode;
 
     // test the values
     QVERIFY(wkgErrorNode != nullptr);
@@ -128,7 +128,6 @@ void tst_events::test_addError()
     QCOMPARE(wkgErrorNode->timeStamp, timeStamp);
     QCOMPARE(wkgErrorNode->eventString, eventString);
     QCOMPARE(wkgErrorNode->cleared, cleared);
-    QCOMPARE(wkgErrorNode->error, true);
     QCOMPARE(eventObj->totalErrors, 1);
     QCOMPARE(eventObj->totalNodes, 1);
 
@@ -142,7 +141,7 @@ void tst_events::test_addError()
 void tst_events::test_freeLinkedLists()
 {
     // create event object
-    Events *eventObj = new Events(false, 50);
+    Events *eventObj = new Events();
 
     // providing a seed value for random values
     srand((unsigned) time(nullptr));
@@ -171,7 +170,10 @@ void tst_events::test_freeLinkedLists()
     QCOMPARE(eventObj->lastErrorNode, nullptr);
 
     // ensure that member variables are reset back to 0
-    QCOMPARE(eventObj->storedNodes, 0);
+    QCOMPARE(eventObj->totalEvents, 0);
+    QCOMPARE(eventObj->totalErrors, 0);
+    QCOMPARE(eventObj->totalNodes, 0);
+    QCOMPARE(eventObj->totalClearedErrors, 0);
 
     // free
     delete eventObj;
@@ -183,7 +185,7 @@ void tst_events::test_freeLinkedLists()
 void tst_events::test_clearError()
 {
     // create event object
-    Events *eventObj = new Events(false, 50);
+    Events *eventObj = new Events();
 
     // providing a seed value for random values
     srand((unsigned) time(nullptr));
@@ -201,14 +203,14 @@ void tst_events::test_clearError()
     QVERIFY(eventObj->lastErrorNode != nullptr);
 
     // create a working node from the headErrorNode
-    EventNode *wkgErrorNode = eventObj->headErrorNode;
+    ErrorNode *wkgErrorNode = eventObj->headErrorNode;
 
     // verify that this error is not cleared yet
     QCOMPARE(wkgErrorNode->cleared, false);
     QCOMPARE(eventObj->totalClearedErrors, 0);
 
     // clear the error
-    bool result = eventObj->clearError(id);
+    bool result = eventObj->clearError(id, TEST_LOG_FILE);
 
     // verify that this error is now cleared
     QCOMPARE(result, true);
@@ -216,7 +218,7 @@ void tst_events::test_clearError()
     QCOMPARE(eventObj->totalClearedErrors, 1);
 
     // confirm the test fails with improper input
-    result = eventObj->clearError(500);
+    result = eventObj->clearError(500, TEST_LOG_FILE);
     QCOMPARE(result, false);
 
     // free
@@ -229,7 +231,7 @@ void tst_events::test_clearError()
 void tst_events::test_getNextNodeToPrint()
 {
     // create event object
-    Events *eventObj = new Events(false, 50);
+    Events *eventObj = new Events();
 
     // providing a seed value for random values
     srand((unsigned) time(nullptr));
@@ -254,7 +256,7 @@ void tst_events::test_getNextNodeToPrint()
     eventObj->addError(errorId, timeStamp, eventString, cleared);
 
     // create working nodes from the headErrorNode and headEventNode
-    EventNode *wkgErrorNode = eventObj->headErrorNode;
+    ErrorNode *wkgErrorNode = eventObj->headErrorNode;
     EventNode *wkgEventNode = eventObj->headEventNode;
     bool printErr; // placeholder bool
 
@@ -275,7 +277,7 @@ void tst_events::test_getNextNodeToPrint()
 void tst_events::test_nodeToString()
 {
     // set up an example node
-    Events *eventObj = new Events(false, 50);
+    Events *eventObj = new Events();
     EventNode *exampleNode = new EventNode();
 
     // provide a seed value for random values
@@ -310,7 +312,7 @@ void tst_events::test_nodeToString()
 void tst_events::test_stringToNode()
 {
     // create event object
-    Events *eventObj = new Events(false, 50);
+    Events *eventObj = new Events();
 
     // create example string message
     QString exampleString = "ID: 5, 0:02:22, Sample test message 1";
@@ -334,7 +336,7 @@ void tst_events::test_stringToNode()
         QCOMPARE(wkgEventNode->id, 5);
         QCOMPARE(wkgEventNode->timeStamp, "0:02:22");
         QCOMPARE(wkgEventNode->eventString, "Sample test message 1");
-        QCOMPARE(wkgEventNode->error, false);
+        QCOMPARE(wkgEventNode->isError(), false);
         QCOMPARE(eventObj->totalEvents, 1);
         QCOMPARE(eventObj->totalNodes, 1);
     }
@@ -358,7 +360,7 @@ void tst_events::test_stringToNode()
 void tst_events::test_loadEventData()
 {
     // create a new events class object
-    Events *eventObj = new Events(false, 50);
+    Events *eventObj = new Events();
 
     // set up some variables
     QString exampleMsg = "30,0:01:15,Sample Test message 1,\n";
@@ -401,7 +403,7 @@ void tst_events::test_loadEventData()
 
 void tst_events::test_loadEventData_badInput_correctDelim()
 {
-    Events *eventObj = new Events(false, 50);
+    Events *eventObj = new Events();
 
     // check out of bounds id
     QString dataMsg = "-30,0:01:15,Sample Test message 1,\n";
@@ -427,7 +429,7 @@ void tst_events::test_loadEventData_badInput_correctDelim()
 void tst_events::test_loadErrorData()
 {
     // create a new events class object
-    Events *eventObj = new Events(false, 50);
+    Events *eventObj = new Events();
 
     // set up some variables
     QString exampleMsg = "30,0:01:15,Sample Test message 1,1,\n";
@@ -441,7 +443,7 @@ void tst_events::test_loadErrorData()
     QVERIFY(eventObj->lastErrorNode != nullptr);
 
     // create a working node from the headEventNode
-    EventNode *wkgErrorNode = eventObj->headErrorNode;
+    ErrorNode *wkgErrorNode = eventObj->headErrorNode;
 
     // test the values
     if (wkgErrorNode != nullptr)
@@ -472,7 +474,7 @@ void tst_events::test_loadErrorData()
 
 void tst_events::test_loadErrorData_badInput_correctDelim()
 {
-    Events *eventObj = new Events(false, 50);
+    Events *eventObj = new Events();
 
     //check for invalid id
     QString dataMsg = "-30,0:01:15,Sample Test message 1,1,\n";
@@ -499,7 +501,7 @@ void tst_events::test_loadErrorData_badInput_correctDelim()
 void tst_events::test_loadEventDump()
 {
     // create a new events class object
-    Events *eventObj = new Events(false, 50);
+    Events *eventObj = new Events();
 
     // set up some variables
     QString exampleMsg = "30,0:01:15,Sample Test message 1,,31,0:02:31,Sample Test message 2";
@@ -552,7 +554,7 @@ void tst_events::test_loadEventDump()
 void tst_events::test_loadErrorDump()
 {
     // create a new events class object
-    Events *eventObj = new Events(false, 50);
+    Events *eventObj = new Events();
 
     // set up some variables
     QString exampleMsg = "30,0:01:15,Sample Test message 1,1,,31,0:02:31,Sample Test message 2,0";
@@ -566,7 +568,7 @@ void tst_events::test_loadErrorDump()
     QVERIFY(eventObj->lastErrorNode != nullptr);
 
     // create a working node from the headEventNode
-    EventNode *wkgErrorNode = eventObj->headErrorNode;
+    ErrorNode *wkgErrorNode = eventObj->headErrorNode;
 
     // test the values
     if (wkgErrorNode != nullptr && wkgErrorNode->nextPtr != nullptr)
