@@ -1,5 +1,6 @@
 
 
+
 # Weapon System Support Software
 
 Weapon System Support Software is a downloadable application which is designed to receive data from Northrop Grumman weapon controllers and display the data in an easy to use GUI. Team Controller is a senior Computer Science capstone group for the Fall 2023 and Spring 2024 semesters from Northern Arizona University. For more information about the project and our team members, visit our [website](https://ceias.nau.edu/capstone/projects/CS/2024/TeamController_F23/)!
@@ -35,7 +36,22 @@ Please reference the **Developer Guide** for comprehensive implementation inform
 ## Version History
 
 ### v6.0.0-alpha
-	- In progress...
+	- Various bug fixes and optimizations
+ 	- GUI enhancements
+	 	- Revamped Status page
+	 	- Styling for buttons on mouse hover
+	 	- Custom assets for drop down menus
+	 	- Fixed zoom related display issues
+	 	- Refresh serial ports button
+	 	- Search button on events page
+	 - Advanced log file optional setting
+	 - Notify on error cleared optional setting
+	 - Added clear error functionality for log files
+	 - Enhanced unit testing
+	 - Documentation
+		 - Developer Guide
+		 - Installation Guide
+		 - Updated old diagrams
 ### v5.0.0-alpha
 	- Various bug fixes and optimizations
 	- Notifications page
