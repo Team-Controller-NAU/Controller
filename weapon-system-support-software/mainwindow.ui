@@ -441,11 +441,131 @@ font: 16pt &quot;Segoe UI&quot;;</string>
             </sizepolicy>
            </property>
            <property name="currentIndex">
-            <number>2</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="Events_page">
             <layout class="QGridLayout" name="gridLayout_3">
-             <item row="3" column="0" rowspan="3" colspan="6">
+             <item row="0" column="0" alignment="Qt::AlignLeft">
+              <widget class="QLabel" name="Event_Header">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="font">
+                <font>
+                 <family>Segoe UI</family>
+                 <pointsize>24</pointsize>
+                 <italic>false</italic>
+                 <bold>true</bold>
+                </font>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">color: rgb(255, 255, 255);
+font: 700 24pt &quot;Segoe UI&quot;;</string>
+               </property>
+               <property name="text">
+                <string>Events</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="4" alignment="Qt::AlignBottom">
+              <widget class="QComboBox" name="FilterBox">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>100</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>175</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Filter the events output&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QComboBox {
+	padding-bottom: 3px;
+	color: rgb(255, 255, 255);
+	background-color: rgb(47, 47, 47);
+	border: 1px solid;
+	border-color: rgb(64, 64, 64);
+	font: 12pt &quot;Segoe UI&quot;;
+}
+
+QComboBox::hover {
+	background-color: rgb(117, 117, 117);
+}
+
+QComboBox::items {
+	color: rgb(255, 255, 255);
+}
+
+QListView {
+	color: rgb(255, 255, 255);
+}
+
+QToolTip{
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid black;
+}
+
+QComboBox::drop-down 
+{
+    border: 0px; 
+}
+
+QComboBox::down-arrow {
+    image: url(:/resources/Images/white-down-arrow.png);
+    width: 15px;
+    height: 15px;
+}</string>
+               </property>
+               <property name="editable">
+                <bool>false</bool>
+               </property>
+               <property name="currentText">
+                <string> Default</string>
+               </property>
+               <item>
+                <property name="text">
+                 <string> Default</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string> All Events</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string> All Errors</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string> Cleared Errors</string>
+                </property>
+               </item>
+               <item>
+                <property name="text">
+                 <string> Active Errors</string>
+                </property>
+               </item>
+              </widget>
+             </item>
+             <item row="3" column="0" rowspan="3" colspan="5">
               <widget class="QTextEdit" name="events_output">
                <property name="styleSheet">
                 <string notr="true">color: rgb(255, 255, 255);
@@ -457,7 +577,69 @@ border-color: rgb(255, 255, 255);</string>
                </property>
               </widget>
              </item>
-             <item row="7" column="0" colspan="6">
+             <item row="0" column="3" alignment="Qt::AlignBottom">
+              <widget class="QPushButton" name="searchButton">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>30</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>30</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Filtered Search&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QPushButton {
+	padding-bottom: 3px;
+	color: rgb(255, 255, 255);
+	background-color: rgb(47, 47, 47);
+	border: 1px solid;
+	border-color: rgb(64, 64, 64);
+	font: 12pt &quot;Segoe UI&quot;;
+}
+
+QPushButton::hover {
+	background-color: rgb(117, 117, 117);
+}
+
+QPushButton::pressed {
+	background-color: rgb(45, 45, 45);
+}
+
+QToolTip{
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid black;
+}</string>
+               </property>
+               <property name="text">
+                <string/>
+               </property>
+               <property name="icon">
+                <iconset resource="resources.qrc">
+                 <normaloff>:/resources/Images/search.png</normaloff>:/resources/Images/search.png</iconset>
+               </property>
+               <property name="iconSize">
+                <size>
+                 <width>30</width>
+                 <height>30</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item row="7" column="0" colspan="5">
               <layout class="QGridLayout" name="EventStatus">
                <property name="verticalSpacing">
                 <number>1</number>
@@ -478,6 +660,10 @@ border-color: rgb(255, 255, 255);</string>
 	border: 1px solid;
 	border-color: rgb(64, 64, 64);
 	font: 12pt &quot;Segoe UI&quot;;
+}
+
+QPushButton:disabled {
+     color: #666666; 
 }
 
 QPushButton::hover {
@@ -814,211 +1000,6 @@ font: 22pt &quot;Segoe UI&quot;;</string>
                 </widget>
                </item>
               </layout>
-             </item>
-             <item row="0" column="4" alignment="Qt::AlignBottom">
-              <widget class="QPushButton" name="searchButton">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>30</width>
-                 <height>30</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>30</width>
-                 <height>30</height>
-                </size>
-               </property>
-               <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Filtered Search&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">QPushButton {
-	padding-bottom: 3px;
-	color: rgb(255, 255, 255);
-	background-color: rgb(47, 47, 47);
-	border: 1px solid;
-	border-color: rgb(64, 64, 64);
-	font: 12pt &quot;Segoe UI&quot;;
-}
-
-QPushButton::hover {
-	background-color: rgb(117, 117, 117);
-}
-
-QPushButton::pressed {
-	background-color: rgb(45, 45, 45);
-}
-
-QToolTip{
-    background-color: #000000;
-    color: #FFFFFF;
-    border: 1px solid black;
-}</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-               <property name="icon">
-                <iconset resource="resources.qrc">
-                 <normaloff>:/resources/Images/search.png</normaloff>:/resources/Images/search.png</iconset>
-               </property>
-               <property name="iconSize">
-                <size>
-                 <width>30</width>
-                 <height>30</height>
-                </size>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="0" alignment="Qt::AlignLeft">
-              <widget class="QLabel" name="Event_Header">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="font">
-                <font>
-                 <family>Segoe UI</family>
-                 <pointsize>24</pointsize>
-                 <italic>false</italic>
-                 <bold>true</bold>
-                </font>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">color: rgb(255, 255, 255);
-font: 700 24pt &quot;Segoe UI&quot;;</string>
-               </property>
-               <property name="text">
-                <string>Events</string>
-               </property>
-              </widget>
-             </item>
-             <item row="0" column="5" alignment="Qt::AlignBottom">
-              <widget class="QComboBox" name="FilterBox">
-               <property name="minimumSize">
-                <size>
-                 <width>0</width>
-                 <height>30</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>16777215</width>
-                 <height>30</height>
-                </size>
-               </property>
-               <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Filter the events output&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">QComboBox {
-	padding-bottom: 3px;
-	color: rgb(255, 255, 255);
-	background-color: rgb(47, 47, 47);
-	border: 1px solid;
-	border-color: rgb(64, 64, 64);
-	font: 12pt &quot;Segoe UI&quot;;
-}
-
-QComboBox::hover {
-	background-color: rgb(117, 117, 117);
-}
-
-QComboBox::items {
-	color: rgb(255, 255, 255);
-}
-
-QListView {
-	color: rgb(255, 255, 255);
-}
-
-QToolTip{
-    background-color: #000000;
-    color: #FFFFFF;
-    border: 1px solid black;
-}
-
-QComboBox::drop-down 
-{
-    border: 0px; 
-}
-
-QComboBox::down-arrow {
-    image: url(:/resources/Images/white-down-arrow.png);
-    width: 15px;
-    height: 15px;
-}</string>
-               </property>
-               <property name="editable">
-                <bool>false</bool>
-               </property>
-               <property name="currentText">
-                <string> Default</string>
-               </property>
-               <item>
-                <property name="text">
-                 <string> Default</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string> All Events</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string> All Errors</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string> Cleared Errors</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string> Active Errors</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-             <item row="0" column="3">
-              <widget class="QLabel" name="truncated_label">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>130</width>
-                 <height>40</height>
-                </size>
-               </property>
-               <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Not all events are being displayed. This  improves performance.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">	color: orange;
-	font: 16pt &quot;Segoe UI&quot;;</string>
-               </property>
-               <property name="text">
-                <string>Truncated</string>
-               </property>
-               <property name="alignment">
-                <set>Qt::AlignBottom|Qt::AlignHCenter</set>
-               </property>
-              </widget>
              </item>
             </layout>
            </widget>
@@ -1377,6 +1358,26 @@ li.checked::marker { content: &quot;\2612&quot;; }
              </property>
              <property name="text">
               <string>Generation Interval</string>
+             </property>
+            </widget>
+            <widget class="QPushButton" name="pause_csim_button">
+             <property name="geometry">
+              <rect>
+               <x>600</x>
+               <y>110</y>
+               <width>161</width>
+               <height>21</height>
+              </rect>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">background-color: rgb(47, 47, 47);
+color: rgb(255, 255, 255);
+border-color: rgb(255, 255, 255);
+border-top-color: rgb(255, 255, 255);
+border-right-color: rgb(255, 255, 255);</string>
+             </property>
+             <property name="text">
+              <string>pause</string>
              </property>
             </widget>
            </widget>
@@ -2078,7 +2079,7 @@ border-color: rgb(255, 255, 255);</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>1033</width>
+                  <width>892</width>
                   <height>736</height>
                  </rect>
                 </property>
@@ -4650,203 +4651,18 @@ QToolTip{
            </widget>
            <widget class="QWidget" name="Settings_Page">
             <layout class="QGridLayout" name="gridLayout_5">
-             <item row="1" column="0">
-              <spacer name="verticalSpacer_4">
+             <item row="11" column="1">
+              <spacer name="verticalSpacer_5">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeType">
-                <enum>QSizePolicy::Fixed</enum>
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
                  <width>20</width>
-                 <height>10</height>
+                 <height>40</height>
                 </size>
                </property>
               </spacer>
-             </item>
-             <item row="12" column="0">
-              <widget class="QCheckBox" name="ram_clearing">
-               <property name="maximumSize">
-                <size>
-                 <width>400</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;When number of nodes gets high clear them out of RAM to improve performance. They will remain in the log file just not in the event page output.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">QCheckBox {
-	color: white;
-	font: 20pt &quot;Segoe UI&quot;;
-}
-
-
-QCheckBox::indicator {
-	width: 20px;
-	height: 20px;
-}</string>
-               </property>
-               <property name="text">
-                <string>RAM Clearing</string>
-               </property>
-              </widget>
-             </item>
-             <item row="8" column="1" colspan="2">
-              <widget class="QLabel" name="connection_timeout_label">
-               <property name="styleSheet">
-                <string notr="true">QLabel {
-	color: white;
-	font: 20pt &quot;Segoe UI&quot;;
-}</string>
-               </property>
-               <property name="text">
-                <string>Connection Timeout Duration (msec)</string>
-               </property>
-              </widget>
-             </item>
-             <item row="10" column="1" colspan="2">
-              <widget class="QLabel" name="auto_save_limit_label">
-               <property name="styleSheet">
-                <string notr="true">QLabel {
-	color: white;
-	font: 20pt &quot;Segoe UI&quot;;
-}</string>
-               </property>
-               <property name="text">
-                <string>Auto Saved Log File Limit</string>
-               </property>
-              </widget>
-             </item>
-             <item row="6" column="0" colspan="2">
-              <widget class="QCheckBox" name="notify_error_cleared">
-               <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Causes notification when an error is retroactively cleared by controller&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">QCheckBox {
-	color: white;
-	font: 20pt &quot;Segoe UI&quot;;
-}
-
-
-QCheckBox::indicator {
-	width: 20px;
-	height: 20px;
-}</string>
-               </property>
-               <property name="text">
-                <string>Notify on Error Cleared</string>
-               </property>
-              </widget>
-             </item>
-             <item row="12" column="1">
-              <widget class="QSpinBox" name="max_data_nodes">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>200</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;The number of nodes allowed before RAM is cleared&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">QSpinBox {
-	color: white;
-	font: 20pt &quot;Segoe UI&quot;;
-}
-QSpinBox::up-arrow
-{
-	color: rgb(47, 47, 47);
-}
-QSpinBox::down-arrow
-{
-	color: rgb(47, 47, 47);
-}</string>
-               </property>
-               <property name="maximum">
-                <number>999999999</number>
-               </property>
-               <property name="singleStep">
-                <number>50</number>
-               </property>
-              </widget>
-             </item>
-             <item row="3" column="0">
-              <spacer name="verticalSpacer_3">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeType">
-                <enum>QSizePolicy::Fixed</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>10</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="11" column="0">
-              <spacer name="verticalSpacer_12">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeType">
-                <enum>QSizePolicy::Fixed</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>10</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="2" column="0" colspan="2">
-              <widget class="QCheckBox" name="colored_events_output">
-               <property name="styleSheet">
-                <string notr="true">QCheckBox {
-	color: white;
-	font: 20pt &quot;Segoe UI&quot;;
-}
-
-QCheckBox::indicator {
-	width: 20px;
-	height: 20px;
-}</string>
-               </property>
-               <property name="text">
-                <string>Colored Events Output</string>
-               </property>
-               <property name="checked">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="13" column="1">
-              <widget class="QLabel" name="max_data_nodes_label">
-               <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;The number of nodes allowed before RAM is cleared&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">	color: white;
-	font: 20pt &quot;Segoe UI&quot;;</string>
-               </property>
-               <property name="text">
-                <string>Max Data Nodes</string>
-               </property>
-              </widget>
              </item>
              <item row="0" column="0">
               <widget class="QLabel" name="userSettingsLabel">
@@ -4859,62 +4675,8 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
                </property>
               </widget>
              </item>
-             <item row="7" column="0">
-              <spacer name="verticalSpacer_11">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeType">
-                <enum>QSizePolicy::Fixed</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>10</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="9" column="0">
-              <spacer name="verticalSpacer_9">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeType">
-                <enum>QSizePolicy::Fixed</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>10</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="4" column="0" colspan="2">
-              <widget class="QCheckBox" name="advanced_log_file">
-               <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Logs status, electrical and session data.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">QCheckBox {
-	color: white;
-	font: 20pt &quot;Segoe UI&quot;;
-}
-
-
-QCheckBox::indicator {
-	width: 20px;
-	height: 20px;
-}</string>
-               </property>
-               <property name="text">
-                <string>Advanced Log File</string>
-               </property>
-              </widget>
-             </item>
-             <item row="5" column="0">
-              <spacer name="verticalSpacer_10">
+             <item row="1" column="0">
+              <spacer name="verticalSpacer_4">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
                </property>
@@ -4983,6 +4745,145 @@ QToolTip{
                </property>
               </widget>
              </item>
+             <item row="3" column="0">
+              <spacer name="verticalSpacer_3">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>10</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="9" column="0">
+              <spacer name="verticalSpacer_9">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>10</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="7" column="0">
+              <spacer name="verticalSpacer_11">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>10</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="8" column="1" colspan="2">
+              <widget class="QLabel" name="connection_timeout_label">
+               <property name="styleSheet">
+                <string notr="true">QLabel {
+	color: white;
+	font: 20pt &quot;Segoe UI&quot;;
+}</string>
+               </property>
+               <property name="text">
+                <string>Connection Timeout Duration (msec)</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0" colspan="2">
+              <widget class="QCheckBox" name="advanced_log_file">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Logs status, electrical and session data.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QCheckBox {
+	color: white;
+	font: 20pt &quot;Segoe UI&quot;;
+}
+
+
+QCheckBox::indicator {
+	width: 20px;
+	height: 20px;
+}</string>
+               </property>
+               <property name="text">
+                <string>Advanced Log File</string>
+               </property>
+              </widget>
+             </item>
+             <item row="10" column="1" colspan="2">
+              <widget class="QLabel" name="auto_save_limit_label">
+               <property name="styleSheet">
+                <string notr="true">QLabel {
+	color: white;
+	font: 20pt &quot;Segoe UI&quot;;
+}</string>
+               </property>
+               <property name="text">
+                <string>Auto Saved Log File Limit</string>
+               </property>
+              </widget>
+             </item>
+             <item row="6" column="0" colspan="2">
+              <widget class="QCheckBox" name="notify_error_cleared">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Causes notification when an error is retroactively cleared by controller&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QCheckBox {
+	color: white;
+	font: 20pt &quot;Segoe UI&quot;;
+}
+
+
+QCheckBox::indicator {
+	width: 20px;
+	height: 20px;
+}</string>
+               </property>
+               <property name="text">
+                <string>Notify on Error Cleared</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0" colspan="2">
+              <widget class="QCheckBox" name="colored_events_output">
+               <property name="styleSheet">
+                <string notr="true">QCheckBox {
+	color: white;
+	font: 20pt &quot;Segoe UI&quot;;
+}
+
+QCheckBox::indicator {
+	width: 20px;
+	height: 20px;
+}</string>
+               </property>
+               <property name="text">
+                <string>Colored Events Output</string>
+               </property>
+               <property name="checked">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
              <item row="10" column="0">
               <widget class="QSpinBox" name="auto_save_limit">
                <property name="sizePolicy">
@@ -5026,15 +4927,18 @@ QSpinBox::down-arrow
                </property>
               </widget>
              </item>
-             <item row="14" column="1">
-              <spacer name="verticalSpacer_5">
+             <item row="5" column="0">
+              <spacer name="verticalSpacer_10">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
                  <width>20</width>
-                 <height>40</height>
+                 <height>10</height>
                 </size>
                </property>
               </spacer>

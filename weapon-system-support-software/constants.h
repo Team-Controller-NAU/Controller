@@ -29,6 +29,13 @@ const QString ADVANCED_LOG_FILE_INDICATOR = "***";
 //minimum value allowed to be set for max data nodes
 const int MIN_DATA_NODES_BEFORE_RAM_CLEAR = 700;
 
+//number of bytes in a newline. linux uses \n =1 byte windows uses \r\n = 2 bytes
+#ifdef Q_OS_LINUX
+const int NEWLINE_SIZE = 1;
+#else
+const int NEW_LINE_SIZE=2;
+#endif
+
 //======================================================================================
 // Enumerations and enum related vals
 //======================================================================================
@@ -105,6 +112,9 @@ const int ONE_SECOND = 1000;
 //time before clearing notification pop ups
 const int NOTIFICATION_DURATION = 3000;
 
+//cooldown for preventing spamming of handshake button (spamming causes crash)
+const int HANDSHAKE_COOLDOWN_TIME = 200;
+
 //======================================================================================
 // Load data integrity checks
 //======================================================================================
@@ -117,11 +127,14 @@ const int NUM_BEGIN_ELEMENTS = 3;
 const int NUM_STATUS_ELEMENTS = 9;
 
 //======================================================================================
-// Integer return codes
+// Integer codes
 //======================================================================================
 
 const int DATA_NOT_FOUND = -101;
 const int INCORRECT_FORMAT = -102;
+const int UNINITIALIZED = -103;
+const int FAILED_TO_CLEAR_FROM_LOGFILE = -104;
+const int FAILED_TO_CLEAR= -105;
 const int SUCCESS = 1;
 
 //======================================================================================

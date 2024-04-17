@@ -81,7 +81,7 @@ bool Connection::checkForValidMessage()
         {
             return true;
         }
-        #if DEV_MODE && SERIAL_COMM_DEBUG
+        /*#if DEV_MODE && SERIAL_COMM_DEBUG
         else
         {
             qDebug() << "checkForValidMessage returned false for: " + message;
@@ -92,7 +92,7 @@ bool Connection::checkForValidMessage()
                 qDebug().noquote() << QString("%1 ").arg((quint8)serializedMessage[i], 2, 16, QLatin1Char('0')).toUpper();
             }
         }
-        #endif
+        #endif*/
     }
     else
     {
@@ -145,13 +145,13 @@ void Connection::transmit(QString message)
     }
 
     // Display the contents of the QByteArray in hexadecimal format
-    #if DEV_MODE && SERIAL_COMM_DEBUG
+   /* #if DEV_MODE && SERIAL_COMM_DEBUG
     qDebug() << "Data sent (hex): ";
     for (int i = 0; i < data.size(); ++i)
     {
         qDebug().noquote() << QString("%1 ").arg((quint8)data[i], 2, 16, QLatin1Char('0')).toUpper();
     }
-    #endif
+    #endif*/
 }
 
 //send disconnect to communicating party

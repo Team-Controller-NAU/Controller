@@ -176,6 +176,9 @@ void MainWindow::on_FilterBox_currentIndexChanged(int index)
 //this button is seen as connect/connecting/disconnect on connection page
 void MainWindow::on_handshake_button_clicked()
 {
+    //prevent spam
+    if (handshakeCooldownTimer->isActive()) {qDebug()<<"handshake spam prevented"; return;}
+
     //if port isnt open, attempt to open it
     if (ddmCon == nullptr)
     {
@@ -229,6 +232,8 @@ void MainWindow::on_handshake_button_clicked()
         //update connection status to disconnected and update related objects
         updateConnectionStatus(false);
     }
+
+    handshakeCooldownTimer->start();
 }
 
 //saves connection settings into the qSettings class for cross session storage
@@ -377,8 +382,6 @@ void MainWindow::on_load_events_from_logfile_clicked()
 
     // Pass the selected file name to the loadDataFromLogFile function
     int result = events->loadDataFromLogFile(events, selectedFile);
-
-    ui->truncated_label->setVisible(false);
 
     // Handle the result if needed
     if (result == INCORRECT_FORMAT)
@@ -618,47 +621,6 @@ void MainWindow::on_advanced_log_file_stateChanged(int arg1)
     userSettings.sync();
 }
 
-//toggle for ram clearing on events class
-void MainWindow::on_ram_clearing_stateChanged(int arg1)
-{
-    //arg1 represents the state of the checkbox
-    switch(arg1)
-    {
-    //unchecked
-    case 0:
-         userSettings.setValue("RAMClearing", false);
-
-        break;
-
-        //checked
-    default:
-        userSettings.setValue("RAMClearing", true);
-    }
-
-    if (!allowSettingChanges) return;
-
-    //update value in events class
-    events->RAMClearing = userSettings.value("RAMClearing").toBool();
-
-    //set visibility of max nodes based on ram clearing setting
-    ui->max_data_nodes->setVisible(events->RAMClearing);
-    ui->max_data_nodes_label->setVisible(events->RAMClearing);
-
-    userSettings.sync();
-}
-
-//updates value of max data nodes for events class
-void MainWindow::on_max_data_nodes_valueChanged(int arg1)
-{
-    if (!allowSettingChanges) return;
-
-    events->maxNodes = arg1;
-    userSettings.setValue("maxDataNodes", events->maxNodes);
-
-    //write changes to the registry
-    userSettings.sync();
-}
-
 //======================================================================================
 //DEV_MODE exclusive methods
 //======================================================================================
@@ -701,6 +663,8 @@ void MainWindow::on_CSim_button_clicked()
     {
         // csim is running, shut it down
         csimHandle->stopSimulation();
+
+        csimHandle->pause=false;
 
         // update ui
         ui->CSim_button->setText("Start CSim");
@@ -828,5 +792,20 @@ void MainWindow::on_send_message_button_clicked()
 void MainWindow::on_csim_generation_interval_selection_valueChanged(int arg1)
 {
     csimHandle->generationInterval = arg1;
+}
+
+
+void MainWindow::on_pause_csim_button_clicked()
+{
+    if (csimHandle->pause)
+    {
+        csimHandle->pause=false;
+        ui->pause_csim_button->setText("pause");
+    }
+    else
+    {
+       csimHandle->pause=true;
+        ui->pause_csim_button->setText("unpause");
+    }
 }
 #endif
