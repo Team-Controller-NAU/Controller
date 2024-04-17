@@ -198,9 +198,7 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
 
         // update ui
         ui->handshake_button->setText("Disconnect");
-        ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #FE1C1C; border: 1px solid; border-color: #cb0101; font: 15pt 'Segoe UI'; } "
-                                            "QPushButton::hover { background-color: #fe3434; } "
-                                            "QPushButton::pressed { background-color: #fe8080;}");
+        ui->handshake_button->setStyleSheet(CONNECTED_STYLE);
         ui->connectionLabel->setText("Connected ");
         ui->connectionStatus->setPixmap(GREEN_LIGHT);
 
@@ -236,9 +234,7 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
 
         //refreshes connection button/displays
         ui->handshake_button->setText("Connect");
-        ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #14AE5C; border: 1px solid; border-color: #0d723c; font: 15pt 'Segoe UI'; } "
-                                            "QPushButton::hover { background-color: #1be479; } "
-                                            "QPushButton::pressed { background-color: #76efae;}");
+        ui->handshake_button->setStyleSheet(DISCONNECTED_STYLE);
         ui->connectionStatus->setPixmap(RED_LIGHT);
         ui->connectionLabel->setText("Disconnected ");
 

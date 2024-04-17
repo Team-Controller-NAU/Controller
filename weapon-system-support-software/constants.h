@@ -172,6 +172,13 @@ const QString CONNECTING_STYLE = "QPushButton { padding-bottom: 3px; color: rgb(
                                  "QPushButton::hover { background-color: #ff8533; } "
                                  "QPushButton::pressed { background-color: #ffa366;}";
 
+const QString CONNECTED_STYLE = "QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #FE1C1C; border: 1px solid; border-color: #cb0101; font: 15pt 'Segoe UI'; } "
+                                "QPushButton::hover { background-color: #fe3434; } "
+                                "QPushButton::pressed { background-color: #fe8080;}";
+
+const QString DISCONNECTED_STYLE = "QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #14AE5C; border: 1px solid; border-color: #0d723c; font: 15pt 'Segoe UI'; } "
+                                   "QPushButton::hover { background-color: #1be479; } "
+                                   "QPushButton::pressed { background-color: #76efae;}";
 //======================================================================================
 // CSIM exclusive constants
 //======================================================================================
