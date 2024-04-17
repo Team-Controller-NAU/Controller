@@ -197,6 +197,7 @@ void tst_events::test_clearError()
 
     // create and add node to linked list
     eventObj->addError(id, timeStamp, eventString, false);
+    eventObj->outputToLogFile("../Tests" + TEST_LOG_FILE, false);
 
     // test the head/last event node values
     QVERIFY(eventObj->headErrorNode != nullptr);
@@ -210,16 +211,16 @@ void tst_events::test_clearError()
     QCOMPARE(eventObj->totalClearedErrors, 0);
 
     // clear the error
-    bool result = eventObj->clearError(id, TEST_LOG_FILE);
+    int result = eventObj->clearError(id, "../Tests" + TEST_LOG_FILE);
 
     // verify that this error is now cleared
-    QCOMPARE(result, true);
+    QCOMPARE(result, SUCCESS);
     QCOMPARE(wkgErrorNode->cleared, true);
     QCOMPARE(eventObj->totalClearedErrors, 1);
 
     // confirm the test fails with improper input
-    result = eventObj->clearError(500, TEST_LOG_FILE);
-    QCOMPARE(result, false);
+    result = eventObj->clearError(500, "../Tests" + TEST_LOG_FILE);
+    QCOMPARE(result, FAILED_TO_CLEAR);
 
     // free
     delete eventObj;

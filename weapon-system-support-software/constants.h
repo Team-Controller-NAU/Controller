@@ -96,8 +96,6 @@ const int INITIAL_AUTO_SAVE_LIMIT = 5;
 const QString INITIAL_DDM_PORT = "COM5";
 //if a message is not received from controller in 20 seconds, connection times out
 const int INITIAL_CONNECTION_TIMEOUT = 20000; // 20 seconds
-const bool INITIAL_RAM_CLEARING = false;
-const int INITIAL_MAX_DATA_NODES = 1400;
 
 //======================================================================================
 // Timer vals
@@ -176,7 +174,7 @@ const QString ELECTRICAL_MESSAGES[NUM_ELECTRICAL_MESSAGES] = {"Servo Motor, 20, 
                                                               "Servo Motor, 19, 2,,Pump Cooler, 2, 3,,Internal Temp Sensor, 33, 4",
                                                               "Fuel Injector, 27, 1,,Voltage Regulator, 19, 3,,Rotor 1, 9, 13,,Rotor 3, 9, 9,,Exciter Stator, 19, 2"};
 
-const QString TEST_LOG_FILE = QDir::currentPath() + "/testLogFile.txt";
+const QString TEST_LOG_FILE = "/testLogFile.txt";
 
 const QString CRC_VERSION = "2F5A1D3E7B9";
 const QString CONTROLLER_VERSION = "6.7.2";
