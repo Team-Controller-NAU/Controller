@@ -38,7 +38,6 @@ Events::Events()
         activeIndicatorBytes = activeIndicator.toUtf8();
         clearedIndicator = CLEARED_INDICATOR;
         clearedIndicatorBytes = clearedIndicator.toUtf8();
-
     }
     else
     {
@@ -406,6 +405,7 @@ int Events::loadDataFromLogFile(Events *&events, QString logFileName)
         {
             delete newEvents;
             file.close();
+            qDebug() << "Error: loadDataFromLogFile, corrupt line: " << currentLine;
             return INCORRECT_FORMAT;
         }
     }
@@ -476,14 +476,16 @@ bool Events::stringToNode(QString nodeString)
         {
             cleared = true;
         }
-        else if (parts[3].trimmed() == activeIndicator)
+        else if (parts[3].trimmed() == activeIndicator.trimmed())
         {
             cleared = false;
         }
         else
         {
             // Invalid format for cleared status
-            qDebug() << "Error: stringToNode 'cleared' conversion error: " << nodeString;
+            qDebug() << "Error: stringToNode cleared status conversion error: " << nodeString;
+            qDebug() << "Expected: '" << clearedIndicator.trimmed() << "' or '" << activeIndicator.trimmed()
+                     << "'. data received: '" << parts[3].trimmed() << "'";
             return false;
         }
 

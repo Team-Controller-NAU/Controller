@@ -44,14 +44,14 @@ void MainWindow::on_SettingsPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(5);
     resetPageButton();
-    ui->SettingsPageButton->setStyleSheet("border-image: url(://resources/Images/purpleSettings.png)");
+    ui->SettingsPageButton->setStyleSheet(SELECTED_SETTINGS_ICON);
 }
 
 void MainWindow::on_NotificationPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(6);
     resetPageButton();
-    ui->NotificationPageButton->setStyleSheet("border-image: url(://resources/Images/purpleNotificationBell.png);");
+    ui->NotificationPageButton->setStyleSheet(SELECTED_NOTIFICATIONS_ICON);
 }
 
 //reset all tab buttons to default style
@@ -61,8 +61,8 @@ void MainWindow::resetPageButton()
     ui->EventsPageButton->setStyleSheet(NAV_BUTTON_STYLE);
     ui->StatusPageButton->setStyleSheet(NAV_BUTTON_STYLE);
     ui->ElectricalPageButton->setStyleSheet(NAV_BUTTON_STYLE);
-    ui->SettingsPageButton->setStyleSheet("border-image: url(://resources/Images/whiteSettings.png)");
-    ui->NotificationPageButton->setStyleSheet("border-image: url(://resources/Images/notificationBell.png);");
+    ui->SettingsPageButton->setStyleSheet(SETTINGS_ICON);
+    ui->NotificationPageButton->setStyleSheet(NOTIFICATIONS_ICON);
 
 #if DEV_MODE
     ui->DevPageButton->setStyleSheet(NAV_BUTTON_STYLE);
@@ -211,9 +211,7 @@ void MainWindow::on_handshake_button_clicked()
 
         //refreshes connection button/displays
         ui->handshake_button->setText("Connecting");
-        ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #FF7518; border: 1px solid; border-color: #e65c00; font: 15pt 'Segoe UI'; } "
-                                            "QPushButton::hover { background-color: #ff8533; } "
-                                            "QPushButton::pressed { background-color: #ffa366;}");
+        ui->handshake_button->setStyleSheet(CONNECTING_STYLE);
 
         ui->connectionStatus->setPixmap(ORANGE_LIGHT);
         ui->connectionLabel->setText("Connecting ");

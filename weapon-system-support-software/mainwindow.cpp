@@ -103,7 +103,7 @@ MainWindow::MainWindow(QWidget *parent)
     //connect clear notification process to the notification timer. If run, the process
     //will trigger after the notification timeout
     connect(notificationTimer, &QTimer::timeout, this, [this]() {
-        ui->notificationPopUp->setStyleSheet("background-color: transparent; border: none;");
+        ui->notificationPopUp->setStyleSheet(INVISIBLE);
         ui->notificationPopUp->clear();
     });
 
@@ -184,7 +184,7 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
 
             // update elapsed time
             ui->elapsed_time_label->setText("Elapsed Time: ");
-            ui->elapsedTime->setText( status->elapsedControllerTime.toString("HH:mm:ss"));
+            ui->elapsedTime->setText( status->elapsedControllerTime.toString(TIME_FORMAT));
         }
 
         //free old electrical data if any exists
@@ -987,7 +987,7 @@ void MainWindow::updateElapsedTime()
     status->elapsedControllerTime = status->elapsedControllerTime.addSecs(1);
 
     // update the GUI
-    ui->elapsedTime->setText(status->elapsedControllerTime.toString("HH:mm:ss"));
+    ui->elapsedTime->setText(status->elapsedControllerTime.toString(TIME_FORMAT));
 }
 
 // method updates the elapsed time since last message received to DDM
@@ -1007,11 +1007,6 @@ void MainWindow::updateTimeSinceLastMessage()
     {
         qDebug() << "Error: updateTimeSinceLastMessage time since last DDM message received is negative.\n";
     }
-    // check for invalid datetime
-    else if(elapsedMs == 0)
-    {
-        qDebug() << "Error: updateTimeSinceLastMessage either datetime is invalid.\n";
-    }
     //check if timeout was reached
     else if (elapsedMs >= connectionTimeout)
     {
@@ -1025,7 +1020,7 @@ void MainWindow::updateTimeSinceLastMessage()
         elapsedTime = QTime(0, 0, 0).addMSecs(elapsedMs);
 
         // update gui
-        ui->DDMTimer->setText(elapsedTime.toString("HH:mm:ss"));
+        ui->DDMTimer->setText(elapsedTime.toString(TIME_FORMAT));
     }
 }
 
@@ -1218,9 +1213,9 @@ void MainWindow::notifyUser(QString notificationText, bool error)
 void MainWindow::notifyUser(QString notificationText, QString logText, bool error)
 {
     // Get the current timestamp
-    QString timeStamp = QDateTime::currentDateTime().toString("[hh:mm:ss] ");
+    QString timeStamp = QDateTime::currentDateTime().toString("[" + TIME_FORMAT +"] ");
 
-    QString notificationRichText = "<p style='color: white; font-size: 16px'>" + timeStamp +
+    QString notificationRichText = "<p style='" + NOTIFICATION_TIMESTAMP_STYLE + "'>" + timeStamp +
                                    " " + "<span style='color: ";
 
     QString popUpStyle = "border: 3px solid ";
@@ -1230,17 +1225,18 @@ void MainWindow::notifyUser(QString notificationText, QString logText, bool erro
 
     if (error)
     {
+        //replace new line literals with \n symbols
         logText.replace("\n", "\\n");
-        notificationRichText += "red";
-        popUpStyle += "red";
+        notificationRichText += ERROR_COLOR;
+        popUpStyle += ERROR_COLOR;
     }
     else
     {
-        notificationRichText += "green";
-        popUpStyle += "green";
+        notificationRichText += STANDARD_COLOR;
+        popUpStyle += STANDARD_COLOR;
     }
-    notificationRichText += "; font-size: 16px'>" + notificationText;
-    popUpStyle += "; color: white; text-align: center; font-size: 16px;";
+    notificationRichText += "; font-size: "+NOTIFICATION_SIZE+"px'>" + notificationText;
+    popUpStyle += "; " + POP_UP_STYLE;
 
     if (logText != "")
     {
@@ -1261,7 +1257,7 @@ void MainWindow::notifyUser(QString notificationText, QString logText, bool erro
     if (ui->Flow_Label->currentIndex() != 6 && error)
     {
         //update the notification icon to get user attention
-        ui->NotificationPageButton->setStyleSheet("border-image: url(://resources/Images/newNotification.png);");
+        ui->NotificationPageButton->setStyleSheet(URGENT_NOTIFICATION_ICON);
     }
 
     //stop old timer if running
@@ -1273,7 +1269,7 @@ void MainWindow::notifyUser(QString notificationText, QString logText, bool erro
 
 QString MainWindow::getSessionStatistics()
 {
-    return "Duration: " + status->elapsedControllerTime.toString("HH:mm:ss") + ", Total Events: " +
+    return "Duration: " + status->elapsedControllerTime.toString(TIME_FORMAT) + ", Total Events: " +
            QString::number(events->totalEvents) + ", Total Errors: " + QString::number(events->totalErrors)
            + ", Non-cleared errors: " + QString::number(events->totalClearedErrors)
            + ", Total Firing events: " + QString::number(status->totalFiringEvents);

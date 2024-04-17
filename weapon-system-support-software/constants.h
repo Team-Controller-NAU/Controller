@@ -113,6 +113,8 @@ const int NOTIFICATION_DURATION = 3000;
 //cooldown for preventing spamming of handshake button (spamming causes crash)
 const int HANDSHAKE_COOLDOWN_TIME = 200;
 
+const QString TIME_FORMAT = "HH:mm:ss";
+
 //======================================================================================
 // Load data integrity checks
 //======================================================================================
@@ -136,7 +138,7 @@ const int FAILED_TO_CLEAR= -105;
 const int SUCCESS = 1;
 
 //======================================================================================
-// GUI style sheets
+// GUI styles
 //======================================================================================
 
 const QString NAV_BUTTON_STYLE = "QPushButton {color: rgb(255, 255, 255);background-color: rgb(39, 39, 39);font: 16pt Segoe UI;} "
@@ -144,11 +146,31 @@ const QString NAV_BUTTON_STYLE = "QPushButton {color: rgb(255, 255, 255);backgro
 
 const QString SELECTED_NAV_BUTTON_STYLE = "color: rgb(210, 210, 210);background-color: #9747FF;font: 16pt Segoe UI; ";
 
+//jpg resource paths
+const QString SETTINGS_ICON = "border-image: url(://resources/Images/whiteSettings.png)";
+const QString NOTIFICATIONS_ICON = "border-image: url(://resources/Images/notificationBell.png);";
+const QString SELECTED_SETTINGS_ICON = "border-image: url(://resources/Images/purpleSettings.png)";
+const QString SELECTED_NOTIFICATIONS_ICON = "border-image: url(://resources/Images/purpleNotificationBell.png);";
+const QString URGENT_NOTIFICATION_ICON = "border-image: url(://resources/Images/newNotification.png);";
+
 //colored output will apply these styles (toggle off to apply event color to all nodes)
 const QString EVENT_OUTPUT_SIZE = "16"; //px
 const QString EVENT_COLOR = "rgb(255, 255, 255)";
 const QString CLEARED_ERROR_COLOR = "rgb(20, 174, 92)"; //changes here must also be made in clearErrorFromEventsOutput
 const QString ACTIVE_ERROR_COLOR = "rgb(254, 28, 28)";
+
+//these are applied to notifications
+const QString INVISIBLE = "background-color: transparent; border: none;";
+const QString NOTIFICATION_SIZE = "16"; //px
+const QString NOTIFICATION_TIMESTAMP_STYLE = "color: white; font-size: 16px";
+const QString ERROR_COLOR = "red";
+const QString STANDARD_COLOR = "green";
+const QString POP_UP_STYLE = "color: white; text-align: center; font-size: 16px;";
+
+//handshake button
+const QString CONNECTING_STYLE = "QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #FF7518; border: 1px solid; border-color: #e65c00; font: 15pt 'Segoe UI'; } "
+                                 "QPushButton::hover { background-color: #ff8533; } "
+                                 "QPushButton::pressed { background-color: #ffa366;}";
 
 //======================================================================================
 // CSIM exclusive constants
