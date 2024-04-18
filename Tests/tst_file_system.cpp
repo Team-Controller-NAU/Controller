@@ -51,16 +51,8 @@ void tst_file_system::tst_outputToLogFile()
     QCOMPARE(values[1], "0:00:00");
     QCOMPARE(values[2], "Test message on log file");
 
-
-    // remove test file
-    if(file.remove())
-    {
-        qDebug() << "file removed";
-    }
-    else
-    {
-        qDebug() << "file not removed";
-    }
+    // remove the test file
+    QVERIFY(file.remove());
 
     // remove event object
     delete eventObj;
@@ -70,30 +62,38 @@ void tst_file_system::tst_appendToLogfile()
 {
     QSettings userSettings("Team Controller", "WSSS");
     Events *eventObj = new Events();
-
-
     QString dataMsg = "15,0:00:00,Test message on log file";
     QString dataMsg2 = "16,0:00:11,Second test message on log";
     QString logfile = userSettings.value("logfileLocation").toString();
     QString logfileName = "/tst_appendToLogFile.txt";
     QFile file(logfile + logfileName);
 
-
+    // load the first data msg into event obj
     eventObj->loadEventData(dataMsg);
+
+    // create and add data msg into logfile
     eventObj->outputToLogFile(logfile + logfileName, false);
 
+    // load second data msg
     eventObj->loadEventData(dataMsg2);
+
     EventNode *wkgNode = eventObj->lastEventNode;
+
+    // call append
     eventObj->appendToLogfile(logfile + logfileName, wkgNode);
 
+    // open file in readonly
     QVERIFY(file.open(QIODevice::ReadOnly | QIODevice::Text));
 
+    // create a text stream and capture the data lines inside the file
     QTextStream in(&file);
     QVERIFY(!in.atEnd());
 
-    // capture second line (***ADVANCED LOG FILE DISABLED/ENABLED)
+    // capture first line (***ADVANCED LOG FILE DISABLED/ENABLED)
     QString firstLine = in.readLine();
+    qDebug() << "First line of logfile: " << firstLine;
 
+    // capture the first data msg in the file
     QVERIFY(!in.atEnd());
     QString dataMsginFile = in.readLine();
     QStringList values = dataMsginFile.split(", ");
@@ -103,16 +103,20 @@ void tst_file_system::tst_appendToLogfile()
     QCOMPARE(values[1], "0:00:00");
     QCOMPARE(values[2], "Test message on log file");
 
+    // capture the second data msg in file
     QVERIFY(!in.atEnd());
     QString dataMsg2inFile = in.readLine();
     values = dataMsg2inFile.split(", ");
 
+    // check for correct values
     QCOMPARE(values[0], "ID: 16");
     QCOMPARE(values[1], "0:00:11");
     QCOMPARE(values[2], "Second test message on log");
 
+    // remove file
+    QVERIFY(file.remove());
 
-
+    // delete event obj
     delete eventObj;
 }
 
