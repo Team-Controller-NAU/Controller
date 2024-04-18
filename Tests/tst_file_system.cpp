@@ -25,7 +25,29 @@ void tst_file_system::tst_outputToLogFile()
 
     eventObj->outputToLogFile(logfile + "/tst_outputToLogFile.txt", false);
 
-    // navigate to the
+    // check if the file can be opened in read mode
+    QVERIFY(file.open(QIODevice::ReadOnly | QIODevice::Text));
+
+    QTextStream in(&file);
+
+    // verify that the text stream is not at the end of the file
+    QVERIFY(!in.atEnd());
+
+    // capture the first line in the file
+    QString firstLine = in.readLine();
+
+    // move the text stream to the next line
+    QVERIFY(!in.atEnd());
+
+    // capture the second line (contains event data)
+    QString secondLine = in.readLine();
+    QStringList values = secondLine.split(", ");
+
+    // check for the correctly inputed values
+    QCOMPARE(values[0], "ID: 15");
+    QCOMPARE(values[1], "0:00:00");
+    QCOMPARE(values[2], "Test message on log file");
+
 
     // remove test file
     if(file.remove())
@@ -37,6 +59,7 @@ void tst_file_system::tst_outputToLogFile()
         qDebug() << "file not removed";
     }
 
+    // remove event object
     delete eventObj;
 }
 
