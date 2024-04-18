@@ -20,10 +20,6 @@ electrical::electrical()
     numNodes = 0;
     headNode = nullptr;
     lastNode = nullptr;
-
-    name = "";
-    voltage = 0;
-    amps = 0;
 }
 
 /**

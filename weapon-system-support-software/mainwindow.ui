@@ -441,7 +441,7 @@ font: 16pt &quot;Segoe UI&quot;;</string>
             </sizepolicy>
            </property>
            <property name="currentIndex">
-            <number>0</number>
+            <number>5</number>
            </property>
            <widget class="QWidget" name="Events_page">
             <layout class="QGridLayout" name="gridLayout_3">
@@ -1000,6 +1000,44 @@ font: 22pt &quot;Segoe UI&quot;;</string>
                 </widget>
                </item>
               </layout>
+             </item>
+             <item row="0" column="2">
+              <widget class="QLabel" name="truncated_label">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>130</width>
+                 <height>40</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>130</width>
+                 <height>40</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Not all events are being displayed. This  improves performance.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">color: orange;
+	font: 16pt Segoe UI;</string>
+               </property>
+               <property name="inputMethodHints">
+                <set>Qt::ImhNone</set>
+               </property>
+               <property name="text">
+                <string>Truncated</string>
+               </property>
+               <property name="alignment">
+                <set>Qt::AlignBottom|Qt::AlignHCenter</set>
+               </property>
+              </widget>
              </item>
             </layout>
            </widget>
@@ -4651,7 +4689,7 @@ QToolTip{
            </widget>
            <widget class="QWidget" name="Settings_Page">
             <layout class="QGridLayout" name="gridLayout_5">
-             <item row="11" column="1">
+             <item row="14" column="1">
               <spacer name="verticalSpacer_5">
                <property name="orientation">
                 <enum>Qt::Vertical</enum>
@@ -4663,6 +4701,100 @@ QToolTip{
                 </size>
                </property>
               </spacer>
+             </item>
+             <item row="6" column="0" colspan="2">
+              <widget class="QCheckBox" name="notify_error_cleared">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Causes notification when an error is retroactively cleared by controller&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QCheckBox {
+	color: white;
+	font: 20pt &quot;Segoe UI&quot;;
+}
+
+
+QCheckBox::indicator {
+	width: 20px;
+	height: 20px;
+}</string>
+               </property>
+               <property name="text">
+                <string>Notify on Error Cleared</string>
+               </property>
+              </widget>
+             </item>
+             <item row="9" column="0">
+              <spacer name="verticalSpacer_9">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>10</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="2" column="0" colspan="2">
+              <widget class="QCheckBox" name="colored_events_output">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Enables color coding of Events page outputs&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QCheckBox {
+	color: white;
+	font: 20pt &quot;Segoe UI&quot;;
+}
+
+QCheckBox::indicator {
+	width: 20px;
+	height: 20px;
+}</string>
+               </property>
+               <property name="text">
+                <string>Colored Events Output</string>
+               </property>
+               <property name="checked">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="11" column="0">
+              <spacer name="verticalSpacer_12">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>10</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="10" column="1" colspan="2">
+              <widget class="QLabel" name="auto_save_limit_label">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Max number of auto saved log files to be kept before overwrites occur on the oldest one&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QLabel {
+	color: white;
+	font: 20pt &quot;Segoe UI&quot;;
+}</string>
+               </property>
+               <property name="text">
+                <string>Auto Saved Log File Limit</string>
+               </property>
+              </widget>
              </item>
              <item row="0" column="0">
               <widget class="QLabel" name="userSettingsLabel">
@@ -4690,6 +4822,189 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
                 </size>
                </property>
               </spacer>
+             </item>
+             <item row="7" column="0">
+              <spacer name="verticalSpacer_11">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>10</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="12" column="0">
+              <widget class="QCheckBox" name="ram_clearing">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Removes events and errors from RAM to improve performance. Cleared event and error data won't be displayed to the Events page but it will still be recorded on the log file. &lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QCheckBox {
+	color: white;
+	font: 20pt &quot;Segoe UI&quot;;
+}
+
+
+QCheckBox::indicator {
+	width: 20px;
+	height: 20px;
+}</string>
+               </property>
+               <property name="text">
+                <string>RAM Clearing</string>
+               </property>
+              </widget>
+             </item>
+             <item row="12" column="1">
+              <widget class="QSpinBox" name="max_data_nodes">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>200</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>200</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of nodes allowed before RAM clear.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QSpinBox {
+	color: white;
+	font: 20pt &quot;Segoe UI&quot;;
+}
+QSpinBox::up-arrow
+{
+	color: rgb(47, 47, 47);
+}
+QSpinBox::down-arrow
+{
+	color: rgb(47, 47, 47);
+}
+QToolTip{
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid black;
+}
+</string>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::UpDownArrows</enum>
+               </property>
+               <property name="maximum">
+                <number>999999999</number>
+               </property>
+               <property name="singleStep">
+                <number>100</number>
+               </property>
+              </widget>
+             </item>
+             <item row="8" column="1" colspan="2">
+              <widget class="QLabel" name="connection_timeout_label">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If no messages are received for this long, connection is terminated&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QLabel {
+	color: white;
+	font: 20pt &quot;Segoe UI&quot;;
+}</string>
+               </property>
+               <property name="text">
+                <string>Connection Timeout Duration (msec)</string>
+               </property>
+              </widget>
+             </item>
+             <item row="5" column="0">
+              <spacer name="verticalSpacer_10">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>10</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="3" column="0">
+              <spacer name="verticalSpacer_3">
+               <property name="orientation">
+                <enum>Qt::Vertical</enum>
+               </property>
+               <property name="sizeType">
+                <enum>QSizePolicy::Fixed</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>20</width>
+                 <height>10</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+             <item row="10" column="0">
+              <widget class="QSpinBox" name="auto_save_limit">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>200</width>
+                 <height>0</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>200</width>
+                 <height>16777215</height>
+                </size>
+               </property>
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Max number of auto saved log files to be kept before overwrites occur on the oldest one&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+               <property name="styleSheet">
+                <string notr="true">QSpinBox {
+	color: white;
+	font: 20pt &quot;Segoe UI&quot;;
+}
+
+QSpinBox::up-arrow
+{
+	color: rgb(47, 47, 47);
+}
+QSpinBox::down-arrow
+{
+	color: rgb(47, 47, 47);
+}</string>
+               </property>
+               <property name="buttonSymbols">
+                <enum>QAbstractSpinBox::UpDownArrows</enum>
+               </property>
+              </widget>
              </item>
              <item row="8" column="0">
               <widget class="QSpinBox" name="connection_timeout">
@@ -4745,71 +5060,10 @@ QToolTip{
                </property>
               </widget>
              </item>
-             <item row="3" column="0">
-              <spacer name="verticalSpacer_3">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeType">
-                <enum>QSizePolicy::Fixed</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>10</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="9" column="0">
-              <spacer name="verticalSpacer_9">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeType">
-                <enum>QSizePolicy::Fixed</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>10</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="7" column="0">
-              <spacer name="verticalSpacer_11">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeType">
-                <enum>QSizePolicy::Fixed</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>10</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="8" column="1" colspan="2">
-              <widget class="QLabel" name="connection_timeout_label">
-               <property name="styleSheet">
-                <string notr="true">QLabel {
-	color: white;
-	font: 20pt &quot;Segoe UI&quot;;
-}</string>
-               </property>
-               <property name="text">
-                <string>Connection Timeout Duration (msec)</string>
-               </property>
-              </widget>
-             </item>
              <item row="4" column="0" colspan="2">
               <widget class="QCheckBox" name="advanced_log_file">
                <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Logs status, electrical and session data.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Logs status, electrical and session statistics to log file. Reduced performance on large log files&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
                <property name="styleSheet">
                 <string notr="true">QCheckBox {
@@ -4828,8 +5082,11 @@ QCheckBox::indicator {
                </property>
               </widget>
              </item>
-             <item row="10" column="1" colspan="2">
-              <widget class="QLabel" name="auto_save_limit_label">
+             <item row="13" column="1">
+              <widget class="QLabel" name="max_data_nodes_label">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Number of nodes allowed before RAM clear.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="styleSheet">
                 <string notr="true">QLabel {
 	color: white;
@@ -4837,111 +5094,9 @@ QCheckBox::indicator {
 }</string>
                </property>
                <property name="text">
-                <string>Auto Saved Log File Limit</string>
+                <string>Max Data Nodes</string>
                </property>
               </widget>
-             </item>
-             <item row="6" column="0" colspan="2">
-              <widget class="QCheckBox" name="notify_error_cleared">
-               <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Causes notification when an error is retroactively cleared by controller&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">QCheckBox {
-	color: white;
-	font: 20pt &quot;Segoe UI&quot;;
-}
-
-
-QCheckBox::indicator {
-	width: 20px;
-	height: 20px;
-}</string>
-               </property>
-               <property name="text">
-                <string>Notify on Error Cleared</string>
-               </property>
-              </widget>
-             </item>
-             <item row="2" column="0" colspan="2">
-              <widget class="QCheckBox" name="colored_events_output">
-               <property name="styleSheet">
-                <string notr="true">QCheckBox {
-	color: white;
-	font: 20pt &quot;Segoe UI&quot;;
-}
-
-QCheckBox::indicator {
-	width: 20px;
-	height: 20px;
-}</string>
-               </property>
-               <property name="text">
-                <string>Colored Events Output</string>
-               </property>
-               <property name="checked">
-                <bool>false</bool>
-               </property>
-              </widget>
-             </item>
-             <item row="10" column="0">
-              <widget class="QSpinBox" name="auto_save_limit">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>200</width>
-                 <height>0</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>200</width>
-                 <height>16777215</height>
-                </size>
-               </property>
-               <property name="toolTip">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Max number of auto saved log files to be kept before overwrites occur on the oldest one&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-               <property name="styleSheet">
-                <string notr="true">QSpinBox {
-	color: white;
-	font: 20pt &quot;Segoe UI&quot;;
-}
-
-QSpinBox::up-arrow
-{
-	color: rgb(47, 47, 47);
-}
-QSpinBox::down-arrow
-{
-	color: rgb(47, 47, 47);
-}</string>
-               </property>
-               <property name="buttonSymbols">
-                <enum>QAbstractSpinBox::UpDownArrows</enum>
-               </property>
-              </widget>
-             </item>
-             <item row="5" column="0">
-              <spacer name="verticalSpacer_10">
-               <property name="orientation">
-                <enum>Qt::Vertical</enum>
-               </property>
-               <property name="sizeType">
-                <enum>QSizePolicy::Fixed</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>20</width>
-                 <height>10</height>
-                </size>
-               </property>
-              </spacer>
              </item>
             </layout>
            </widget>

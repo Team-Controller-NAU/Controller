@@ -11,6 +11,8 @@
 
 struct EventNode
 {
+    //id is a unique identifier for this specific node, it could
+    //be any number
     int id;
     QString timeStamp;
     QString eventString;
@@ -35,7 +37,7 @@ class Events : public QObject
 {
     Q_OBJECT
 public:
-    Events();
+    Events(bool EventRAMClearing, int maxDataNodes);
     ~Events();
 
     //class variables
@@ -43,6 +45,9 @@ public:
     int totalErrors;
     int totalNodes;
     int totalClearedErrors;
+    int storedNodes;
+    int maxNodes;
+    bool RAMClearing;
 
     QString clearedIndicator;
     QString activeIndicator;
@@ -61,10 +66,10 @@ public:
 
     //free memory utils
     void freeError(int id);
-    void freeLinkedLists();
+    void freeLinkedLists(bool fullClear);
 
     //navigation utils
-    EventNode* getNextNodeToPrint(EventNode*& eventPtr, ErrorNode*& errorPtr, bool& printErr);
+    EventNode* getNextNode(EventNode*& eventPtr, ErrorNode*& errorPtr);
 
     //load from serial message utils
     bool loadErrorData(QString message);
@@ -94,6 +99,12 @@ public:
 
         int getErrorIdByPosition(int pos);
     #endif
+signals:
+    void RAMCleared();
+private:
+    //called as last resort when clearError cant find error node, if this
+    //returns fail, we dont recognize the node
+    int clearErrorInLogFile(int id, QString logFileName);
 };
 
 #endif // EVENTS_H

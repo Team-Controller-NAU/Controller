@@ -169,6 +169,8 @@ private slots:
     void on_auto_save_limit_valueChanged(int arg1);
     void on_notify_error_cleared_stateChanged(int arg1);
     void on_connection_timeout_valueChanged(int arg1);
+    void on_ram_clearing_stateChanged(int arg1);
+    void on_max_data_nodes_valueChanged(int arg1);
 
     #if (DEV_MODE)
         void on_send_message_button_clicked();
@@ -209,7 +211,7 @@ private slots:
     static QSerialPort::FlowControl fromStringFlowControl(QString flowControlStr);
     //=========================================================================================================
 
-    private:
+private:
     Ui::MainWindow *ui;
 
     QPixmap GREEN_LIGHT;

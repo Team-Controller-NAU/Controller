@@ -27,7 +27,7 @@ const int MAX_ELECTRICAL_COMPONENTS = 100;
 const QString ADVANCED_LOG_FILE_INDICATOR = "***";
 
 //minimum value allowed to be set for max data nodes
-const int MIN_DATA_NODES_BEFORE_RAM_CLEAR = 700;
+const int MIN_DATA_NODES_BEFORE_RAM_CLEAR = 1500;
 
 //number of bytes in a newline. linux uses \n =1 byte windows uses \r\n = 2 bytes
 #ifdef Q_OS_LINUX
@@ -96,6 +96,8 @@ const int INITIAL_AUTO_SAVE_LIMIT = 5;
 const QString INITIAL_DDM_PORT = "COM5";
 //if a message is not received from controller in 20 seconds, connection times out
 const int INITIAL_CONNECTION_TIMEOUT = 20000; // 20 seconds
+const bool INITIAL_RAM_CLEARING = false;
+const int INITIAL_MAX_DATA_NODES = 10000;
 
 //======================================================================================
 // Timer vals
@@ -133,8 +135,12 @@ const int NUM_STATUS_ELEMENTS = 9;
 const int DATA_NOT_FOUND = -101;
 const int INCORRECT_FORMAT = -102;
 const int UNINITIALIZED = -103;
+
+//return codes for clearError and clearErrorInLogFile
 const int FAILED_TO_CLEAR_FROM_LOGFILE = -104;
 const int FAILED_TO_CLEAR= -105;
+const int FAILED_TO_CLEAR_FROM_LL = -106;
+
 const int SUCCESS = 1;
 
 //======================================================================================
@@ -179,6 +185,7 @@ const QString CONNECTED_STYLE = "QPushButton { padding-bottom: 3px; color: rgb(2
 const QString DISCONNECTED_STYLE = "QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #14AE5C; border: 1px solid; border-color: #0d723c; font: 15pt 'Segoe UI'; } "
                                    "QPushButton::hover { background-color: #1be479; } "
                                    "QPushButton::pressed { background-color: #76efae;}";
+
 //======================================================================================
 // CSIM exclusive constants
 //======================================================================================

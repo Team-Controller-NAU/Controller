@@ -6,6 +6,7 @@
 // add necessary includes here
 class tst_events : public QObject
 {
+    friend class Events;
     Q_OBJECT
 
 private slots:
@@ -14,7 +15,7 @@ private slots:
     void test_addError();
     void test_freeLinkedLists();
     void test_clearError();
-    void test_getNextNodeToPrint();
+    void test_getNextNode();
     void test_nodeToString();
     void test_stringToNode();
     void test_loadEventData();
@@ -33,7 +34,7 @@ private slots:
 void tst_events::events_constructor()
 {
     // create a new events class object
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 0);
 
     // ensure that member variables are 0 upon initialization
     QCOMPARE(eventObj->totalEvents, 0);
@@ -63,7 +64,7 @@ void tst_events::events_constructor()
 void tst_events::test_addEvent()
 {
     // create a new events class object
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 0);
 
     // providing a seed value for random values
     srand((unsigned) time(nullptr));
@@ -101,7 +102,7 @@ void tst_events::test_addEvent()
 void tst_events::test_addError()
 {
     // create a new events class object
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 0);
 
     // providing a seed value for random values
     srand((unsigned) time(nullptr));
@@ -141,7 +142,7 @@ void tst_events::test_addError()
 void tst_events::test_freeLinkedLists()
 {
     // create event object
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 0);
 
     // providing a seed value for random values
     srand((unsigned) time(nullptr));
@@ -163,7 +164,7 @@ void tst_events::test_freeLinkedLists()
     QVERIFY(eventObj->lastErrorNode != nullptr);
 
     // free and test if head/last node is null
-    eventObj->freeLinkedLists();
+    eventObj->freeLinkedLists(true);
     QCOMPARE(eventObj->headEventNode, nullptr);
     QCOMPARE(eventObj->lastEventNode, nullptr);
     QCOMPARE(eventObj->headErrorNode, nullptr);
@@ -185,7 +186,7 @@ void tst_events::test_freeLinkedLists()
 void tst_events::test_clearError()
 {
     // create event object
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 0);
 
     // providing a seed value for random values
     srand((unsigned) time(nullptr));
@@ -227,12 +228,12 @@ void tst_events::test_clearError()
 }
 
 /**
- * Test case for getNextNodeToPrint() in events.cpp
+ * Test case for getNextNode() in events.cpp
  */
-void tst_events::test_getNextNodeToPrint()
+void tst_events::test_getNextNode()
 {
     // create event object
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 0);
 
     // providing a seed value for random values
     srand((unsigned) time(nullptr));
@@ -259,10 +260,9 @@ void tst_events::test_getNextNodeToPrint()
     // create working nodes from the headErrorNode and headEventNode
     ErrorNode *wkgErrorNode = eventObj->headErrorNode;
     EventNode *wkgEventNode = eventObj->headEventNode;
-    bool printErr; // placeholder bool
 
     // get next node to print by ID
-    EventNode *nextNode = eventObj->getNextNodeToPrint(wkgEventNode, wkgErrorNode, printErr);
+    EventNode *nextNode = eventObj->getNextNode(wkgEventNode, wkgErrorNode);
 
     // verify that it captured the proper node
     // we are checking that the next node ID is the smaller of the two IDs in both linked lists
@@ -278,7 +278,7 @@ void tst_events::test_getNextNodeToPrint()
 void tst_events::test_nodeToString()
 {
     // set up an example node
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 0);
     EventNode *exampleNode = new EventNode();
 
     // provide a seed value for random values
@@ -313,7 +313,7 @@ void tst_events::test_nodeToString()
 void tst_events::test_stringToNode()
 {
     // create event object
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 0);
 
     // create example string message
     QString exampleString = "ID: 5, 0:02:22, Sample test message 1";
@@ -361,7 +361,7 @@ void tst_events::test_stringToNode()
 void tst_events::test_loadEventData()
 {
     // create a new events class object
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 0);
 
     // set up some variables
     QString exampleMsg = "30,0:01:15,Sample Test message 1,\n";
@@ -404,7 +404,7 @@ void tst_events::test_loadEventData()
 
 void tst_events::test_loadEventData_badInput_correctDelim()
 {
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 0);
 
     // check out of bounds id
     QString dataMsg = "-30,0:01:15,Sample Test message 1,\n";
@@ -430,7 +430,7 @@ void tst_events::test_loadEventData_badInput_correctDelim()
 void tst_events::test_loadErrorData()
 {
     // create a new events class object
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 0);
 
     // set up some variables
     QString exampleMsg = "30,0:01:15,Sample Test message 1,1,\n";
@@ -475,7 +475,7 @@ void tst_events::test_loadErrorData()
 
 void tst_events::test_loadErrorData_badInput_correctDelim()
 {
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 0);
 
     //check for invalid id
     QString dataMsg = "-30,0:01:15,Sample Test message 1,1,\n";
@@ -502,7 +502,7 @@ void tst_events::test_loadErrorData_badInput_correctDelim()
 void tst_events::test_loadEventDump()
 {
     // create a new events class object
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 0);
 
     // set up some variables
     QString exampleMsg = "30,0:01:15,Sample Test message 1,,31,0:02:31,Sample Test message 2";
@@ -555,7 +555,7 @@ void tst_events::test_loadEventDump()
 void tst_events::test_loadErrorDump()
 {
     // create a new events class object
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 0);
 
     // set up some variables
     QString exampleMsg = "30,0:01:15,Sample Test message 1,1,,31,0:02:31,Sample Test message 2,0";

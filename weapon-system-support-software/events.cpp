@@ -14,13 +14,16 @@
  *
  * This initializes the parameters into a linked list object
  */
-Events::Events()
+Events::Events(bool EventRAMClearing, int maxDataNodes)
 {
     //initialize variables
     totalEvents = 0;
     totalErrors= 0;
     totalNodes= 0;
     totalClearedErrors = 0;
+    int storedNodes = 0;
+    maxNodes = maxDataNodes;
+    RAMClearing = EventRAMClearing;
 
     headEventNode= nullptr;
     lastEventNode= nullptr;
@@ -56,7 +59,7 @@ Events::Events()
 Events::~Events()
 {
     qDebug() << "Deleting event and error data";
-    freeLinkedLists();
+    freeLinkedLists(true);
 }
 
 /**
@@ -84,10 +87,17 @@ void Events::addEvent(int id, QString timeStamp, QString eventString)
     totalNodes++;
     totalEvents++;
 
-    //log: new event created
-    #if DEV_MODE && EVENTS_DEBUG
-    qDebug() << "New event node created. Total nodes: " << totalNodes;
-    #endif
+    //check if we have exceeded max nodes and if ram clearing is enabled
+    if (RAMClearing && storedNodes > maxNodes)
+    {
+        //free the linked lists
+        freeLinkedLists(false);
+
+        qDebug() << "Events class cleared to reduce RAM usage";
+
+        //notify parent
+        emit RAMCleared();
+    }
 
     //check if linked list is currently empty
     if (headEventNode == nullptr)
@@ -105,6 +115,13 @@ void Events::addEvent(int id, QString timeStamp, QString eventString)
         lastEventNode->nextPtr = newNode;
         lastEventNode = newNode;
     }
+
+    storedNodes++;
+
+    #if DEV_MODE && EVENTS_DEBUG
+    qDebug() << "New error node created. Total nodes: " << totalNodes
+             << " total events: " << totalEvents << " stored nodes: " << storedNodes;
+    #endif
 }
 
 /**
@@ -136,6 +153,18 @@ void Events::addError(int id, QString timeStamp, QString eventString, bool clear
     totalErrors++;
     if(cleared) totalClearedErrors++;
 
+    //check if we have exceeded max nodes and if ram clearing is enabled
+    if (RAMClearing && storedNodes > maxNodes)
+    {
+        //free the linked lists
+        freeLinkedLists(false);
+
+        qDebug() << "Events class cleared to reduce RAM usage";
+
+        //notify parent
+        emit RAMCleared();
+    }
+
     //check if linked list is currently empty
     if (headErrorNode == nullptr)
     {
@@ -154,9 +183,11 @@ void Events::addError(int id, QString timeStamp, QString eventString, bool clear
         lastErrorNode = newNode;
     }
 
-    //log: new err created
+    storedNodes++;
+
     #if DEV_MODE && EVENTS_DEBUG
-    qDebug() << "New error node created. Total nodes: " << totalNodes << " total errors: " << totalErrors;
+   qDebug() << "New error node created. Total nodes: " << totalNodes << " total errors: " <<
+        totalErrors<< " stored nodes: " << storedNodes;
     #endif
 }
 
@@ -165,7 +196,7 @@ void Events::addError(int id, QString timeStamp, QString eventString, bool clear
  *
  * Deletes all nodes associated with both linked lists
  */
-void Events::freeLinkedLists()
+void Events::freeLinkedLists(bool fullClear)
 {
     // Free memory for the event linked list
     // get ptr to head node
@@ -207,11 +238,18 @@ void Events::freeLinkedLists()
     // ensure head and tail point to null symbolizing empty list
     headErrorNode = lastErrorNode = nullptr;
   
-    //free counters
-    totalEvents=0;
-    totalErrors=0;
-    totalNodes=0;
-    totalClearedErrors=0;
+    //reset stored nodes
+    storedNodes=0;
+
+    //check for full clear
+    if (fullClear)
+    {
+        //clear counters
+        totalNodes=0;
+        totalEvents=0;
+        totalErrors=0;
+        totalClearedErrors=0;
+    }
 
     #if DEV_MODE && EVENTS_DEBUG
     qDebug() << "Event and error linked lists freed";
@@ -263,15 +301,19 @@ int Events::clearError(int id, QString logFileName)
                 wkgPtr->logFileIndicator = UNINITIALIZED;
 
                 #if DEV_MODE && EVENTS_DEBUG
-                qDebug() << "Error " << id << " cleared in log file";
+                qDebug() << "Error " << id << " cleared in log file using preferred method";
                 #endif
+
+                logFile.close();
             }
             else
             {
-                qDebug() << "Error: clearError logFileIndicator is invalid, cannot clear error " << id << " in log file";
-                result = FAILED_TO_CLEAR_FROM_LOGFILE;
+                logFile.close();
+                qDebug() << "Error: clearError logFileIndicator is invalid, attempting manual clear for error " << id;
+
+                //attempt alternate clear method
+                result = clearErrorInLogFile(id, logFileName);
             }
-            logFile.close();
 
             wkgPtr->cleared = true;
 
@@ -288,79 +330,143 @@ int Events::clearError(int id, QString logFileName)
         //iterate to next error node
         wkgPtr = wkgPtr->nextPtr;
     }
-    //we couldnt find the error
-    return FAILED_TO_CLEAR;
+    //error was not found in linked list and could not be cleared
+    //this could indicate a RAM dump has been made
+    //attempt to find and clear from log file manually
+    if (clearErrorInLogFile(id, logFileName) != SUCCESS)
+    {
+        //we couldnt find the error
+        return FAILED_TO_CLEAR;
+    }
+    else
+    {
+        #if DEV_MODE && EVENTS_DEBUG
+        qDebug() << "Error " << id << " cleared in log file using unpreferred method (likely due to RAM clear)";
+        #endif
+        return FAILED_TO_CLEAR_FROM_LL;
+    }
 }
 
 /**
- * Goes through both linked lists and determines whate node to be outputted
+ * Searches log file for error with given id, attempts to clear
+ * and returns result. This method is inefficient and only used
+ * when standard clearError fails
  *
- * Searches through both or a single linked lists and checks the identification
- * number to determine which node will be output to the GUI
+ * @param id The identification number of the error node to be cleared
+ * @param the logfile to modify
+ */
+int Events::clearErrorInLogFile(int id, QString logFileName)
+{
+    // Open the log file
+    QFile logFile(logFileName);
+    if (!logFile.open(QIODevice::ReadWrite | QIODevice::Text))
+    {
+        qDebug() << "Failed to open log file:" << logFile.errorString();
+        return FAILED_TO_CLEAR_FROM_LOGFILE;
+    }
+
+    // Read the entire log file into memory
+    QByteArray fileData = logFile.readAll();
+    QString fileContent(fileData);
+
+    // Find and replace the line we are searching for
+    QString searchString = "ID: " + QString::number(id) + DELIMETER;
+    int index = fileContent.indexOf(searchString);
+    if (index != -1)
+    {
+        // Find the end of the line
+        int endIndex = fileContent.indexOf("\n", index);
+        if (endIndex != -1)
+        {
+            // Extract the line
+            QString line = fileContent.mid(index, endIndex - index + 1);
+
+            // Replace the substring if found
+            int indicatorIndex = line.indexOf(activeIndicator);
+            if (indicatorIndex != -1)
+            {
+                line.replace(indicatorIndex, activeIndicator.length(), clearedIndicator);
+
+                // Replace the modified line in the file content
+                fileContent.replace(index, line.length(), line);
+            }
+        }
+    }
+
+    // Clear the file and write the modified content
+    logFile.resize(0);
+    QTextStream out(&logFile);
+    out << fileContent;
+
+    // Close the file
+    logFile.close();
+
+    return (index != -1) ? SUCCESS : FAILED_TO_CLEAR_FROM_LOGFILE;
+}
+
+/**
+ * Goes through both linked lists and returns a pointer to the node which
+ * has the earliest time stamp
  *
  * @param eventPtr Pointer to the event linked lists
  * @param errorPtr Pointer to the error linked lists
  * @param printErr Boolean determining if an error occured
  */
-EventNode* Events::getNextNodeToPrint(EventNode*& eventPtr, ErrorNode*& errorPtr, bool& printErr)
+EventNode* Events::getNextNode(EventNode*& eventPtr, ErrorNode*& errorPtr)
 {
     // initialize variables
-    EventNode* nextPrintPtr = nullptr;
+    EventNode* nextPtr = nullptr;
 
     // check if both lists have valid ptrs to nodes
     if (eventPtr != nullptr && errorPtr != nullptr)
     {
-        // check if next even has lower id than next error
-        if (errorPtr->id > eventPtr->id)
+        // check if event occurred before error
+        if (errorPtr->timeStamp > eventPtr->timeStamp)
         {
-            // choose  this event to print
-            nextPrintPtr = eventPtr;
-
-            // set no error flag
-            printErr = false;
-
-            // get next event
+            // choose this event to print
+            nextPtr = eventPtr;
             eventPtr = eventPtr->nextPtr;
         }
-        else
+        //check if error occurred first
+        else if (errorPtr->timeStamp < eventPtr->timeStamp)
         {
             // choose this error to print
-            nextPrintPtr = errorPtr;
-
-            // set err flag
-            printErr = true;
-
-            // get next error
+            nextPtr = errorPtr;
             errorPtr = errorPtr->nextPtr;
+        }
+        //otherwise they occurred at the same time
+        else
+        {
+            //select node with lowest id
+            if (eventPtr->id < errorPtr->id)
+            {
+                nextPtr = eventPtr;
+                eventPtr = eventPtr->nextPtr;
+            }
+            else
+            {
+                nextPtr = errorPtr;
+                errorPtr= errorPtr->nextPtr;
+            }
         }
     }
     // check for only events
     else if (eventPtr != nullptr)
     {
         // choose this event to print
-        nextPrintPtr = eventPtr;
-
-        // set no err flag
-        printErr = false;
-
-        // get next event
+        nextPtr = eventPtr;
         eventPtr = eventPtr->nextPtr;
     }
     // otherwise there are only errors
     else
     {
         // choose this err to print
-        nextPrintPtr = errorPtr;
-
-        // set err flag
-        printErr = true;
-
-        // get next err
+        nextPtr = errorPtr;
         errorPtr = errorPtr->nextPtr;
     }
 
     // return next ptr
-    return nextPrintPtr;
+    return nextPtr;
 }
 
 /**
@@ -387,7 +493,7 @@ int Events::loadDataFromLogFile(Events *&events, QString logFileName)
 
     //get log file contents
     QTextStream in(&file);
-    Events *newEvents = new Events();
+    Events *newEvents = new Events(false, 0);
     QString currentLine;
 
     //loop through log file contents
@@ -530,8 +636,6 @@ bool Events::outputToLogFile(QString logFileName, bool advancedLogFile)
     EventNode *nextPrintPtr;
     ErrorNode *errPtr = headErrorNode;
     EventNode *eventPtr = headEventNode;
-    bool error;
-    QString line;
 
     // Display advanced log file value
     if (advancedLogFile)
@@ -547,12 +651,10 @@ bool Events::outputToLogFile(QString logFileName, bool advancedLogFile)
     while (errPtr != nullptr || eventPtr != nullptr)
     {
         // Get next node to print
-        nextPrintPtr = getNextNodeToPrint(eventPtr, errPtr, error);
-
-        line = nodeToString(nextPrintPtr) +"\n";
+        nextPrintPtr = getNextNode(eventPtr, errPtr);
 
         // Print node to log file
-        out << line;
+        out << nodeToString(nextPrintPtr) << Qt::endl;
 
         if (nextPrintPtr->isError())
         {
@@ -595,7 +697,7 @@ bool Events::loadErrorData(QString message)
         QString timeStamp = values[1];
         QStringList timeValues = timeStamp.split(':');
         if(timeValues[0].toInt() <= -1 || timeValues[1].toInt() <= -1
-            || timeValues[2].toInt() <= -1)
+            || timeValues[2].toInt() <= -1 || timeValues[3].toInt()<= -1)
         {
             return false;
         }
@@ -645,7 +747,7 @@ bool Events::loadEventData(QString message)
         QString timeStamp = values[1];
         QStringList timeValues = timeStamp.split(':');
         if(timeValues[0].toInt() <= -1 || timeValues[1].toInt() <= -1
-            || timeValues[2].toInt() <= -1)
+            || timeValues[2].toInt() <= -1 || timeValues[3].toInt()<= -1)
         {
             return false;
         }
@@ -787,7 +889,7 @@ QString Events::nodeToString(EventNode *event)
 {
     QString nodeString;
 
-    // construct string
+    // construct string (changes here must be made to clearErrorInLogFile as well)
     nodeString = "ID: " + QString::number(event->id) + DELIMETER + " " + event->timeStamp + DELIMETER
                  + " " + event->eventString;
 

@@ -315,7 +315,7 @@ void MainWindow::on_openLogfileFolder_clicked()
         //open from the user settings
         QDesktopServices::openUrl(QUrl::fromLocalFile(userSettings.value("logfileLocation").toString()));
         #if DEV_MODE && GUI_DEBUG
-        qDebug() << "log file location opening: " << userSettings.value("logfileLocation").toString();
+        qDebug() << "on_openLogfileFolder_clicked: file explorer opening to : " << userSettings.value("logfileLocation").toString();
         #endif
     }
     // save user settings
@@ -360,6 +360,8 @@ void MainWindow::on_load_events_from_logfile_clicked()
 {
     //declare file browser class
     QFileDialog dialog(this);
+
+    ui->truncated_label->setVisible(false);
 
     //set initial directory to log file directory set by user
     dialog.setDirectory(userSettings.value("logfileLocation").toString());
@@ -618,6 +620,45 @@ void MainWindow::on_advanced_log_file_stateChanged(int arg1)
     //write changes to the registry
     userSettings.sync();
 }
+
+//toggle for ram clearing on events class
+void MainWindow::on_ram_clearing_stateChanged(int arg1)
+{
+    //arg1 represents the state of the checkbox
+    switch(arg1)
+    {
+    //unchecked
+    case 0:
+        userSettings.setValue("RAMClearing", false);
+
+        break;
+
+        //checked
+    default:
+        userSettings.setValue("RAMClearing", true);
+    }
+
+    //update value in events class
+    if (events != nullptr) events->RAMClearing = userSettings.value("RAMClearing").toBool();
+
+    //set visibility of max nodes based on ram clearing setting
+    ui->max_data_nodes->setVisible(userSettings.value("RAMClearing").toBool());
+    ui->max_data_nodes_label->setVisible(userSettings.value("RAMClearing").toBool());
+
+    userSettings.sync();
+}
+
+//updates value of max data nodes for events class
+void MainWindow::on_max_data_nodes_valueChanged(int arg1)
+{
+    userSettings.setValue("maxDataNodes", arg1);
+
+    //write changes to the registry
+    userSettings.sync();
+
+    if (events != nullptr) events->maxNodes = arg1;
+}
+
 
 //======================================================================================
 //DEV_MODE exclusive methods

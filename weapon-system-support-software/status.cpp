@@ -138,13 +138,15 @@ bool Status::loadVersionData(QString versionMessage)
 
     // Split time string
     QStringList parts = values[0].split(':');
-    if (parts.size() != 3) {
+    if (parts.size() != 4) {
         qDebug() << "Error: loadVersionData: Invalid time string format in load version data";
         return false;
     }
 
     // Calculate total milliseconds
-    qint64 totalMilliseconds = parts[0].toInt() * 3600000LL + parts[1].toInt() * 60000LL + parts[2].toInt() * 1000LL;
+    qint64 totalMilliseconds = parts[0].toInt() * 3600000LL + parts[1].toInt() * 60000LL + parts[2].toInt()
+                               * 1000LL + parts[3].toInt();
+
 
     // Initialize elapsedControllerTime
     elapsedControllerTime = QTime::fromMSecsSinceStartOfDay(totalMilliseconds);
