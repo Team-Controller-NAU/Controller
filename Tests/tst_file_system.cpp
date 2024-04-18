@@ -14,6 +14,8 @@ private slots:
 };
 
 //TODO: add documentation
+//TODO: add negative tests
+
 void tst_file_system::tst_outputToLogFile()
 {
     // initialize variables
@@ -119,6 +121,8 @@ void tst_file_system::tst_appendToLogfile()
     // delete event obj
     delete eventObj;
 }
+
+// void tst_file_system::tst_loadEventsFromLogFile
 
 QTEST_MAIN(tst_file_system)
 #include "tst_file_system.moc"
