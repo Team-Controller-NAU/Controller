@@ -86,6 +86,30 @@ void tst_file_system::tst_appendToLogfile()
     EventNode *wkgNode = eventObj->lastEventNode;
     eventObj->appendToLogfile(logfile + logfileName, wkgNode);
 
+    QVERIFY(file.open(QIODevice::ReadOnly | QIODevice::Text));
+
+    QTextStream in(&file);
+    QVERIFY(!in.atEnd());
+
+    // capture second line (***ADVANCED LOG FILE DISABLED/ENABLED)
+    QString firstLine = in.readLine();
+
+    QVERIFY(!in.atEnd());
+    QString dataMsginFile = in.readLine();
+    QStringList values = dataMsginFile.split(", ");
+
+    // check for the correctly inputed values
+    QCOMPARE(values[0], "ID: 15");
+    QCOMPARE(values[1], "0:00:00");
+    QCOMPARE(values[2], "Test message on log file");
+
+    QVERIFY(!in.atEnd());
+    QString dataMsg2inFile = in.readLine();
+    values = dataMsg2inFile.split(", ");
+
+    QCOMPARE(values[0], "ID: 16");
+    QCOMPARE(values[1], "0:00:11");
+    QCOMPARE(values[2], "Second test message on log");
 
 
 
