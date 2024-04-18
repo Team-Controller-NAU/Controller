@@ -117,18 +117,21 @@ bool electrical::loadElecData(QString message)
         QString name = values[0];
         if(name == "")
         {
+            qDebug() << "Error: loadElecData empty electrical component name";
             return false;
         }
 
         int voltage = values[1].toInt();
-        if(voltage <= -1)
+        if(voltage <= -1 || values[1] != "0" && voltage == 0)
         {
+            qDebug() << "Error: loadElecData invalid voltage: " << values[1];
             return false;
         }
 
         int amps = values[2].toInt();
-        if(amps <= -1)
+        if(amps <= -1 || values[2] != "0" && amps == 0)
         {
+            qDebug() << "Error: loadElecData invalid amps: " << values[2];
             return false;
         }
 

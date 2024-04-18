@@ -364,7 +364,7 @@ void tst_events::test_loadEventData()
     Events *eventObj = new Events(false, 0);
 
     // set up some variables
-    QString exampleMsg = "30,0:01:15,Sample Test message 1,\n";
+    QString exampleMsg = "30,0:01:15:433,Sample Test message 1,\n";
 
     // attempt to add the node
     bool result = eventObj->loadEventData(exampleMsg);
@@ -383,7 +383,7 @@ void tst_events::test_loadEventData()
         // only access these values if loadEventData actually worked
         // to avoid dereferencing a null pointer
         QCOMPARE(wkgEventNode->id, 30);
-        QCOMPARE(wkgEventNode->timeStamp, "0:01:15");
+        QCOMPARE(wkgEventNode->timeStamp, "0:01:15:433");
         QCOMPARE(wkgEventNode->eventString, "Sample Test message 1");
         QCOMPARE(eventObj->totalEvents, 1);
         QCOMPARE(eventObj->totalNodes, 1);
@@ -433,7 +433,7 @@ void tst_events::test_loadErrorData()
     Events *eventObj = new Events(false, 0);
 
     // set up some variables
-    QString exampleMsg = "30,0:01:15,Sample Test message 1,1,\n";
+    QString exampleMsg = "30,0:01:15:921,Sample Test message 1,1,\n";
 
     // attempt to add the node
     bool result = eventObj->loadErrorData(exampleMsg);
@@ -452,7 +452,7 @@ void tst_events::test_loadErrorData()
         // only access these values if loadEventData actually worked
         // to avoid dereferencing a null pointer
         QCOMPARE(wkgErrorNode->id, 30);
-        QCOMPARE(wkgErrorNode->timeStamp, "0:01:15");
+        QCOMPARE(wkgErrorNode->timeStamp, "0:01:15:921");
         QCOMPARE(wkgErrorNode->eventString, "Sample Test message 1");
         QCOMPARE(wkgErrorNode->cleared, 1);
         QCOMPARE(eventObj->totalErrors, 1);
@@ -505,7 +505,7 @@ void tst_events::test_loadEventDump()
     Events *eventObj = new Events(false, 0);
 
     // set up some variables
-    QString exampleMsg = "30,0:01:15,Sample Test message 1,,31,0:02:31,Sample Test message 2";
+    QString exampleMsg = "30,0:01:15:212,Sample Test message 1,,31,0:02:31:343,Sample Test message 2";
 
     // attempt to add the two nodes
     bool result = eventObj->loadEventDump(exampleMsg);
@@ -524,12 +524,12 @@ void tst_events::test_loadEventDump()
         // only access these values if loadEventData actually worked
         // to avoid dereferencing a null pointer
         QCOMPARE(wkgEventNode->id, 30);
-        QCOMPARE(wkgEventNode->timeStamp, "0:01:15");
+        QCOMPARE(wkgEventNode->timeStamp, "0:01:15:212");
         QCOMPARE(wkgEventNode->eventString, "Sample Test message 1");
 
         wkgEventNode = wkgEventNode->nextPtr;
         QCOMPARE(wkgEventNode->id, 31);
-        QCOMPARE(wkgEventNode->timeStamp, "0:02:31");
+        QCOMPARE(wkgEventNode->timeStamp, "0:02:31:343");
         QCOMPARE(wkgEventNode->eventString, "Sample Test message 2");
 
         QCOMPARE(eventObj->totalEvents, 2);
@@ -558,7 +558,7 @@ void tst_events::test_loadErrorDump()
     Events *eventObj = new Events(false, 0);
 
     // set up some variables
-    QString exampleMsg = "30,0:01:15,Sample Test message 1,1,,31,0:02:31,Sample Test message 2,0";
+    QString exampleMsg = "30,0:01:15:111,Sample Test message 1,1,,31,0:02:31:322,Sample Test message 2,0";
 
     // attempt to add the two nodes
     bool result = eventObj->loadErrorDump(exampleMsg);
@@ -577,13 +577,13 @@ void tst_events::test_loadErrorDump()
         // only access these values if loadEventData actually worked
         // to avoid dereferencing a null pointer
         QCOMPARE(wkgErrorNode->id, 30);
-        QCOMPARE(wkgErrorNode->timeStamp, "0:01:15");
+        QCOMPARE(wkgErrorNode->timeStamp, "0:01:15:111");
         QCOMPARE(wkgErrorNode->eventString, "Sample Test message 1");
         QCOMPARE(wkgErrorNode->cleared, 1);
 
         wkgErrorNode = wkgErrorNode->nextPtr;
         QCOMPARE(wkgErrorNode->id, 31);
-        QCOMPARE(wkgErrorNode->timeStamp, "0:02:31");
+        QCOMPARE(wkgErrorNode->timeStamp, "0:02:31:322");
         QCOMPARE(wkgErrorNode->eventString, "Sample Test message 2");
         QCOMPARE(wkgErrorNode->cleared, 0);
 

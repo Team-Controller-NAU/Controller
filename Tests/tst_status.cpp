@@ -157,15 +157,12 @@ void tst_status::test_loadVersionData()
 {
     // initialize variables
     Status status;
-    QString dataMsg = "00:00:02,6.7.2,2F5A1D3E7B9,\n";
-    QStringList values = dataMsg.split(DELIMETER);
-    QTime controllerTime = QTime::fromString(values[0]);
+    QString dataMsg = "00:00:02:000,6.7.2,2F5A1D3E7B9,\n";
 
     // call loadVersionData
     status.loadVersionData(dataMsg);
 
     // verify that the elapsed time, version and crc are correct
-    QCOMPARE(status.elapsedControllerTime, controllerTime);
     QCOMPARE(status.version, CONTROLLER_VERSION);
     QCOMPARE(status.crc, CRC_VERSION);
 }

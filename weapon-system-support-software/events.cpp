@@ -691,20 +691,28 @@ bool Events::loadErrorData(QString message)
         int id = values[0].toInt();
         if(id <= -1)
         {
+            qDebug() << "Error: loadErrorData invalid id: " << values[0];
             return false;
         }
 
         QString timeStamp = values[1];
         QStringList timeValues = timeStamp.split(':');
+        if (timeValues.length() != 4)
+        {
+            qDebug() << "Error: loadErrorData invalid time stamp: " << timeStamp;
+            return false;
+        }
         if(timeValues[0].toInt() <= -1 || timeValues[1].toInt() <= -1
             || timeValues[2].toInt() <= -1 || timeValues[3].toInt()<= -1)
         {
+            qDebug() << "Error: loadErrorData invalid time stamp: " << timeStamp;
             return false;
         }
 
         QString eventString = values[2];
         if(eventString == "")
         {
+            qDebug() << "Error: loadErrorData empty event string";
             return false;
         }
 
@@ -741,20 +749,28 @@ bool Events::loadEventData(QString message)
         int id = values[0].toInt();
         if(id <= -1)
         {
+            qDebug() << "Error: loadEventData invalid id: " << values[0];
             return false;
         }
 
         QString timeStamp = values[1];
         QStringList timeValues = timeStamp.split(':');
-        if(timeValues[0].toInt() <= -1 || timeValues[1].toInt() <= -1
+        if (timeValues.length() != 4)
+        {
+            qDebug() << "Error: loadEventData invalid time stamp: " << timeStamp;
+            return false;
+        }
+        else if (timeValues[0].toInt() <= -1 || timeValues[1].toInt() <= -1
             || timeValues[2].toInt() <= -1 || timeValues[3].toInt()<= -1)
         {
+            qDebug() << "Error: loadEventData invalid time stamp: " << timeStamp;
             return false;
         }
 
         QString eventString = values[2];
         if(eventString == "")
         {
+            qDebug() << "Error: loadEventData empty event string";
             return false;
         }
 
