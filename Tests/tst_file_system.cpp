@@ -11,6 +11,8 @@ private slots:
     void tst_outputToLogFile();
 
     void tst_appendToLogfile();
+
+    void tst_loadEventsFromLogFile();
 };
 
 //TODO: add documentation
@@ -122,7 +124,12 @@ void tst_file_system::tst_appendToLogfile()
     delete eventObj;
 }
 
-// void tst_file_system::tst_loadEventsFromLogFile
+void tst_file_system::tst_loadEventsFromLogFile()
+{
+    Events *eventObj = new Events(false, 50);
+
+    delete eventObj;
+}
 
 QTEST_MAIN(tst_file_system)
 #include "tst_file_system.moc"
