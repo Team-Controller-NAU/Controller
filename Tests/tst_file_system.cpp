@@ -19,7 +19,7 @@ void tst_file_system::tst_outputToLogFile()
     // initialize variables
     QSettings userSettings("Team Controller", "WSSS");
     Events *eventObj = new Events(false, 50);
-    QString dataMsg = "15,0:00:00,Test message on log file";
+    QString dataMsg = "15,0:00:00:150,Test message on log file";
     QString logfile = userSettings.value("logfileLocation").toString();
     QFile file(logfile + "/tst_outputToLogFile.txt");
 
@@ -48,7 +48,7 @@ void tst_file_system::tst_outputToLogFile()
 
     // check for the correctly inputed values
     QCOMPARE(values[0], "ID: 15");
-    QCOMPARE(values[1], "0:00:00");
+    QCOMPARE(values[1], "0:00:00:150");
     QCOMPARE(values[2], "Test message on log file");
 
     // remove the test file
@@ -62,8 +62,8 @@ void tst_file_system::tst_appendToLogfile()
 {
     QSettings userSettings("Team Controller", "WSSS");
     Events *eventObj = new Events(false, 50);
-    QString dataMsg = "15,0:00:00,Test message on log file";
-    QString dataMsg2 = "16,0:00:11,Second test message on log";
+    QString dataMsg = "15,0:00:00:011,Test message on log file";
+    QString dataMsg2 = "16,0:00:11:123,Second test message on log";
     QString logfile = userSettings.value("logfileLocation").toString();
     QString logfileName = "/tst_appendToLogFile.txt";
     QFile file(logfile + logfileName);
@@ -100,7 +100,7 @@ void tst_file_system::tst_appendToLogfile()
 
     // check for the correctly inputed values
     QCOMPARE(values[0], "ID: 15");
-    QCOMPARE(values[1], "0:00:00");
+    QCOMPARE(values[1], "0:00:00:011");
     QCOMPARE(values[2], "Test message on log file");
 
     // capture the second data msg in file
@@ -110,7 +110,7 @@ void tst_file_system::tst_appendToLogfile()
 
     // check for correct values
     QCOMPARE(values[0], "ID: 16");
-    QCOMPARE(values[1], "0:00:11");
+    QCOMPARE(values[1], "0:00:11:123");
     QCOMPARE(values[2], "Second test message on log");
 
     // remove file
