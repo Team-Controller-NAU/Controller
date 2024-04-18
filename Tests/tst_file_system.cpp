@@ -9,8 +9,11 @@ class tst_file_system : public QObject
 
 private slots:
     void tst_outputToLogFile();
+
+    void tst_appendToLogfile();
 };
 
+//TODO: add documentation
 void tst_file_system::tst_outputToLogFile()
 {
     // initialize variables
@@ -60,6 +63,32 @@ void tst_file_system::tst_outputToLogFile()
     }
 
     // remove event object
+    delete eventObj;
+}
+
+void tst_file_system::tst_appendToLogfile()
+{
+    QSettings userSettings("Team Controller", "WSSS");
+    Events *eventObj = new Events();
+
+
+    QString dataMsg = "15,0:00:00,Test message on log file";
+    QString dataMsg2 = "16,0:00:11,Second test message on log";
+    QString logfile = userSettings.value("logfileLocation").toString();
+    QString logfileName = "/tst_appendToLogFile.txt";
+    QFile file(logfile + logfileName);
+
+
+    eventObj->loadEventData(dataMsg);
+    eventObj->outputToLogFile(logfile + logfileName, false);
+
+    eventObj->loadEventData(dataMsg2);
+    EventNode *wkgNode = eventObj->lastEventNode;
+    eventObj->appendToLogfile(logfile + logfileName, wkgNode);
+
+
+
+
     delete eventObj;
 }
 
