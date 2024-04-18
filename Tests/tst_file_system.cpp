@@ -2,6 +2,7 @@
 #include <QTest>
 #include <QSettings>
 #include "../weapon-system-support-software/events.cpp"
+#include "../weapon-system-support-software/constants.h"
 
 class tst_file_system : public QObject
 {
@@ -12,7 +13,7 @@ private slots:
 
     void tst_appendToLogfile();
 
-    void tst_loadEventsFromLogFile();
+    void tst_loadDataFromLogFile();
 };
 
 //TODO: add documentation
@@ -124,12 +125,41 @@ void tst_file_system::tst_appendToLogfile()
     delete eventObj;
 }
 
-void tst_file_system::tst_loadEventsFromLogFile()
+#if DEV_MODE
+void tst_file_system::tst_loadDataFromLogFile()
 {
+    QSettings userSettings("Team Controller", "WSSS");
     Events *eventObj = new Events(false, 50);
+    QString dataMsg = "15,0:00:00:150,Test message on log file";
+    QString logfile = userSettings.value("logfileLocation").toString();
+    QString logfileName = "loadDataFromLogFile.txt";
+    QFile file(logfile + logfileName);
 
+    // create a log file to load in
+    eventObj->loadEventData(dataMsg);
+    eventObj->outputToLogFile(logfile + logfileName, false);
+
+    // create an event object to store loaded data in
+    Events *wkgNode = new Events(false, 50);
+
+    // check the return of loadDataFromLogFile
+    QCOMPARE(eventObj->loadDataFromLogFile(wkgNode, logfile + logfileName), SUCCESS);
+
+    // create a secondary wkgnode for comparrison
+    EventNode *wkgEventNode = wkgNode->headEventNode;
+
+    // check for valid values
+    QCOMPARE(wkgEventNode->id, 15);
+    QCOMPARE(wkgEventNode->timeStamp, "0:00:00:150");
+    QCOMPARE(wkgEventNode->eventString, "Test message on log file");
+
+    // delete the file
+    QVERIFY(file.remove());
+
+    // delete the created objects
     delete eventObj;
+    delete wkgNode;
 }
-
+#endif
 QTEST_MAIN(tst_file_system)
 #include "tst_file_system.moc"
