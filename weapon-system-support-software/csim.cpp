@@ -148,7 +148,7 @@ void CSim::checkConnection(Connection *conn)
             conn->connected = false;
 
             //erase existing events to prevent unrecognized messages in next session
-            eventsPtr->freeLinkedLists();
+            eventsPtr->freeLinkedLists(true);
 
             break;
 
@@ -218,19 +218,23 @@ void CSim::checkConnection(Connection *conn)
     }
 }
 
-//returns a qstring containing the time since start up in H:M:S
+//returns a qstring containing the time since start up in HH:MM:SS:mmm
 QString CSim::getTimeStamp()
 {
     // Calculate elapsed time since startup
     qint64 elapsedTime = QDateTime::currentMSecsSinceEpoch() - startupTime;
 
-    // Convert milliseconds to hours, minutes, and seconds
+    // Convert milliseconds to hours, minutes, seconds, and milliseconds
     int hours = elapsedTime / (1000 * 60 * 60);
     int minutes = (elapsedTime % (1000 * 60 * 60)) / (1000 * 60);
     int seconds = (elapsedTime % (1000 * 60)) / 1000;
+    int milliseconds = elapsedTime % 1000;
 
-    // Format the timestamp as "H:M:S" and return
-    return QString("%1:%2:%3").arg(hours, 2, 10, QLatin1Char('0')).arg(minutes, 2, 10, QLatin1Char('0')).arg(seconds, 2, 10, QLatin1Char('0'));
+    // Format the timestamp as "H:M:S:Ms" and return
+    return QString("%1:%2:%3:%4").arg(hours, 2, 10, QLatin1Char('0'))
+        .arg(minutes, 2, 10, QLatin1Char('0'))
+        .arg(seconds, 2, 10, QLatin1Char('0'))
+        .arg(milliseconds, 3, 10, QLatin1Char('0'));
 }
 
 //this function contains main event loop for simulating weapon controller.
@@ -254,7 +258,7 @@ void CSim::run()
 
         //init events class (csim only uses this to store non cleared errors so that it can
         //clear them later)
-        Events *events(new Events());
+        Events *events(new Events(false, 0));
         eventsPtr = events;
 
         //for status use smart pointer for automatic memory management (resources auto free when function exits)
@@ -393,7 +397,7 @@ void CSim::run()
                 message += QString::number(eventId) + DELIMETER;
 
                 //generate time stamp
-                timeStamp = QTime::currentTime().toString("[hh:mm:ss]");
+                timeStamp = getTimeStamp();
 
                 //put time stamp in message
                 message += getTimeStamp() + DELIMETER;
@@ -405,7 +409,7 @@ void CSim::run()
                 message += errorMessage + DELIMETER;
 
                 //set cleared / not cleared
-                cleared = 0;//randomGenerator.bounded(0,2); //temporarily only send active errors
+                cleared = randomGenerator.bounded(0,2);
 
                 // append cleared val
                 message += QString::number(cleared) + DELIMETER;

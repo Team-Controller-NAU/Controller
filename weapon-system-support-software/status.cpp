@@ -43,77 +43,122 @@ bool Status::loadData(QString statusMessage)
         double firingRate;
      *
      */
-    //create bool ptr to store result of string->double conversion for fire rate
-    bool result = true;
 
     QStringList values = statusMessage.split(DELIMETER);
 
     // check if message contains too few or too many items
     if (values.length()-1 != NUM_STATUS_ELEMENTS)
     {
+        qDebug() << "Error: Status::loadData invalid number of delimeters: " << statusMessage;
         return false;
     }
 
-    //extract armed value from message
-    armed = (values[0] == "1");
+    //verify all data is valid====================================================
 
+    //get data into vars to prevent inefficiency caused by recasting over and over
+    bool firRateConversionResult = false;
+    int trig1 = values[1].toInt();
+    int trig2 = values[2].toInt();
+    int conState = values[3].toInt();
+    int firMode = values[4].toInt();
+    int feedPos = values[5].toInt();
+    int totFirEvents = values[6].toInt();
+    int burLen = values[7].toInt();
+    double firRate = values[8].toDouble(&firRateConversionResult);
 
+    //check each value to ensure it is of correct type. if the toInt() method fails
+    //the return will be 0. So if we find an int =0 and its string != 0, its a fail.
+    //we also check that the integers are in range of their respective enumerations
+    //declared in constants. Firing mode and feed position are exceptions, each
+    //val is manually checked because their enumerations represent degrees.
 
-    //extract trigger1 status
-    trigger1 = static_cast<TriggerStatus>(values[1].toInt());
-
-    //extract trigger2
-    trigger2 = static_cast<TriggerStatus>(values[2].toInt());
-
-    // check if trigger1 and trigger2 are valid
-    if(!(trigger1 == ENGAGED || trigger1 == DISENGAGED || trigger1 == NA) ||
-        !(trigger2 == ENGAGED || trigger2 == DISENGAGED || trigger2 == NA))
+    //armed
+    if (values[0] != "0" && values[0] != "1")
     {
-        return false;
+        qDebug() << "Error: Status::loadData invalid armed value: " << values[0];
     }
-
-    //extract controller state
-    controllerState = static_cast<ControllerState>(values[3].toInt());
-
-    // check if controllerState is valid
-    if(!(controllerState == RUNNING || controllerState == BLOCKED
-          || controllerState == TERMINATED || controllerState == SUSPENDED))
+    //trigger 1
+    else if ((values[1] != "0" && trig1 == 0) || trig1 < 0
+               || trig1 >= NUM_TRIGGER_STATUS )
     {
-        return false;
+        qDebug() << "Error: Status::loadData invalid trigger 1 value: " << values[1];
     }
-
-    //extract firing mode
-    firingMode = static_cast<FiringMode>(values[4].toInt());
-
-    // check for valid firingMode
-    if(!(firingMode == SAFE || firingMode == SINGLE
-          || firingMode == BURST || firingMode == FULL_AUTO))
+    //trigger 2
+    else if ((values[2] != "0" && trig2 == 0) || trig2 < 0
+             || trig2 >= NUM_TRIGGER_STATUS )
     {
-        return false;
+        qDebug() << "Error: Status::loadData invalid trigger 2 value: " << values[2];
     }
-
-    //extract feed pos
-    feedPosition = static_cast<FeedPosition>(values[5].toInt());
-
-    // check for valid feedPos
-    if(!(feedPosition == CHAMBERING || feedPosition == LOCKING
-          || feedPosition == FIRING || feedPosition == UNLOCKING
-          || feedPosition == EXTRACTING || feedPosition == EJECTING
-          || feedPosition == COCKING || feedPosition == FEEDING))
+    //controller state
+    else if ((values[3] != "0" && conState == 0) || conState < 0
+             || conState >= NUM_CONTROLLER_STATE )
     {
-        return false;
+        qDebug() << "Error: Status::loadData invalid controller state value: " << values[3];
     }
+    //firing mode
+    else if ( (values[4] != "0" && firMode == 0) || (firMode != SAFE &&
+               firMode != SINGLE && firMode != BURST && firMode != FULL_AUTO))
+    {
+        qDebug() << "Error: Status::loadData invalid firing mode value: " << values[4];
+    }
+    //feed pos
+    else if ( (values[5] != "0" && feedPos == 0) || (feedPos != CHAMBERING
+               && feedPos != LOCKING
+               && feedPos != FIRING && feedPos != UNLOCKING
+               && feedPos != EXTRACTING && feedPos != EJECTING
+               && feedPos != COCKING && feedPos != FEEDING))
+    {
+        qDebug() << "Error: Status::loadData invalid feed position value: " << values[5];
+    }
+    //total firing events
+    else if ( (values[6] != "0" && totFirEvents == 0) || totFirEvents < 0)
+    {
+        qDebug() << "Error: Status::loadData invalid total firing events value: " << values[6];
+    }
+    //burst length
+    else if ( (values[6] != "0" && burLen == 0) || burLen < 0)
+    {
+        qDebug() << "Error: Status::loadData invalid burst length value: " << values[7];
+    }
+    //firing rate
+    else if ( !firRateConversionResult || firRate < 0)
+    {
+        qDebug() << "Error: Status::loadData invalid firing rate value: " << values[8];
+    }
+    //all data has been verified at this point==========================================
+    else
+    {
+        //extract armed value from message
+        armed = (values[0] == "1");
 
-    //extract
-    totalFiringEvents = values[6].toInt();
+        //extract trigger1 status
+        trigger1 = static_cast<TriggerStatus>(trig1);
 
-    //extract
-    burstLength = values[7].toInt();
+        //extract trigger2
+        trigger2 = static_cast<TriggerStatus>(trig2);
 
-    //extract
-    firingRate = values[8].toDouble(&result);
+        //extract controller state
+        controllerState = static_cast<ControllerState>(conState);
 
-    return true;
+        //extract firing mode
+        firingMode = static_cast<FiringMode>(firMode);
+
+        //extract feed pos
+        feedPosition = static_cast<FeedPosition>(feedPos);
+
+        //extract
+        totalFiringEvents = totFirEvents;
+
+        //extract
+        burstLength = burLen;
+
+        //extract
+        firingRate = firRate;
+
+        return true;
+    }
+    //one of the tests failed, no data was loaded from this message
+    return false;
 }
 
 /**
@@ -138,13 +183,15 @@ bool Status::loadVersionData(QString versionMessage)
 
     // Split time string
     QStringList parts = values[0].split(':');
-    if (parts.size() != 3) {
-        qDebug() << "Error: loadVersionData: Invalid time string format in load version data";
+    if (parts.size() != 4) {
+        qDebug() << "Error: loadVersionData: Invalid time string format in load version data: " << values[0];
         return false;
     }
 
     // Calculate total milliseconds
-    qint64 totalMilliseconds = parts[0].toInt() * 3600000LL + parts[1].toInt() * 60000LL + parts[2].toInt() * 1000LL;
+    qint64 totalMilliseconds = parts[0].toInt() * 3600000LL + parts[1].toInt() * 60000LL + parts[2].toInt()
+                               * 1000LL + parts[3].toInt();
+
 
     // Initialize elapsedControllerTime
     elapsedControllerTime = QTime::fromMSecsSinceStartOfDay(totalMilliseconds);

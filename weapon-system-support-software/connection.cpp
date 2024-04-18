@@ -44,12 +44,10 @@ Connection::Connection(QString portName, QSerialPort::BaudRate baudRate,
     // log result
     if (!serialPort.isOpen())
     {
-        // notify
         qDebug() << "Failed to open " << portName;
     }
     else
     {
-        // notify
         qDebug() << portName << " opened successfully";
         serialPort.clear();
         serialPort.readAll();

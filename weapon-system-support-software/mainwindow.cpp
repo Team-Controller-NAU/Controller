@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
     ddmCon(nullptr),
     status(new Status()),
     electricalData(new electrical()),
-    events(new Events()),
+    events(nullptr),
 
     //this determines what will be shown on the events page
     eventFilter(ALL),
@@ -50,6 +50,28 @@ MainWindow::MainWindow(QWidget *parent)
 
     //setup user settings and init settings related gui elements
     setupSettings();
+
+    //make new events class for this session
+    events = new Events(userSettings.value("RAMClearing").toBool(), userSettings.value("maxDataNodes").toInt());
+
+    //setup signal and slot to notify user when ram is cleared from events
+    //this signal connects to a lambda function so we can call more than 1 function
+    //using 1 signal-slot connection
+    connect(events, &Events::RAMCleared, this, [=]() {
+        notifyUser("RAM Cleared",
+                   "Events and errors were removed from RAM to improve performance. "
+                   "They are still being tracked by counters and our log file. You can also load them"
+                   "back into the GUI after this session ends.", false);
+
+        //show truncated label on the events page to tell user not all nodes are displayed
+        ui->truncated_label->setVisible(true);
+
+        //get rid of outdated display
+        refreshEventsOutput();
+    });
+
+    //will be disabled until RAM is cleared
+    ui->truncated_label->setVisible(false);
 
     //if dev mode is active, init CSim
     #if DEV_MODE
@@ -103,7 +125,7 @@ MainWindow::MainWindow(QWidget *parent)
     //connect clear notification process to the notification timer. If run, the process
     //will trigger after the notification timeout
     connect(notificationTimer, &QTimer::timeout, this, [this]() {
-        ui->notificationPopUp->setStyleSheet("background-color: transparent; border: none;");
+        ui->notificationPopUp->setStyleSheet(INVISIBLE);
         ui->notificationPopUp->clear();
     });
 
@@ -170,11 +192,14 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
     //check if we are connected
     if (ddmCon->connected)
     {
+
         //disable changes to connection related settings
         disableConnectionChanges();
 
         //stop handshake protocols
         handshakeTimer->stop();
+
+        ui->truncated_label->setVisible(false);
 
         // check if controller timer is not running
         if(!runningControllerTimer->isActive())
@@ -184,7 +209,7 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
 
             // update elapsed time
             ui->elapsed_time_label->setText("Elapsed Time: ");
-            ui->elapsedTime->setText( status->elapsedControllerTime.toString("HH:mm:ss"));
+            ui->elapsedTime->setText( status->elapsedControllerTime.toString(TIME_FORMAT));
         }
 
         //free old electrical data if any exists
@@ -198,15 +223,14 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
 
         // update ui
         ui->handshake_button->setText("Disconnect");
-        ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #FE1C1C; border: 1px solid; border-color: #cb0101; font: 15pt 'Segoe UI'; } "
-                                            "QPushButton::hover { background-color: #fe3434; } "
-                                            "QPushButton::pressed { background-color: #fe8080;}");
+        ui->handshake_button->setStyleSheet(CONNECTED_STYLE);
         ui->connectionLabel->setText("Connected ");
         ui->connectionStatus->setPixmap(GREEN_LIGHT);
 
-        //clear events ll and output box
-        events->freeLinkedLists();
+        //clear events and full clear the class output box
         ui->events_output->clear();
+
+        events->freeLinkedLists(true);
 
         //reset event counters
         ui->TotalEventsOutput->setText("0");
@@ -236,14 +260,12 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
 
         //refreshes connection button/displays
         ui->handshake_button->setText("Connect");
-        ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #14AE5C; border: 1px solid; border-color: #0d723c; font: 15pt 'Segoe UI'; } "
-                                            "QPushButton::hover { background-color: #1be479; } "
-                                            "QPushButton::pressed { background-color: #76efae;}");
+        ui->handshake_button->setStyleSheet(DISCONNECTED_STYLE);
         ui->connectionStatus->setPixmap(RED_LIGHT);
         ui->connectionLabel->setText("Disconnected ");
 
         //output session stats
-        if (events->totalNodes > 0 && autosaveLogFile != "")
+        if (autosaveLogFile != "")
         {
             notifyUser("Session statistics ready", getSessionStatistics(), false);
         }
@@ -342,9 +364,10 @@ void MainWindow::readSerialData()
         #if DEV_MODE && SERIAL_COMM_DEBUG
         qDebug() << "message: " << message;
         #endif
-
+        #if DEV_MODE
         //update gui with new message
         ui->stdout_label->setText(message);
+        #endif
 
         //check if message id is present and followed by a comma
         if (message[0].isDigit() && message[1] == DELIMETER)
@@ -354,6 +377,22 @@ void MainWindow::readSerialData()
 
             //remove message id from message (id has len=1 and delimeter has len=1 so 2 total)
             message = message.mid(2);
+
+            //ensure we are in an active connection or attempting to connect
+            if(!(handshakeTimer->isActive() || ddmCon->connected))
+            {
+                qDebug() << "Error: readSerialData unexpected communication from controller";
+                notifyUser("Unexpected communication from controller", message, true);
+                ddmCon->sendDisconnectMsg();
+                return;
+            }
+            //ensure we are only getting begin message during handshake
+            else if (handshakeTimer->isActive() && messageId != BEGIN)
+            {
+                notifyUser("Invalid handshake is occurring", message, true);
+                ddmCon->sendDisconnectMsg();
+                return;
+            }
 
             //determine what kind of message this is
             switch ( messageId )
@@ -514,8 +553,8 @@ void MainWindow::readSerialData()
                 //attempt clear
                 result = events->clearError(errorId, autosaveLogFile );
 
-                //check for fail
-                if (result != SUCCESS )
+                //check for fail (here failed to clear from ll indicates RAM dump)
+                if (result != SUCCESS && result != FAILED_TO_CLEAR_FROM_LL)
                 {
                     //notify user of fail type
                     if (result == FAILED_TO_CLEAR)
@@ -531,19 +570,19 @@ void MainWindow::readSerialData()
                 else
                 {
                     //attempt to clear in events output
-                    clearErrorFromEventsOutput(errorId);
+                    if (result == SUCCESS) clearErrorFromEventsOutput(errorId);
 
                     //update counters
                     ui->ClearedErrorsOutput->setText(QString::number(events->totalClearedErrors));
                     ui->statusClearedErrors->setText(QString::number(events->totalClearedErrors));
 
                     if (notifyOnErrorCleared) notifyUser("Error " + message.left(message.indexOf(DELIMETER)) + " Cleared", false);
-
-                    #if DEV_MODE
-                    //update the cleared error selection box in dev tools (can be removed when dev page is removed)
-                    update_non_cleared_error_selection();
-                    #endif
                 }
+
+                #if DEV_MODE
+                //update the cleared error selection box in dev tools (can be removed when dev page is removed)
+                update_non_cleared_error_selection();
+                #endif
 
                 break;
 
@@ -558,14 +597,6 @@ void MainWindow::readSerialData()
                 {
                     //report
                     notifyUser("Invalid 'begin' message received", message, true);
-
-                    //end connection attempt
-                    ddmCon->sendDisconnectMsg();
-                }
-                //if we didnt initiate a connection, tell controller to disconnect
-                else if (!handshakeTimer->isActive())
-                {
-                    notifyUser("Invalid connection attempt", "Controller attempted to connect despite no active handshake. Connection terminated", true);
 
                     //end connection attempt
                     ddmCon->sendDisconnectMsg();
@@ -892,6 +923,33 @@ void MainWindow::setupSettings()
 
     //==============================================================
 
+    // Check if ram clearing setting does not exist
+    if (!userSettings.contains("RAMClearing") || !userSettings.value("RAMClearing").isValid()) {
+        // set the default value
+        userSettings.setValue("RAMClearing", INITIAL_RAM_CLEARING);
+    }
+
+    //set gui display to match
+    ui->ram_clearing->setChecked(userSettings.value("RAMClearing").toBool());
+
+    //check if the max nodes setting does not exist
+    if (!userSettings.contains("maxDataNodes") || !userSettings.value("maxDataNodes").isValid()) {
+        // If it doesn't exist or is not valid, set the default value
+        userSettings.setValue("maxDataNodes", INITIAL_MAX_DATA_NODES);
+    }
+
+    //update gui to match
+    ui->max_data_nodes->setValue(userSettings.value("maxDataNodes").toInt());
+
+    //dont allow the user to go below this value for max data nodes
+    ui->max_data_nodes->setMinimum(MIN_DATA_NODES_BEFORE_RAM_CLEAR);
+
+    //set max node visibility based on ram clearing setting
+    ui->max_data_nodes->setVisible(userSettings.value("RAMClearing").toBool());
+    ui->max_data_nodes_label->setVisible(userSettings.value("RAMClearing").toBool());
+
+    //==============================================================
+
     //sets up text options in connection settings drop down boxes
     setupConnectionPage();
 
@@ -987,7 +1045,7 @@ void MainWindow::updateElapsedTime()
     status->elapsedControllerTime = status->elapsedControllerTime.addSecs(1);
 
     // update the GUI
-    ui->elapsedTime->setText(status->elapsedControllerTime.toString("HH:mm:ss"));
+    ui->elapsedTime->setText(status->elapsedControllerTime.toString(TIME_FORMAT));
 }
 
 // method updates the elapsed time since last message received to DDM
@@ -1007,11 +1065,6 @@ void MainWindow::updateTimeSinceLastMessage()
     {
         qDebug() << "Error: updateTimeSinceLastMessage time since last DDM message received is negative.\n";
     }
-    // check for invalid datetime
-    else if(elapsedMs == 0)
-    {
-        qDebug() << "Error: updateTimeSinceLastMessage either datetime is invalid.\n";
-    }
     //check if timeout was reached
     else if (elapsedMs >= connectionTimeout)
     {
@@ -1025,7 +1078,7 @@ void MainWindow::updateTimeSinceLastMessage()
         elapsedTime = QTime(0, 0, 0).addMSecs(elapsedMs);
 
         // update gui
-        ui->DDMTimer->setText(elapsedTime.toString("HH:mm:ss"));
+        ui->DDMTimer->setText(elapsedTime.toString(TIME_FORMAT));
     }
 }
 
@@ -1130,13 +1183,12 @@ void MainWindow::refreshEventsOutput()
     ErrorNode *wkgErrPtr = events->headErrorNode;
     EventNode *wkgEventPtr = events->headEventNode;
     EventNode *nextPrintPtr;
-    bool printErr;
 
     //loop through all events and errors
     while(wkgErrPtr != nullptr || wkgEventPtr != nullptr)
     {
         // get next to print
-        nextPrintPtr = events->getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
+        nextPrintPtr = events->getNextNode(wkgEventPtr, wkgErrPtr);
 
         //update events output if filter allows
         updateEventsOutput(nextPrintPtr);
@@ -1218,9 +1270,9 @@ void MainWindow::notifyUser(QString notificationText, bool error)
 void MainWindow::notifyUser(QString notificationText, QString logText, bool error)
 {
     // Get the current timestamp
-    QString timeStamp = QDateTime::currentDateTime().toString("[hh:mm:ss] ");
+    QString timeStamp = QDateTime::currentDateTime().toString("[" + TIME_FORMAT +"] ");
 
-    QString notificationRichText = "<p style='color: white; font-size: 16px'>" + timeStamp +
+    QString notificationRichText = "<p style='" + NOTIFICATION_TIMESTAMP_STYLE + "'>" + timeStamp +
                                    " " + "<span style='color: ";
 
     QString popUpStyle = "border: 3px solid ";
@@ -1230,17 +1282,18 @@ void MainWindow::notifyUser(QString notificationText, QString logText, bool erro
 
     if (error)
     {
+        //replace new line literals with \n symbols
         logText.replace("\n", "\\n");
-        notificationRichText += "red";
-        popUpStyle += "red";
+        notificationRichText += ERROR_COLOR;
+        popUpStyle += ERROR_COLOR;
     }
     else
     {
-        notificationRichText += "green";
-        popUpStyle += "green";
+        notificationRichText += STANDARD_COLOR;
+        popUpStyle += STANDARD_COLOR;
     }
-    notificationRichText += "; font-size: 16px'>" + notificationText;
-    popUpStyle += "; color: white; text-align: center; font-size: 16px;";
+    notificationRichText += "; font-size: "+NOTIFICATION_SIZE+"px'>" + notificationText;
+    popUpStyle += "; " + POP_UP_STYLE;
 
     if (logText != "")
     {
@@ -1261,7 +1314,7 @@ void MainWindow::notifyUser(QString notificationText, QString logText, bool erro
     if (ui->Flow_Label->currentIndex() != 6 && error)
     {
         //update the notification icon to get user attention
-        ui->NotificationPageButton->setStyleSheet("border-image: url(://resources/Images/newNotification.png);");
+        ui->NotificationPageButton->setStyleSheet(URGENT_NOTIFICATION_ICON);
     }
 
     //stop old timer if running
@@ -1273,7 +1326,7 @@ void MainWindow::notifyUser(QString notificationText, QString logText, bool erro
 
 QString MainWindow::getSessionStatistics()
 {
-    return "Duration: " + status->elapsedControllerTime.toString("HH:mm:ss") + ", Total Events: " +
+    return "Duration: " + status->elapsedControllerTime.toString(TIME_FORMAT) + ", Total Events: " +
            QString::number(events->totalEvents) + ", Total Errors: " + QString::number(events->totalErrors)
            + ", Non-cleared errors: " + QString::number(events->totalClearedErrors)
            + ", Total Firing events: " + QString::number(status->totalFiringEvents);
@@ -1323,7 +1376,7 @@ void MainWindow::logAdvancedDetails(SerialMessageIdentifier id)
     {
         //append the text to the log file
         QTextStream out(&file);
-        out << outString + "\n";
+        out << outString << Qt::endl;
         file.close();
     }
 }
