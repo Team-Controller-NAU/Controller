@@ -18,7 +18,7 @@ void tst_file_system::tst_outputToLogFile()
 {
     // initialize variables
     QSettings userSettings("Team Controller", "WSSS");
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 50);
     QString dataMsg = "15,0:00:00,Test message on log file";
     QString logfile = userSettings.value("logfileLocation").toString();
     QFile file(logfile + "/tst_outputToLogFile.txt");
@@ -61,7 +61,7 @@ void tst_file_system::tst_outputToLogFile()
 void tst_file_system::tst_appendToLogfile()
 {
     QSettings userSettings("Team Controller", "WSSS");
-    Events *eventObj = new Events();
+    Events *eventObj = new Events(false, 50);
     QString dataMsg = "15,0:00:00,Test message on log file";
     QString dataMsg2 = "16,0:00:11,Second test message on log";
     QString logfile = userSettings.value("logfileLocation").toString();
