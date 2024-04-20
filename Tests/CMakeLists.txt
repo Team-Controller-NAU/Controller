@@ -20,16 +20,21 @@ add_executable(status_tests tst_status.cpp
 add_executable(electrical_tests tst_electrical.cpp)
 add_executable(event_tests tst_events.cpp
     ../weapon-system-support-software/events.h)
+add_executable(serial_comm_tests tst_serial_comm.cpp
+    ../weapon-system-support-software/connection.h)
 
 # Add include directories for mainwindow.h
 target_include_directories(status_tests PRIVATE ../weapon-system-support-software)
 target_include_directories(electrical_tests PRIVATE ../weapon-system-support-software)
 target_include_directories(event_tests PRIVATE ../weapon-system-support-software)
+target_include_directories(serial_comm_tests PRIVATE ../weapon-system-support-software)
 
 target_link_libraries(status_tests PRIVATE Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Test)
 target_link_libraries(electrical_tests PRIVATE Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Test)
 target_link_libraries(event_tests PRIVATE Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Test)
+target_link_libraries(serial_comm_tests PRIVATE Qt${QT_VERSION_MAJOR}::Gui Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Test)
 
 add_test(NAME status_tests COMMAND status_tests)
 add_test(NAME electrical_tests COMMAND electrical_tests)
 add_test(NAME event_tests COMMAND event_tests)
+add_test(NAME serial_comm_tests COMMAND serial_comm_tests)
