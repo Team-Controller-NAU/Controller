@@ -13,9 +13,9 @@ private slots:
     void tst_outputToLogFile_badInput_logFileName();
 
     void tst_appendToLogFile();
-    void tst_appendToLogFile_badInput_logFileName();
 
     void tst_loadDataFromLogFile();
+    void tst_loadDataFromLogFile_badInput_logFileName();
 };
 
 /**
@@ -154,36 +154,7 @@ void tst_file_system::tst_appendToLogFile()
     delete eventObj;
 }
 
-void tst_file_system::tst_appendToLogFile_badInput_logFileName()
-{
-    QSettings userSettings("Team Controller", "WSSS");
-    Events *eventObj = new Events(false, 50);
-    QString dataMsg = "15,0:00:00:011,Test message on log file";
-    QString dataMsg2 = "16,0:00:11:123,Second test message on log";
-    QString logfile = userSettings.value("logfileLocation").toString();
-    QString logfileName = "/tst_appendToLogFile.txt";
-    QFile file(logfile + logfileName);
-
-    // load the first data msg into event obj
-    eventObj->loadEventData(dataMsg);
-
-    // create and add data msg into logfile
-    QVERIFY(eventObj->outputToLogFile(logfile + logfileName, false));
-
-    // load second data msg
-    eventObj->loadEventData(dataMsg2);
-
-    EventNode *wkgNode = eventObj->lastEventNode;
-
-    // call append
-
-
-    QVERIFY(file.remove());
-    delete eventObj;
-}
-
 #if DEV_MODE
-
 /**
  * Test case for events function loadDataFromLogFile
  *
@@ -222,6 +193,30 @@ void tst_file_system::tst_loadDataFromLogFile()
     // delete the created objects
     delete eventObj;
     delete wkgNode;
+}
+
+
+void tst_file_system::tst_loadDataFromLogFile_badInput_logFileName()
+{
+    Events *eventObj = new Events(false, 50);
+
+    Events *wkgNode = new Events(false, 50);
+
+    // check the return of loadDataFromLogFile
+    QCOMPARE(eventObj->loadDataFromLogFile(wkgNode, "/logfile.txt"), DATA_NOT_FOUND);
+
+    QCOMPARE(eventObj->loadDataFromLogFile(wkgNode, "/logfile"), DATA_NOT_FOUND);
+
+    QCOMPARE(eventObj->loadDataFromLogFile(wkgNode, "logfile.txt"), DATA_NOT_FOUND);
+
+    QCOMPARE(eventObj->loadDataFromLogFile(wkgNode, "logfile"), DATA_NOT_FOUND);
+
+
+
+
+
+    delete eventObj;
+    //delete wkgNode;
 }
 #endif
 
