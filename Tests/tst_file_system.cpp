@@ -195,7 +195,9 @@ void tst_file_system::tst_loadDataFromLogFile()
     delete wkgNode;
 }
 
-
+/**
+ * Bad input test case for events function loadDataFromLogFile
+ */
 void tst_file_system::tst_loadDataFromLogFile_badInput_logFileName()
 {
     Events *eventObj = new Events(false, 50);
@@ -211,12 +213,8 @@ void tst_file_system::tst_loadDataFromLogFile_badInput_logFileName()
 
     QCOMPARE(eventObj->loadDataFromLogFile(wkgNode, "logfile"), DATA_NOT_FOUND);
 
-
-
-
-
     delete eventObj;
-    //delete wkgNode;
+    delete wkgNode;
 }
 #endif
 
