@@ -10,15 +10,17 @@ class tst_file_system : public QObject
 
 private slots:
     void tst_outputToLogFile();
+    void tst_outputToLogFile_badInput_logFileName();
 
-    void tst_appendToLogfile();
+    void tst_appendToLogFile();
+    void tst_appendToLogFile_badInput_logFileName();
 
     void tst_loadDataFromLogFile();
 };
 
-//TODO: add documentation
-//TODO: add negative tests
-
+/**
+ * Test case for events function outputToLogFile
+ */
 void tst_file_system::tst_outputToLogFile()
 {
     // initialize variables
@@ -63,7 +65,34 @@ void tst_file_system::tst_outputToLogFile()
     delete eventObj;
 }
 
-void tst_file_system::tst_appendToLogfile()
+/**
+ * Bad input test case for events function outputToLogfile
+ */
+void tst_file_system::tst_outputToLogFile_badInput_logFileName()
+{
+    Events *eventObj = new Events(false, 50);
+    QString dataMsg = "15,0:00:00:150,Test message on log file";
+
+    // add data to event
+    eventObj->loadEventData(dataMsg);
+
+    // test a bad log file name - incomplete path
+    QVERIFY(eventObj->outputToLogFile("/tst_appendToLogFile.txt", false) == false);
+
+    // test a bad log file name - no extension
+    QVERIFY(eventObj->outputToLogFile("/tst_appendToLogFile", false) == false);
+
+    // test a bad log file name - no file name
+    QVERIFY(eventObj->outputToLogFile(" ", false) == false);
+
+    // delete the event obj
+    delete eventObj;
+}
+
+/**
+ * Test case for events function appendToLogFile
+ */
+void tst_file_system::tst_appendToLogFile()
 {
     QSettings userSettings("Team Controller", "WSSS");
     Events *eventObj = new Events(false, 50);
@@ -125,7 +154,41 @@ void tst_file_system::tst_appendToLogfile()
     delete eventObj;
 }
 
+void tst_file_system::tst_appendToLogFile_badInput_logFileName()
+{
+    QSettings userSettings("Team Controller", "WSSS");
+    Events *eventObj = new Events(false, 50);
+    QString dataMsg = "15,0:00:00:011,Test message on log file";
+    QString dataMsg2 = "16,0:00:11:123,Second test message on log";
+    QString logfile = userSettings.value("logfileLocation").toString();
+    QString logfileName = "/tst_appendToLogFile.txt";
+    QFile file(logfile + logfileName);
+
+    // load the first data msg into event obj
+    eventObj->loadEventData(dataMsg);
+
+    // create and add data msg into logfile
+    QVERIFY(eventObj->outputToLogFile(logfile + logfileName, false));
+
+    // load second data msg
+    eventObj->loadEventData(dataMsg2);
+
+    EventNode *wkgNode = eventObj->lastEventNode;
+
+    // call append
+
+
+    QVERIFY(file.remove());
+    delete eventObj;
+}
+
 #if DEV_MODE
+
+/**
+ * Test case for events function loadDataFromLogFile
+ *
+ * This function is located in the dev mode section because it uses constants.h
+ */
 void tst_file_system::tst_loadDataFromLogFile()
 {
     QSettings userSettings("Team Controller", "WSSS");
@@ -161,5 +224,6 @@ void tst_file_system::tst_loadDataFromLogFile()
     delete wkgNode;
 }
 #endif
+
 QTEST_MAIN(tst_file_system)
 #include "tst_file_system.moc"
