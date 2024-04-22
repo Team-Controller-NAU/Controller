@@ -8,36 +8,80 @@ class tst_serial_comm : public QObject
     Q_OBJECT
 
 public:
+    QSettings userSettings;
+    tst_serial_comm();
 
 private:
 
 private slots:
     void test_transmit();
+
+    void test_checkForValidMessage();
 };
 
+tst_serial_comm::tst_serial_comm()
+    : userSettings("Team Controller", "WSSS")
+{}
 
 void tst_serial_comm::test_transmit()
 {
-    Connection *sender = new Connection("Com4", QSerialPort::Baud9600, QSerialPort::Data8,
+    Connection *sender = new Connection(userSettings.value("portName").toString(), QSerialPort::Baud9600, QSerialPort::Data8,
                QSerialPort::NoParity, QSerialPort::OneStop, QSerialPort::NoFlowControl);
 
-    Connection *receiver = new Connection("Com5",QSerialPort::Baud9600, QSerialPort::Data8,
+    Connection *receiver = new Connection(userSettings.value("csimPortName").toString(),QSerialPort::Baud9600, QSerialPort::Data8,
                QSerialPort::NoParity, QSerialPort::OneStop, QSerialPort::NoFlowControl);
 
     QVERIFY(sender != nullptr);
     QVERIFY(receiver != nullptr);
 
-    QString stringToTransmit = "Hello world!";
+    QString stringToTransmit = "Hello world!\n";
 
     sender->transmit(stringToTransmit);
 
     //allow time for transmit
-    sender->serialPort.waitForReadyRead(1000);
+    sender->serialPort.waitForReadyRead(100);
+    receiver->serialPort.waitForReadyRead(100);
 
     QString stringReceived = QString::fromUtf8(receiver->serialPort.readLine());
 
     QCOMPARE(stringToTransmit, stringReceived);
 
+    delete sender;
+    delete receiver;
 }
+
+void tst_serial_comm::test_checkForValidMessage()
+{
+    Connection *sender = new Connection(userSettings.value("portName").toString(), QSerialPort::Baud9600, QSerialPort::Data8,
+                                        QSerialPort::NoParity, QSerialPort::OneStop, QSerialPort::NoFlowControl);
+
+    Connection *receiver = new Connection(userSettings.value("csimPortName").toString(),QSerialPort::Baud9600, QSerialPort::Data8,
+                                          QSerialPort::NoParity, QSerialPort::OneStop, QSerialPort::NoFlowControl);
+
+    QString validMessage = "Hello world\n";
+    QString invalidMessage = "Hello world";
+
+    sender->transmit(invalidMessage);
+
+    //allow time for transmit
+    sender->serialPort.waitForReadyRead(100);
+    receiver->serialPort.waitForReadyRead(100);
+
+    QCOMPARE(false, receiver->checkForValidMessage());
+
+    sender->transmit(validMessage);
+
+    //allow time for transmit
+    sender->serialPort.waitForReadyRead(100);
+    receiver->serialPort.waitForReadyRead(100);
+
+    QCOMPARE(true, receiver->checkForValidMessage());
+
+    delete sender;
+    delete receiver;
+}
+
+
+
 QTEST_MAIN(tst_serial_comm)
 #include "tst_serial_comm.moc"
