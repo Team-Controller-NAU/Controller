@@ -9,19 +9,19 @@ class tst_file_system : public QObject
     Q_OBJECT
 
 private slots:
-    void tst_outputToLogFile();
-    void tst_outputToLogFile_badInput_logFileName();
+    void test_outputToLogFile();
+    void test_outputToLogFile_badInput_logFileName();
 
-    void tst_appendToLogFile();
+    void test_appendToLogFile();
 
-    void tst_loadDataFromLogFile();
-    void tst_loadDataFromLogFile_badInput_logFileName();
+    void test_loadDataFromLogFile();
+    void test_loadDataFromLogFile_badInput_logFileName();
 };
 
 /**
  * Test case for events function outputToLogFile
  */
-void tst_file_system::tst_outputToLogFile()
+void tst_file_system::test_outputToLogFile()
 {
     // initialize variables
     QSettings userSettings("Team Controller", "WSSS");
@@ -68,7 +68,7 @@ void tst_file_system::tst_outputToLogFile()
 /**
  * Bad input test case for events function outputToLogfile
  */
-void tst_file_system::tst_outputToLogFile_badInput_logFileName()
+void tst_file_system::test_outputToLogFile_badInput_logFileName()
 {
     Events *eventObj = new Events(false, 50);
     QString dataMsg = "15,0:00:00:150,Test message on log file";
@@ -92,7 +92,7 @@ void tst_file_system::tst_outputToLogFile_badInput_logFileName()
 /**
  * Test case for events function appendToLogFile
  */
-void tst_file_system::tst_appendToLogFile()
+void tst_file_system::test_appendToLogFile()
 {
     QSettings userSettings("Team Controller", "WSSS");
     Events *eventObj = new Events(false, 50);
@@ -160,7 +160,7 @@ void tst_file_system::tst_appendToLogFile()
  *
  * This function is located in the dev mode section because it uses constants.h
  */
-void tst_file_system::tst_loadDataFromLogFile()
+void tst_file_system::test_loadDataFromLogFile()
 {
     QSettings userSettings("Team Controller", "WSSS");
     Events *eventObj = new Events(false, 50);
@@ -198,7 +198,7 @@ void tst_file_system::tst_loadDataFromLogFile()
 /**
  * Bad input test case for events function loadDataFromLogFile
  */
-void tst_file_system::tst_loadDataFromLogFile_badInput_logFileName()
+void tst_file_system::test_loadDataFromLogFile_badInput_logFileName()
 {
     Events *eventObj = new Events(false, 50);
 
