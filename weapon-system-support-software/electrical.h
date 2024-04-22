@@ -8,8 +8,8 @@
 struct electricalNode {
     int id;
     QString name;
-    int voltage;
-    int amps;
+    double voltage;
+    double amps;
     struct electricalNode *nextNode;
 };
 
@@ -26,7 +26,7 @@ public:
     electricalNode *headNode;
     electricalNode *lastNode;
 
-    void addNode(QString name, int voltage, int amps);
+    void addNode(QString name, double voltage, double amps);
     void freeLL();
     bool loadElecData(QString message);
     bool loadElecDump(QString message);

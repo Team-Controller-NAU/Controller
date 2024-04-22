@@ -205,10 +205,10 @@ const int NUM_ERROR_MESSAGES = 3;
 const QString ERROR_MESSAGES[NUM_ERROR_MESSAGES] = {"Sample error message 1.22", "Sample error message 2; 5; 0", "Sample error message 3; 677"};
 
 const int NUM_ELECTRICAL_MESSAGES = 4;
-const QString ELECTRICAL_MESSAGES[NUM_ELECTRICAL_MESSAGES] = {"Servo Motor, 20, 4",
-                                                              "Piston, 14, 29,,Alternator, 96, 3",
-                                                              "Servo Motor, 19, 2,,Pump Cooler, 2, 3,,Internal Temp Sensor, 33, 4",
-                                                              "Fuel Injector, 27, 1,,Voltage Regulator, 19, 3,,Rotor 1, 9, 13,,Rotor 3, 9, 9,,Exciter Stator, 19, 2"};
+const QString ELECTRICAL_MESSAGES[NUM_ELECTRICAL_MESSAGES] = {"Servo Motor, 20.2, 4.9",
+                                                              "Piston, 14.33, 29.1,,Alternator, 96.5, 3.33",
+                                                              "Servo Motor, 19.1, 2.34,,Pump Cooler, 2.6, 3.7,,Internal Temp Sensor, 33.9, 4.2",
+                                                              "Fuel Injector, 27.5, 1.12,,Voltage Regulator, 19.4, 3.3,,Rotor 1.5, 9.2, 13.4,,Rotor 3.22, 9.3, 9.7,,Exciter Stator, 19.11, 2.72"};
 
 const QString TEST_LOG_FILE = "/testLogFile.txt";
 
