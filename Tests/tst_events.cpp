@@ -15,6 +15,7 @@ private slots:
     void test_getNextNode();
     void test_nodeToString();
     void test_stringToNode();
+    void test_stringToNode_badInput();
     void test_loadEventData();
     void test_loadEventData_badInput_correctDelim();
 
@@ -281,6 +282,44 @@ void tst_events::test_stringToNode()
 }
 
 /**
+ * Test case for stringToNode() in events.cpp
+ */
+void tst_events::test_stringToNode_badInput()
+{
+    // create event object
+    Events *eventObj = new Events(false, 0);
+
+    // create example string message with <3 parts
+    QString exampleString = "01:15:43:237, Sample test message 1";
+
+    // convert to node
+    bool result = eventObj->stringToNode(exampleString);
+
+    // confirm the test fails
+    QCOMPARE(result, false);
+
+    // create example string message with invalid ID
+    exampleString = "ID: six, 01:15:43:237, Sample test message 2";
+
+    // convert to node
+    result = eventObj->stringToNode(exampleString);
+
+    // confirm the test fails
+    QCOMPARE(result, false);
+
+    // create example string message with invalid cleared/active indicator
+    exampleString = "ID: 5, 01:15:43:237, Sample test message 2,false";
+
+    // convert to node
+    result = eventObj->stringToNode(exampleString);
+
+    // confirm the test fails
+    QCOMPARE(result, false);
+
+    delete eventObj;
+}
+
+/**
  * Test case for loadEventData() in events.cpp
  */
 void tst_events::test_loadEventData()
@@ -377,7 +416,7 @@ void tst_events::test_loadErrorData()
         // only access these values if loadEventData actually worked
         // to avoid dereferencing a null pointer
         QCOMPARE(wkgErrorNode->id, 30);
-        QCOMPARE(wkgErrorNode->timeStamp, "0:01:15:21");
+        QCOMPARE(wkgErrorNode->timeStamp, "01:15:43:237");
         QCOMPARE(wkgErrorNode->eventString, "Sample Test message 1");
         QCOMPARE(wkgErrorNode->cleared, 1);
         QCOMPARE(eventObj->totalErrors, 1);
