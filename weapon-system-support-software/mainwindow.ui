@@ -441,7 +441,7 @@ font: 16pt &quot;Segoe UI&quot;;</string>
             </sizepolicy>
            </property>
            <property name="currentIndex">
-            <number>5</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="Events_page">
             <layout class="QGridLayout" name="gridLayout_3">
@@ -675,7 +675,7 @@ QPushButton::pressed {
 }</string>
                  </property>
                  <property name="text">
-                  <string>Set Logfile Folder</string>
+                  <string>Set Log File Folder</string>
                  </property>
                  <property name="autoRepeatDelay">
                   <number>300</number>
@@ -847,7 +847,7 @@ QPushButton::pressed {
 }</string>
                  </property>
                  <property name="text">
-                  <string>Open Logfile Folder</string>
+                  <string>Open Log File Folder</string>
                  </property>
                 </widget>
                </item>
@@ -919,7 +919,7 @@ QToolTip{
 }</string>
                  </property>
                  <property name="text">
-                  <string>Load events from log file</string>
+                  <string>Load Events From Log File</string>
                  </property>
                 </widget>
                </item>
