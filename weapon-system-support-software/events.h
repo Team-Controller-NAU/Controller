@@ -59,7 +59,7 @@ public:
     Events(bool EventRAMClearing, int maxDataNodes);
     ~Events(); // destructor
 
-    // member variables variables
+    // member variables
     int totalEvents; // stores the total amount of events per session
     int totalErrors; // stores the total amount of errors per session
     int totalNodes; // stores the total amount of nodes (events + errors) per session
@@ -67,10 +67,10 @@ public:
     int storedNodes; // stores the total amount of nodes in a session, even after truncation
     int maxNodes; // the max number of nodes allowed (to improve CPU performance), defined in user settings
     bool RAMClearing; // boolean stating whether or not to clear the program's ram usage, defined in user settings
-    QString clearedIndicator;
-    QString activeIndicator;
-    QByteArray clearedIndicatorBytes;
-    QByteArray activeIndicatorBytes;
+    QString clearedIndicator; // the string indicator for cleared error messages (default CLEARED in constants.h)
+    QString activeIndicator; // the string indicator for active error messages (default ACTIVE in constants.h)
+    QByteArray clearedIndicatorBytes; // the cleared indicator converted to bytes for logfile usage
+    QByteArray activeIndicatorBytes; // the active indicator converted to bytes for logfile usage
     EventNode *headEventNode; // stores the top node in the Events linked list
     EventNode *lastEventNode; // stores the bottom node in the EVents linked list
     ErrorNode *headErrorNode; // stores the top node in the Errors linked list
