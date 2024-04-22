@@ -49,7 +49,7 @@ public slots:
     //sends disconnect message through port
     void sendDisconnectMsg();
 
-    //sends disconnect message through port
+    //sends handshake message through port
     void sendHandshakeMsg();
 };
 

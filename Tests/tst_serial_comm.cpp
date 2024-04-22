@@ -34,6 +34,8 @@ void test_transmit()
 
     QCOMPARE(stringToTransmit, stringReceived);
 
+    delete sender;
+    delete receiver;
 }
 QTEST_MAIN(tst_serial_comm)
 #include "tst_serial_comm.moc"
