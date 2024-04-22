@@ -2,8 +2,6 @@
 #include <QTest>
 #include "../weapon-system-support-software/electrical.cpp"
 
-// add necessary includes here
-
 class tst_electrical : public QObject
 {
     //allows us to test private members of electrical class

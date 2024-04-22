@@ -1,18 +1,22 @@
 #include <QTest>
-#include "../weapon-system-support-software/connection.h"
+#include "../weapon-system-support-software/connection.cpp"
 
 // add necessary includes here
 class tst_serial_comm : public QObject
 {
-    friend class Connection;
+    //friend class Connection;
     Q_OBJECT
+
+public:
+
+private:
 
 private slots:
     void test_transmit();
 };
 
 
-void test_transmit()
+void tst_serial_comm::test_transmit()
 {
     Connection *sender = new Connection("Com4", QSerialPort::Baud9600, QSerialPort::Data8,
                QSerialPort::NoParity, QSerialPort::OneStop, QSerialPort::NoFlowControl);

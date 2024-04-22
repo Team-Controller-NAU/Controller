@@ -3,7 +3,6 @@
 #include "../weapon-system-support-software/events.cpp"
 #include "../weapon-system-support-software/constants.h"
 
-// add necessary includes here
 class tst_events : public QObject
 {
     friend class Events;
