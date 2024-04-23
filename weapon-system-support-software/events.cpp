@@ -119,7 +119,7 @@ void Events::addEvent(int id, QString timeStamp, QString eventString)
     storedNodes++;
 
     #if DEV_MODE && EVENTS_DEBUG
-    qDebug() << "New error node created. Total nodes: " << totalNodes
+    qDebug() << "New event node created. Total nodes: " << totalNodes
              << " total events: " << totalEvents << " stored nodes: " << storedNodes;
     #endif
 }
