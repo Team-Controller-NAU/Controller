@@ -417,7 +417,7 @@ void CSim::run()
                 //if cleared is false, store error in case of later clear
                 if (!cleared)
                 {
-                    events->addError(eventId, timeStamp, errorMessage, cleared);
+                    events->loadErrorData(message);
                 }
 
                 //increment event id
