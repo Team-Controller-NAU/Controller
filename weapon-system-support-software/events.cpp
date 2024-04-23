@@ -24,6 +24,7 @@ Events::Events(bool EventRAMClearing, int maxDataNodes)
     int storedNodes = 0;
     maxNodes = maxDataNodes;
     RAMClearing = EventRAMClearing;
+    truncated = false;
 
     headEventNode= nullptr;
     lastEventNode= nullptr;
@@ -97,6 +98,9 @@ void Events::addEvent(int id, QString timeStamp, QString eventString)
 
         //notify parent
         emit RAMCleared();
+
+        //set flag indicating ram dump has occurred
+        truncated = true;
     }
 
     //check if linked list is currently empty
@@ -163,6 +167,9 @@ void Events::addError(int id, QString timeStamp, QString eventString, bool clear
 
         //notify parent
         emit RAMCleared();
+
+        //set flag indicating ram dump has occurred
+        truncated = true;
     }
 
     //check if linked list is currently empty
@@ -640,11 +647,17 @@ bool Events::outputToLogFile(QString logFileName, bool advancedLogFile)
     // Display advanced log file value
     if (advancedLogFile)
     {
-        out << ADVANCED_LOG_FILE_INDICATOR + "ADVANCED LOG FILE ENABLED" << "\n";
+        out << ADVANCED_LOG_FILE_INDICATOR + "ADVANCED LOG FILE ENABLED" << Qt::endl;
     }
     else
     {
-        out << ADVANCED_LOG_FILE_INDICATOR + "ADVANCED LOG FILE DISABLED" << "\n";
+        out << ADVANCED_LOG_FILE_INDICATOR + "ADVANCED LOG FILE DISABLED" << Qt::endl;
+    }
+
+    //display if the data is truncated
+    if (truncated)
+    {
+        out << ADVANCED_LOG_FILE_INDICATOR + "This log file is truncated, view the auto save log file for the complete data set." << Qt::endl;
     }
 
     // Loop through the events struct to print all nodes in order

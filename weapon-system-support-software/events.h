@@ -67,6 +67,7 @@ public:
     int storedNodes; // stores the total amount of nodes in a session, even after truncation
     int maxNodes; // the max number of nodes allowed (to improve CPU performance), defined in user settings
     bool RAMClearing; // boolean stating whether or not to clear the program's ram usage, defined in user settings
+    bool truncated; //boolean which indicates if a RAM dump has occurred
     QString clearedIndicator; // the string indicator for cleared error messages (default CLEARED in constants.h)
     QString activeIndicator; // the string indicator for active error messages (default ACTIVE in constants.h)
     QByteArray clearedIndicatorBytes; // the cleared indicator converted to bytes for logfile usage
