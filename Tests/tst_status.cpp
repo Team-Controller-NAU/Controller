@@ -82,19 +82,100 @@ void tst_status::test_loadData_badInput_correctDelim()
     QString dataMsg = "0,1,0,1,30,90,6,23,1636.14,\n";
     QVERIFY(status.loadData(dataMsg) == true);
 
-    //test if the trigger checks returns false
+    //get values prior to testing bad inputs into string
+    QString initialStatus = status.toString();
+
+    //test bad armed data=========================
+    dataMsg = "DSL,1,0,1,30,20,6,23,1636.14,\n";
+    QVERIFY(status.loadData(dataMsg) == false);
+
+    dataMsg = "232,1,0,1,30,20,6,23,1636.14,\n";
+    QVERIFY(status.loadData(dataMsg) == false);
+
+    //============================================
+
+    //test bad trigger data=======================
     dataMsg = "0,18,4,1,1,90,6,23,1636.14,\n";
     QVERIFY(status.loadData(dataMsg) == false);
+
+    dataMsg = "0,0,23332,1,1,90,6,23,1636.14,\n";
+    QVERIFY(status.loadData(dataMsg) == false);
+
+    dataMsg = "0,438983479587324987593475938475983475983475983475983475987348597349857439857349857349875498753984759384759348759347593487593475934875934875934875934875934875983475983475394875943875934875934875934875934875934875934875934875934875"
+              ",4,1,1,90,6,23,1636.14,\n";
+    QVERIFY(status.loadData(dataMsg) == false);
+
+    //============================================
 
     // test bad controllerState data
     dataMsg = "0,1,0,19,1,90,6,23,1636.14,\n";
     QVERIFY(status.loadData(dataMsg) == false);
 
+    dataMsg = "0,1,0,asds,1,90,6,23,1636.14,\n";
+    QVERIFY(status.loadData(dataMsg) == false);
+
+    dataMsg = "0,1,0,-2,1,90,6,23,1636.14,\n";
+    QVERIFY(status.loadData(dataMsg) == false);
+
+    //============================================
+
+    // test bad firing mode data
     dataMsg = "0,1,0,1,1,90,6,23,1636.14,\n";
     QVERIFY(status.loadData(dataMsg) == false);
 
+    dataMsg = "0,1,0,1,-3,90,6,23,1636.14,\n";
+    QVERIFY(status.loadData(dataMsg) == false);
+
+    dataMsg = "0,1,0,1,adfds,90,6,23,1636.14,\n";
+    QVERIFY(status.loadData(dataMsg) == false);
+
+    //============================================
+
+    //test bad feed position
     dataMsg = "0,1,0,1,30,20,6,23,1636.14,\n";
     QVERIFY(status.loadData(dataMsg) == false);
+
+    dataMsg = "0,1,0,1,30,asldkf,6,23,1636.14,\n";
+    QVERIFY(status.loadData(dataMsg) == false);
+
+    dataMsg = "0,1,0,1,30,-22,6,23,1636.14,\n";
+    QVERIFY(status.loadData(dataMsg) == false);
+
+    //============================================
+
+    //test bad firing events
+    dataMsg = "0,1,0,1,30,90,-1,23,1636.14,\n";
+    QVERIFY(status.loadData(dataMsg) == false);
+
+    dataMsg = "0,1,0,1,30,90,asdf,23,1636.14,\n";
+    QVERIFY(status.loadData(dataMsg) == false);
+
+    dataMsg = "0,1,0,1,30,90,a,23,1636.14,\n";
+    QVERIFY(status.loadData(dataMsg) == false);
+
+    //============================================
+
+    //test bad burst length
+    dataMsg = "0,1,0,1,30,90,6,-1,1636.14,\n";
+    QVERIFY(status.loadData(dataMsg) == false);
+
+    dataMsg = "0,1,0,1,30,90,6,sadf,1636.14,\n";
+    QVERIFY(status.loadData(dataMsg) == false);
+
+    //============================================
+
+    //test bad firing rate
+    dataMsg = "0,1,0,1,30,90,6,23,-1,\n";
+    QVERIFY(status.loadData(dataMsg) == false);
+
+    //test bad firing rate
+    dataMsg = "0,1,0,1,30,20,6,23, scarp,\n";
+    QVERIFY(status.loadData(dataMsg) == false);
+
+    //============================================
+
+    //confirm that none of the bad loads affected any status variables
+    QCOMPARE(status.toString(), initialStatus);
 }
 
 /**

@@ -44,7 +44,7 @@ electrical::~electrical()
  * @param voltage The voltage amount of the electrical component.
  * @param amps The amp amount of the electrical component
  */
-void electrical::addNode(QString name, int voltage, int amps)
+void electrical::addNode(QString name, double voltage, double amps)
 {
     //create new node
     electricalNode *wkgNode = new electricalNode;
@@ -121,15 +121,15 @@ bool electrical::loadElecData(QString message)
             return false;
         }
 
-        int voltage = values[1].toInt();
-        if(voltage <= -1 || values[1] != "0" && voltage == 0)
+        double voltage = values[1].toDouble();
+        if(voltage <= -1 || values[1] != "0" && voltage == 0.0)
         {
             qDebug() << "Error: loadElecData invalid voltage: " << values[1];
             return false;
         }
 
-        int amps = values[2].toInt();
-        if(amps <= -1 || values[2] != "0" && amps == 0)
+        double amps = values[2].toDouble();
+        if(amps <= -1 || values[2] != "0" && amps == 0.0)
         {
             qDebug() << "Error: loadElecData invalid amps: " << values[2];
             return false;
