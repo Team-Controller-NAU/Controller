@@ -143,7 +143,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->trigger2->setPixmap(BLANK_LIGHT);
 
     // ensures that the application will open on the events page
-    on_EventsPageButton_clicked();
+    on_ConnectionPageButton_clicked();
 
     // hide electrical data boxes until the data is filled in
     for(int index = 1; index <= MAX_ELECTRICAL_COMPONENTS; index++)
@@ -343,12 +343,14 @@ void MainWindow::readSerialData()
 {
     if (ddmCon == nullptr)
     {
+        //this should never happen..
+        qDebug() <<"Error: readSerialData() called with no connection class declared"<<Qt::endl;
         notifyUser("Could not read serial data", "Connection class is not declared", true);
         return;
     }
 
     //read lines until all data in buffer is processed
-    while (ddmCon->checkForValidMessage())
+    while (ddmCon->checkForValidMessage() == VALID_MESSAGE)
     {
         // declare variables
         SerialMessageIdentifier messageId;
@@ -375,13 +377,10 @@ void MainWindow::readSerialData()
             //extract message id
             messageId = static_cast<SerialMessageIdentifier>(QString(message[0]).toInt());
 
-            //remove message id from message (id has len=1 and delimeter has len=1 so 2 total)
-            message = message.mid(2);
-
             //ensure we are in an active connection or attempting to connect
             if(!(handshakeTimer->isActive() || ddmCon->connected))
             {
-                qDebug() << "Error: readSerialData unexpected communication from controller";
+                qDebug() << "Error: readSerialData unexpected communication from controller"<< Qt::endl;
                 notifyUser("Unexpected communication from controller", message, true);
                 ddmCon->sendDisconnectMsg();
                 return;
@@ -393,6 +392,9 @@ void MainWindow::readSerialData()
                 ddmCon->sendDisconnectMsg();
                 return;
             }
+
+            //remove message id from message (id has len=1 and delimeter has len=1 so 2 total)
+            message = message.mid(2);
 
             //determine what kind of message this is
             switch ( messageId )
@@ -495,6 +497,8 @@ void MainWindow::readSerialData()
                 qDebug() <<  "Message id: event dump" << qPrintable("\n");
                 #endif
 
+                notifyUser("Loading event dump...", false);
+
                 // load all events to event linked list, notify if fail
                 if (!events->loadEventDump(message))
                 {
@@ -505,6 +509,11 @@ void MainWindow::readSerialData()
                 if (!events->outputToLogFile( autosaveLogFile, advancedLogFile ))
                 {
                     notifyUser("Failed to open logfile","Manual download could save the data.", true);
+                }
+
+                if (events->totalEvents > 0)
+                {
+                    notifyUser(QString::number(events->totalEvents) + " events loaded.", false);
                 }
 
                 //new auto save file created, enforce auto save limit
@@ -521,6 +530,8 @@ void MainWindow::readSerialData()
                 qDebug() <<  "Message id: error dump" << qPrintable("\n");
                 #endif
 
+                notifyUser("Loading error dump...", false);
+
                 // load all errors to error linked list, notify if fail
                 if (!events->loadErrorDump(message))
                 {
@@ -531,6 +542,11 @@ void MainWindow::readSerialData()
                 if (!events->outputToLogFile( autosaveLogFile, advancedLogFile ))
                 {
                     notifyUser("Failed to open logfile","Manual download could save the data.", true);
+                }
+
+                if (events->totalErrors > 0)
+                {
+                    notifyUser(QString::number(events->totalEvents) + " errors loaded.", false);
                 }
 
                 //new auto save file created, enforce auto save limit
@@ -637,7 +653,7 @@ void MainWindow::readSerialData()
                 break;
 
             default:
-                qDebug() << "ERROR: readSerialData message from controller is not recognized";
+                qDebug() << "ERROR: readSerialData message from controller is not recognized"<< Qt::endl;
 
                 //report
                 notifyUser("Unrecognized message received", message, true);
@@ -651,7 +667,7 @@ void MainWindow::readSerialData()
         //invalid message id detected
         else
         {
-            qDebug() << "Error: readSerialData Unrecognized serial message received : " << message;
+            qDebug() << "Error: readSerialData Unrecognized serial message received : " << message<< Qt::endl;
             notifyUser("Unrecognized serial message received", message, true);
         }
     }
@@ -751,7 +767,7 @@ void MainWindow::setup_logfile_location()
         //attempt to create the directory
         if(!dir.mkpath(autosaveLogFile))
         {
-            qDebug() << "Error: setup_logfile_location Failed to create logfile folder on startup: " << autosaveLogFile;
+            qDebug() << "Error: setup_logfile_location Failed to create logfile folder on startup: " << autosaveLogFile<< Qt::endl;
             return;
         }
     }
@@ -832,7 +848,7 @@ void MainWindow::enforceAutoSaveLimit()
         // Remove the oldest file
         if (!QFile::remove(oldestFilePath))
         {
-            qDebug() << "Error: enforceAutoSaveLimit failed to delete file: " << oldestFilePath;
+            qDebug() << "Error: enforceAutoSaveLimit failed to delete file: " << oldestFilePath << Qt::endl;
             return;
         }
         else
@@ -1063,7 +1079,7 @@ void MainWindow::updateTimeSinceLastMessage()
     // check for negative elapsed time
     if(elapsedMs < 0)
     {
-        qDebug() << "Error: updateTimeSinceLastMessage time since last DDM message received is negative.\n";
+        qDebug() << "Error: updateTimeSinceLastMessage time since last DDM message received is negative."<< Qt::endl;
     }
     //check if timeout was reached
     else if (elapsedMs >= connectionTimeout)
@@ -1254,7 +1270,7 @@ void MainWindow::clearErrorFromEventsOutput(int errorId)
     }
     else
     {
-        qDebug() << "Error: clearErrorFromEventsOutput failed to find error" << errorId;
+        qDebug() << "Error: clearErrorFromEventsOutput failed to find error" << errorId << Qt::endl;
     }
 }
 
@@ -1264,7 +1280,7 @@ void MainWindow::notifyUser(QString notificationText, bool error)
     notifyUser(notificationText, "", error);
 }
 
-//renders a notification for the user that lasts 3 seconds. Updates the
+//renders a notification for the user that lasts a few seconds. Updates the
 //notification page button to indicate unread messages. bool urgent is used to
 //toggle the notification outline from orange to red
 void MainWindow::notifyUser(QString notificationText, QString logText, bool error)
@@ -1369,7 +1385,7 @@ void MainWindow::logAdvancedDetails(SerialMessageIdentifier id)
     //attempt to open in append mode
     if (!file.open(QIODevice::Append | QIODevice::Text))
     {
-        qDebug() <<  "Error: logAdvancedDetails Could not open log file for appending: " << autosaveLogFile;
+        qDebug() <<  "Error: logAdvancedDetails Could not open log file for appending: " << autosaveLogFile << Qt::endl;
         notifyUser("Failed to open logfile", "log text \"" + outString + "\" discarded", true);
     }
     else

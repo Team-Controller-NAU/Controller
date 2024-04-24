@@ -34,7 +34,8 @@ public:
     ~Connection();
 
     //checks if messages in the serial port are complete by checking if they contain \n
-    bool checkForValidMessage();
+    // return codes are VALID_MESSAGE, EMPTY_BUFFER, or UNTERMINATED_MESSAGE
+    int  checkForValidMessage();
 
     //stores name of port given upon initialization
     QString portName;

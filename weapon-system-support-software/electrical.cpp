@@ -117,21 +117,21 @@ bool electrical::loadElecData(QString message)
         QString name = values[0];
         if(name == "")
         {
-            qDebug() << "Error: loadElecData empty electrical component name";
+            qDebug() << "Error: loadElecData empty electrical component name"<< Qt::endl;
             return false;
         }
 
         double voltage = values[1].toDouble();
         if(voltage <= -1 || values[1] != "0" && voltage == 0.0)
         {
-            qDebug() << "Error: loadElecData invalid voltage: " << values[1];
+            qDebug() << "Error: loadElecData invalid voltage: " << values[1]<< Qt::endl;
             return false;
         }
 
         double amps = values[2].toDouble();
         if(amps <= -1 || values[2] != "0" && amps == 0.0)
         {
-            qDebug() << "Error: loadElecData invalid amps: " << values[2];
+            qDebug() << "Error: loadElecData invalid amps: " << values[2]<< Qt::endl;
             return false;
         }
 
@@ -141,7 +141,7 @@ bool electrical::loadElecData(QString message)
     }
     else
     {
-        qDebug() << "Invalid input to load electrical data: " << message << "\n";
+        qDebug() << "Invalid input to load electrical data: " << message << "\n"<< Qt::endl;
         return false;
     }
 }
