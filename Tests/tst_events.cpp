@@ -12,6 +12,7 @@ private slots:
     void events_constructor();
     void test_freeLinkedLists();
     void test_clearError();
+    void test_clearError_badInput();
     void test_getNextNode();
     void test_nodeToString();
     void test_stringToNode();
@@ -142,9 +143,46 @@ void tst_events::test_clearError()
     QCOMPARE(wkgErrorNode->cleared, true);
     QCOMPARE(eventObj->totalClearedErrors, 1);
 
-    // confirm the test fails with improper input
-    result = eventObj->clearError(500, "../Tests" + TEST_LOG_FILE);
+    // free
+    delete eventObj;
+}
+
+/**
+ * Test case for clearError() in events.cpp
+ */
+void tst_events::test_clearError_badInput()
+{
+    // create event object
+    Events *eventObj = new Events(false, 0);
+
+    // try to clear an error that doesn't exist
+    int result = eventObj->clearError(500, "../Tests" + TEST_LOG_FILE);
     QCOMPARE(result, FAILED_TO_CLEAR);
+
+    // set up some variables
+    int id = 1 + (rand() % 100); // get a random ID value, 1-100
+    QString timeStamp = "01:15:43:237";
+    QString eventString = "Sample test message 1";
+    QString message = QString::number(id) + "," + timeStamp + "," + eventString + ",";
+
+    // create and add node to linked list
+    eventObj->loadErrorData(message);
+
+    // try to clear an error that exists in the LL but not the log file
+    result = eventObj->clearError(id, "../Tests" + TEST_LOG_FILE);
+    QCOMPARE(result, FAILED_TO_CLEAR_FROM_LOGFILE);
+
+    // create and add node to linked list and log file
+    message = QString::number(id + 1) + "," + timeStamp + "," + eventString + ",";
+    eventObj->loadErrorData(message);
+    eventObj->outputToLogFile("../Tests" + TEST_LOG_FILE, false);
+
+    // free the linked list...
+    eventObj->freeLinkedLists(true);
+
+    // try to clear an error that exists in the log file but not in the LL
+    result = eventObj->clearError(id, "../Tests" + TEST_LOG_FILE);
+    QCOMPARE(result, FAILED_TO_CLEAR_FROM_LL);
 
     // free
     delete eventObj;

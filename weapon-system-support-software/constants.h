@@ -67,7 +67,7 @@ const QString CONTROLLER_STATE_NAMES[NUM_CONTROLLER_STATE]{"Running", "Blocked",
 //======================================================================================
 
 // armed is a bool value, not an enumeration - only names are provided
-const QString ARMED_NAMES[2]{"Armed", "Disarmed"};
+const QString ARMED_NAMES[2]{"Disarmed", "Armed"};
 
 //======================================================================================
 
