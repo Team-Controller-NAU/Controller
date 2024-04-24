@@ -293,7 +293,7 @@ int Events::clearError(int id, QString logFileName)
             QFile logFile(logFileName);
             if (!logFile.open(QIODevice::ReadWrite | QIODevice::Text))
             {
-                qDebug() << "Error: clearError Failed to open log file:" << logFileName;
+                qDebug() << "Error: clearError Failed to open log file:" << logFileName << Qt::endl;
             }
             //logfile opened
             else if (wkgPtr->logFileIndicator > 0)
@@ -316,7 +316,7 @@ int Events::clearError(int id, QString logFileName)
             else
             {
                 logFile.close();
-                qDebug() << "Error: clearError logFileIndicator is invalid, attempting manual clear for error " << id;
+                qDebug() << "Error: clearError logFileIndicator is invalid, attempting manual clear for error " << id<< Qt::endl;
 
                 //attempt alternate clear method
                 result = clearErrorInLogFile(id, logFileName);
@@ -494,7 +494,7 @@ int Events::loadDataFromLogFile(Events *&events, QString logFileName)
     //check if we cant open logfile for reading
     if ( !file.open(QIODevice::ReadOnly | QIODevice::Text ))
     {
-        qDebug() << "Error: loadDataFromLogFile could not open log file: " << logFileName;
+        qDebug() << "Error: loadDataFromLogFile could not open log file: " << logFileName<< Qt::endl;
         return DATA_NOT_FOUND;
     }
 
@@ -518,7 +518,7 @@ int Events::loadDataFromLogFile(Events *&events, QString logFileName)
         {
             delete newEvents;
             file.close();
-            qDebug() << "Error: loadDataFromLogFile, corrupt line: " << currentLine;
+            qDebug() << "Error: loadDataFromLogFile, corrupt line: " << currentLine<< Qt::endl;
             return INCORRECT_FORMAT;
         }
     }
@@ -554,7 +554,7 @@ bool Events::stringToNode(QString nodeString)
     //ensure the input has at least 3 parts
     if ( parts.size() < 3)
     {
-        qDebug() << "Error: stringToNode failed because string has < 3 parts: " << nodeString;
+        qDebug()<< "Error: stringToNode failed because string has < 3 parts: " << nodeString<< Qt::endl;
         return false;
     }
 
@@ -572,7 +572,7 @@ bool Events::stringToNode(QString nodeString)
     //check for int conversion error
     if (!conversionError)
     {
-        qDebug() << "Error: stringToNode Int conversion error: " << nodeString;
+        qDebug() << "Error: stringToNode Int conversion error: " << nodeString<< Qt::endl;
         return false;
     }
 
@@ -598,7 +598,7 @@ bool Events::stringToNode(QString nodeString)
             // Invalid format for cleared status
             qDebug() << "Error: stringToNode cleared status conversion error: " << nodeString;
             qDebug() << "Expected: '" << clearedIndicator.trimmed() << "' or '" << activeIndicator.trimmed()
-                     << "'. data received: '" << parts[3].trimmed() << "'";
+                     << "'. data received: '" << parts[3].trimmed() << "'"<< Qt::endl;
             return false;
         }
 
@@ -629,7 +629,7 @@ bool Events::outputToLogFile(QString logFileName, bool advancedLogFile)
     QFile file(logFileName);
     if (!file.open(QIODevice::ReadWrite | QIODevice::Text))
     {
-        qDebug() << "Error: outputToLogFile could not open " << logFileName << " for writing: " << file.errorString();
+        qDebug() << "Error: outputToLogFile could not open " << logFileName << " for writing: " << file.errorString()<< Qt::endl;
         return false;
     }
 
@@ -704,28 +704,29 @@ bool Events::loadErrorData(QString message)
         int id = values[0].toInt();
         if(id <= -1)
         {
-            qDebug() << "Error: loadErrorData invalid id: " << values[0];
+            qDebug() << "Error: loadErrorData invalid id: " << values[0]<< Qt::endl;
             return false;
         }
 
         QString timeStamp = values[1];
         QStringList timeValues = timeStamp.split(':');
+
         if (timeValues.length() != 4)
         {
-            qDebug() << "Error: loadErrorData invalid time stamp: " << timeStamp;
+            qDebug() << "Error: loadErrorData invalid time stamp: " << timeStamp<< Qt::endl;
             return false;
         }
         if(timeValues[0].toInt() <= -1 || timeValues[1].toInt() <= -1
             || timeValues[2].toInt() <= -1 || timeValues[3].toInt()<= -1)
         {
-            qDebug() << "Error: loadErrorData invalid time stamp: " << timeStamp;
+            qDebug()<< "Error: loadErrorData invalid time stamp: " << timeStamp<< Qt::endl;
             return false;
         }
 
         QString eventString = values[2];
         if(eventString == "")
         {
-            qDebug() << "Error: loadErrorData empty event string";
+            qDebug()<< "Error: loadErrorData empty event string"<< Qt::endl;
             return false;
         }
 
@@ -737,7 +738,7 @@ bool Events::loadErrorData(QString message)
     }
     else
     {
-        qDebug() << "Error: Invalid input to load error data: " << message << "\n";
+        qDebug()<< "Error: Invalid input to load error data: " << message << Qt::endl;
         return false;
     }
 }
@@ -762,7 +763,7 @@ bool Events::loadEventData(QString message)
         int id = values[0].toInt();
         if(id <= -1)
         {
-            qDebug() << "Error: loadEventData invalid id: " << values[0];
+            qDebug()<< "Error: loadEventData invalid id: " << values[0]<< Qt::endl;
             return false;
         }
 
@@ -770,20 +771,20 @@ bool Events::loadEventData(QString message)
         QStringList timeValues = timeStamp.split(':');
         if (timeValues.length() != 4)
         {
-            qDebug() << "Error: loadEventData invalid time stamp: " << timeStamp;
+            qDebug()<< "Error: loadEventData invalid time stamp: " << timeStamp << Qt::endl;
             return false;
         }
         else if (timeValues[0].toInt() <= -1 || timeValues[1].toInt() <= -1
             || timeValues[2].toInt() <= -1 || timeValues[3].toInt()<= -1)
         {
-            qDebug() << "Error: loadEventData invalid time stamp: " << timeStamp;
+            qDebug() << "Error: loadEventData invalid time stamp: " << timeStamp << Qt::endl;
             return false;
         }
 
         QString eventString = values[2];
         if(eventString == "")
         {
-            qDebug() << "Error: loadEventData empty event string";
+            qDebug()<< "Error: loadEventData empty event string"<< Qt::endl;
             return false;
         }
 
@@ -793,7 +794,7 @@ bool Events::loadEventData(QString message)
     }
     else
     {
-        qDebug() << "Error: Invalid input to load event data: " << message << "\n";
+        qDebug()<< "Error: Invalid input to load event data: " << message << Qt::endl;
         return false;
     }
 }
@@ -884,7 +885,7 @@ void Events::appendToLogfile(QString logfilePath, EventNode *event)
     //attempt to open in append mode
     if (!file.open(QIODevice::Append | QIODevice::Text))
     {
-        qDebug() <<  "Error: appendToLogfile could not open log file for appending: " << logfilePath;
+        qDebug()<<  "Error: appendToLogfile could not open log file for appending: " << logfilePath << Qt::endl;
         return;
     }
 

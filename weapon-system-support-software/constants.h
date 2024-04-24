@@ -152,11 +152,15 @@ const QString INITIAL_LOGFILE_LOCATION = "WSSS_Logfiles/";
 const int INITIAL_AUTO_SAVE_LIMIT = 5;
 
 //======================================================================================
-// Timer vals
+// Timer vals (ints represent msec)
 //======================================================================================
 
 // rate at which handshake messages are sent
 const int HANDSHAKE_INTERVAL = 2000;
+
+// time allowed for controller to send final messages before disconnect occurs
+// this is used when user clicks disconnect button
+const int DISCONNECT_GRACE_PERIOD = 500;
 
 // added for better readability
 const int ONE_SECOND = 1000;
@@ -198,6 +202,11 @@ const int FAILED_TO_CLEAR_FROM_LOGFILE = -104;
 const int FAILED_TO_CLEAR= -105;
 const int FAILED_TO_CLEAR_FROM_LL = -106;
 
+//return codes for check for valid message
+const int VALID_MESSAGE=100;
+const int EMPTY_BUFFER = -107;
+const int UNTERMINATED_MESSAGE = -108;
+
 // default success code
 const int SUCCESS = 1;
 
@@ -221,7 +230,7 @@ const QString URGENT_NOTIFICATION_ICON = "border-image: url(://resources/Images/
 // colored output will apply these styles (toggle off to apply event color to all nodes)
 const QString EVENT_OUTPUT_SIZE = "16"; //px
 const QString EVENT_COLOR = "rgb(255, 255, 255)";
-const QString CLEARED_ERROR_COLOR = "rgb(20, 174, 92)"; //changes here must also be made in clearErrorFromEventsOutput
+const QString CLEARED_ERROR_COLOR = "rgb(20, 174, 92)"; //changes here must also be made in clearErrorFromEventsOutput found in mainwindow.cpp
 const QString ACTIVE_ERROR_COLOR = "rgb(254, 28, 28)";
 
 // properties applied to notifications
@@ -233,15 +242,18 @@ const QString STANDARD_COLOR = "green";
 const QString POP_UP_STYLE = "color: white; text-align: center; font-size: 16px;";
 
 // handshake button CSS properties
-const QString CONNECTING_STYLE = "QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #FF7518; border: 1px solid; border-color: #e65c00; font: 15pt 'Segoe UI'; } "
+const QString CONNECTING_STYLE = "QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: "
+                                 "#FF7518; border: 1px solid; border-color: #e65c00; font: 15pt 'Segoe UI'; } "
                                  "QPushButton::hover { background-color: #ff8533; } "
                                  "QPushButton::pressed { background-color: #ffa366;}";
 
-const QString CONNECTED_STYLE = "QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #FE1C1C; border: 1px solid; border-color: #cb0101; font: 15pt 'Segoe UI'; } "
+const QString CONNECTED_STYLE = "QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: "
+                                "#FE1C1C; border: 1px solid; border-color: #cb0101; font: 15pt 'Segoe UI'; } "
                                 "QPushButton::hover { background-color: #fe3434; } "
                                 "QPushButton::pressed { background-color: #fe8080;}";
 
-const QString DISCONNECTED_STYLE = "QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #14AE5C; border: 1px solid; border-color: #0d723c; font: 15pt 'Segoe UI'; } "
+const QString DISCONNECTED_STYLE = "QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: "
+                                   "#14AE5C; border: 1px solid; border-color: #0d723c; font: 15pt 'Segoe UI'; } "
                                    "QPushButton::hover { background-color: #1be479; } "
                                    "QPushButton::pressed { background-color: #76efae;}";
 
@@ -267,7 +279,8 @@ const int NUM_ELECTRICAL_MESSAGES = 4;
 const QString ELECTRICAL_MESSAGES[NUM_ELECTRICAL_MESSAGES] = {"Servo Motor, 20.2, 4.9",
                                                               "Piston, 14.33, 29.1,,Alternator, 96.5, 3.33",
                                                               "Servo Motor, 19.1, 2.34,,Pump Cooler, 2.6, 3.7,,Internal Temp Sensor, 33.9, 4.2",
-                                                              "Fuel Injector, 27.5, 1.12,,Voltage Regulator, 19.4, 3.3,,Rotor 1.5, 9.2, 13.4,,Rotor 3.22, 9.3, 9.7,,Exciter Stator, 19.11, 2.72"};
+                                                              "Fuel Injector, 27.5, 1.12,,Voltage Regulator, 19.4, 3.3,,Rotor 1.5, 9.2, 13.4,,"
+                                                              "Rotor 3.22, 9.3, 9.7,,Exciter Stator, 19.11, 2.72"};
 
 const QString TEST_LOG_FILE = "/testLogFile.txt";
 

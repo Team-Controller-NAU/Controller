@@ -74,7 +74,6 @@ void MainWindow::setupConnectionPage()
     ui->stop_bit_selection->setCurrentIndex(ui->stop_bit_selection->findText(userSettings.value("stopBits").toString()));
     ui->flow_control_selection->setCurrentIndex(ui->flow_control_selection->findText(userSettings.value("flowControl").toString()));
 
-
     // Set initial stop bits value
     switch (fromStringStopBits(userSettings.value("stopBits").toString())) {
     case QSerialPort::OneStop:

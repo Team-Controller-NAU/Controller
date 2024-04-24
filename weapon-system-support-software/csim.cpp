@@ -122,8 +122,25 @@ void CSim::startCSim(QString portNameInput)
 //reads messages from ddm
 void CSim::checkConnection(Connection *conn)
 {
+    int i=0;
+
+    //if message is in the process of transmitting, wait
+    while(conn->checkForValidMessage() == UNTERMINATED_MESSAGE)
+    {
+        i++;
+
+        //iteration limit to prevent infinite loop
+        if (i>10000)
+        {
+            qDebug() << "Error: CSim::checkConnection possible invalid message, breaking waiting loop" << Qt::endl;
+            break;
+        }
+
+        conn->serialPort.waitForReadyRead(100);
+    }
+
     // Check for message from ddm
-    if (conn->checkForValidMessage())
+    if ( conn->checkForValidMessage() == VALID_MESSAGE )
     {
         // Get serialized string from port
         QByteArray serializedMessage = conn->serialPort.readAll();
@@ -146,6 +163,7 @@ void CSim::checkConnection(Connection *conn)
             #endif
             // Update flag
             conn->connected = false;
+            qDebug() << "got disconnect from ddm";
 
             //erase existing events to prevent unrecognized messages in next session
             eventsPtr->freeLinkedLists(true);
@@ -396,9 +414,6 @@ void CSim::run()
                 //put event id in message
                 message += QString::number(eventId) + DELIMETER;
 
-                //generate time stamp
-                timeStamp = getTimeStamp();
-
                 //put time stamp in message
                 message += getTimeStamp() + DELIMETER;
 
@@ -418,9 +433,15 @@ void CSim::run()
                 if (!cleared)
                 {
                     //remove message id from message (id has len=1 and delimeter has len=1 so 2 total)
-                    QString tmpMessage = message.mid(2);
-
-                    events->loadErrorData(tmpMessage);
+                    if (conn->connected)
+                    {
+                        QString tmpMessage = message.mid(2);
+                        events->loadErrorData(tmpMessage);
+                    }
+                    else
+                    {
+                        events->loadErrorData(message);
+                    }
                 }
 
                 //increment event id

@@ -49,7 +49,7 @@ bool Status::loadData(QString statusMessage)
     // check if message contains too few or too many items
     if (values.length()-1 != NUM_STATUS_ELEMENTS)
     {
-        qDebug() << "Error: Status::loadData invalid number of delimeters: " << statusMessage;
+        qDebug() << "Error: Status::loadData invalid number of delimeters: " << statusMessage << Qt::endl;
         return false;
     }
 
@@ -75,31 +75,31 @@ bool Status::loadData(QString statusMessage)
     //armed
     if (values[0] != "0" && values[0] != "1")
     {
-        qDebug() << "Error: Status::loadData invalid armed value: " << values[0];
+        qDebug()<< "Error: Status::loadData invalid armed value: " << values[0]<< Qt::endl;
     }
     //trigger 1
     else if ((values[1] != "0" && trig1 == 0) || trig1 < 0
                || trig1 >= NUM_TRIGGER_STATUS )
     {
-        qDebug() << "Error: Status::loadData invalid trigger 1 value: " << values[1];
+        qDebug() << "Error: Status::loadData invalid trigger 1 value: " << values[1] << Qt::endl;
     }
     //trigger 2
     else if ((values[2] != "0" && trig2 == 0) || trig2 < 0
              || trig2 >= NUM_TRIGGER_STATUS )
     {
-        qDebug() << "Error: Status::loadData invalid trigger 2 value: " << values[2];
+        qDebug() << "Error: Status::loadData invalid trigger 2 value: " << values[2] << Qt::endl;
     }
     //controller state
     else if ((values[3] != "0" && conState == 0) || conState < 0
              || conState >= NUM_CONTROLLER_STATE )
     {
-        qDebug() << "Error: Status::loadData invalid controller state value: " << values[3];
+        qDebug() << "Error: Status::loadData invalid controller state value: " << values[3]<< Qt::endl;
     }
     //firing mode
     else if ( (values[4] != "0" && firMode == 0) || (firMode != SAFE &&
                firMode != SINGLE && firMode != BURST && firMode != FULL_AUTO))
     {
-        qDebug() << "Error: Status::loadData invalid firing mode value: " << values[4];
+        qDebug() << "Error: Status::loadData invalid firing mode value: " << values[4]<< Qt::endl;
     }
     //feed pos
     else if ( (values[5] != "0" && feedPos == 0) || (feedPos != CHAMBERING
@@ -108,22 +108,22 @@ bool Status::loadData(QString statusMessage)
                && feedPos != EXTRACTING && feedPos != EJECTING
                && feedPos != COCKING && feedPos != FEEDING))
     {
-        qDebug() << "Error: Status::loadData invalid feed position value: " << values[5];
+        qDebug() << "Error: Status::loadData invalid feed position value: " << values[5] << Qt::endl;
     }
     //total firing events
     else if ( (values[6] != "0" && totFirEvents == 0) || totFirEvents < 0)
     {
-        qDebug() << "Error: Status::loadData invalid total firing events value: " << values[6];
+        qDebug() << "Error: Status::loadData invalid total firing events value: " << values[6]<< Qt::endl;
     }
     //burst length
     else if ( (values[6] != "0" && burLen == 0) || burLen < 0)
     {
-        qDebug() << "Error: Status::loadData invalid burst length value: " << values[7];
+        qDebug() << "Error: Status::loadData invalid burst length value: " << values[7]<< Qt::endl;
     }
     //firing rate
     else if ( !firRateConversionResult || firRate < 0)
     {
-        qDebug() << "Error: Status::loadData invalid firing rate value: " << values[8];
+        qDebug() << "Error: Status::loadData invalid firing rate value: " << values[8]<< Qt::endl;
     }
     //all data has been verified at this point==========================================
     else
@@ -184,7 +184,7 @@ bool Status::loadVersionData(QString versionMessage)
     // Split time string
     QStringList parts = values[0].split(':');
     if (parts.size() != 4) {
-        qDebug() << "Error: loadVersionData: Invalid time string format in load version data: " << values[0];
+        qDebug() << "Error: loadVersionData: Invalid time string format in load version data: " << values[0]<< Qt::endl;
         return false;
     }
 

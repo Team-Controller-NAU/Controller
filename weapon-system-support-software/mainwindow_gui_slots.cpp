@@ -165,7 +165,7 @@ void MainWindow::on_FilterBox_currentIndexChanged(int index)
         break;
 
     default:
-        qDebug() << "Error: on_FilterBox_currentIndexChanged unrecognized filter index.";
+        qDebug() << "Error: on_FilterBox_currentIndexChanged unrecognized filter index."<< Qt::endl ;
     }
 
     //refresh to display with filter
@@ -220,15 +220,19 @@ void MainWindow::on_handshake_button_clicked()
     }
     else
     {
+        //disconnect from controller
         ddmCon->sendDisconnectMsg();
+
+        //update connection status to disconnected and update related objects
+        //we use timer to allow grace period for final messages (disregard clazy warning)
+        QTimer::singleShot(DISCONNECT_GRACE_PERIOD, [&]() {
+            updateConnectionStatus(false);
+        });
 
         if (ddmCon->connected)
         {
             notifyUser("User disconnect", "Session end",  false);
         }
-
-        //update connection status to disconnected and update related objects
-        updateConnectionStatus(false);
     }
 
     handshakeCooldownTimer->start();
@@ -305,7 +309,7 @@ void MainWindow::on_openLogfileFolder_clicked()
             }
             else
             {
-                qDebug() << "Error: on_openLogfileFolder_clicked() The log file directory failed to create";
+                qDebug()<< "Error: on_openLogfileFolder_clicked() The log file directory failed to create"<< Qt::endl;
             }
         }
         QDesktopServices::openUrl(QUrl::fromLocalFile(INITIAL_LOGFILE_LOCATION));
@@ -333,14 +337,14 @@ void MainWindow::on_setLogfileFolder_clicked()
     // check the success of saving settings
     if(userSettings.status() != QSettings::NoError)
     {
-        qDebug() << "Error: on_setLogfileFolder_clicked() failed to save logfile location: " << userSettings.status();
+        qDebug() << "Error: on_setLogfileFolder_clicked() failed to save logfile location: " << userSettings.status()<< Qt::endl;
     }
     // check if user exited the dialog box
     else if(userSettings.value("logfileLocation").toString() == "/")
     {
         // revert to previous user setting
         userSettings.setValue("logfileLocation", previousPath);
-        qDebug() << "Error: on_setLogfileFolder_clicked() No logfile directory set. Reverting to previous path: " << previousPath;
+        qDebug() << "Error: on_setLogfileFolder_clicked() No logfile directory set. Reverting to previous path: " << previousPath << Qt::endl;
     }
     // otherwise, assume successful logfile directory creation
     else
@@ -386,12 +390,12 @@ void MainWindow::on_load_events_from_logfile_clicked()
     // Handle the result if needed
     if (result == INCORRECT_FORMAT)
     {
-        qDebug() << "Error: on_load_events_from_logfile_clicked() Log file was of incorrect format.";
+        qDebug() << "Error: on_load_events_from_logfile_clicked() Log file was of incorrect format." << Qt::endl;
         notifyUser("Load failed on corrupt logfile.", true);
     }
     else if (result == DATA_NOT_FOUND)
     {
-        qDebug() << "Error: on_load_events_from_logfile_clicked() Log file could not be found";
+        qDebug() << "Error: on_load_events_from_logfile_clicked() Log file could not be found" << Qt::endl;
         notifyUser("Load failed on missing logfile.", true);
     }
     else
@@ -599,7 +603,7 @@ void MainWindow::on_advanced_log_file_stateChanged(int arg1)
         //attempt to open in append mode
         if (!file.open(QIODevice::Append | QIODevice::Text))
         {
-            qDebug() <<  "Error: on_advanced_log_file_stateChanged could not open log file for appending: " << autosaveLogFile;
+            qDebug() << "Error: on_advanced_log_file_stateChanged could not open log file for appending: " << autosaveLogFile << Qt::endl;
         }
         else
         {
