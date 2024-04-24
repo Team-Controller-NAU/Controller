@@ -11,4 +11,4 @@ add_compile_definitions(DEV_MODE=1)
 
 # Add subdirectories for unit tests and WSSS applications
 add_subdirectory(weapon-system-support-software/)
-add_subdirectory(tests/)
+add_subdirectory(Tests/)

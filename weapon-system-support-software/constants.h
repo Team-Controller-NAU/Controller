@@ -39,7 +39,7 @@ const int MIN_DATA_NODES_BEFORE_RAM_CLEAR = 1500;
 
 // number of bytes in a newline - linux uses \n =1 byte windows uses \r\n = 2 bytes
 #ifdef Q_OS_LINUX
-const int NEWLINE_SIZE = 1;
+const int NEW_LINE_SIZE = 1;
 #else
 const int NEW_LINE_SIZE=2;
 #endif
