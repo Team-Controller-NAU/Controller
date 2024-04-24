@@ -417,7 +417,10 @@ void CSim::run()
                 //if cleared is false, store error in case of later clear
                 if (!cleared)
                 {
-                    events->loadErrorData(message);
+                    //remove message id from message (id has len=1 and delimeter has len=1 so 2 total)
+                    QString tmpMessage = message.mid(2);
+
+                    events->loadErrorData(tmpMessage);
                 }
 
                 //increment event id
