@@ -58,6 +58,8 @@ void tst_serial_comm::test_checkForValidMessage()
     Connection *receiver = new Connection(userSettings.value("csimPortName").toString(),QSerialPort::Baud9600, QSerialPort::Data8,
                                           QSerialPort::NoParity, QSerialPort::OneStop, QSerialPort::NoFlowControl);
 
+    QCOMPARE(EMPTY_BUFFER, receiver->checkForValidMessage());
+
     QString validMessage = "Hello world\n";
     QString invalidMessage = "Hello world";
 
@@ -67,7 +69,7 @@ void tst_serial_comm::test_checkForValidMessage()
     sender->serialPort.waitForReadyRead(100);
     receiver->serialPort.waitForReadyRead(100);
 
-    QCOMPARE(false, receiver->checkForValidMessage());
+    QCOMPARE(UNTERMINATED_MESSAGE, receiver->checkForValidMessage());
 
     sender->transmit(validMessage);
 
@@ -75,7 +77,7 @@ void tst_serial_comm::test_checkForValidMessage()
     sender->serialPort.waitForReadyRead(100);
     receiver->serialPort.waitForReadyRead(100);
 
-    QCOMPARE(true, receiver->checkForValidMessage());
+    QCOMPARE(VALID_MESSAGE, receiver->checkForValidMessage());
 
     delete sender;
     delete receiver;
