@@ -28,9 +28,6 @@ const QString DELIMETER = ",";
 const QString CLEARED_INDICATOR = "CLEARED";
 const QString ACTIVE_INDICATOR = "ACTIVE";
 
-// the max number of electrical componenets to expect from a weapon
-const int MAX_ELECTRICAL_COMPONENTS = 100;
-
 // denotes advanced log file entries
 const QString ADVANCED_LOG_FILE_INDICATOR = "***";
 
@@ -257,6 +254,13 @@ const QString DISCONNECTED_STYLE = "QPushButton { padding-bottom: 3px; color: rg
                                    "QPushButton::hover { background-color: #1be479; } "
                                    "QPushButton::pressed { background-color: #76efae;}";
 
+
+// electrical page boxes CSS properties
+const QString ELECTRICAL_BOX_HEADER_STYLE = "font: 20pt 'Segoe UI'; background-color: rgb(179, 179, 179);"
+                                            "color: black;";
+
+const QString ELECTRICAL_BOX_CONTENT_STYLE = "color: rgb(30, 30, 30); font: 20pt 'Segoe UI';"
+                                             "background-color: rgb(105, 105, 105); color: white;";
 //======================================================================================
 // CSIM exclusive constants
 //======================================================================================
@@ -277,10 +281,12 @@ const QString ERROR_MESSAGES[NUM_ERROR_MESSAGES] = {"Sample error message 1.22",
 
 const int NUM_ELECTRICAL_MESSAGES = 4;
 const QString ELECTRICAL_MESSAGES[NUM_ELECTRICAL_MESSAGES] = {"Servo Motor, 20.2, 4.9",
-                                                              "Piston, 14.33, 29.1,,Alternator, 96.5, 3.33",
-                                                              "Servo Motor, 19.1, 2.34,,Pump Cooler, 2.6, 3.7,,Internal Temp Sensor, 33.9, 4.2",
-                                                              "Fuel Injector, 27.5, 1.12,,Voltage Regulator, 19.4, 3.3,,Rotor 1.5, 9.2, 13.4,,"
-                                                              "Rotor 3.22, 9.3, 9.7,,Exciter Stator, 19.11, 2.72"};
+                                                              "Piston, 14.33, 29.1,,Alternator, 96.5, 3.33,,Servo Motor, 20.2, 4.9",
+                                                              "Servo Motor, 19.1, 2.34,,Pump Cooler, 2.6, 3.7,,Internal Temp Sensor, 33.9, 4.2,,Alternator, 96.5, 3.33",
+                                                              "Fuel Injector, 27.5, 1.12,,Alternator, 96.5, 3.33,,Voltage Regulator, 19.4, 3.3,,Servo Motor, 20.2, 4.9,,"
+                                                              "Rotor 3.22, 9.3, 9.7,,Piston, 14.33, 29.1,,Alternator, 96.5, 3.33,,Exciter Stator, 19.11, 2.72,,"
+                                                              "sample component, 19.11, 2.72,,sample component, 11, 2.72,,sample component, 20.2, 2.72,,"
+                                                              "sample component, 19.11, 96.5,,sample component, 19.11, 3.33"};
 
 const QString TEST_LOG_FILE = "/testLogFile.txt";
 

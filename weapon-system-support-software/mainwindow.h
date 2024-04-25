@@ -118,7 +118,6 @@ private slots:
     void updateConnectionStatus(bool connectionStatus);
     QString getSessionStatistics();
     void logAdvancedDetails(SerialMessageIdentifier id);
-    void renderElectricalPage();
 
     #if DEV_MODE
         void displaySavedSettings();
@@ -137,6 +136,9 @@ private slots:
     void setup_logfile_location();
     void setupSettings();
     void setupConnectionPage();
+    void renderElectricalPage();
+    void addElecBox(QWidget *horizontalWidget, QLayout *horizontalLayout, electricalNode *component);
+    void freeElectricalPage();
     //========================================================================================================
 
 

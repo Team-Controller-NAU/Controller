@@ -142,21 +142,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->trigger1->setPixmap(BLANK_LIGHT);
     ui->trigger2->setPixmap(BLANK_LIGHT);
 
-    // ensures that the application will open on the events page
+    // ensures that the application will open on the connection page
     on_ConnectionPageButton_clicked();
-
-    // hide electrical data boxes until the data is filled in
-    for(int index = 1; index <= MAX_ELECTRICAL_COMPONENTS; index++)
-    {
-        // get the current box name
-        QString widgetName = QString("box%1_widget").arg(index);
-
-        // get the current box based off name
-        QWidget *widget = findChild<QWidget *>(widgetName);
-
-        // check if widget exists, and hide it
-        //if(widget) widget->hide();
-    }
 }
 
 //destructor
@@ -192,7 +179,6 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
     //check if we are connected
     if (ddmCon->connected)
     {
-
         //disable changes to connection related settings
         disableConnectionChanges();
 
@@ -211,6 +197,9 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
             ui->elapsed_time_label->setText("Elapsed Time: ");
             ui->elapsedTime->setText( status->elapsedControllerTime.toString(TIME_FORMAT));
         }
+
+        //free all elements of electrical page if they exist
+        freeElectricalPage();
 
         //free old electrical data if any exists
         electricalData->freeLL();
@@ -1400,64 +1389,122 @@ void MainWindow::logAdvancedDetails(SerialMessageIdentifier id)
 //uses data in electrical class to render electrical page
 void MainWindow::renderElectricalPage()
 {
-    int boxIndex;
-    //get head node into wkg ptr
-    electricalNode* wkgElecPtr = electricalData->headNode;
-
-    // loop through each electrical data box
-    for (boxIndex = 1; boxIndex <= MAX_ELECTRICAL_COMPONENTS; boxIndex++)
+    if (electricalData->headNode == nullptr)
     {
-        // get the current box name
-        QString widgetName = "box" + QString::number(boxIndex) + "_widget";
-
-        // get the current box based off name
-        QWidget *widget = findChild<QWidget *>(widgetName);
-
-        // check if widget exists, and hide it
-        if(widget) widget->hide();
+        notifyUser("No electrical Data to display", false);
+        return;
     }
 
-    // loop through each electrical data box
-    for (boxIndex = 1; boxIndex <= MAX_ELECTRICAL_COMPONENTS; boxIndex++)
+    // Get the parent container into a widget object
+    QWidget *elecParentContainer = ui->scrollAreaWidgetContents;
+
+    // Find the existing vertical layout of elecParentContainer
+    QVBoxLayout *verticalLayout = qobject_cast<QVBoxLayout*>(elecParentContainer->layout());
+
+    // Check if the vertical layout already exists
+    if (verticalLayout)
     {
-        // get the current box name
-        QString widgetName = "box" + QString::number(boxIndex) + "_widget";
+        // Set the alignment of the vertical layout to top
+        verticalLayout->setAlignment(Qt::AlignTop);
 
-        // get the names of the labels for this box
-        QString labelName = "box" + QString::number(boxIndex) + "_label";
-        QString statsName = "box" + QString::number(boxIndex) + "_stats";
+        // Set the margins of the scroll area's contents
+        verticalLayout->setSpacing(0);
 
-        // get the current box based off name
-        QWidget *widget = findChild<QWidget *>(widgetName);
+        //get wkg pointer at head of electrical ll
+        electricalNode *wkgPtr = electricalData->headNode;
 
-        // find the label objects with findChild
-        QLabel *boxLabel = findChild<QLabel *>(labelName);
-        QTextEdit *boxStats = findChild<QTextEdit *>(statsName);
-
-        // check if the current electrical node exists
-        if (wkgElecPtr != nullptr)
+        //loop through the electrical linked list
+        while (wkgPtr != nullptr)
         {
-            // update label with name if it exists
-            if (boxLabel) boxLabel->setText(" " + wkgElecPtr->name);
+            // create a horizontal widget (for displaying 2 electrical boxes side by side)
+            QWidget *horizontalWidget = new QWidget(elecParentContainer);
 
-            // update stats with voltage and amps if it exists
-            if (boxStats) boxStats->setPlainText("Voltage: " + QString::number(wkgElecPtr->voltage) +
-                                       '\n' + "Amps: " + QString::number(wkgElecPtr->amps));
+            // create a layout for the horizontal widget
+            QHBoxLayout *horizontalLayout = new QHBoxLayout(horizontalWidget);
 
-            // check if the box exists, and show it
-            if(widget) widget->show();
+            //remove pre set spacing
+            horizontalLayout->setContentsMargins(0, 0, 0, 0);
+            horizontalLayout->setSpacing(0);
 
-            // move to next electrical node
-            wkgElecPtr = wkgElecPtr->nextNode;
+            //add a box for this node
+            addElecBox(horizontalWidget, horizontalLayout, wkgPtr);
+
+            //get next node
+            wkgPtr=wkgPtr->nextNode;
+
+            //check if we have not reached end of ll
+            if (wkgPtr != nullptr)
+            {
+                //add next box to the horizontal layout
+                addElecBox(horizontalWidget, horizontalLayout, wkgPtr);
+
+                //get next node
+                wkgPtr = wkgPtr->nextNode;
+            }
+
+            // Set the horizontal layout for the widget
+            horizontalWidget->setLayout(horizontalLayout);
+
+            // Add the horizontal widget to the existing vertical layout
+            verticalLayout->addWidget(horizontalWidget);
         }
-        // else, there are no more electrical nodes
-        else
-        {
-            // break once we are done
-            break;
+    }
+    else
+    {
+        // Vertical layout doesn't exist, handle error or create it
+        qDebug() << "Error: renderElectricalPage No vertical layout found for elecParentContainer";
+        notifyUser("Error rendering electrical page", "Turn on advanced log file on settings page to view electrical data at the end of the session",true);
+    }
+}
+
+
+void MainWindow::addElecBox(QWidget *horizontalWidget, QLayout *horizontalLayout, electricalNode *component)
+{
+    //Create vertical layout (for header on top of content)
+    QWidget *elecBox = new QWidget(horizontalWidget);
+    QVBoxLayout *elecBoxLayout = new QVBoxLayout(elecBox);
+    elecBoxLayout->setContentsMargins(3, 0, 3, 13);
+    elecBoxLayout->setSpacing(0);
+    elecBoxLayout->setAlignment(Qt::AlignTop);
+
+    //create box header
+    QLabel *elecBoxTitle = new QLabel(component->name, elecBox);
+    elecBoxTitle->setStyleSheet(ELECTRICAL_BOX_HEADER_STYLE);
+    elecBoxTitle->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed); // Set expanding size policy
+    elecBoxTitle->setFixedHeight(75);
+    elecBoxTitle->setMargin(5);
+    elecBoxLayout->addWidget(elecBoxTitle);
+
+    //create box content
+    QTextEdit *elecBoxContent = new QTextEdit( elecBox);
+    elecBoxContent->setAlignment(Qt::AlignCenter);
+    elecBoxContent->setPlainText("Voltage: " + QString::number(component->voltage) +
+                                 "\nAmps: " + QString::number(component->amps));
+    elecBoxContent->setStyleSheet(ELECTRICAL_BOX_CONTENT_STYLE);
+    elecBoxContent->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed); // Set expanding size policy
+    elecBoxContent->setFixedHeight(100);
+
+    //add box to layout
+    elecBoxLayout->addWidget(elecBoxContent);
+    elecBox->setLayout(elecBoxLayout);
+    horizontalLayout->addWidget(elecBox);
+}
+
+void MainWindow::freeElectricalPage()
+{
+    QWidget *scrollAreaWidgetContents = ui->scrollAreaWidgetContents;
+
+    // Iterate over all children of scrollAreaWidgetContents
+    QList<QWidget*> children = scrollAreaWidgetContents->findChildren<QWidget*>();
+    for (QWidget *child : children) {
+        // Check if the child is not the scrollAreaWidgetContents itself
+        if (child != scrollAreaWidgetContents) {
+            child->deleteLater(); // Schedule the child widget for deletion
         }
     }
 }
+
+
 
 //======================================================================================
 //DEV_MODE exclusive methods
