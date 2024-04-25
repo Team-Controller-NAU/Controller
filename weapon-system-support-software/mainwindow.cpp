@@ -144,8 +144,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     // ensures that the application will open on the connection page
     on_ConnectionPageButton_clicked();
-
-    renderElectricalPage();
 }
 
 //destructor
@@ -181,7 +179,6 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
     //check if we are connected
     if (ddmCon->connected)
     {
-
         //disable changes to connection related settings
         disableConnectionChanges();
 
@@ -200,6 +197,9 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
             ui->elapsed_time_label->setText("Elapsed Time: ");
             ui->elapsedTime->setText( status->elapsedControllerTime.toString(TIME_FORMAT));
         }
+
+        //free all elements of electrical page if they exist
+        freeElectricalPage();
 
         //free old electrical data if any exists
         electricalData->freeLL();
@@ -1389,131 +1389,122 @@ void MainWindow::logAdvancedDetails(SerialMessageIdentifier id)
 //uses data in electrical class to render electrical page
 void MainWindow::renderElectricalPage()
 {
-    // Assuming you have access to scrollAreaWidgetContents
+    if (electricalData->headNode == nullptr)
+    {
+        notifyUser("No electrical Data to display", false);
+        return;
+    }
+
+    // Get the parent container into a widget object
     QWidget *elecParentContainer = ui->scrollAreaWidgetContents;
 
     // Find the existing vertical layout of elecParentContainer
     QVBoxLayout *verticalLayout = qobject_cast<QVBoxLayout*>(elecParentContainer->layout());
 
     // Check if the vertical layout already exists
-    if (verticalLayout) {
+    if (verticalLayout)
+    {
         // Set the alignment of the vertical layout to top
         verticalLayout->setAlignment(Qt::AlignTop);
 
-        // Create a widget to hold the horizontal layout
-        QWidget *horizontalWidget = new QWidget(elecParentContainer);
+        // Set the margins of the scroll area's contents
+        verticalLayout->setSpacing(0);
 
-        // Set the horizontal layout for the widget
-        QHBoxLayout *horizontalLayout = new QHBoxLayout(horizontalWidget);
+        //get wkg pointer at head of electrical ll
+        electricalNode *wkgPtr = electricalData->headNode;
 
-        // Create first vertical layout widget
-        QWidget *firstVerticalWidget = new QWidget(horizontalWidget);
-        QVBoxLayout *firstVBoxLayout = new QVBoxLayout(firstVerticalWidget);
+        //loop through the electrical linked list
+        while (wkgPtr != nullptr)
+        {
+            // create a horizontal widget (for displaying 2 electrical boxes side by side)
+            QWidget *horizontalWidget = new QWidget(elecParentContainer);
 
-        // Add QLabel with dark grey background and text "electrical 1"
-        QLabel *label1 = new QLabel("electrical 1", firstVerticalWidget);
-        label1->setStyleSheet("background-color: darkgrey; color: white;");
-        firstVBoxLayout->addWidget(label1);
+            // create a layout for the horizontal widget
+            QHBoxLayout *horizontalLayout = new QHBoxLayout(horizontalWidget);
 
-        // Add QTextEdit with black background and text "data 1 \ndata 2"
-        QTextEdit *textEdit1 = new QTextEdit("data 1 \ndata 2", firstVerticalWidget);
-        textEdit1->setStyleSheet("background-color: black; color: white;");
-        firstVBoxLayout->addWidget(textEdit1);
+            //remove pre set spacing
+            horizontalLayout->setContentsMargins(0, 0, 0, 0);
+            horizontalLayout->setSpacing(0);
 
-        firstVerticalWidget->setLayout(firstVBoxLayout);
+            //add a box for this node
+            addElecBox(horizontalWidget, horizontalLayout, wkgPtr);
 
-        // Create second vertical layout widget
-        QWidget *secondVerticalWidget = new QWidget(horizontalWidget);
-        QVBoxLayout *secondVBoxLayout = new QVBoxLayout(secondVerticalWidget);
+            //get next node
+            wkgPtr=wkgPtr->nextNode;
 
-        // Add QLabel with dark grey background and text "electrical 2"
-        QLabel *label2 = new QLabel("electrical 2", secondVerticalWidget);
-        label2->setStyleSheet("background-color: darkgrey; color: white;");
-        secondVBoxLayout->addWidget(label2);
+            //check if we have not reached end of ll
+            if (wkgPtr != nullptr)
+            {
+                //add next box to the horizontal layout
+                addElecBox(horizontalWidget, horizontalLayout, wkgPtr);
 
-        // Add QTextEdit with black background and text "data 3 \ndata 4"
-        QTextEdit *textEdit2 = new QTextEdit("data 3 \ndata 4", secondVerticalWidget);
-        textEdit2->setStyleSheet("background-color: black; color: white;");
-        secondVBoxLayout->addWidget(textEdit2);
+                //get next node
+                wkgPtr = wkgPtr->nextNode;
+            }
 
-        secondVerticalWidget->setLayout(secondVBoxLayout);
+            // Set the horizontal layout for the widget
+            horizontalWidget->setLayout(horizontalLayout);
 
-        // Add vertical layout widgets to the horizontal layout
-        horizontalLayout->addWidget(firstVerticalWidget);
-        horizontalLayout->addWidget(secondVerticalWidget);
-
-        // Set the horizontal layout for the widget
-        horizontalWidget->setLayout(horizontalLayout);
-
-        // Add the horizontal widget to the existing vertical layout
-        verticalLayout->addWidget(horizontalWidget);
-    } else {
+            // Add the horizontal widget to the existing vertical layout
+            verticalLayout->addWidget(horizontalWidget);
+        }
+    }
+    else
+    {
         // Vertical layout doesn't exist, handle error or create it
-        qDebug() << "Error: No vertical layout found for elecParentContainer";
+        qDebug() << "Error: renderElectricalPage No vertical layout found for elecParentContainer";
+        notifyUser("Error rendering electrical page", "Turn on advanced log file on settings page to view electrical data at the end of the session",true);
     }
 }
 
 
+void MainWindow::addElecBox(QWidget *horizontalWidget, QLayout *horizontalLayout, electricalNode *component)
+{
+    //Create vertical layout (for header on top of content)
+    QWidget *elecBox = new QWidget(horizontalWidget);
+    QVBoxLayout *elecBoxLayout = new QVBoxLayout(elecBox);
+    elecBoxLayout->setContentsMargins(3, 0, 3, 13);
+    elecBoxLayout->setSpacing(0);
+    elecBoxLayout->setAlignment(Qt::AlignTop);
 
+    //create box header
+    QLabel *elecBoxTitle = new QLabel(component->name, elecBox);
+    elecBoxTitle->setStyleSheet(ELECTRICAL_BOX_HEADER_STYLE);
+    elecBoxTitle->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed); // Set expanding size policy
+    elecBoxTitle->setFixedHeight(75);
+    elecBoxTitle->setMargin(5);
+    elecBoxLayout->addWidget(elecBoxTitle);
 
-    /*int boxIndex;
-    //get head node into wkg ptr
-    electricalNode* wkgElecPtr = electricalData->headNode;
+    //create box content
+    QTextEdit *elecBoxContent = new QTextEdit( elecBox);
+    elecBoxContent->setAlignment(Qt::AlignCenter);
+    elecBoxContent->setPlainText("Voltage: " + QString::number(component->voltage) +
+                                 "\nAmps: " + QString::number(component->amps));
+    elecBoxContent->setStyleSheet(ELECTRICAL_BOX_CONTENT_STYLE);
+    elecBoxContent->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed); // Set expanding size policy
+    elecBoxContent->setFixedHeight(100);
 
-    // loop through each electrical data box
-    for (boxIndex = 1; boxIndex <= MAX_ELECTRICAL_COMPONENTS; boxIndex++)
-    {
-        // get the current box name
-        QString widgetName = "box" + QString::number(boxIndex) + "_widget";
+    //add box to layout
+    elecBoxLayout->addWidget(elecBoxContent);
+    elecBox->setLayout(elecBoxLayout);
+    horizontalLayout->addWidget(elecBox);
+}
 
-        // get the current box based off name
-        QWidget *widget = findChild<QWidget *>(widgetName);
+void MainWindow::freeElectricalPage()
+{
+    QWidget *scrollAreaWidgetContents = ui->scrollAreaWidgetContents;
 
-        // check if widget exists, and hide it
-        if(widget) widget->hide();
-    }
-
-    // loop through each electrical data box
-    for (boxIndex = 1; boxIndex <= MAX_ELECTRICAL_COMPONENTS; boxIndex++)
-    {
-        // get the current box name
-        QString widgetName = "box" + QString::number(boxIndex) + "_widget";
-
-        // get the names of the labels for this box
-        QString labelName = "box" + QString::number(boxIndex) + "_label";
-        QString statsName = "box" + QString::number(boxIndex) + "_stats";
-
-        // get the current box based off name
-        QWidget *widget = findChild<QWidget *>(widgetName);
-
-        // find the label objects with findChild
-        QLabel *boxLabel = findChild<QLabel *>(labelName);
-        QTextEdit *boxStats = findChild<QTextEdit *>(statsName);
-
-        // check if the current electrical node exists
-        if (wkgElecPtr != nullptr)
-        {
-            // update label with name if it exists
-            if (boxLabel) boxLabel->setText(" " + wkgElecPtr->name);
-
-            // update stats with voltage and amps if it exists
-            if (boxStats) boxStats->setPlainText("Voltage: " + QString::number(wkgElecPtr->voltage) +
-                                       '\n' + "Amps: " + QString::number(wkgElecPtr->amps));
-
-            // check if the box exists, and show it
-            if(widget) widget->show();
-
-            // move to next electrical node
-            wkgElecPtr = wkgElecPtr->nextNode;
-        }
-        // else, there are no more electrical nodes
-        else
-        {
-            // break once we are done
-            break;
+    // Iterate over all children of scrollAreaWidgetContents
+    QList<QWidget*> children = scrollAreaWidgetContents->findChildren<QWidget*>();
+    for (QWidget *child : children) {
+        // Check if the child is not the scrollAreaWidgetContents itself
+        if (child != scrollAreaWidgetContents) {
+            child->deleteLater(); // Schedule the child widget for deletion
         }
     }
-}*/
+}
+
+
 
 //======================================================================================
 //DEV_MODE exclusive methods

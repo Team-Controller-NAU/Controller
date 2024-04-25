@@ -2095,6 +2095,11 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="font">
+                <font>
+                 <kerning>true</kerning>
+                </font>
+               </property>
                <property name="styleSheet">
                 <string notr="true">color: rgb(255, 255, 255);
 background-color: rgb(30, 30, 30);
@@ -2110,7 +2115,7 @@ border-color: rgb(255, 255, 255);</string>
                 <bool>true</bool>
                </property>
                <property name="alignment">
-                <set>Qt::AlignCenter</set>
+                <set>Qt::AlignHCenter|Qt::AlignTop</set>
                </property>
                <widget class="QWidget" name="scrollAreaWidgetContents">
                 <property name="geometry">
