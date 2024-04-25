@@ -142,21 +142,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui->trigger1->setPixmap(BLANK_LIGHT);
     ui->trigger2->setPixmap(BLANK_LIGHT);
 
-    // ensures that the application will open on the events page
+    // ensures that the application will open on the connection page
     on_ConnectionPageButton_clicked();
 
-    // hide electrical data boxes until the data is filled in
-    for(int index = 1; index <= MAX_ELECTRICAL_COMPONENTS; index++)
-    {
-        // get the current box name
-        QString widgetName = QString("box%1_widget").arg(index);
-
-        // get the current box based off name
-        QWidget *widget = findChild<QWidget *>(widgetName);
-
-        // check if widget exists, and hide it
-        //if(widget) widget->hide();
-    }
+    renderElectricalPage();
 }
 
 //destructor
@@ -1400,7 +1389,74 @@ void MainWindow::logAdvancedDetails(SerialMessageIdentifier id)
 //uses data in electrical class to render electrical page
 void MainWindow::renderElectricalPage()
 {
-    int boxIndex;
+    // Assuming you have access to scrollAreaWidgetContents
+    QWidget *elecParentContainer = ui->scrollAreaWidgetContents;
+
+    // Find the existing vertical layout of elecParentContainer
+    QVBoxLayout *verticalLayout = qobject_cast<QVBoxLayout*>(elecParentContainer->layout());
+
+    // Check if the vertical layout already exists
+    if (verticalLayout) {
+        // Set the alignment of the vertical layout to top
+        verticalLayout->setAlignment(Qt::AlignTop);
+
+        // Create a widget to hold the horizontal layout
+        QWidget *horizontalWidget = new QWidget(elecParentContainer);
+
+        // Set the horizontal layout for the widget
+        QHBoxLayout *horizontalLayout = new QHBoxLayout(horizontalWidget);
+
+        // Create first vertical layout widget
+        QWidget *firstVerticalWidget = new QWidget(horizontalWidget);
+        QVBoxLayout *firstVBoxLayout = new QVBoxLayout(firstVerticalWidget);
+
+        // Add QLabel with dark grey background and text "electrical 1"
+        QLabel *label1 = new QLabel("electrical 1", firstVerticalWidget);
+        label1->setStyleSheet("background-color: darkgrey; color: white;");
+        firstVBoxLayout->addWidget(label1);
+
+        // Add QTextEdit with black background and text "data 1 \ndata 2"
+        QTextEdit *textEdit1 = new QTextEdit("data 1 \ndata 2", firstVerticalWidget);
+        textEdit1->setStyleSheet("background-color: black; color: white;");
+        firstVBoxLayout->addWidget(textEdit1);
+
+        firstVerticalWidget->setLayout(firstVBoxLayout);
+
+        // Create second vertical layout widget
+        QWidget *secondVerticalWidget = new QWidget(horizontalWidget);
+        QVBoxLayout *secondVBoxLayout = new QVBoxLayout(secondVerticalWidget);
+
+        // Add QLabel with dark grey background and text "electrical 2"
+        QLabel *label2 = new QLabel("electrical 2", secondVerticalWidget);
+        label2->setStyleSheet("background-color: darkgrey; color: white;");
+        secondVBoxLayout->addWidget(label2);
+
+        // Add QTextEdit with black background and text "data 3 \ndata 4"
+        QTextEdit *textEdit2 = new QTextEdit("data 3 \ndata 4", secondVerticalWidget);
+        textEdit2->setStyleSheet("background-color: black; color: white;");
+        secondVBoxLayout->addWidget(textEdit2);
+
+        secondVerticalWidget->setLayout(secondVBoxLayout);
+
+        // Add vertical layout widgets to the horizontal layout
+        horizontalLayout->addWidget(firstVerticalWidget);
+        horizontalLayout->addWidget(secondVerticalWidget);
+
+        // Set the horizontal layout for the widget
+        horizontalWidget->setLayout(horizontalLayout);
+
+        // Add the horizontal widget to the existing vertical layout
+        verticalLayout->addWidget(horizontalWidget);
+    } else {
+        // Vertical layout doesn't exist, handle error or create it
+        qDebug() << "Error: No vertical layout found for elecParentContainer";
+    }
+}
+
+
+
+
+    /*int boxIndex;
     //get head node into wkg ptr
     electricalNode* wkgElecPtr = electricalData->headNode;
 
@@ -1457,7 +1513,7 @@ void MainWindow::renderElectricalPage()
             break;
         }
     }
-}
+}*/
 
 //======================================================================================
 //DEV_MODE exclusive methods
