@@ -15,6 +15,8 @@ MainWindow::MainWindow(QWidget *parent)
     //this determines what will be shown on the events page
     eventFilter(ALL),
 
+    loadingDump(false),
+
     //timer is used to repeatedly transmit handshake signals
     handshakeTimer( new QTimer(this) ),
 
@@ -338,6 +340,8 @@ void MainWindow::readSerialData()
         return;
     }
 
+    loadingDump=true;
+
     //read lines until all data in buffer is processed
     while (ddmCon->checkForValidMessage() == VALID_MESSAGE)
     {
@@ -372,6 +376,7 @@ void MainWindow::readSerialData()
                 qDebug() << "Error: readSerialData unexpected communication from controller"<< Qt::endl;
                 notifyUser("Unexpected communication from controller", message, true);
                 ddmCon->sendDisconnectMsg();
+                loadingDump=false;
                 return;
             }
             //ensure we are only getting begin message during handshake
@@ -379,6 +384,7 @@ void MainWindow::readSerialData()
             {
                 notifyUser("Invalid handshake is occurring", message, true);
                 ddmCon->sendDisconnectMsg();
+                loadingDump=false;
                 return;
             }
 
@@ -660,6 +666,7 @@ void MainWindow::readSerialData()
             notifyUser("Unrecognized serial message received", message, true);
         }
     }
+    loadingDump=false;
 }
 
 //scans for available serial ports and adds them to ddm port selection box
@@ -1071,7 +1078,7 @@ void MainWindow::updateTimeSinceLastMessage()
         qDebug() << "Error: updateTimeSinceLastMessage time since last DDM message received is negative."<< Qt::endl;
     }
     //check if timeout was reached
-    else if (elapsedMs >= connectionTimeout)
+    else if (elapsedMs >= connectionTimeout && !loadingDump)
     {
         //run disconnect method
         on_handshake_button_clicked();

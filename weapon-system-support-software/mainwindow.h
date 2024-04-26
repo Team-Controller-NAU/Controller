@@ -51,6 +51,7 @@ public:
 
     // vars
     QString ddmPortName;
+    bool loadingDump;
     QTimer* handshakeTimer;
     QTimer* lastMessageTimer;
     QTimer* runningControllerTimer;
