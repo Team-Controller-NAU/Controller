@@ -5,6 +5,19 @@
 
 Weapon System Support Software is a downloadable application which is designed to receive data from Northrop Grumman weapon controllers and display the data in an easy to use GUI. Team Controller is a senior Computer Science capstone group for the Fall 2023 and Spring 2024 semesters from Northern Arizona University. For more information about the project and our team members, visit our [website](https://ceias.nau.edu/capstone/projects/CS/2024/TeamController_F23/)!
 
+## Events Page
+![image](https://github.com/Team-Controller-NAU/Controller/assets/72166103/b89351d7-2b71-4447-8d85-08331b7aceca)
+
+## Status Page
+![image](https://github.com/Team-Controller-NAU/Controller/assets/72166103/ac084363-658b-4fd9-bfca-844824534e10)
+
+## Electrical Page
+![image](https://github.com/Team-Controller-NAU/Controller/assets/72166103/9d619d58-0cf4-4296-9ba8-d67377f51bdb)
+
+## Connection Page
+![image](https://github.com/Team-Controller-NAU/Controller/assets/72166103/82ccaef9-62d2-47c6-98c5-b44ea7e5e690)
+
+
 ## Description
 
 This application was designed to be easy to deploy and use. Simply download the installer for your platform **(Linux and Windows options are available)** and follow the given installation guide to deploy the program. Launch your program, select the desired serial port and click the connect button to attempt a handshake with the controller. After a connection occurs, data will be sent from the controller and populated into the GUI. Additionally log files will be managed automatically and updated upon the arrival of any new information. You may open the directory containing these log files from the Events page to view the events and errors of past sessions and even load this data back into the GUI for analysis (filtering and color coding will be available).
