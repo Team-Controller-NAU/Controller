@@ -9,7 +9,7 @@ Weapon System Support Software is a downloadable application which is designed t
 ![image](https://github.com/Team-Controller-NAU/Controller/assets/72166103/b89351d7-2b71-4447-8d85-08331b7aceca)
 
 ## Status Page
-![image](https://github.com/Team-Controller-NAU/Controller/assets/72166103/ac084363-658b-4fd9-bfca-844824534e10)
+![image](https://github.com/Team-Controller-NAU/Controller/assets/72166103/33d61992-9ff9-455e-8071-388d31647608)
 
 ## Electrical Page
 ![image](https://github.com/Team-Controller-NAU/Controller/assets/72166103/9d619d58-0cf4-4296-9ba8-d67377f51bdb)
