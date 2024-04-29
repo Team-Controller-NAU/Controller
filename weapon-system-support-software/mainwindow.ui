@@ -441,7 +441,7 @@ font: 16pt &quot;Segoe UI&quot;;</string>
             </sizepolicy>
            </property>
            <property name="currentIndex">
-            <number>3</number>
+            <number>5</number>
            </property>
            <widget class="QWidget" name="Events_page">
             <layout class="QGridLayout" name="gridLayout_3">
@@ -2122,8 +2122,8 @@ border-color: rgb(255, 255, 255);</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>1047</width>
-                  <height>426</height>
+                  <width>66</width>
+                  <height>18</height>
                  </rect>
                 </property>
                 <property name="sizePolicy">
@@ -3910,8 +3910,16 @@ QToolTip{
 
 
 QCheckBox::indicator {
-	width: 20px;
-	height: 20px;
+    width: 30px;
+    height: 30px;
+}
+
+QCheckBox::indicator:checked {
+	image: url(:/resources/Images/check.png);
+}
+
+QCheckBox::indicator:unchecked {
+	image: url(:/resources/Images/unchecked.png);
 }</string>
                </property>
                <property name="text">
@@ -3947,8 +3955,16 @@ QCheckBox::indicator {
 }
 
 QCheckBox::indicator {
-	width: 20px;
-	height: 20px;
+    width: 30px;
+    height: 30px;
+}
+
+QCheckBox::indicator:checked {
+	image: url(:/resources/Images/check.png);
+}
+
+QCheckBox::indicator:unchecked {
+	image: url(:/resources/Images/unchecked.png);
 }</string>
                </property>
                <property name="text">
@@ -4047,8 +4063,16 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
 
 
 QCheckBox::indicator {
-	width: 20px;
-	height: 20px;
+    width: 30px;
+    height: 30px;
+}
+
+QCheckBox::indicator:checked {
+	image: url(:/resources/Images/check.png);
+}
+
+QCheckBox::indicator:unchecked {
+	image: url(:/resources/Images/unchecked.png);
 }</string>
                </property>
                <property name="text">
@@ -4268,8 +4292,16 @@ QToolTip{
 
 
 QCheckBox::indicator {
-	width: 20px;
-	height: 20px;
+    width: 30px;
+    height: 30px;
+}
+
+QCheckBox::indicator:checked {
+	image: url(:/resources/Images/check.png);
+}
+
+QCheckBox::indicator:unchecked {
+	image: url(:/resources/Images/unchecked.png);
 }</string>
                </property>
                <property name="text">
@@ -4391,6 +4423,9 @@ QToolTip{
           <width>80</width>
           <height>25</height>
          </size>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
         </property>
         <property name="styleSheet">
          <string notr="true">QLabel {
@@ -4534,7 +4569,6 @@ QToolTip{
 	background-color: rgb(47, 47, 47);
 	border:none;
 	font: 9pt &quot;Segoe UI&quot;;
-	alignment: right;
 }
 
 QToolTip{
@@ -4545,6 +4579,9 @@ QToolTip{
         </property>
         <property name="text">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
@@ -4584,6 +4621,9 @@ QToolTip{
         </property>
         <property name="text">
          <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
