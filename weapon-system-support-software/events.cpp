@@ -811,6 +811,10 @@ bool Events::loadErrorDump(QString message)
 {
     bool successfulLoad = true;
 
+    //temporarily disable ram clearing
+    bool prevRAMClearing = RAMClearing;
+    RAMClearing = false;
+
     // Split the dump messages into individual error sets
     QStringList errorSet = message.split(",,", Qt::SkipEmptyParts);
 
@@ -831,6 +835,7 @@ bool Events::loadErrorDump(QString message)
             }
         }
     }
+    RAMClearing = prevRAMClearing;
     return successfulLoad;
 }
 
@@ -845,6 +850,10 @@ bool Events::loadErrorDump(QString message)
 bool Events::loadEventDump(QString message)
 {
     bool successfulLoad = true;
+
+    //temporarily disable ram clearing
+    bool prevRAMClearing = RAMClearing;
+    RAMClearing = false;
 
     // Split the dump messages into individual event sets
     QStringList eventSet = message.split(",,", Qt::SkipEmptyParts);
@@ -866,6 +875,7 @@ bool Events::loadEventDump(QString message)
             }
         }
     }
+    RAMClearing = prevRAMClearing;
     return successfulLoad;
 }
 
