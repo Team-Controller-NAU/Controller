@@ -305,7 +305,7 @@ void MainWindow::createDDMCon()
     else
     {
         //set up signal and slot (when a message is sent to DDMs serial port, the readyRead signal is emitted and
-        //our lambda function is called)
+        //readSerialData() is called)
         connect(&ddmCon->serialPort, &QSerialPort::readyRead, this, &MainWindow::readSerialData);
 
         qDebug() << "GUI is now listening to port " << ddmCon->portName;
