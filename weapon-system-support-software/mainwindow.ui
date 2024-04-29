@@ -441,7 +441,7 @@ font: 16pt &quot;Segoe UI&quot;;</string>
             </sizepolicy>
            </property>
            <property name="currentIndex">
-            <number>5</number>
+            <number>3</number>
            </property>
            <widget class="QWidget" name="Events_page">
             <layout class="QGridLayout" name="gridLayout_3">
@@ -568,9 +568,35 @@ QComboBox::down-arrow {
              <item row="3" column="0" rowspan="3" colspan="5">
               <widget class="QTextEdit" name="events_output">
                <property name="styleSheet">
-                <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(30, 30, 30);
-border-color: rgb(255, 255, 255);</string>
+                <string notr="true">QTextEdit{
+	color: rgb(255, 255, 255);
+	background-color: rgb(30, 30, 30);
+	border-color: rgb(255, 255, 255);
+}
+
+QScrollBar:vertical {
+	background-color: transparent;
+    border: rgb(255, 255, 255);
+    width: 10px;
+}
+
+QScrollBar::handle:vertical {
+    background: rgb(255, 255, 255);
+    min-height: 25px;
+    border-radius: 5px;
+}
+
+QScrollBar::add-line:vertical {
+    background: none;
+}
+
+QScrollBar::sub-line:vertical {
+    background: none;
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+     background: none;
+}</string>
                </property>
                <property name="readOnly">
                 <bool>true</bool>
@@ -2100,10 +2126,41 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
                  <kerning>true</kerning>
                 </font>
                </property>
+               <property name="autoFillBackground">
+                <bool>false</bool>
+               </property>
                <property name="styleSheet">
-                <string notr="true">color: rgb(255, 255, 255);
+                <string notr="true">QAbstractScrollArea
+{
 background-color: rgb(30, 30, 30);
-border-color: rgb(255, 255, 255);</string>
+}
+QWidget#scrollAreaWidgetContents{
+background-color: rgb(30, 30, 30);
+}
+
+QScrollBar:vertical {
+	background-color: transparent;
+    border: rgb(255, 255, 255);
+    width: 10px;
+}
+
+QScrollBar::handle:vertical {
+    background: rgb(255, 255, 255);
+    min-height: 25px;
+    border-radius: 5px;
+}
+
+QScrollBar::add-line:vertical {
+    background: none;
+}
+
+QScrollBar::sub-line:vertical {
+    background: none;
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+     background: none;
+}</string>
                </property>
                <property name="horizontalScrollBarPolicy">
                 <enum>Qt::ScrollBarAsNeeded</enum>
@@ -2122,8 +2179,8 @@ border-color: rgb(255, 255, 255);</string>
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>66</width>
-                  <height>18</height>
+                  <width>1047</width>
+                  <height>426</height>
                  </rect>
                 </property>
                 <property name="sizePolicy">
@@ -2131,6 +2188,9 @@ border-color: rgb(255, 255, 255);</string>
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">background-color: rgb(30, 30, 30);</string>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_12"/>
                </widget>
