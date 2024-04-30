@@ -81,37 +81,6 @@ border-color: rgb(255, 255, 255);</string>
         <number>0</number>
        </property>
        <item alignment="Qt::AlignLeft|Qt::AlignTop">
-        <widget class="QPushButton" name="ConnectionPageButton">
-         <property name="minimumSize">
-          <size>
-           <width>105</width>
-           <height>35</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>25</height>
-          </size>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">QPushButton {
-	color: rgb(255, 255, 255);
-	background-color: rgb(39, 39, 39);
-	border-color: rgb(255, 255, 255);
-	font: 16pt &quot;Segoe UI&quot;;
-}
-
-QPushButton::hover {
-	background-color: rgb(117, 117, 117);
-}</string>
-         </property>
-         <property name="text">
-          <string>Connection</string>
-         </property>
-        </widget>
-       </item>
-       <item alignment="Qt::AlignLeft|Qt::AlignTop">
         <widget class="QPushButton" name="EventsPageButton">
          <property name="minimumSize">
           <size>
@@ -240,6 +209,37 @@ QPushButton::hover {
          </property>
          <property name="text">
           <string>Developer</string>
+         </property>
+        </widget>
+       </item>
+       <item alignment="Qt::AlignTop">
+        <widget class="QPushButton" name="ConnectionPageButton">
+         <property name="minimumSize">
+          <size>
+           <width>105</width>
+           <height>35</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>25</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QPushButton {
+	color: rgb(255, 255, 255);
+	background-color: rgb(39, 39, 39);
+	border-color: rgb(255, 255, 255);
+	font: 16pt &quot;Segoe UI&quot;;
+}
+
+QPushButton::hover {
+	background-color: rgb(117, 117, 117);
+}</string>
+         </property>
+         <property name="text">
+          <string>Connection</string>
          </property>
         </widget>
        </item>
