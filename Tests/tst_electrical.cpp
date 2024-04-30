@@ -1,11 +1,12 @@
+#if DEV_MODE
 #include <QCoreApplication>
 #include <QTest>
 #include "../weapon-system-support-software/electrical.cpp"
 
-// add necessary includes here
-
 class tst_electrical : public QObject
 {
+    //allows us to test private members of electrical class
+    friend class Electrical;
     Q_OBJECT
 
 private slots:
@@ -27,10 +28,7 @@ void tst_electrical::electrical_constructor()
 {
     electrical *elecObj = new electrical();
 
-    // ensure that values are empty string or 0 for constructor
-    QCOMPARE(elecObj->name, "");
-    QCOMPARE(elecObj->voltage, 0);
-    QCOMPARE(elecObj->amps, 0);
+    QCOMPARE(elecObj->numNodes, 0);
 
     // check the head/last node values
     QCOMPARE(elecObj->headNode, nullptr);
@@ -211,3 +209,4 @@ void tst_electrical::test_loadElecDump_badInputMore()
 
 QTEST_MAIN(tst_electrical)
 #include "tst_electrical.moc"
+#endif

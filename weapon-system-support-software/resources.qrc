@@ -14,5 +14,7 @@
         <file>Images/white-down-arrow.png</file>
         <file>Images/refresh.png</file>
         <file>Images/search.png</file>
+        <file>Images/check.png</file>
+        <file>Images/unchecked.png</file>
     </qresource>
 </RCC>

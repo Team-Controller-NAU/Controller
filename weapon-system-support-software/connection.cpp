@@ -44,12 +44,10 @@ Connection::Connection(QString portName, QSerialPort::BaudRate baudRate,
     // log result
     if (!serialPort.isOpen())
     {
-        // notify
         qDebug() << "Failed to open " << portName;
     }
     else
     {
-        // notify
         qDebug() << portName << " opened successfully";
         serialPort.clear();
         serialPort.readAll();
@@ -66,7 +64,7 @@ Connection::Connection(QString portName, QSerialPort::BaudRate baudRate,
  *
  * Returns true if the message is valid, false otherwise
  */
-bool Connection::checkForValidMessage()
+int Connection::checkForValidMessage()
 {
     //ensure port is open to prevent possible errors
     if (serialPort.isOpen())
@@ -79,9 +77,17 @@ bool Connection::checkForValidMessage()
         //check for complete message
         if ( message.contains("\n") || message.contains('\n') )
         {
-            return true;
+            return VALID_MESSAGE;
         }
-        #if DEV_MODE && SERIAL_COMM_DEBUG
+        else if (message=="")
+        {
+            return EMPTY_BUFFER;
+        }
+        else
+        {
+            return UNTERMINATED_MESSAGE;
+        }
+        /*#if DEV_MODE && SERIAL_COMM_DEBUG
         else
         {
             qDebug() << "checkForValidMessage returned false for: " + message;
@@ -92,11 +98,11 @@ bool Connection::checkForValidMessage()
                 qDebug().noquote() << QString("%1 ").arg((quint8)serializedMessage[i], 2, 16, QLatin1Char('0')).toUpper();
             }
         }
-        #endif
+        #endif*/
     }
     else
     {
-        qDebug() << "Error: serial port is closed, message cannot be read";
+        qDebug() << "Error: serial port is closed, message cannot be read" << Qt::endl;
     }
 
     //invalid message
@@ -145,13 +151,13 @@ void Connection::transmit(QString message)
     }
 
     // Display the contents of the QByteArray in hexadecimal format
-    #if DEV_MODE && SERIAL_COMM_DEBUG
+   /* #if DEV_MODE && SERIAL_COMM_DEBUG
     qDebug() << "Data sent (hex): ";
     for (int i = 0; i < data.size(); ++i)
     {
         qDebug().noquote() << QString("%1 ").arg((quint8)data[i], 2, 16, QLatin1Char('0')).toUpper();
     }
-    #endif
+    #endif*/
 }
 
 //send disconnect to communicating party

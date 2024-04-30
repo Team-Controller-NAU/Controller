@@ -6,7 +6,7 @@
 CSim::CSim(QObject *parent, QString portName)
     : QThread(parent), stop(false), portName(portName),
     connPtr(nullptr), eventsPtr(nullptr), startupTime(QDateTime::currentMSecsSinceEpoch()),
-    secondTrigger(true)
+    secondTrigger(true), pause(false)
 {
     // Avoid class initialization until thread is running
 }
@@ -122,8 +122,25 @@ void CSim::startCSim(QString portNameInput)
 //reads messages from ddm
 void CSim::checkConnection(Connection *conn)
 {
+    int i=0;
+
+    //if message is in the process of transmitting, wait
+    while(conn->checkForValidMessage() == UNTERMINATED_MESSAGE)
+    {
+        i++;
+
+        //iteration limit to prevent infinite loop
+        if (i>10000)
+        {
+            qDebug() << "Error: CSim::checkConnection possible invalid message, breaking waiting loop" << Qt::endl;
+            break;
+        }
+
+        conn->serialPort.waitForReadyRead(100);
+    }
+
     // Check for message from ddm
-    if (conn->checkForValidMessage())
+    if ( conn->checkForValidMessage() == VALID_MESSAGE )
     {
         // Get serialized string from port
         QByteArray serializedMessage = conn->serialPort.readAll();
@@ -146,9 +163,10 @@ void CSim::checkConnection(Connection *conn)
             #endif
             // Update flag
             conn->connected = false;
+            qDebug() << "got disconnect from ddm";
 
             //erase existing events to prevent unrecognized messages in next session
-            eventsPtr->freeLinkedLists();
+            eventsPtr->freeLinkedLists(true);
 
             break;
 
@@ -218,19 +236,23 @@ void CSim::checkConnection(Connection *conn)
     }
 }
 
-//returns a qstring containing the time since start up in H:M:S
+//returns a qstring containing the time since start up in HH:MM:SS:mmm
 QString CSim::getTimeStamp()
 {
     // Calculate elapsed time since startup
     qint64 elapsedTime = QDateTime::currentMSecsSinceEpoch() - startupTime;
 
-    // Convert milliseconds to hours, minutes, and seconds
+    // Convert milliseconds to hours, minutes, seconds, and milliseconds
     int hours = elapsedTime / (1000 * 60 * 60);
     int minutes = (elapsedTime % (1000 * 60 * 60)) / (1000 * 60);
     int seconds = (elapsedTime % (1000 * 60)) / 1000;
+    int milliseconds = elapsedTime % 1000;
 
-    // Format the timestamp as "H:M:S" and return
-    return QString("%1:%2:%3").arg(hours, 2, 10, QLatin1Char('0')).arg(minutes, 2, 10, QLatin1Char('0')).arg(seconds, 2, 10, QLatin1Char('0'));
+    // Format the timestamp as "H:M:S:Ms" and return
+    return QString("%1:%2:%3:%4").arg(hours, 2, 10, QLatin1Char('0'))
+        .arg(minutes, 2, 10, QLatin1Char('0'))
+        .arg(seconds, 2, 10, QLatin1Char('0'))
+        .arg(milliseconds, 3, 10, QLatin1Char('0'));
 }
 
 //this function contains main event loop for simulating weapon controller.
@@ -392,9 +414,6 @@ void CSim::run()
                 //put event id in message
                 message += QString::number(eventId) + DELIMETER;
 
-                //generate time stamp
-                timeStamp = QTime::currentTime().toString("[hh:mm:ss]");
-
                 //put time stamp in message
                 message += getTimeStamp() + DELIMETER;
 
@@ -413,7 +432,16 @@ void CSim::run()
                 //if cleared is false, store error in case of later clear
                 if (!cleared)
                 {
-                    events->addError(eventId, timeStamp, errorMessage, cleared);
+                    //remove message id from message (id has len=1 and delimeter has len=1 so 2 total)
+                    if (conn->connected)
+                    {
+                        QString tmpMessage = message.mid(2);
+                        events->loadErrorData(tmpMessage);
+                    }
+                    else
+                    {
+                        events->loadErrorData(message);
+                    }
                 }
 
                 //increment event id
@@ -465,6 +493,8 @@ void CSim::run()
 
             //wait for interval while monitoring serial port
             conn->serialPort.waitForReadyRead(generationInterval);
+
+            while (pause){QCoreApplication::processEvents();}
 
         } //end main execution loop
 

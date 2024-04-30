@@ -10,6 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
     ddmCon(nullptr),
     status(new Status()),
     electricalData(new electrical()),
+    events(nullptr),
 
     //this determines what will be shown on the events page
     eventFilter(ALL),
@@ -25,6 +26,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     // timer is used to update controller running time
     runningControllerTimer( new QTimer(this) ),
+
+    //timer for preventing spam of handshake button
+    handshakeCooldownTimer(new QTimer(this)),
 
     //init user settings to our organization and project
     userSettings("Team Controller", "WSSS"),
@@ -47,17 +51,17 @@ MainWindow::MainWindow(QWidget *parent)
     //setup user settings and init settings related gui elements
     setupSettings();
 
-    //setup events with ram clearing and max nodes taken from settings
+    //make new events class for this session
     events = new Events(userSettings.value("RAMClearing").toBool(), userSettings.value("maxDataNodes").toInt());
 
     //setup signal and slot to notify user when ram is cleared from events
     //this signal connects to a lambda function so we can call more than 1 function
     //using 1 signal-slot connection
     connect(events, &Events::RAMCleared, this, [=]() {
-        notifyUser("Event class cleared",
-        "Events and errors were removed from RAM to improve performance. "
-        "They are still being counted by counters and will be visible if you "
-        "load this session again after it ends", false);
+        notifyUser("RAM Cleared",
+                   "Events and errors were removed from RAM to improve performance. "
+                   "They are still being tracked by counters and our log file. You can also load them"
+                   "back into the GUI after this session ends.", false);
 
         //show truncated label on the events page to tell user not all nodes are displayed
         ui->truncated_label->setVisible(true);
@@ -65,6 +69,9 @@ MainWindow::MainWindow(QWidget *parent)
         //get rid of outdated display
         refreshEventsOutput();
     });
+
+    //will be disabled until RAM is cleared
+    ui->truncated_label->setVisible(false);
 
     //if dev mode is active, init CSim
     #if DEV_MODE
@@ -102,6 +109,8 @@ MainWindow::MainWindow(QWidget *parent)
         ui->DevPageButton->setVisible(false);
     #endif
 
+    //Timers ===============================================================================
+
     //set handshake timer interval
     handshakeTimer->setInterval(HANDSHAKE_INTERVAL);
 
@@ -109,10 +118,14 @@ MainWindow::MainWindow(QWidget *parent)
     //this is necessary to prevent the gui from freezing. signals stop when timer is stoped
     connect(handshakeTimer, &QTimer::timeout, this, &MainWindow::handshake);
 
+    //prevents spamming of the handshake button which may cause crash
+    handshakeCooldownTimer->setInterval(HANDSHAKE_COOLDOWN_TIME);
+    handshakeCooldownTimer->setSingleShot(true);
+
     //connect clear notification process to the notification timer. If run, the process
     //will trigger after the notification timeout
     connect(notificationTimer, &QTimer::timeout, this, [this]() {
-        ui->notificationPopUp->setStyleSheet("background-color: transparent; border: none;");
+        ui->notificationPopUp->setStyleSheet(INVISIBLE);
         ui->notificationPopUp->clear();
     });
 
@@ -123,29 +136,14 @@ MainWindow::MainWindow(QWidget *parent)
     //connect running controller timer to slot
     runningControllerTimer->setInterval(ONE_SECOND);
     connect(runningControllerTimer, &QTimer::timeout, this, &MainWindow::updateElapsedTime);
+    //======================================================================================
 
     //init trigger to grey buttons until updated by serial status updates
     ui->trigger1->setPixmap(BLANK_LIGHT);
     ui->trigger2->setPixmap(BLANK_LIGHT);
 
-    //will be disabled until RAM is cleared
-    ui->truncated_label->setVisible(false);
-
-    // ensures that the application will open on the events page
-    on_EventsPageButton_clicked();
-
-    // hide electrical data boxes until the data is filled in
-    for(int index = 1; index <= MAX_ELECTRICAL_COMPONENTS; index++)
-    {
-        // get the current box name
-        QString widgetName = QString("box%1_widget").arg(index);
-
-        // get the current box based off name
-        QWidget *widget = findChild<QWidget *>(widgetName);
-
-        // check if widget exists, and hide it
-        //if(widget) widget->hide();
-    }
+    // ensures that the application will open on the connection page
+    on_ConnectionPageButton_clicked();
 }
 
 //destructor
@@ -160,6 +158,7 @@ MainWindow::~MainWindow()
     delete notificationTimer;
     delete lastMessageTimer;
     delete runningControllerTimer;
+    delete handshakeCooldownTimer;
     delete electricalData;
     #if DEV_MODE
         delete csimHandle;
@@ -183,10 +182,10 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
         //disable changes to connection related settings
         disableConnectionChanges();
 
-        ui->truncated_label->setVisible(false);
-
         //stop handshake protocols
         handshakeTimer->stop();
+
+        ui->truncated_label->setVisible(false);
 
         // check if controller timer is not running
         if(!runningControllerTimer->isActive())
@@ -196,29 +195,31 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
 
             // update elapsed time
             ui->elapsed_time_label->setText("Elapsed Time: ");
-            ui->elapsedTime->setText( status->elapsedControllerTime.toString("HH:mm:ss"));
+            ui->elapsedTime->setText( status->elapsedControllerTime.toString(TIME_FORMAT));
         }
+
+        //free all elements of electrical page if they exist
+        freeElectricalPage();
 
         //free old electrical data if any exists
         electricalData->freeLL();
 
         //start last message timer
         timeLastReceived = QDateTime::currentDateTime();
-        ui->DDM_timer_label->setText("Time Since Last Message: ");
+        ui->DDM_timer_label->setText("Time Since Last Message :");
         ui->DDMTimer->setText("00:00:00");
         lastMessageTimer->start();
 
         // update ui
         ui->handshake_button->setText("Disconnect");
-        ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #FE1C1C; border: 1px solid; border-color: #cb0101; font: 15pt 'Segoe UI'; } "
-                                            "QPushButton::hover { background-color: #fe3434; } "
-                                            "QPushButton::pressed { background-color: #fe8080;}");
+        ui->handshake_button->setStyleSheet(CONNECTED_STYLE);
         ui->connectionLabel->setText("Connected ");
         ui->connectionStatus->setPixmap(GREEN_LIGHT);
 
-        //clear events ll and output box
-        events->freeLinkedLists();
+        //clear events and full clear the class output box
         ui->events_output->clear();
+
+        events->freeLinkedLists(true);
 
         //reset event counters
         ui->TotalEventsOutput->setText("0");
@@ -248,14 +249,12 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
 
         //refreshes connection button/displays
         ui->handshake_button->setText("Connect");
-        ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #14AE5C; border: 1px solid; border-color: #0d723c; font: 15pt 'Segoe UI'; } "
-                                            "QPushButton::hover { background-color: #1be479; } "
-                                            "QPushButton::pressed { background-color: #76efae;}");
+        ui->handshake_button->setStyleSheet(DISCONNECTED_STYLE);
         ui->connectionStatus->setPixmap(RED_LIGHT);
         ui->connectionLabel->setText("Disconnected ");
 
         //output session stats
-        if (events->totalNodes > 0 && autosaveLogFile != "")
+        if (autosaveLogFile != "")
         {
             notifyUser("Session statistics ready", getSessionStatistics(), false);
         }
@@ -333,16 +332,22 @@ void MainWindow::readSerialData()
 {
     if (ddmCon == nullptr)
     {
+        //this should never happen..
+        qDebug() <<"Error: readSerialData() called with no connection class declared"<<Qt::endl;
         notifyUser("Could not read serial data", "Connection class is not declared", true);
         return;
     }
 
+    //prevent timeout during long processing
+    lastMessageTimer->stop();
+
     //read lines until all data in buffer is processed
-    while (ddmCon->checkForValidMessage())
+    while (ddmCon->checkForValidMessage() == VALID_MESSAGE)
     {
         // declare variables
         SerialMessageIdentifier messageId;
         int errorId;
+        int result;
 
         //get serialized string from port
         QByteArray serializedMessage = ddmCon->serialPort.readLine();
@@ -353,15 +358,32 @@ void MainWindow::readSerialData()
         #if DEV_MODE && SERIAL_COMM_DEBUG
         qDebug() << "message: " << message;
         #endif
-
+        #if DEV_MODE
         //update gui with new message
         ui->stdout_label->setText(message);
+        #endif
 
         //check if message id is present and followed by a comma
         if (message[0].isDigit() && message[1] == DELIMETER)
         {
             //extract message id
             messageId = static_cast<SerialMessageIdentifier>(QString(message[0]).toInt());
+
+            //ensure we are in an active connection or attempting to connect
+            if(!(handshakeTimer->isActive() || ddmCon->connected))
+            {
+                qDebug() << "Error: readSerialData unexpected communication from controller"<< Qt::endl;
+                notifyUser("Unexpected communication from controller", message, true);
+                ddmCon->sendDisconnectMsg();
+                return;
+            }
+            //ensure we are only getting begin message during handshake
+            else if (handshakeTimer->isActive() && messageId != BEGIN)
+            {
+                notifyUser("Invalid handshake is occurring", message, true);
+                ddmCon->sendDisconnectMsg();
+                return;
+            }
 
             //remove message id from message (id has len=1 and delimeter has len=1 so 2 total)
             message = message.mid(2);
@@ -479,6 +501,15 @@ void MainWindow::readSerialData()
                     notifyUser("Failed to open logfile","Manual download could save the data.", true);
                 }
 
+                if (events->totalEvents == 1)
+                {
+                    notifyUser(QString::number(events->totalEvents) + " event loaded from dump", false);
+                }
+                else if (events->totalEvents > 0)
+                {
+                    notifyUser(QString::number(events->totalEvents) + " events loaded from dump", false);
+                }
+
                 //new auto save file created, enforce auto save limit
                 enforceAutoSaveLimit();
 
@@ -505,6 +536,15 @@ void MainWindow::readSerialData()
                     notifyUser("Failed to open logfile","Manual download could save the data.", true);
                 }
 
+                if (events->totalErrors == 1)
+                {
+                    notifyUser(QString::number(events->totalEvents) + " error loaded from dump", false);
+                }
+                else if (events->totalErrors > 0)
+                {
+                    notifyUser(QString::number(events->totalEvents) + " errors loaded from dump", false);
+                }
+
                 //new auto save file created, enforce auto save limit
                 enforceAutoSaveLimit();
 
@@ -519,31 +559,42 @@ void MainWindow::readSerialData()
                 qDebug() << "Message id: clear error " << message << qPrintable("\n");
                 #endif
 
-                errorId = message.left(message.indexOf(DELIMETER)).toInt();
+                //extract error id from message
+                errorId = message.left(message.indexOf(DELIMETER)).trimmed().toInt();
 
-                if (!events->clearErrorInLogFile(autosaveLogFile, errorId))
-                {
-                    notifyUser("Failed to clear error in logfile", QString::number(errorId),true);
-                }
+                //attempt clear
+                result = events->clearError(errorId, autosaveLogFile );
 
-                //clear error with given id on ll and log file, notify if fail
-                if (!events->clearError(errorId) && ui->truncated_label->isHidden())
+                //check for fail (here failed to clear from ll indicates RAM dump)
+                if (result != SUCCESS && result != FAILED_TO_CLEAR_FROM_LL)
                 {
-                    notifyUser("Failed to clear error", message, true);
+                    //notify user of fail type
+                    if (result == FAILED_TO_CLEAR)
+                    {
+                        notifyUser("Failed to clear error", message, true);
+                    }
+                    else if (result == FAILED_TO_CLEAR_FROM_LOGFILE)
+                    {
+                        notifyUser("Error "+ QString::number(errorId) + " can't be cleared from logfile", true);
+                    }
                 }
                 //otherwise success
                 else
                 {
-                    //clear error in events output
-                    clearErrorFromEventsOutput(errorId);
+                    //attempt to clear in events output
+                    if (result == SUCCESS) clearErrorFromEventsOutput(errorId);
+
+                    //update counters
+                    ui->ClearedErrorsOutput->setText(QString::number(events->totalClearedErrors));
+                    ui->statusClearedErrors->setText(QString::number(events->totalClearedErrors));
 
                     if (notifyOnErrorCleared) notifyUser("Error " + message.left(message.indexOf(DELIMETER)) + " Cleared", false);
-
-                    #if DEV_MODE
-                    //update the cleared error selection box in dev tools (can be removed when dev page is removed)
-                    update_non_cleared_error_selection();
-                    #endif
                 }
+
+                #if DEV_MODE
+                //update the cleared error selection box in dev tools (can be removed when dev page is removed)
+                update_non_cleared_error_selection();
+                #endif
 
                 break;
 
@@ -558,14 +609,6 @@ void MainWindow::readSerialData()
                 {
                     //report
                     notifyUser("Invalid 'begin' message received", message, true);
-
-                    //end connection attempt
-                    ddmCon->sendDisconnectMsg();
-                }
-                //if we didnt initiate a connection, tell controller to disconnect
-                else if (!handshakeTimer->isActive())
-                {
-                    notifyUser("Invalid connection attempt", "Controller attempted to connect despite no active handshake. Connection terminated", true);
 
                     //end connection attempt
                     ddmCon->sendDisconnectMsg();
@@ -606,24 +649,26 @@ void MainWindow::readSerialData()
                 break;
 
             default:
-                qDebug() << "ERROR: readSerialData message from controller is not recognized";
+                qDebug() << "ERROR: readSerialData message from controller is not recognized"<< Qt::endl;
 
                 //report
                 notifyUser("Unrecognized message received", message, true);
 
                 break;
             }
-
-            // update the timestamp of last received message
-            timeLastReceived = QDateTime::currentDateTime();
         }
         //invalid message id detected
         else
         {
-            qDebug() << "Error: readSerialData Unrecognized serial message received : " << message;
+            qDebug() << "Error: readSerialData Unrecognized serial message received : " << message<< Qt::endl;
             notifyUser("Unrecognized serial message received", message, true);
         }
     }
+    // update the timestamp of last received message
+    timeLastReceived = QDateTime::currentDateTime();
+
+    //re-enable timer
+    lastMessageTimer->start();
 }
 
 //scans for available serial ports and adds them to ddm port selection box
@@ -674,6 +719,7 @@ void MainWindow::disableConnectionChanges()
     ui->load_events_from_logfile->setDisabled(true);
     ui->restore_Button->setDisabled(true);
     ui->refresh_serial_port_selections->setVisible(false);
+    ui->setLogfileFolder->setDisabled(true);
 }
 
 //makes all settings in connection settings editable (call when ddm connection
@@ -689,6 +735,7 @@ void MainWindow::enableConnectionChanges()
     ui->load_events_from_logfile->setEnabled(true);
     ui->restore_Button->setEnabled(true);
     ui->refresh_serial_port_selections->setVisible(true);
+    ui->setLogfileFolder->setEnabled(true);
 }
 
 //checks if user has setup a custom log file directory, if not, the default directory is selected
@@ -718,7 +765,7 @@ void MainWindow::setup_logfile_location()
         //attempt to create the directory
         if(!dir.mkpath(autosaveLogFile))
         {
-            qDebug() << "Error: setup_logfile_location Failed to create logfile folder on startup: " << autosaveLogFile;
+            qDebug() << "Error: setup_logfile_location Failed to create logfile folder on startup: " << autosaveLogFile<< Qt::endl;
             return;
         }
     }
@@ -799,7 +846,7 @@ void MainWindow::enforceAutoSaveLimit()
         // Remove the oldest file
         if (!QFile::remove(oldestFilePath))
         {
-            qDebug() << "Error: enforceAutoSaveLimit failed to delete file: " << oldestFilePath;
+            qDebug() << "Error: enforceAutoSaveLimit failed to delete file: " << oldestFilePath << Qt::endl;
             return;
         }
         else
@@ -887,6 +934,9 @@ void MainWindow::setupSettings()
 
     //update gui to match
     ui->connection_timeout->setValue(connectionTimeout);
+
+    //dont allow the user to go below this value for max data nodes
+    ui->connection_timeout->setMinimum(MIN_TIMEOUT_DURATION);
 
     //==============================================================
 
@@ -1012,7 +1062,7 @@ void MainWindow::updateElapsedTime()
     status->elapsedControllerTime = status->elapsedControllerTime.addSecs(1);
 
     // update the GUI
-    ui->elapsedTime->setText(status->elapsedControllerTime.toString("HH:mm:ss"));
+    ui->elapsedTime->setText(status->elapsedControllerTime.toString(TIME_FORMAT));
 }
 
 // method updates the elapsed time since last message received to DDM
@@ -1030,16 +1080,16 @@ void MainWindow::updateTimeSinceLastMessage()
     // check for negative elapsed time
     if(elapsedMs < 0)
     {
-        qDebug() << "Error: updateTimeSinceLastMessage time since last DDM message received is negative.\n";
-    }
-    // check for invalid datetime
-    else if(elapsedMs == 0)
-    {
-        qDebug() << "Error: updateTimeSinceLastMessage either datetime is invalid.\n";
+        qDebug() << "Error: updateTimeSinceLastMessage time since last DDM message received is negative."<< Qt::endl;
     }
     //check if timeout was reached
     else if (elapsedMs >= connectionTimeout)
     {
+        //notify timeout
+        notifyUser("Connection timeout", "We have not received a message from the controller in "
+                    + QString::number(connectionTimeout) +" msec. (you can "
+                    "modify this from settings page)", true);
+
         //run disconnect method
         on_handshake_button_clicked();
     }
@@ -1050,27 +1100,21 @@ void MainWindow::updateTimeSinceLastMessage()
         elapsedTime = QTime(0, 0, 0).addMSecs(elapsedMs);
 
         // update gui
-        ui->DDMTimer->setText(elapsedTime.toString("HH:mm:ss"));
+        ui->DDMTimer->setText(elapsedTime.toString(TIME_FORMAT));
     }
 }
-
-//overloaded function to add simplicity when possible
-void MainWindow::updateEventsOutput(EventNode *event)
-{
-    updateEventsOutput(events->nodeToString(event), event->error, event->cleared);
-}
-
 
 //updates gui with given message, dynamically colors output based on the type of outString
 //accounts for filtering settings and only renders the outString if it is being filtered for
 // by the user
-void MainWindow::updateEventsOutput(QString outString, bool error, bool cleared)
+void MainWindow::updateEventsOutput(EventNode *event)
 {
     QTextDocument document;
     QString richText;
+    QString outString = events->nodeToString(event);
 
     //check if we have an event as input and check if filter allows printing events
-    if (!error )
+    if (!event->isError() )
     {
         if (eventFilter == EVENTS || eventFilter == ALL)
         {
@@ -1085,7 +1129,7 @@ void MainWindow::updateEventsOutput(QString outString, bool error, bool cleared)
         }
     }
     //otherwise check for cleared error and if filter allows printing cleared errors
-    else if (cleared)
+    else if (static_cast<ErrorNode *>(event)->cleared)
     {
         if (eventFilter == ALL || eventFilter == ERRORS || eventFilter == CLEARED_ERRORS)
         {
@@ -1132,13 +1176,13 @@ void MainWindow::updateEventsOutput(QString outString, bool error, bool cleared)
     ui->TotalEventsOutput->setText(QString::number(events->totalEvents));
     ui->statusEventOutput->setText(QString::number(events->totalEvents));
 
-    if (!error) return;
+    if (!event->isError()) return;
 
     // update total errors gui
     ui->TotalErrorsOutput->setText(QString::number(events->totalErrors));
     ui->statusErrorOutput->setText(QString::number(events->totalErrors));
 
-    if ( cleared )
+    if ( static_cast<ErrorNode *>(event)->cleared )
     {
         // update cleared errors gui
         ui->ClearedErrorsOutput->setText(QString::number(events->totalClearedErrors));
@@ -1158,16 +1202,15 @@ void MainWindow::refreshEventsOutput()
     ui->events_output->clear();
 
     //init vars
-    EventNode *wkgErrPtr = events->headErrorNode;
+    ErrorNode *wkgErrPtr = events->headErrorNode;
     EventNode *wkgEventPtr = events->headEventNode;
     EventNode *nextPrintPtr;
-    bool printErr;
 
     //loop through all events and errors
     while(wkgErrPtr != nullptr || wkgEventPtr != nullptr)
     {
         // get next to print
-        nextPrintPtr = events->getNextNodeToPrint(wkgEventPtr, wkgErrPtr, printErr);
+        nextPrintPtr = events->getNextNode(wkgEventPtr, wkgErrPtr);
 
         //update events output if filter allows
         updateEventsOutput(nextPrintPtr);
@@ -1233,7 +1276,7 @@ void MainWindow::clearErrorFromEventsOutput(int errorId)
     }
     else
     {
-        qDebug() << "Error: clearErrorFromEventsOutput failed to find error" << errorId;
+        qDebug() << "Error: clearErrorFromEventsOutput failed to find error" << errorId << Qt::endl;
     }
 }
 
@@ -1243,15 +1286,15 @@ void MainWindow::notifyUser(QString notificationText, bool error)
     notifyUser(notificationText, "", error);
 }
 
-//renders a notification for the user that lasts 3 seconds. Updates the
+//renders a notification for the user that lasts a few seconds. Updates the
 //notification page button to indicate unread messages. bool urgent is used to
 //toggle the notification outline from orange to red
 void MainWindow::notifyUser(QString notificationText, QString logText, bool error)
 {
     // Get the current timestamp
-    QString timeStamp = QDateTime::currentDateTime().toString("[hh:mm:ss] ");
+    QString timeStamp = QDateTime::currentDateTime().toString("[" + TIME_FORMAT +"] ");
 
-    QString notificationRichText = "<p style='color: white; font-size: 16px'>" + timeStamp +
+    QString notificationRichText = "<p style='" + NOTIFICATION_TIMESTAMP_STYLE + "'>" + timeStamp +
                                    " " + "<span style='color: ";
 
     QString popUpStyle = "border: 3px solid ";
@@ -1261,17 +1304,18 @@ void MainWindow::notifyUser(QString notificationText, QString logText, bool erro
 
     if (error)
     {
+        //replace new line literals with \n symbols
         logText.replace("\n", "\\n");
-        notificationRichText += "red";
-        popUpStyle += "red";
+        notificationRichText += ERROR_COLOR;
+        popUpStyle += ERROR_COLOR;
     }
     else
     {
-        notificationRichText += "green";
-        popUpStyle += "green";
+        notificationRichText += STANDARD_COLOR;
+        popUpStyle += STANDARD_COLOR;
     }
-    notificationRichText += "; font-size: 16px'>" + notificationText;
-    popUpStyle += "; color: white; text-align: center; font-size: 16px;";
+    notificationRichText += "; font-size: "+NOTIFICATION_SIZE+"px'>" + notificationText;
+    popUpStyle += "; " + POP_UP_STYLE;
 
     if (logText != "")
     {
@@ -1292,7 +1336,7 @@ void MainWindow::notifyUser(QString notificationText, QString logText, bool erro
     if (ui->Flow_Label->currentIndex() != 6 && error)
     {
         //update the notification icon to get user attention
-        ui->NotificationPageButton->setStyleSheet("border-image: url(://resources/Images/newNotification.png);");
+        ui->NotificationPageButton->setStyleSheet(URGENT_NOTIFICATION_ICON);
     }
 
     //stop old timer if running
@@ -1304,7 +1348,7 @@ void MainWindow::notifyUser(QString notificationText, QString logText, bool erro
 
 QString MainWindow::getSessionStatistics()
 {
-    return "Duration: " + status->elapsedControllerTime.toString("HH:mm:ss") + ", Total Events: " +
+    return "Duration: " + status->elapsedControllerTime.toString(TIME_FORMAT) + ", Total Events: " +
            QString::number(events->totalEvents) + ", Total Errors: " + QString::number(events->totalErrors)
            + ", Non-cleared errors: " + QString::number(events->totalClearedErrors)
            + ", Total Firing events: " + QString::number(status->totalFiringEvents);
@@ -1347,14 +1391,14 @@ void MainWindow::logAdvancedDetails(SerialMessageIdentifier id)
     //attempt to open in append mode
     if (!file.open(QIODevice::Append | QIODevice::Text))
     {
-        qDebug() <<  "Error: logAdvancedDetails Could not open log file for appending: " << autosaveLogFile;
+        qDebug() <<  "Error: logAdvancedDetails Could not open log file for appending: " << autosaveLogFile << Qt::endl;
         notifyUser("Failed to open logfile", "log text \"" + outString + "\" discarded", true);
     }
     else
     {
         //append the text to the log file
         QTextStream out(&file);
-        out << outString + "\n";
+        out << outString << Qt::endl;
         file.close();
     }
 }
@@ -1362,64 +1406,122 @@ void MainWindow::logAdvancedDetails(SerialMessageIdentifier id)
 //uses data in electrical class to render electrical page
 void MainWindow::renderElectricalPage()
 {
-    int boxIndex;
-    //get head node into wkg ptr
-    electricalNode* wkgElecPtr = electricalData->headNode;
-
-    // loop through each electrical data box
-    for (boxIndex = 1; boxIndex <= MAX_ELECTRICAL_COMPONENTS; boxIndex++)
+    if (electricalData->headNode == nullptr)
     {
-        // get the current box name
-        QString widgetName = "box" + QString::number(boxIndex) + "_widget";
-
-        // get the current box based off name
-        QWidget *widget = findChild<QWidget *>(widgetName);
-
-        // check if widget exists, and hide it
-        if(widget) widget->hide();
+        notifyUser("No electrical Data to display", false);
+        return;
     }
 
-    // loop through each electrical data box
-    for (boxIndex = 1; boxIndex <= MAX_ELECTRICAL_COMPONENTS; boxIndex++)
+    // Get the parent container into a widget object
+    QWidget *elecParentContainer = ui->scrollAreaWidgetContents;
+
+    // Find the existing vertical layout of elecParentContainer
+    QVBoxLayout *verticalLayout = qobject_cast<QVBoxLayout*>(elecParentContainer->layout());
+
+    // Check if the vertical layout already exists
+    if (verticalLayout)
     {
-        // get the current box name
-        QString widgetName = "box" + QString::number(boxIndex) + "_widget";
+        // Set the alignment of the vertical layout to top
+        verticalLayout->setAlignment(Qt::AlignTop);
 
-        // get the names of the labels for this box
-        QString labelName = "box" + QString::number(boxIndex) + "_label";
-        QString statsName = "box" + QString::number(boxIndex) + "_stats";
+        // Set the margins of the scroll area's contents
+        verticalLayout->setSpacing(0);
 
-        // get the current box based off name
-        QWidget *widget = findChild<QWidget *>(widgetName);
+        //get wkg pointer at head of electrical ll
+        electricalNode *wkgPtr = electricalData->headNode;
 
-        // find the label objects with findChild
-        QLabel *boxLabel = findChild<QLabel *>(labelName);
-        QTextEdit *boxStats = findChild<QTextEdit *>(statsName);
-
-        // check if the current electrical node exists
-        if (wkgElecPtr != nullptr)
+        //loop through the electrical linked list
+        while (wkgPtr != nullptr)
         {
-            // update label with name if it exists
-            if (boxLabel) boxLabel->setText(" " + wkgElecPtr->name);
+            // create a horizontal widget (for displaying 2 electrical boxes side by side)
+            QWidget *horizontalWidget = new QWidget(elecParentContainer);
 
-            // update stats with voltage and amps if it exists
-            if (boxStats) boxStats->setPlainText("Voltage: " + QString::number(wkgElecPtr->voltage) +
-                                       '\n' + "Amps: " + QString::number(wkgElecPtr->amps));
+            // create a layout for the horizontal widget
+            QHBoxLayout *horizontalLayout = new QHBoxLayout(horizontalWidget);
 
-            // check if the box exists, and show it
-            if(widget) widget->show();
+            //remove pre set spacing
+            horizontalLayout->setContentsMargins(0, 0, 0, 0);
+            horizontalLayout->setSpacing(0);
 
-            // move to next electrical node
-            wkgElecPtr = wkgElecPtr->nextNode;
+            //add a box for this node
+            addElecBox(horizontalWidget, horizontalLayout, wkgPtr);
+
+            //get next node
+            wkgPtr=wkgPtr->nextNode;
+
+            //check if we have not reached end of ll
+            if (wkgPtr != nullptr)
+            {
+                //add next box to the horizontal layout
+                addElecBox(horizontalWidget, horizontalLayout, wkgPtr);
+
+                //get next node
+                wkgPtr = wkgPtr->nextNode;
+            }
+
+            // Set the horizontal layout for the widget
+            horizontalWidget->setLayout(horizontalLayout);
+
+            // Add the horizontal widget to the existing vertical layout
+            verticalLayout->addWidget(horizontalWidget);
         }
-        // else, there are no more electrical nodes
-        else
-        {
-            // break once we are done
-            break;
+    }
+    else
+    {
+        // Vertical layout doesn't exist, handle error or create it
+        qDebug() << "Error: renderElectricalPage No vertical layout found for elecParentContainer";
+        notifyUser("Error rendering electrical page", "Turn on advanced log file on settings page to view electrical data at the end of the session",true);
+    }
+}
+
+
+void MainWindow::addElecBox(QWidget *horizontalWidget, QLayout *horizontalLayout, electricalNode *component)
+{
+    //Create vertical layout (for header on top of content)
+    QWidget *elecBox = new QWidget(horizontalWidget);
+    QVBoxLayout *elecBoxLayout = new QVBoxLayout(elecBox);
+    elecBoxLayout->setContentsMargins(3, 0, 3, 13);
+    elecBoxLayout->setSpacing(0);
+    elecBoxLayout->setAlignment(Qt::AlignTop);
+
+    //create box header
+    QLabel *elecBoxTitle = new QLabel(component->name, elecBox);
+    elecBoxTitle->setStyleSheet(ELECTRICAL_BOX_HEADER_STYLE);
+    elecBoxTitle->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed); // Set expanding size policy
+    elecBoxTitle->setFixedHeight(75);
+    elecBoxTitle->setMargin(5);
+    elecBoxLayout->addWidget(elecBoxTitle);
+
+    //create box content
+    QTextEdit *elecBoxContent = new QTextEdit( elecBox);
+    elecBoxContent->setAlignment(Qt::AlignCenter);
+    elecBoxContent->setPlainText("Voltage: " + QString::number(component->voltage) +
+                                 "\nAmps: " + QString::number(component->amps));
+    elecBoxContent->setStyleSheet(ELECTRICAL_BOX_CONTENT_STYLE);
+    elecBoxContent->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed); // Set expanding size policy
+    elecBoxContent->setFixedHeight(100);
+
+    //add box to layout
+    elecBoxLayout->addWidget(elecBoxContent);
+    elecBox->setLayout(elecBoxLayout);
+    horizontalLayout->addWidget(elecBox);
+}
+
+void MainWindow::freeElectricalPage()
+{
+    QWidget *scrollAreaWidgetContents = ui->scrollAreaWidgetContents;
+
+    // Iterate over all children of scrollAreaWidgetContents
+    QList<QWidget*> children = scrollAreaWidgetContents->findChildren<QWidget*>();
+    for (QWidget *child : children) {
+        // Check if the child is not the scrollAreaWidgetContents itself
+        if (child != scrollAreaWidgetContents) {
+            child->deleteLater(); // Schedule the child widget for deletion
         }
     }
 }
+
+
 
 //======================================================================================
 //DEV_MODE exclusive methods
@@ -1460,7 +1562,7 @@ void MainWindow::update_non_cleared_error_selection()
     if (csimHandle->eventsPtr != nullptr)
     {
         //get head node
-        EventNode *wkgPtr = csimHandle->eventsPtr->headErrorNode;
+        ErrorNode *wkgPtr = csimHandle->eventsPtr->headErrorNode;
 
         //loop until list ends
         while (wkgPtr != nullptr)

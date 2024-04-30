@@ -44,14 +44,14 @@ void MainWindow::on_SettingsPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(5);
     resetPageButton();
-    ui->SettingsPageButton->setStyleSheet("border-image: url(://resources/Images/purpleSettings.png)");
+    ui->SettingsPageButton->setStyleSheet(SELECTED_SETTINGS_ICON);
 }
 
 void MainWindow::on_NotificationPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(6);
     resetPageButton();
-    ui->NotificationPageButton->setStyleSheet("border-image: url(://resources/Images/purpleNotificationBell.png);");
+    ui->NotificationPageButton->setStyleSheet(SELECTED_NOTIFICATIONS_ICON);
 }
 
 //reset all tab buttons to default style
@@ -61,8 +61,8 @@ void MainWindow::resetPageButton()
     ui->EventsPageButton->setStyleSheet(NAV_BUTTON_STYLE);
     ui->StatusPageButton->setStyleSheet(NAV_BUTTON_STYLE);
     ui->ElectricalPageButton->setStyleSheet(NAV_BUTTON_STYLE);
-    ui->SettingsPageButton->setStyleSheet("border-image: url(://resources/Images/whiteSettings.png)");
-    ui->NotificationPageButton->setStyleSheet("border-image: url(://resources/Images/notificationBell.png);");
+    ui->SettingsPageButton->setStyleSheet(SETTINGS_ICON);
+    ui->NotificationPageButton->setStyleSheet(NOTIFICATIONS_ICON);
 
 #if DEV_MODE
     ui->DevPageButton->setStyleSheet(NAV_BUTTON_STYLE);
@@ -165,7 +165,7 @@ void MainWindow::on_FilterBox_currentIndexChanged(int index)
         break;
 
     default:
-        qDebug() << "Error: on_FilterBox_currentIndexChanged unrecognized filter index.";
+        qDebug() << "Error: on_FilterBox_currentIndexChanged unrecognized filter index."<< Qt::endl ;
     }
 
     //refresh to display with filter
@@ -176,6 +176,9 @@ void MainWindow::on_FilterBox_currentIndexChanged(int index)
 //this button is seen as connect/connecting/disconnect on connection page
 void MainWindow::on_handshake_button_clicked()
 {
+    //prevent spam
+    if (handshakeCooldownTimer->isActive()) {qDebug()<<"handshake spam prevented"; return;}
+
     //if port isnt open, attempt to open it
     if (ddmCon == nullptr)
     {
@@ -208,9 +211,7 @@ void MainWindow::on_handshake_button_clicked()
 
         //refreshes connection button/displays
         ui->handshake_button->setText("Connecting");
-        ui->handshake_button->setStyleSheet("QPushButton { padding-bottom: 3px; color: rgb(255, 255, 255); background-color: #FF7518; border: 1px solid; border-color: #e65c00; font: 15pt 'Segoe UI'; } "
-                                            "QPushButton::hover { background-color: #ff8533; } "
-                                            "QPushButton::pressed { background-color: #ffa366;}");
+        ui->handshake_button->setStyleSheet(CONNECTING_STYLE);
 
         ui->connectionStatus->setPixmap(ORANGE_LIGHT);
         ui->connectionLabel->setText("Connecting ");
@@ -219,16 +220,22 @@ void MainWindow::on_handshake_button_clicked()
     }
     else
     {
+        //disconnect from controller
         ddmCon->sendDisconnectMsg();
+
+        //update connection status to disconnected and update related objects
+        //we use timer to allow grace period for final messages (disregard clazy warning)
+        QTimer::singleShot(DISCONNECT_GRACE_PERIOD, [&]() {
+            updateConnectionStatus(false);
+        });
 
         if (ddmCon->connected)
         {
             notifyUser("User disconnect", "Session end",  false);
         }
-
-        //update connection status to disconnected and update related objects
-        updateConnectionStatus(false);
     }
+
+    handshakeCooldownTimer->start();
 }
 
 //saves connection settings into the qSettings class for cross session storage
@@ -302,7 +309,7 @@ void MainWindow::on_openLogfileFolder_clicked()
             }
             else
             {
-                qDebug() << "Error: on_openLogfileFolder_clicked() The log file directory failed to create";
+                qDebug()<< "Error: on_openLogfileFolder_clicked() The log file directory failed to create"<< Qt::endl;
             }
         }
         QDesktopServices::openUrl(QUrl::fromLocalFile(INITIAL_LOGFILE_LOCATION));
@@ -312,7 +319,7 @@ void MainWindow::on_openLogfileFolder_clicked()
         //open from the user settings
         QDesktopServices::openUrl(QUrl::fromLocalFile(userSettings.value("logfileLocation").toString()));
         #if DEV_MODE && GUI_DEBUG
-        qDebug() << "log file location opening: " << userSettings.value("logfileLocation").toString();
+        qDebug() << "on_openLogfileFolder_clicked: file explorer opening to : " << userSettings.value("logfileLocation").toString();
         #endif
     }
     // save user settings
@@ -330,14 +337,14 @@ void MainWindow::on_setLogfileFolder_clicked()
     // check the success of saving settings
     if(userSettings.status() != QSettings::NoError)
     {
-        qDebug() << "Error: on_setLogfileFolder_clicked() failed to save logfile location: " << userSettings.status();
+        qDebug() << "Error: on_setLogfileFolder_clicked() failed to save logfile location: " << userSettings.status()<< Qt::endl;
     }
     // check if user exited the dialog box
     else if(userSettings.value("logfileLocation").toString() == "/")
     {
         // revert to previous user setting
         userSettings.setValue("logfileLocation", previousPath);
-        qDebug() << "Error: on_setLogfileFolder_clicked() No logfile directory set. Reverting to previous path: " << previousPath;
+        qDebug() << "Error: on_setLogfileFolder_clicked() No logfile directory set. Reverting to previous path: " << previousPath << Qt::endl;
     }
     // otherwise, assume successful logfile directory creation
     else
@@ -357,6 +364,8 @@ void MainWindow::on_load_events_from_logfile_clicked()
 {
     //declare file browser class
     QFileDialog dialog(this);
+
+    ui->truncated_label->setVisible(false);
 
     //set initial directory to log file directory set by user
     dialog.setDirectory(userSettings.value("logfileLocation").toString());
@@ -378,17 +387,15 @@ void MainWindow::on_load_events_from_logfile_clicked()
     // Pass the selected file name to the loadDataFromLogFile function
     int result = events->loadDataFromLogFile(events, selectedFile);
 
-    ui->truncated_label->setVisible(false);
-
     // Handle the result if needed
     if (result == INCORRECT_FORMAT)
     {
-        qDebug() << "Error: on_load_events_from_logfile_clicked() Log file was of incorrect format.";
+        qDebug() << "Error: on_load_events_from_logfile_clicked() Log file was of incorrect format." << Qt::endl;
         notifyUser("Load failed on corrupt logfile.", true);
     }
     else if (result == DATA_NOT_FOUND)
     {
-        qDebug() << "Error: on_load_events_from_logfile_clicked() Log file could not be found";
+        qDebug() << "Error: on_load_events_from_logfile_clicked() Log file could not be found" << Qt::endl;
         notifyUser("Load failed on missing logfile.", true);
     }
     else
@@ -596,7 +603,7 @@ void MainWindow::on_advanced_log_file_stateChanged(int arg1)
         //attempt to open in append mode
         if (!file.open(QIODevice::Append | QIODevice::Text))
         {
-            qDebug() <<  "Error: on_advanced_log_file_stateChanged could not open log file for appending: " << autosaveLogFile;
+            qDebug() << "Error: on_advanced_log_file_stateChanged could not open log file for appending: " << autosaveLogFile << Qt::endl;
         }
         else
         {
@@ -626,7 +633,7 @@ void MainWindow::on_ram_clearing_stateChanged(int arg1)
     {
     //unchecked
     case 0:
-         userSettings.setValue("RAMClearing", false);
+        userSettings.setValue("RAMClearing", false);
 
         break;
 
@@ -635,14 +642,12 @@ void MainWindow::on_ram_clearing_stateChanged(int arg1)
         userSettings.setValue("RAMClearing", true);
     }
 
-    if (!allowSettingChanges) return;
-
     //update value in events class
-    events->RAMClearing = userSettings.value("RAMClearing").toBool();
+    if (events != nullptr) events->RAMClearing = userSettings.value("RAMClearing").toBool();
 
     //set visibility of max nodes based on ram clearing setting
-    ui->max_data_nodes->setVisible(events->RAMClearing);
-    ui->max_data_nodes_label->setVisible(events->RAMClearing);
+    ui->max_data_nodes->setVisible(userSettings.value("RAMClearing").toBool());
+    ui->max_data_nodes_label->setVisible(userSettings.value("RAMClearing").toBool());
 
     userSettings.sync();
 }
@@ -650,14 +655,14 @@ void MainWindow::on_ram_clearing_stateChanged(int arg1)
 //updates value of max data nodes for events class
 void MainWindow::on_max_data_nodes_valueChanged(int arg1)
 {
-    if (!allowSettingChanges) return;
-
-    events->maxNodes = arg1;
-    userSettings.setValue("maxDataNodes", events->maxNodes);
+    userSettings.setValue("maxDataNodes", arg1);
 
     //write changes to the registry
     userSettings.sync();
+
+    if (events != nullptr) events->maxNodes = arg1;
 }
+
 
 //======================================================================================
 //DEV_MODE exclusive methods
@@ -701,6 +706,8 @@ void MainWindow::on_CSim_button_clicked()
     {
         // csim is running, shut it down
         csimHandle->stopSimulation();
+
+        csimHandle->pause=false;
 
         // update ui
         ui->CSim_button->setText("Start CSim");
@@ -828,5 +835,20 @@ void MainWindow::on_send_message_button_clicked()
 void MainWindow::on_csim_generation_interval_selection_valueChanged(int arg1)
 {
     csimHandle->generationInterval = arg1;
+}
+
+
+void MainWindow::on_pause_csim_button_clicked()
+{
+    if (csimHandle->pause)
+    {
+        csimHandle->pause=false;
+        ui->pause_csim_button->setText("pause");
+    }
+    else
+    {
+       csimHandle->pause=true;
+        ui->pause_csim_button->setText("unpause");
+    }
 }
 #endif

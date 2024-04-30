@@ -9,63 +9,89 @@
 #include <QSettings>
 #include "constants.h"
 
-struct EventNode {
-    int id;
-    QString timeStamp;
-    QString eventString;
-    bool error;
-    bool cleared;
-    struct EventNode *nextPtr;
+/**
+ * @brief The EventNode linked list
+ * Stores significant information about an EVENT message that has been received from the
+ * controller.
+ */
+struct EventNode
+{
+
+    int id; // id is a unique identifier for this specific node, it could be any number
+    QString timeStamp; // the timestamp from the controller of when this message was received
+    QString eventString; // the actual string message from the controller
+    struct EventNode *nextPtr; // pointer to next node in linked list
+
+    virtual bool isError() const { return false; }
+    virtual void storeIndicatorLoc(qint64 loc) {}
+};
+
+/**
+ * @brief The ErrorNode linked list
+ * Stores significant information about an ERROR message that has been received from the
+ * controller.
+ *
+ * NOTE: This struct inherits all member variables from the EventNode defined above
+ */
+struct ErrorNode : public EventNode
+{
+    bool cleared; // status of whether or not this error has been cleared yet
+    qint64 logFileIndicator; // location of where this error is stored in the logfile
+    struct ErrorNode *nextPtr; // pointer to next node in linked list
+
+    bool isError() const override { return true; }
+    void storeIndicatorLoc(qint64 loc) override {if(!cleared) logFileIndicator=loc;}
 };
 
 class Events : public QObject
 {
     Q_OBJECT
-public:
-    Events(bool EventRAMClearing, int maxDataNodes);
-    ~Events();
-
-    //class variables
-    int totalEvents;
-    int totalErrors;
-    int totalNodes;
-    int totalClearedErrors;
-    bool RAMClearing;
-    int maxNodes;
-    int storedNodes;
-    QString clearedIndicator;
-    QString activeIndicator;
-    QByteArray clearedIndicatorBytes;
-    QByteArray activeIndicatorBytes;
-
-    EventNode *headEventNode;
-    EventNode *lastEventNode;
-
-    EventNode *headErrorNode;
-    EventNode *lastErrorNode;
-
-    //node creation utils
+private:
+    /**
+     * These methods are helper functions that are NOT safeguarded with error checks.
+     * Therefore, they should not be used outside of the Events data structure
+     */
+    // node creation helper methods
     void addEvent(int id, QString timeStamp, QString eventString);
     void addError(int id, QString timeStamp, QString eventString, bool cleared);
+public:
+    // initialization constructor
+    Events(bool EventRAMClearing, int maxDataNodes);
+    ~Events(); // destructor
 
-    //free memory utils
+    // member variables
+    int totalEvents; // stores the total amount of events per session
+    int totalErrors; // stores the total amount of errors per session
+    int totalNodes; // stores the total amount of nodes (events + errors) per session
+    int totalClearedErrors; // stores the total amount of cleared errors per session
+    int storedNodes; // stores the total amount of nodes in a session, even after truncation
+    int maxNodes; // the max number of nodes allowed (to improve CPU performance), defined in user settings
+    bool RAMClearing; // boolean stating whether or not to clear the program's ram usage, defined in user settings
+    bool truncated; //boolean which indicates if a RAM dump has occurred
+    QString clearedIndicator; // the string indicator for cleared error messages (default CLEARED in constants.h)
+    QString activeIndicator; // the string indicator for active error messages (default ACTIVE in constants.h)
+    QByteArray clearedIndicatorBytes; // the cleared indicator converted to bytes for logfile usage
+    QByteArray activeIndicatorBytes; // the active indicator converted to bytes for logfile usage
+    EventNode *headEventNode; // stores the top node in the Events linked list
+    EventNode *lastEventNode; // stores the bottom node in the EVents linked list
+    ErrorNode *headErrorNode; // stores the top node in the Errors linked list
+    ErrorNode *lastErrorNode; // stores the bottom node in the Errors linked list
+
+    // free memory utils
     void freeError(int id);
-    void freeLinkedLists();
+    void freeLinkedLists(bool fullClear);
 
-    //navigation utils
-    EventNode* getNextNodeToPrint(EventNode*& eventPtr, EventNode*& errorPtr, bool& printErr);
+    // navigation utils
+    EventNode* getNextNode(EventNode*& eventPtr, ErrorNode*& errorPtr);
 
-    //load from serial message utils
+    // load from serial message utils
     bool loadErrorData(QString message);
     bool loadEventData(QString message);
     bool loadEventDump(QString message);
     bool loadErrorDump(QString message);
-    bool clearError(int id);
-    //searches through log file and replaces the active error indicator
-    //with the cleared error indicator
-    bool clearErrorInLogFile(QString logFileName, int errorId);
+    int clearError(int id, QString logFileName);
 
-    //log file utils
+    // log file utils
     bool outputToLogFile(QString logFileName, bool advancedLogFile);
     int loadDataFromLogFile(Events *&events, QString logFileName);
     void appendToLogfile(QString logfilePath, EventNode *event);
@@ -86,9 +112,12 @@ public:
 
         int getErrorIdByPosition(int pos);
     #endif
-
 signals:
     void RAMCleared();
+private:
+    //called as last resort when clearError cant find error node, if this
+    //returns fail, we dont recognize the node
+    int clearErrorInLogFile(int id, QString logFileName);
 };
 
 #endif // EVENTS_H

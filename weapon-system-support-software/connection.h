@@ -19,7 +19,7 @@ class Connection : public QObject
     Q_OBJECT
 
 public:
-    // qt serial port class
+    // qt serial port class object
     QSerialPort serialPort;
 
     // constructor, opens the port with given port name and initial settings
@@ -34,7 +34,8 @@ public:
     ~Connection();
 
     //checks if messages in the serial port are complete by checking if they contain \n
-    bool checkForValidMessage();
+    // return codes are VALID_MESSAGE, EMPTY_BUFFER, or UNTERMINATED_MESSAGE
+    int  checkForValidMessage();
 
     //stores name of port given upon initialization
     QString portName;
@@ -46,10 +47,10 @@ public slots:
     // sends message through port
     void transmit(QString message);
 
-    //sends disconnect message through port
+    // sends disconnect message through port
     void sendDisconnectMsg();
 
-    //sends disconnect message through port
+    // sends disconnect message through port
     void sendHandshakeMsg();
 };
 
