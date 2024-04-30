@@ -256,6 +256,7 @@ void Events::freeLinkedLists(bool fullClear)
         totalEvents=0;
         totalErrors=0;
         totalClearedErrors=0;
+        truncated = false;
     }
 
     #if DEV_MODE && EVENTS_DEBUG
