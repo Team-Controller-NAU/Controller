@@ -639,7 +639,7 @@ void MainWindow::readSerialData()
                 qDebug() << "ERROR: readSerialData message from controller is not recognized"<< Qt::endl;
 
                 //report
-                notifyUser("Unrecognized message received", message, true);
+                notifyUser("Unrecognized message received", QString::fromUtf8(serializedMessage), true);
 
                 break;
             }
@@ -648,7 +648,7 @@ void MainWindow::readSerialData()
         else
         {
             qDebug() << "Error: readSerialData Unrecognized serial message received : " << message<< Qt::endl;
-            notifyUser("Unrecognized serial message received", message, true);
+            notifyUser("Unrecognized serial message received", QString::fromUtf8(serializedMessage), true);
         }
     }
     // update the timestamp of last received message
