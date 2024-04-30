@@ -4425,7 +4425,7 @@ border-color: rgb(255, 255, 255);</string>
     </item>
     <item>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="7" alignment="Qt::AlignLeft">
+      <item row="1" column="7" alignment="Qt::AlignLeft|Qt::AlignBottom">
        <widget class="QLabel" name="DDMTimer">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -4462,9 +4462,12 @@ QToolTip{
         <property name="text">
          <string/>
         </property>
+        <property name="alignment">
+         <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+        </property>
        </widget>
       </item>
-      <item row="1" column="5" alignment="Qt::AlignLeft">
+      <item row="1" column="5" alignment="Qt::AlignLeft|Qt::AlignBottom">
        <widget class="QLabel" name="elapsedTime">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -4504,9 +4507,12 @@ QToolTip{
         <property name="text">
          <string/>
         </property>
+        <property name="alignment">
+         <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+        </property>
        </widget>
       </item>
-      <item row="1" column="0" alignment="Qt::AlignLeft">
+      <item row="1" column="0" alignment="Qt::AlignLeft|Qt::AlignBottom">
        <widget class="QLabel" name="controllerLabel">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -4517,7 +4523,7 @@ QToolTip{
         <property name="maximumSize">
          <size>
           <width>150</width>
-          <height>20</height>
+          <height>25</height>
          </size>
         </property>
         <property name="toolTip">
@@ -4538,12 +4544,15 @@ QToolTip{
         <property name="text">
          <string/>
         </property>
+        <property name="alignment">
+         <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+        </property>
         <property name="textInteractionFlags">
          <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
         </property>
        </widget>
       </item>
-      <item row="1" column="2" alignment="Qt::AlignLeft">
+      <item row="1" column="2" alignment="Qt::AlignLeft|Qt::AlignBottom">
        <widget class="QLabel" name="crcLabel">
         <property name="maximumSize">
          <size>
@@ -4568,6 +4577,9 @@ QToolTip{
         </property>
         <property name="text">
          <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
         </property>
         <property name="textInteractionFlags">
          <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
@@ -4603,7 +4615,7 @@ QToolTip{
         </property>
        </spacer>
       </item>
-      <item row="1" column="4" alignment="Qt::AlignRight">
+      <item row="1" column="4" alignment="Qt::AlignRight|Qt::AlignBottom">
        <widget class="QLabel" name="elapsed_time_label">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -4641,11 +4653,11 @@ QToolTip{
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
         </property>
        </widget>
       </item>
-      <item row="1" column="6" alignment="Qt::AlignRight">
+      <item row="1" column="6" alignment="Qt::AlignRight|Qt::AlignBottom">
        <widget class="QLabel" name="DDM_timer_label">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -4655,13 +4667,13 @@ QToolTip{
         </property>
         <property name="minimumSize">
          <size>
-          <width>145</width>
+          <width>135</width>
           <height>25</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>145</width>
+          <width>135</width>
           <height>25</height>
          </size>
         </property>
@@ -4683,7 +4695,7 @@ QToolTip{
          <string/>
         </property>
         <property name="alignment">
-         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
         </property>
        </widget>
       </item>
