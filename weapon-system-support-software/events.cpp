@@ -21,7 +21,7 @@ Events::Events(bool EventRAMClearing, int maxDataNodes)
     totalErrors= 0;
     totalNodes= 0;
     totalClearedErrors = 0;
-    int storedNodes = 0;
+    storedNodes = 0;
     maxNodes = maxDataNodes;
     RAMClearing = EventRAMClearing;
     truncated = false;
@@ -523,13 +523,17 @@ int Events::loadDataFromLogFile(Events *&events, QString logFileName)
         }
     }
 
-    //all log data loaded, we can clear old data
+    file.close();
+
+    //transfer ram clearing settings to new class in case user starts a new session
+    newEvents->RAMClearing = events->RAMClearing;
+    newEvents->maxNodes = events->maxNodes;
+
+    //we can clear old data
     delete events;
 
     //assign new events as our events class
     events = newEvents;
-
-    file.close();
 
     #if DEV_MODE && EVENTS_DEBUG
     qDebug() << "New events class allocated for loaded data";

@@ -57,18 +57,7 @@ MainWindow::MainWindow(QWidget *parent)
     //setup signal and slot to notify user when ram is cleared from events
     //this signal connects to a lambda function so we can call more than 1 function
     //using 1 signal-slot connection
-    connect(events, &Events::RAMCleared, this, [=]() {
-        notifyUser("RAM Cleared",
-                   "Events and errors were removed from RAM to improve performance. "
-                   "They are still being tracked by counters and our log file. You can also load them"
-                   "back into the GUI after this session ends.", false);
-
-        //show truncated label on the events page to tell user not all nodes are displayed
-        ui->truncated_label->setVisible(true);
-
-        //get rid of outdated display
-        refreshEventsOutput();
-    });
+    connect(events, &Events::RAMCleared, this, &MainWindow::handleRAMClear);
 
     //will be disabled until RAM is cleared
     ui->truncated_label->setVisible(false);
@@ -741,18 +730,8 @@ void MainWindow::enableConnectionChanges()
 //function
 void MainWindow::setup_logfile_location()
 {
-    //check if user has set a custom log file output directory
-    if ( !userSettings.value("logfileLocation").toString().isEmpty() )
-    {
-        //initialize the logfile into this directory
-        autosaveLogFile = userSettings.value("logfileLocation").toString();
-    }
-    //otherwise use default directory
-    else
-    {
-        //use the path of the exe and add a "Log Files" directory
-        autosaveLogFile = QCoreApplication::applicationDirPath() + "/" + INITIAL_LOGFILE_LOCATION;
-    }
+    //initialize the logfile into preset directory
+    autosaveLogFile = userSettings.value("logfileLocation").toString();
 
     //initialize a directory object in selected location
     QDir dir(autosaveLogFile);
@@ -784,18 +763,8 @@ void MainWindow::enforceAutoSaveLimit()
 {
     QString path;
 
-    //check if user has set a custom log file output directory
-    if ( !userSettings.value("logfileLocation").toString().isEmpty() )
-    {
-        //initialize the logfile into this directory
-        path = userSettings.value("logfileLocation").toString();
-    }
-    //otherwise use default directory
-    else
-    {
-        //use the path of the exe and add a "Log Files" directory
-        path = QCoreApplication::applicationDirPath() + "/" + INITIAL_LOGFILE_LOCATION;
-    }
+    //initialize the logfile into this directory
+    path = userSettings.value("logfileLocation").toString();
 
     // Set a filter to display only files
     QDir dir(path);
@@ -876,6 +845,26 @@ void MainWindow::setupSettings()
 
     //set gui display to match
     ui->colored_events_output->setChecked(coloredEventOutput);
+
+    //==============================================================
+
+    //check if user has not set a custom logfile directory
+    if ( userSettings.value("logfileLocation").toString().isEmpty() || !userSettings.contains("advancedLogFile"))
+    {
+        //initialize default setting
+        userSettings.setValue("logfileLocation", QCoreApplication::applicationDirPath() + "/" + INITIAL_LOGFILE_LOCATION);
+    }
+
+    // Ensure the directory exists and create it if not
+    QDir logDir(userSettings.value("logfileLocation").toString());
+    if (!logDir.exists())
+    {
+        if (!logDir.mkpath("."))
+        {
+            qDebug() << "Error: setupSettings Failed to create logfile directory: " << userSettings.value("logfileLocation").toString();
+            notifyUser("Failed to create logfile directory",userSettings.value("logfileLocation").toString(), true );
+        }
+    }
 
     //==============================================================
 
@@ -1066,6 +1055,14 @@ void MainWindow::updateElapsedTime()
 // method updates the elapsed time since last message received to DDM
 void MainWindow::updateTimeSinceLastMessage()
 {
+    //safety in case timer is left running after disconnect
+    if (!ddmCon->connected )
+    {
+        lastMessageTimer->stop();
+        qDebug() << "Error: updateTimeSinceLastMessage, lastMessageTimer is running after disconnect" << Qt::endl;
+        return;
+    }
+
     // initialize variables
     QTime elapsedTime;
 
@@ -1519,7 +1516,20 @@ void MainWindow::freeElectricalPage()
     }
 }
 
+//slot to be triggered in response to events class RAMCleared signal
+void MainWindow::handleRAMClear()
+{
+    notifyUser("RAM Cleared",
+               "Events and errors were removed from RAM to improve performance. "
+               "They are still being tracked by counters and our log file. You can also load them"
+               "back into the GUI after this session ends.", false);
 
+    //show truncated label on the events page to tell user not all nodes are displayed
+    ui->truncated_label->setVisible(true);
+
+    //get rid of outdated display
+    refreshEventsOutput();
+}
 
 //======================================================================================
 //DEV_MODE exclusive methods

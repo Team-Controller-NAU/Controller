@@ -95,23 +95,7 @@ void MainWindow::on_download_button_clicked()
         return;
     }
 
-    QString logFile;
-
-    //check if user has set a custom log file output directory
-    if ( !userSettings.value("portName").toString().isEmpty() )
-    {
-        //initialize the logfile into this directory
-        logFile = userSettings.value("logfileLocation").toString();
-    }
-    //otherwise use default directory
-    else
-    {
-        //use the path of the exe and add a "Log Files" directory
-        logFile = QCoreApplication::applicationDirPath() + "/" + INITIAL_LOGFILE_LOCATION;
-    }
-
-    qint64 secsSinceEpoch = QDateTime::currentSecsSinceEpoch();
-    logFile += QString::number(secsSinceEpoch) + "-logfile-M.txt";
+    QString logFile = userSettings.value("logfileLocation").toString() + QString::number(QDateTime::currentSecsSinceEpoch()) + "-logfile-M.txt";
 
     // save logfile - mannually done
     if (events->outputToLogFile(logFile, false))
@@ -291,39 +275,28 @@ void MainWindow::on_restore_Button_clicked()
 
 void MainWindow::on_openLogfileFolder_clicked()
 {
-    // if the user hasnt set log file location user settings, temp folder is opened
-    if (userSettings.value("logfileLocation").toString().isEmpty())
-    {
-        // create a QDir object for the path
-        QDir path(INITIAL_LOGFILE_LOCATION);
+    #if DEV_MODE && GUI_DEBUG
+    qDebug() << "on_openLogfileFolder_clicked: file explorer opening to : " << userSettings.value("logfileLocation").toString();
+    #endif
 
-        // check if the path does not lead to anything
-        if(!path.exists())
-        {
-            // check if we can make path successfully
-            if(path.mkpath("."))
-            {
-                #if DEV_MODE && GUI_DEBUG
-                qDebug() << "Logfile directory created at: " << INITIAL_LOGFILE_LOCATION;
-                #endif
-            }
-            else
-            {
-                qDebug()<< "Error: on_openLogfileFolder_clicked() The log file directory failed to create"<< Qt::endl;
-            }
-        }
-        QDesktopServices::openUrl(QUrl::fromLocalFile(INITIAL_LOGFILE_LOCATION));
-    }
-    else
+    QUrl logFileUrl = QUrl::fromLocalFile(userSettings.value("logfileLocation").toString());
+
+    // Ensure the directory exists and create it if not
+    QDir logDir(userSettings.value("logfileLocation").toString());
+    if (!logDir.exists())
     {
-        //open from the user settings
-        QDesktopServices::openUrl(QUrl::fromLocalFile(userSettings.value("logfileLocation").toString()));
-        #if DEV_MODE && GUI_DEBUG
-        qDebug() << "on_openLogfileFolder_clicked: file explorer opening to : " << userSettings.value("logfileLocation").toString();
-        #endif
+        if (!logDir.mkpath("."))
+        {
+            qDebug() << "Error: on_openLogfileFolder_clicked failed to create logfile directory: " << userSettings.value("logfileLocation").toString();
+            notifyUser("Failed to open logfile directory", userSettings.value("logfileLocation").toString() +" does not exist", true );
+            return;
+        }
     }
-    // save user settings
-    userSettings.sync();
+
+    if (!QDesktopServices::openUrl(logFileUrl))
+    {
+        qDebug() << "Error: on_openLogfileFolder_clicked failed to open the directory:" << logFileUrl.toString();
+    }
 }
 
 void MainWindow::on_setLogfileFolder_clicked()
@@ -352,6 +325,17 @@ void MainWindow::on_setLogfileFolder_clicked()
         #if DEV_MODE && GUI_DEBUG
         qDebug() << "New log file directory set: " << userSettings.value("logfileLocation").toString();
         #endif
+
+        // Ensure the directory exists and create it if not
+        QDir logDir(userSettings.value("logfileLocation").toString());
+        if (!logDir.exists())
+        {
+            if (!logDir.mkpath("."))
+            {
+                qDebug() << "Error: setupSettings Failed to create logfile directory: " << userSettings.value("logfileLocation").toString();
+                notifyUser("Failed to create logfile directory",userSettings.value("logfileLocation").toString(), true );
+            }
+        }
     }
 
     //sync user settings
@@ -365,9 +349,7 @@ void MainWindow::on_load_events_from_logfile_clicked()
     //declare file browser class
     QFileDialog dialog(this);
 
-    ui->truncated_label->setVisible(false);
-
-    //set initial directory to log file directory set by user
+    //get user logfile setting as starting dir
     dialog.setDirectory(userSettings.value("logfileLocation").toString());
 
     // Open a file dialog for the user to select a logfile
@@ -391,7 +373,7 @@ void MainWindow::on_load_events_from_logfile_clicked()
     if (result == INCORRECT_FORMAT)
     {
         qDebug() << "Error: on_load_events_from_logfile_clicked() Log file was of incorrect format." << Qt::endl;
-        notifyUser("Load failed on corrupt logfile.", true);
+        notifyUser("Load failed on corrupt logfile.", selectedFile, true);
     }
     else if (result == DATA_NOT_FOUND)
     {
@@ -401,6 +383,8 @@ void MainWindow::on_load_events_from_logfile_clicked()
     else
     {
         notifyUser("Logfile loaded.", selectedFile, false);
+        ui->truncated_label->setVisible(false);
+        connect(events, &Events::RAMCleared, this, &MainWindow::handleRAMClear);
     }
 
     //refresh the events output
