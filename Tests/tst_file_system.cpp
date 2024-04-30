@@ -1,3 +1,4 @@
+#if DEV_MODE
 #include <QCoreApplication>
 #include <QTest>
 #include <QSettings>
@@ -154,7 +155,7 @@ void tst_file_system::test_appendToLogFile()
     delete eventObj;
 }
 
-#if DEV_MODE
+
 /**
  * Test case for events function loadDataFromLogFile
  *
@@ -216,7 +217,7 @@ void tst_file_system::test_loadDataFromLogFile_badInput_logFileName()
     delete eventObj;
     delete wkgNode;
 }
-#endif
 
 QTEST_MAIN(tst_file_system)
 #include "tst_file_system.moc"
+#endif

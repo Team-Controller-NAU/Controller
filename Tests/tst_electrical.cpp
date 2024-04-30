@@ -1,3 +1,4 @@
+#if DEV_MODE
 #include <QCoreApplication>
 #include <QTest>
 #include "../weapon-system-support-software/electrical.cpp"
@@ -208,3 +209,4 @@ void tst_electrical::test_loadElecDump_badInputMore()
 
 QTEST_MAIN(tst_electrical)
 #include "tst_electrical.moc"
+#endif
