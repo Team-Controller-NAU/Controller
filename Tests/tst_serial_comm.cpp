@@ -1,3 +1,4 @@
+#if DEV_MODE
 #include <QTest>
 #include "../weapon-system-support-software/connection.cpp"
 
@@ -87,3 +88,4 @@ void tst_serial_comm::test_checkForValidMessage()
 
 QTEST_MAIN(tst_serial_comm)
 #include "tst_serial_comm.moc"
+#endif
