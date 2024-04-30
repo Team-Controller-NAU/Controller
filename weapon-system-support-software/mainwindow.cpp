@@ -849,7 +849,7 @@ void MainWindow::setupSettings()
     //==============================================================
 
     //check if user has not set a custom logfile directory
-    if ( userSettings.value("logfileLocation").toString().isEmpty() || !userSettings.contains("advancedLogFile"))
+    if ( userSettings.value("logfileLocation").toString().isEmpty() || !userSettings.contains("logfileLocation"))
     {
         //initialize default setting
         userSettings.setValue("logfileLocation", QCoreApplication::applicationDirPath() + "/" + INITIAL_LOGFILE_LOCATION);
