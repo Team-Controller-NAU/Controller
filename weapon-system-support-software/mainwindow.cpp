@@ -1522,7 +1522,7 @@ void MainWindow::handleRAMClear()
     notifyUser("RAM Cleared",
                "Events and errors were removed from RAM to improve performance. "
                "They are still being tracked by counters and our log file. You can also load them"
-               "back into the GUI after this session ends.", false);
+               " back into the GUI after this session ends.", false);
 
     //show truncated label on the events page to tell user not all nodes are displayed
     ui->truncated_label->setVisible(true);
