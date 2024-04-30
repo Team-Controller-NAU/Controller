@@ -34,6 +34,9 @@ const QString ADVANCED_LOG_FILE_INDICATOR = "***";
 // minimum value allowed to be set for max data nodes in user settings
 const int MIN_DATA_NODES_BEFORE_RAM_CLEAR = 1500;
 
+// minimum value allowed for timeout duration
+const int MIN_TIMEOUT_DURATION = 200;
+
 // number of bytes in a newline - linux uses \n =1 byte windows uses \r\n = 2 bytes
 #ifdef Q_OS_LINUX
 const int NEW_LINE_SIZE = 1;
@@ -261,6 +264,8 @@ const QString ELECTRICAL_BOX_HEADER_STYLE = "font: 20pt 'Segoe UI'; background-c
 
 const QString ELECTRICAL_BOX_CONTENT_STYLE = "color: rgb(30, 30, 30); font: 20pt 'Segoe UI';"
                                              "background-color: rgb(105, 105, 105); color: white;";
+
+
 //======================================================================================
 // CSIM exclusive constants
 //======================================================================================

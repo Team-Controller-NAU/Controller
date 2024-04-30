@@ -206,7 +206,7 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
 
         //start last message timer
         timeLastReceived = QDateTime::currentDateTime();
-        ui->DDM_timer_label->setText("Time Since Last Message: ");
+        ui->DDM_timer_label->setText("Time Since Last Message :");
         ui->DDMTimer->setText("00:00:00");
         lastMessageTimer->start();
 
@@ -337,6 +337,9 @@ void MainWindow::readSerialData()
         notifyUser("Could not read serial data", "Connection class is not declared", true);
         return;
     }
+
+    //prevent timeout during long processing
+    lastMessageTimer->stop();
 
     //read lines until all data in buffer is processed
     while (ddmCon->checkForValidMessage() == VALID_MESSAGE)
@@ -486,8 +489,6 @@ void MainWindow::readSerialData()
                 qDebug() <<  "Message id: event dump" << qPrintable("\n");
                 #endif
 
-                notifyUser("Loading event dump...", false);
-
                 // load all events to event linked list, notify if fail
                 if (!events->loadEventDump(message))
                 {
@@ -500,9 +501,13 @@ void MainWindow::readSerialData()
                     notifyUser("Failed to open logfile","Manual download could save the data.", true);
                 }
 
-                if (events->totalEvents > 0)
+                if (events->totalEvents == 1)
                 {
-                    notifyUser(QString::number(events->totalEvents) + " events loaded.", false);
+                    notifyUser(QString::number(events->totalEvents) + " event loaded from dump", false);
+                }
+                else if (events->totalEvents > 0)
+                {
+                    notifyUser(QString::number(events->totalEvents) + " events loaded from dump", false);
                 }
 
                 //new auto save file created, enforce auto save limit
@@ -519,8 +524,6 @@ void MainWindow::readSerialData()
                 qDebug() <<  "Message id: error dump" << qPrintable("\n");
                 #endif
 
-                notifyUser("Loading error dump...", false);
-
                 // load all errors to error linked list, notify if fail
                 if (!events->loadErrorDump(message))
                 {
@@ -533,9 +536,13 @@ void MainWindow::readSerialData()
                     notifyUser("Failed to open logfile","Manual download could save the data.", true);
                 }
 
-                if (events->totalErrors > 0)
+                if (events->totalErrors == 1)
                 {
-                    notifyUser(QString::number(events->totalEvents) + " errors loaded.", false);
+                    notifyUser(QString::number(events->totalEvents) + " error loaded from dump", false);
+                }
+                else if (events->totalErrors > 0)
+                {
+                    notifyUser(QString::number(events->totalEvents) + " errors loaded from dump", false);
                 }
 
                 //new auto save file created, enforce auto save limit
@@ -649,9 +656,6 @@ void MainWindow::readSerialData()
 
                 break;
             }
-
-            // update the timestamp of last received message
-            timeLastReceived = QDateTime::currentDateTime();
         }
         //invalid message id detected
         else
@@ -660,6 +664,11 @@ void MainWindow::readSerialData()
             notifyUser("Unrecognized serial message received", message, true);
         }
     }
+    // update the timestamp of last received message
+    timeLastReceived = QDateTime::currentDateTime();
+
+    //re-enable timer
+    lastMessageTimer->start();
 }
 
 //scans for available serial ports and adds them to ddm port selection box
@@ -926,6 +935,9 @@ void MainWindow::setupSettings()
     //update gui to match
     ui->connection_timeout->setValue(connectionTimeout);
 
+    //dont allow the user to go below this value for max data nodes
+    ui->connection_timeout->setMinimum(MIN_TIMEOUT_DURATION);
+
     //==============================================================
 
     // Check if ram clearing setting does not exist
@@ -1073,6 +1085,11 @@ void MainWindow::updateTimeSinceLastMessage()
     //check if timeout was reached
     else if (elapsedMs >= connectionTimeout)
     {
+        //notify timeout
+        notifyUser("Connection timeout", "We have not received a message from the controller in "
+                    + QString::number(connectionTimeout) +" msec. (you can "
+                    "modify this from settings page)", true);
+
         //run disconnect method
         on_handshake_button_clicked();
     }
