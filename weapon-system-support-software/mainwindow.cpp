@@ -333,7 +333,7 @@ void MainWindow::readSerialData()
     if (ddmCon == nullptr)
     {
         //this should never happen..
-        qDebug() <<"Error: readSerialData() called with no connection class declared"<<Qt::endl;
+        qDebug() <<"Error: readSerialData called with no connection class declared"<<Qt::endl;
         notifyUser("Could not read serial data", "Connection class is not declared", true);
         return;
     }
@@ -494,20 +494,19 @@ void MainWindow::readSerialData()
                 {
                     notifyUser("Invalid event dump received", message, true);
                 }
-
-                // create log file
-                if (!events->outputToLogFile( autosaveLogFile, advancedLogFile ))
-                {
-                    notifyUser("Failed to open logfile","Manual download could save the data.", true);
-                }
-
-                if (events->totalEvents == 1)
+                else if (events->totalEvents == 1)
                 {
                     notifyUser(QString::number(events->totalEvents) + " event loaded from dump", false);
                 }
                 else if (events->totalEvents > 0)
                 {
                     notifyUser(QString::number(events->totalEvents) + " events loaded from dump", false);
+                }
+
+                // create log file
+                if (!events->outputToLogFile( autosaveLogFile, advancedLogFile ))
+                {
+                    notifyUser("Failed to open logfile","Manual download could save the data.", true);
                 }
 
                 //new auto save file created, enforce auto save limit
@@ -529,20 +528,19 @@ void MainWindow::readSerialData()
                 {
                     notifyUser("Invalid error dump received", message, true);
                 }
-
-                // create log file
-                if (!events->outputToLogFile( autosaveLogFile, advancedLogFile ))
-                {
-                    notifyUser("Failed to open logfile","Manual download could save the data.", true);
-                }
-
-                if (events->totalErrors == 1)
+                else if (events->totalErrors == 1)
                 {
                     notifyUser(QString::number(events->totalEvents) + " error loaded from dump", false);
                 }
                 else if (events->totalErrors > 0)
                 {
                     notifyUser(QString::number(events->totalEvents) + " errors loaded from dump", false);
+                }
+
+                // create log file
+                if (!events->outputToLogFile( autosaveLogFile, advancedLogFile ))
+                {
+                    notifyUser("Failed to open logfile","Manual download could save the data.", true);
                 }
 
                 //new auto save file created, enforce auto save limit

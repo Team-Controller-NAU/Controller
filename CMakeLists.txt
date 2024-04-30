@@ -7,7 +7,7 @@ project(Controller)
 
 #set DEV_MODE to 1 to compile for dev release
 #set DEV_MODE to 0 to compile for user release
-add_compile_definitions(DEV_MODE=0)
+add_compile_definitions(DEV_MODE=1)
 
 # Add subdirectories for unit tests and WSSS applications
 add_subdirectory(weapon-system-support-software/)

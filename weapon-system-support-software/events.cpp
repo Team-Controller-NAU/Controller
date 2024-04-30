@@ -820,7 +820,15 @@ bool Events::loadErrorDump(QString message)
 
     #if DEV_MODE && EVENTS_DEBUG
     qDebug() << "num errors in error dump: " << errorSet.length();
+    qDebug() << "Error dump: " << errorSet;
     #endif
+
+    //check for empty dump
+    if (errorSet[0] =="\n")
+    {
+        RAMClearing = prevRAMClearing;
+        return false;
+    }
 
     // Iterate through the error sets and call loadErrorData for each
     for (const QString &error : errorSet)
@@ -860,7 +868,15 @@ bool Events::loadEventDump(QString message)
 
     #if DEV_MODE && EVENTS_DEBUG
     qDebug() << "num events in event dump" << eventSet.length();
+    qDebug() << "Event dump: " << eventSet;
     #endif
+
+    //check for empty dump
+    if (eventSet[0] =="\n")
+    {
+        RAMClearing = prevRAMClearing;
+        return false;
+    }
 
     // Iterate through the event sets and call loadEventData for each
     for (const QString &event : eventSet)
