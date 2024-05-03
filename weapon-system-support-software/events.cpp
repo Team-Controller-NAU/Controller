@@ -21,7 +21,7 @@ Events::Events(bool EventRAMClearing, int maxDataNodes)
     totalErrors= 0;
     totalNodes= 0;
     totalClearedErrors = 0;
-    int storedNodes = 0;
+    storedNodes = 0;
     maxNodes = maxDataNodes;
     RAMClearing = EventRAMClearing;
     truncated = false;
@@ -256,6 +256,7 @@ void Events::freeLinkedLists(bool fullClear)
         totalEvents=0;
         totalErrors=0;
         totalClearedErrors=0;
+        truncated = false;
     }
 
     #if DEV_MODE && EVENTS_DEBUG
@@ -523,13 +524,17 @@ int Events::loadDataFromLogFile(Events *&events, QString logFileName)
         }
     }
 
-    //all log data loaded, we can clear old data
+    file.close();
+
+    //transfer ram clearing settings to new class in case user starts a new session
+    newEvents->RAMClearing = events->RAMClearing;
+    newEvents->maxNodes = events->maxNodes;
+
+    //we can clear old data
     delete events;
 
     //assign new events as our events class
     events = newEvents;
-
-    file.close();
 
     #if DEV_MODE && EVENTS_DEBUG
     qDebug() << "New events class allocated for loaded data";
@@ -820,7 +825,15 @@ bool Events::loadErrorDump(QString message)
 
     #if DEV_MODE && EVENTS_DEBUG
     qDebug() << "num errors in error dump: " << errorSet.length();
+    qDebug() << "Error dump: " << errorSet;
     #endif
+
+    //check for empty dump
+    if (errorSet[0] =="\n")
+    {
+        RAMClearing = prevRAMClearing;
+        return false;
+    }
 
     // Iterate through the error sets and call loadErrorData for each
     for (const QString &error : errorSet)
@@ -860,7 +873,15 @@ bool Events::loadEventDump(QString message)
 
     #if DEV_MODE && EVENTS_DEBUG
     qDebug() << "num events in event dump" << eventSet.length();
+    qDebug() << "Event dump: " << eventSet;
     #endif
+
+    //check for empty dump
+    if (eventSet[0] =="\n")
+    {
+        RAMClearing = prevRAMClearing;
+        return false;
+    }
 
     // Iterate through the event sets and call loadEventData for each
     for (const QString &event : eventSet)
