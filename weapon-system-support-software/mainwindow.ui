@@ -441,7 +441,7 @@ font: 16pt &quot;Segoe UI&quot;;</string>
             </sizepolicy>
            </property>
            <property name="currentIndex">
-            <number>6</number>
+            <number>3</number>
            </property>
            <widget class="QWidget" name="Events_page">
             <layout class="QGridLayout" name="gridLayout_3">
@@ -4406,35 +4406,8 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
                 <bool>true</bool>
                </property>
                <property name="styleSheet">
-                <string notr="true">QTextEdit{
-	color: rgb(255, 255, 255);
-	background-color: rgb(30, 30, 30);
-	border-color: rgb(255, 255, 255);
-}
-
-QScrollBar:vertical {
-	background-color: transparent;
-    border: rgb(255, 255, 255);
-    width: 10px;
-}
-
-QScrollBar::handle:vertical {
-    background: rgb(255, 255, 255);
-    min-height: 25px;
-    border-radius: 5px;
-}
-
-QScrollBar::add-line:vertical {
-    background: none;
-}
-
-QScrollBar::sub-line:vertical {
-    background: none;
-}
-
-QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
-     background: none;
-}</string>
+                <string notr="true">background-color: rgb(30, 30, 30);
+border-color: rgb(255, 255, 255);</string>
                </property>
                <property name="readOnly">
                 <bool>true</bool>
