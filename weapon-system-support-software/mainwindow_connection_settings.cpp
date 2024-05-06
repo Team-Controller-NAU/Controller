@@ -11,7 +11,9 @@
 // GUI Drop boxes
 //======================================================================================
 
-//initial setup
+/**
+ * @brief Set text for drop box options on connection page for each serial setting
+ */
 void MainWindow::setupConnectionPage()
 {
     // Check and set initial value for "baudRate"
@@ -88,6 +90,10 @@ void MainWindow::setupConnectionPage()
     }
 }
 
+/**
+ * @brief Update baud rate with user input, only available when disconnected
+ * @param index Number representing user selection
+ */
 void MainWindow::on_baud_rate_selection_currentIndexChanged(int index)
 {
     if (ddmCon == nullptr) {
@@ -131,6 +137,10 @@ void MainWindow::on_baud_rate_selection_currentIndexChanged(int index)
     }
 }
 
+/**
+ * @brief Update data bits with user input, only available when disconnected
+ * @param index Number representing user selection
+ */
 void MainWindow::on_data_bits_selection_currentIndexChanged(int index)
 {
     if (ddmCon == nullptr) {
@@ -162,6 +172,10 @@ void MainWindow::on_data_bits_selection_currentIndexChanged(int index)
     }
 }
 
+/**
+ * @brief Update flow control with user input, only available when disconnected
+ * @param index Number representing user selection
+ */
 void MainWindow::on_flow_control_selection_currentIndexChanged(int index)
 {
     if (ddmCon == nullptr) {
@@ -190,6 +204,10 @@ void MainWindow::on_flow_control_selection_currentIndexChanged(int index)
     }
 }
 
+/**
+ * @brief Update stop bits with user input, only available when disconnected
+ * @param index Number representing user selection
+ */
 void MainWindow::on_stop_bit_selection_currentIndexChanged(int index)
 {
     if (ddmCon == nullptr) {
@@ -218,6 +236,10 @@ void MainWindow::on_stop_bit_selection_currentIndexChanged(int index)
     }
 }
 
+/**
+ * @brief Update parity selection with user input, only available when disconnected
+ * @param index Number representing user selection
+ */
 void MainWindow::on_parity_selection_currentIndexChanged(int index)
 {
     if (ddmCon == nullptr) {
@@ -256,7 +278,11 @@ void MainWindow::on_parity_selection_currentIndexChanged(int index)
 // To string methods for QSerialPortEnumeratedValues
 //======================================================================================
 
-// Convert QSerialPort::BaudRate to string
+/**
+ * @brief Convert QSerialPort::BaudRate to string
+ * @param baudRate The enumerated value to be converted to string
+ * @return Converted string
+ */
 QString MainWindow::toString(QSerialPort::BaudRate baudRate) {
     switch (baudRate) {
     case QSerialPort::Baud1200: return "1200";
@@ -273,6 +299,11 @@ QString MainWindow::toString(QSerialPort::BaudRate baudRate) {
     }
 }
 
+/**
+ * @brief Convert QSerialPort::DataBits to string
+ * @param dataBits The enumerated value to be converted to string
+ * @return Converted String
+ */
 QString MainWindow::toString(QSerialPort::DataBits dataBits) {
     switch (dataBits) {
     case QSerialPort::Data5: return "5";
@@ -285,6 +316,11 @@ QString MainWindow::toString(QSerialPort::DataBits dataBits) {
     }
 }
 
+/**
+ * @brief Convert QSerialPort::Parity to string
+ * @param parity The enumerated value to be converted to string
+ * @return Converted String
+ */
 QString MainWindow::toString(QSerialPort::Parity parity) {
     switch (parity) {
     case QSerialPort::NoParity: return "No Parity";
@@ -298,6 +334,11 @@ QString MainWindow::toString(QSerialPort::Parity parity) {
     }
 }
 
+/**
+ * @brief Convert QSerialPort::StopBits to string
+ * @param stopBits The enumerated value to be converted to string
+ * @return Converted String
+ */
 QString MainWindow::toString(QSerialPort::StopBits stopBits) {
     switch (stopBits) {
     case QSerialPort::OneStop: return "1";
@@ -308,7 +349,11 @@ QString MainWindow::toString(QSerialPort::StopBits stopBits) {
         throw std::invalid_argument("Invalid stop bits enum value: " + QString::number(stopBits).toStdString());
     }
 }
-
+/**
+ * @brief Convert QSerialPort::flowControl to string
+ * @param flowControl The enumerated value to be converted to string
+ * @return Converted String
+ */
 QString MainWindow::toString(QSerialPort::FlowControl flowControl) {
     switch (flowControl) {
     case QSerialPort::NoFlowControl: return "No Flow Control";
@@ -324,6 +369,11 @@ QString MainWindow::toString(QSerialPort::FlowControl flowControl) {
 //From string methods for QSerialPortEnumeratedValues
 //======================================================================================
 
+/**
+ * @brief Converts corresponding string to enumerated value
+ * @param baudRateStr string to convert
+ * @return corresponding enumerated value
+ */
 QSerialPort::BaudRate MainWindow::fromStringBaudRate(QString baudRateStr) {
     if (baudRateStr == "1200") {
         return QSerialPort::Baud1200;
@@ -346,6 +396,11 @@ QSerialPort::BaudRate MainWindow::fromStringBaudRate(QString baudRateStr) {
     }
 }
 
+/**
+ * @brief Converts corresponding string to enumerated value
+ * @param dataBitsStr string to convert
+ * @return corresponding enumerated value
+ */
 QSerialPort::DataBits MainWindow::fromStringDataBits(QString dataBitsStr) {
     if (dataBitsStr == "5") {
         return QSerialPort::Data5;
@@ -360,6 +415,11 @@ QSerialPort::DataBits MainWindow::fromStringDataBits(QString dataBitsStr) {
     }
 }
 
+/**
+ * @brief Converts corresponding string to enumerated value
+ * @param parityStr string to convert
+ * @return corresponding enumerated value
+ */
 QSerialPort::Parity MainWindow::fromStringParity(QString parityStr) {
     if (parityStr == "No Parity") {
         return QSerialPort::NoParity;
@@ -376,6 +436,11 @@ QSerialPort::Parity MainWindow::fromStringParity(QString parityStr) {
     }
 }
 
+/**
+ * @brief Converts corresponding string to enumerated value
+ * @param stopBitsStr string to convert
+ * @return corresponding enumerated value
+ */
 QSerialPort::StopBits MainWindow::fromStringStopBits(QString stopBitsStr) {
     if (stopBitsStr == "1") {
         return QSerialPort::OneStop;
@@ -388,6 +453,11 @@ QSerialPort::StopBits MainWindow::fromStringStopBits(QString stopBitsStr) {
     }
 }
 
+/**
+ * @brief Converts corresponding string to enumerated value
+ * @param flowControlStr string to convert
+ * @return corresponding enumerated value
+ */
 QSerialPort::FlowControl MainWindow::fromStringFlowControl(QString flowControlStr) {
     if (flowControlStr == "No Flow Control") {
         return QSerialPort::NoFlowControl;
