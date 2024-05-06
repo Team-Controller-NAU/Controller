@@ -7,7 +7,9 @@
 // Navigation
 //======================================================================================
 
-//sends user to electrical page when clicked
+/**
+ * @brief sends user to electrical page when clicked
+ */
 void MainWindow::on_ElectricalPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(3);
@@ -15,7 +17,9 @@ void MainWindow::on_ElectricalPageButton_clicked()
     ui->ElectricalPageButton->setStyleSheet(SELECTED_NAV_BUTTON_STYLE);
 }
 
-//sends user to events page when clicked
+/**
+ * @brief sends user to events page when clicked
+ */
 void MainWindow::on_EventsPageButton_clicked()
 {
     // TODO: first visit refresh page with dump of whole LL??
@@ -24,7 +28,9 @@ void MainWindow::on_EventsPageButton_clicked()
     ui->EventsPageButton->setStyleSheet(SELECTED_NAV_BUTTON_STYLE);
 }
 
-//sends user to settings page when clicked
+/**
+ * @brief sends user to connection page when clicked
+ */
 void MainWindow::on_ConnectionPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(2);
@@ -32,7 +38,9 @@ void MainWindow::on_ConnectionPageButton_clicked()
     ui->ConnectionPageButton->setStyleSheet(SELECTED_NAV_BUTTON_STYLE);
 }
 
-//sends user to status page when clicked
+/**
+ * @brief sends user to status page when clicked
+ */
 void MainWindow::on_StatusPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(4);
@@ -40,6 +48,9 @@ void MainWindow::on_StatusPageButton_clicked()
     ui->StatusPageButton->setStyleSheet(SELECTED_NAV_BUTTON_STYLE);
 }
 
+/**
+ * @brief sends user to settings page when clicked
+ */
 void MainWindow::on_SettingsPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(5);
@@ -47,6 +58,9 @@ void MainWindow::on_SettingsPageButton_clicked()
     ui->SettingsPageButton->setStyleSheet(SELECTED_SETTINGS_ICON);
 }
 
+/**
+ * @brief sends user to notification page when clicked
+ */
 void MainWindow::on_NotificationPageButton_clicked()
 {
     ui->Flow_Label->setCurrentIndex(6);
@@ -54,7 +68,9 @@ void MainWindow::on_NotificationPageButton_clicked()
     ui->NotificationPageButton->setStyleSheet(SELECTED_NOTIFICATIONS_ICON);
 }
 
-//reset all tab buttons to default style
+/**
+ * @brief reset all tab buttons to default style
+ */
 void MainWindow::resetPageButton()
 {
     ui->ConnectionPageButton->setStyleSheet(NAV_BUTTON_STYLE);
@@ -73,8 +89,10 @@ void MainWindow::resetPageButton()
 // General GUI slots
 //======================================================================================
 
-//runs when user changes ddm port. Close old connection, make new one and connect to ready
-//read signal to listen for controller.
+/**
+ * @brief runs when user changes ddm port. Close old connection, then make new one
+ * @param index The int representing users selection
+ */
 void MainWindow::on_ddm_port_selection_currentIndexChanged(int index)
 {
     //create connection on selected port if combo box is set up
@@ -85,7 +103,9 @@ void MainWindow::on_ddm_port_selection_currentIndexChanged(int index)
     }
 }
 
-//download button for events in CSV format
+/**
+ * @brief Manually download events to log file
+ */
 void MainWindow::on_download_button_clicked()
 {
     //if total nodes is 0 prevent download
@@ -107,7 +127,10 @@ void MainWindow::on_download_button_clicked()
        notifyUser("Download failed", "Could not open " + logFile + " for writing", true);
     }
 }
-
+/**
+ * @brief Changes filter on events output
+ * @param index The users selected filter
+ */
 void MainWindow::on_FilterBox_currentIndexChanged(int index)
 {
     // check for which filter the user selected
@@ -156,8 +179,10 @@ void MainWindow::on_FilterBox_currentIndexChanged(int index)
     refreshEventsOutput();
 }
 
-//toggles handshake process on and off. Once connected, allow for disconnect (send disconnect message to controller)
-//this button is seen as connect/connecting/disconnect on connection page
+/**
+ * @brief toggles handshake process on and off. Once connected, allow for disconnect (send disconnect message to controller)
+ * this button is seen as connect/connecting/disconnect on connection page
+ */
 void MainWindow::on_handshake_button_clicked()
 {
     //prevent spam
@@ -222,7 +247,9 @@ void MainWindow::on_handshake_button_clicked()
     handshakeCooldownTimer->start();
 }
 
-//saves connection settings into the qSettings class for cross session storage
+/**
+ * @brief saves connection settings into the qSettings class for cross session storage
+ */
 void MainWindow::on_save_Button_clicked()
 {
     // Load all of the current connection settings into the settings class
@@ -246,7 +273,9 @@ void MainWindow::on_save_Button_clicked()
     #endif
 }
 
-//restores connection settings to the values saved to the system as default
+/**
+ * @brief restores connection settings to the values saved to user settings (uses vals in constants.h until changed by user)
+ */
 void MainWindow::on_restore_Button_clicked()
 {
     // Retrieve the default connection settings from the settings class
@@ -273,6 +302,9 @@ void MainWindow::on_restore_Button_clicked()
         ui->flow_control_selection->setCurrentText(defaultFlowControl);
 }
 
+/**
+ * @brief opens file explorer on users system to the log file folder
+ */
 void MainWindow::on_openLogfileFolder_clicked()
 {
     #if DEV_MODE && GUI_DEBUG
@@ -299,6 +331,9 @@ void MainWindow::on_openLogfileFolder_clicked()
     }
 }
 
+/**
+ * @brief Opens file explorer for user to select new directory for log files to be stored
+ */
 void MainWindow::on_setLogfileFolder_clicked()
 {
     // save prev user settings value
@@ -342,8 +377,10 @@ void MainWindow::on_setLogfileFolder_clicked()
     userSettings.sync();
 }
 
-//opens log file directory to prompt user to select log file. data from log file is then
-//loaded into events class and rendered in events page.
+/**
+ * @brief opens file explorer to log file directory. User selects file then then
+ * data is loaded into events class and rendered in events page.
+ */
 void MainWindow::on_load_events_from_logfile_clicked()
 {
     //declare file browser class
@@ -391,8 +428,12 @@ void MainWindow::on_load_events_from_logfile_clicked()
     refreshEventsOutput();
 }
 
-//refreshes the serial port selections, useful in case an adaptor is plugged in after
-//program launch (also updates dev page selection if dev mode is active)
+/**
+ * @brief scans for serial ports on users system
+ *
+ * useful in case an adaptor is plugged in after
+ * program launch (also updates dev page selection if dev mode is active)
+ */
 void MainWindow::on_refresh_serial_port_selections_clicked()
 {
     notifyUser("Scanning for serial ports", false);
@@ -401,7 +442,9 @@ void MainWindow::on_refresh_serial_port_selections_clicked()
         setup_csim_port_selection(0);
     #endif
 }
-
+/**
+ * @brief Opens search dialog for searching keywords in events output
+ */
 void MainWindow::on_searchButton_clicked()
 {
     // get the text to find from the user by opening an inputdialog box
@@ -490,7 +533,10 @@ void MainWindow::on_searchButton_clicked()
 // User settings
 //======================================================================================
 
-//toggle colored events output (from settings page)
+/**
+ * @brief toggle colored events output (from settings page)
+ * @param arg1 users on-off selection
+ */
 void MainWindow::on_colored_events_output_stateChanged(int arg1)
 {
     //arg1 represents the state of the checkbox
@@ -515,7 +561,10 @@ void MainWindow::on_colored_events_output_stateChanged(int arg1)
     userSettings.sync();
 }
 
-//choose the number of auto save log files before overwrites occur (from settings page)
+/**
+ * @brief user sets the number of auto save log files before overwrites occur (from settings page)
+ * @param arg1 The users selected value
+ */
 void MainWindow::on_auto_save_limit_valueChanged(int arg1)
 {
     autoSaveLimit = arg1;
@@ -525,6 +574,10 @@ void MainWindow::on_auto_save_limit_valueChanged(int arg1)
     userSettings.sync();
 }
 
+/**
+ * @brief changes timeout duration based on user selection
+ * @param arg1 The users selected value
+ */
 void MainWindow::on_connection_timeout_valueChanged(int arg1)
 {
     connectionTimeout = arg1;
@@ -534,6 +587,10 @@ void MainWindow::on_connection_timeout_valueChanged(int arg1)
     userSettings.sync();
 }
 
+/**
+ * @brief toggles notifications on error cleared, based on user input
+ * @param arg1 The users on-off selection
+ */
 void MainWindow::on_notify_error_cleared_stateChanged(int arg1)
 {
     //arg1 represents the state of the checkbox
@@ -555,6 +612,10 @@ void MainWindow::on_notify_error_cleared_stateChanged(int arg1)
     userSettings.sync();
 }
 
+/**
+ * @brief Toggles advanced log file outputs (electrical details, status updates, session statistics)
+ * @param arg1 The users on-off selection
+ */
 void MainWindow::on_advanced_log_file_stateChanged(int arg1)
 {
     //arg1 represents the state of the checkbox
@@ -609,7 +670,10 @@ void MainWindow::on_advanced_log_file_stateChanged(int arg1)
     userSettings.sync();
 }
 
-//toggle for ram clearing on events class
+/**
+ * @brief Toggle RAM clearing based on user input
+ * @param arg1 The users on-off selection
+ */
 void MainWindow::on_ram_clearing_stateChanged(int arg1)
 {
     //arg1 represents the state of the checkbox
@@ -636,7 +700,10 @@ void MainWindow::on_ram_clearing_stateChanged(int arg1)
     userSettings.sync();
 }
 
-//updates value of max data nodes for events class
+/**
+ * @brief updates value of max data nodes for events class based on user selection
+ * @param arg1 The user selected number of max nodes
+ */
 void MainWindow::on_max_data_nodes_valueChanged(int arg1)
 {
     userSettings.setValue("maxDataNodes", arg1);
