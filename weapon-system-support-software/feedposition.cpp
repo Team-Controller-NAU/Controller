@@ -10,7 +10,7 @@
 ********************************************************************************/
 
 /**
- * Initialization constructor for a feedposition object
+ * @brief Initialization constructor for a feedposition object
  *
  * Sets maximum position in degrees
  *
@@ -24,7 +24,7 @@ feedposition::feedposition(QWidget* parent)
 }
 
 /**
- * Paints the feed position graphic
+ * @brief Paints the feed position graphic
  */
 void feedposition::paintEvent(QPaintEvent*)
 {
@@ -159,7 +159,11 @@ void feedposition::paintEvent(QPaintEvent*)
     setDisabled(true);
 }
 
-//misc event processor for feed pos
+/**
+ * @brief Event processor for feed position tool tip. Displays tool tip on the GUI
+ * @param event Pointer to the QEvent ToolTip object
+ * @return True if the event is handled successfully, false otherwise
+ */
 bool feedposition::event(QEvent* event)
 {
     //process tool tip event
