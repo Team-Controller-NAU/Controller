@@ -2,6 +2,17 @@
 #include <QTextDocument>
 #include <QTextCursor>
 
+/********************************************************************************
+** mainwindow.cpp
+**
+** The MainWindow class implements the main window of the entire software. It manages
+** the user interface and coordinates interactions between various components of the software,
+** including serial communication, status updates, event logging, electrical data management,
+** and user settings.
+**
+** @author Team Controller
+********************************************************************************/
+
 /**
  * @brief Constructor for MainWindow Class
  * @param parent Pointer to the parent widget
