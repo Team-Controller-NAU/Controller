@@ -2,6 +2,10 @@
 #include <QTextDocument>
 #include <QTextCursor>
 
+/**
+ * @brief Constructor for MainWindow Class
+ * @param parent Pointer to the parent widget
+ */
 MainWindow::MainWindow(QWidget *parent)
 
     //initialize imbedded classes/vars
@@ -135,7 +139,9 @@ MainWindow::MainWindow(QWidget *parent)
     on_ConnectionPageButton_clicked();
 }
 
-//destructor
+/**
+ * @brief Destructor
+ */
 MainWindow::~MainWindow()
 {
     //call destructors for classes declared in main window
@@ -154,7 +160,14 @@ MainWindow::~MainWindow()
     #endif
 }
 
-//sets connection status, updates gui and timers
+/**
+ * @brief Updates the connection status and associated GUI elements/timers
+ *
+ * This occurs whenever we want to change our status between disconnected or
+ * connected. It updates relevant GUI elements to reflect the current connection state.
+ *
+ * @param connectionStatus The status of the connection (true for connected)
+ */
 void MainWindow::updateConnectionStatus(bool connectionStatus)
 {
     if (ddmCon == nullptr)
@@ -257,8 +270,12 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
     }
 }
 
-//when ddm port is selected, create connection class to work with that port.
-//apply serial settings from settings page
+/**
+ * @brief Creates a new Connection object for the selected DDM port
+ *
+ * When a new DDM port is selected from the dropdown menu, it creates a new
+ * object and establishes the connection with the selected user settings
+ */
 void MainWindow::createDDMCon()
 {
     //close current connection
@@ -303,20 +320,36 @@ void MainWindow::createDDMCon()
     }
 }
 
-//initial synchronization between controller and ddm
+/**
+ * @brief Performs the initial synchronization between the controller and DDM
+ */
 void MainWindow::handshake()
 {
     if (ddmCon == nullptr)
     {
+        // notify of handshake failure
         notifyUser("Handshake failed", "Connection class is not declared", true);
         return;
     }
 
+    // send handshake message if Con object ready
     ddmCon->sendHandshakeMsg();
 }
 
-//this function is called as a result of the readyRead signal being emmited by a connected serial port
-//in other words, this function is called whenever ddm port receives a new message
+/**
+ * @brief Reads and processes incoming serial data from the DDM port
+ *
+ * This method is called as a result of the readyRead signal being emitted by
+ * a connected serial port, indicating that new data has been received. It processes
+ * the incoming data, identifies the type of message, and performs the corresponding
+ * actions based on the message type.
+ *
+ * It reads lines from the serial port until all data in the buffer is processed. Depending
+ * on the message type, it may update the GUI, data structures, log file, etc.
+ *
+ * This method is also the point at which errors are handled by invalid messages or
+ * unexpected input, and the load() methods that are ran redudantly check as well.
+ */
 void MainWindow::readSerialData()
 {
     if (ddmCon == nullptr)
@@ -352,7 +385,7 @@ void MainWindow::readSerialData()
         ui->stdout_label->setText(message);
         #endif
 
-        //check if message id is present and followed by a comma
+        //check if message id is present and followed by the proper delimeter
         if (message[0].isDigit() && message[1] == DELIMETER)
         {
             //extract message id
@@ -381,7 +414,7 @@ void MainWindow::readSerialData()
             switch ( messageId )
             {
             case STATUS:
-
+                // STATUS MESSAGE TYPE
                 #if DEV_MODE && SERIAL_COMM_DEBUG
                 qDebug() <<  "Message id: status update" << qPrintable("\n");
                 #endif
@@ -401,7 +434,7 @@ void MainWindow::readSerialData()
                 break;
 
             case EVENT:
-
+                // EVENT MESSAGE TYPE
                 #if DEV_MODE && SERIAL_COMM_DEBUG
                 qDebug() <<  "Message id: event update" << qPrintable("\n");
                 #endif
@@ -424,7 +457,7 @@ void MainWindow::readSerialData()
                 break;
 
             case ERROR:
-
+                // ERROR MESSAGE TYPE
                 #if DEV_MODE && SERIAL_COMM_DEBUG
                 qDebug() <<  "Message id: error update" << qPrintable("\n");
                 #endif
@@ -453,7 +486,7 @@ void MainWindow::readSerialData()
                 break;
 
             case ELECTRICAL:
-
+                // ELECTRICAL MESSAGE TYPE
                 #if DEV_MODE && SERIAL_COMM_DEBUG
                 qDebug() <<  "Message id: electrical" << qPrintable("\n");
                 #endif
@@ -473,7 +506,7 @@ void MainWindow::readSerialData()
                 break;
 
             case EVENT_DUMP:
-
+                // EVENT DUMP MESSAGE TYPE
                 #if DEV_MODE && SERIAL_COMM_DEBUG
                 qDebug() <<  "Message id: event dump" << qPrintable("\n");
                 #endif
@@ -507,7 +540,7 @@ void MainWindow::readSerialData()
                 break;
 
             case ERROR_DUMP:
-
+                // ERROR DUMP MESSAGE TYPE
                 #if DEV_MODE && SERIAL_COMM_DEBUG
                 qDebug() <<  "Message id: error dump" << qPrintable("\n");
                 #endif
@@ -541,7 +574,7 @@ void MainWindow::readSerialData()
                 break;
 
             case CLEAR_ERROR:
-
+                // CLEAR ERROR MESSAGE TYPE
                 #if DEV_MODE && SERIAL_COMM_DEBUG
                 qDebug() << "Message id: clear error " << message << qPrintable("\n");
                 #endif
@@ -586,7 +619,7 @@ void MainWindow::readSerialData()
                 break;
 
             case BEGIN:
-
+                // BEGIN MESSAGE TYPE
                 #if DEV_MODE && SERIAL_COMM_DEBUG
                 qDebug() << "Message id: begin " << message << qPrintable("\n");
                 #endif
@@ -623,7 +656,7 @@ void MainWindow::readSerialData()
                 break;
 
             case CLOSING_CONNECTION:
-
+                // CLOSING MESSAGE TYPE
                 #if DEV_MODE && SERIAL_COMM_DEBUG
                 qDebug() << "Disconnect message received from Controller";
                 #endif
@@ -636,6 +669,7 @@ void MainWindow::readSerialData()
                 break;
 
             default:
+                // invalid message id detected
                 qDebug() << "ERROR: readSerialData message from controller is not recognized"<< Qt::endl;
 
                 //report
@@ -651,6 +685,8 @@ void MainWindow::readSerialData()
             notifyUser("Unrecognized serial message received", QString::fromUtf8(serializedMessage), true);
         }
     }
+    // end while loop checking for more data in buffer
+
     // update the timestamp of last received message
     timeLastReceived = QDateTime::currentDateTime();
 
@@ -658,7 +694,14 @@ void MainWindow::readSerialData()
     lastMessageTimer->start();
 }
 
-//scans for available serial ports and adds them to ddm port selection box
+/**
+ * @brief Scans for available serial ports and populates the DDM port selection box
+ *
+ * This is only ran when the application starts or when the user interacts
+ * with the port selection UI
+ *
+ * @param index The index of the DDM port selection box
+ */
 void MainWindow::setup_ddm_port_selection(int index)
 {
     // Check and set initial value for "portName"
@@ -693,8 +736,11 @@ void MainWindow::setup_ddm_port_selection(int index)
     allowSettingChanges = true;
 }
 
-//makes all settings in connection settings uneditable (call when ddm connection
-//is made)
+/**
+ * @brief Disables all connection settings
+ *
+ * Usually used to prevent settings from being changed while a session is in progress
+ */
 void MainWindow::disableConnectionChanges()
 {
     ui->ddm_port_selection->setDisabled(true);
@@ -709,8 +755,9 @@ void MainWindow::disableConnectionChanges()
     ui->setLogfileFolder->setDisabled(true);
 }
 
-//makes all settings in connection settings editable (call when ddm connection
-//ends)
+/**
+ * @brief Enables all connection settings
+ */
 void MainWindow::enableConnectionChanges()
 {
     ui->ddm_port_selection->setEnabled(true);
@@ -725,9 +772,13 @@ void MainWindow::enableConnectionChanges()
     ui->setLogfileFolder->setEnabled(true);
 }
 
-//checks if user has setup a custom log file directory, if not, the default directory is selected
-//the auto save log file for this session will be stored in the directory chosen by this
-//function
+/**
+ * @brief Sets the log file directory
+ *
+ * This method checks if the user has set up a custom directory yet, and if not,
+ * the default directory is used. This is the location where the auto-save and
+ * manual log files will go for the session
+ */
 void MainWindow::setup_logfile_location()
 {
     //initialize the logfile into preset directory
@@ -757,8 +808,13 @@ void MainWindow::setup_logfile_location()
     notifyUser("Auto save log set", autosaveLogFile, false);
 }
 
-//checks if the number of auto saved log files is greater than the user
-//set max value. Deletes the oldest until auto save limit is enforced
+/**
+ * @brief Enforces the auto-save limit for log files
+ *
+ * This method checks to see if the number of auto-saved log files in the
+ * specified directory (from user settings) exceeds the user-set maximum. It will
+ * delete the oldest log file so that the newest can replace it.
+ */
 void MainWindow::enforceAutoSaveLimit()
 {
     QString path;
@@ -828,10 +884,17 @@ void MainWindow::enforceAutoSaveLimit()
     }
 }
 
-//Checks if registry values exist for all settings in userSettings. If so settings
-//are loaded into local variables. If not, initial settings are taken from constants.h
-//and loaded into registry and local variables. Selection boxes for connection settings
-//are loaded with Qt serial options.
+/**
+ * @brief Sets up application settings and loads them into local variables
+ *
+ * This method checks if the registry values exist for the user settings. If not,
+ * it sets their default values and loads them in to the registry and local variables
+ * for later use (defined in constants.h).
+ *
+ * NOTE: Settings such as colored events output, auto save limit, connection timeout, RAM
+ * clearing, etc. are initialized and loaded from the registry. If they do not exist (i.e. first time running),
+ * we will set it to the default values.
+ */
 void MainWindow::setupSettings()
 {
     // Check if colored event setting does not exist
@@ -974,7 +1037,13 @@ void MainWindow::setupSettings()
     userSettings.sync();
 }
 
-//displays the current values of the status class onto the gui status page
+/**
+ * @brief Updates the GUI status page with the current values of the Status class
+ *
+ * Includes the feed position graphic, fire mode graphic, fire rate, number of firing
+ * events, burst length, processor state, trigger status' and graphics, and the armed
+ * status and graphic
+ */
 void MainWindow::updateStatusDisplay()
 {
     //update feed position text and graphic
@@ -1042,7 +1111,11 @@ void MainWindow::updateStatusDisplay()
     }
 }
 
-// method updates the running elapsed controller time
+/**
+ * @brief Updates the running elapsed controller time on GUI
+ *
+ * NOTE: Ran every second
+ */
 void MainWindow::updateElapsedTime()
 {
     // add 1 second to timer
@@ -1052,7 +1125,11 @@ void MainWindow::updateElapsedTime()
     ui->elapsedTime->setText(status->elapsedControllerTime.toString(TIME_FORMAT));
 }
 
-// method updates the elapsed time since last message received to DDM
+/**
+ * @brief Updates the running time since last message receieved to DDM on GUI
+ *
+ * NOTE: Ran every second
+ */
 void MainWindow::updateTimeSinceLastMessage()
 {
     //safety in case timer is left running after disconnect
@@ -1099,9 +1176,14 @@ void MainWindow::updateTimeSinceLastMessage()
     }
 }
 
-//updates gui with given message, dynamically colors output based on the type of outString
-//accounts for filtering settings and only renders the outString if it is being filtered for
-// by the user
+/**
+ * @brief Appends to the events text box on the GUI and dynamically colors output
+ *
+ * This method determines the type of message it is, and outputs it to the text box on the
+ * GUI with color coding depending on its type. It also validates if any filters are set.
+ *
+ * @param event A pointer to the eventNode containing the message information
+ */
 void MainWindow::updateEventsOutput(EventNode *event)
 {
     QTextDocument document;
@@ -1190,7 +1272,9 @@ void MainWindow::updateEventsOutput(EventNode *event)
     }
 }
 
-//clears events tab gui element, then repopulates it with current event data
+/**
+ * @brief Empties the entire events text box on the GUI and repopulates it with the current data
+ */
 void MainWindow::refreshEventsOutput()
 {
     // reset gui element
@@ -1216,8 +1300,10 @@ void MainWindow::refreshEventsOutput()
     #endif
 }
 
-//clears error in event output by replacing activeIndicator with clearedIndicator
-//also changes color of text if coloredEventOutput is on
+/**
+ * @brief Clears an error from the events output by replacing the active/cleared indicator
+ * @param errorId The ID of the error to be cleared
+ */
 void MainWindow::clearErrorFromEventsOutput(int errorId)
 {
     //if user is on specific error filter, refresh to update their screen
@@ -1275,15 +1361,30 @@ void MainWindow::clearErrorFromEventsOutput(int errorId)
     }
 }
 
-//overloaded function for convenience
+/**
+ * @brief Notifies the user with a notification on the GUI
+ *
+ * Overloaded method
+ *
+ * @param notificationText The string message to display to the user
+ * @param error A boolean indicating whether the notification represents an error
+ */
 void MainWindow::notifyUser(QString notificationText, bool error)
 {
     notifyUser(notificationText, "", error);
 }
 
-//renders a notification for the user that lasts a few seconds. Updates the
-//notification page button to indicate unread messages. bool urgent is used to
-//toggle the notification outline from orange to red
+/**
+ * @brief Notifies the user with a notification on the GUI
+ *
+ * The notification is rendered for the user for a few seconds. If it is an error,
+ * this is considered "urgent" and there will be a red indicator on the notification
+ * bell indicating that there is an unread error message.
+ *
+ * @param notificationText The string message to display to the user
+ * @param logText Log information to be displayed
+ * @param error A boolean indicating whether the notification represents an error
+ */
 void MainWindow::notifyUser(QString notificationText, QString logText, bool error)
 {
     // Get the current timestamp
@@ -1341,6 +1442,14 @@ void MainWindow::notifyUser(QString notificationText, QString logText, bool erro
     notificationTimer->start(NOTIFICATION_DURATION);
 }
 
+/**
+ * @brief Generates statistics for a session
+ *
+ * Includes various information that may be important such as duration and
+ * total counters.
+ *
+ * @return QString The session statistics formatted as a string
+ */
 QString MainWindow::getSessionStatistics()
 {
     return "Duration: " + status->elapsedControllerTime.toString(TIME_FORMAT) + ", Total Events: " +
@@ -1349,7 +1458,13 @@ QString MainWindow::getSessionStatistics()
            + ", Total Firing events: " + QString::number(status->totalFiringEvents);
 }
 
-//called when advanced log file setting is active, meant to log status updates and electrical data
+/**
+ * @brief Logs advanced details into the log file
+ *
+ * Logs status updates and electrical data when advanced setting is checked
+ *
+ * @param id The identifier for the type of message to log
+ */
 void MainWindow::logAdvancedDetails(SerialMessageIdentifier id)
 {
     if (autosaveLogFile == "")
@@ -1398,7 +1513,12 @@ void MainWindow::logAdvancedDetails(SerialMessageIdentifier id)
     }
 }
 
-//uses data in electrical class to render electrical page
+/**
+ * @brief Dynamically populates the eletrical page using data from the Electrical class
+ *
+ * This method renders the widgets for displaying the electrical boxes side by side in
+ * the GUI. Each electrical box corresponds to a node in the linked list
+ */
 void MainWindow::renderElectricalPage()
 {
     if (electricalData->headNode == nullptr)
@@ -1469,7 +1589,12 @@ void MainWindow::renderElectricalPage()
     }
 }
 
-
+/**
+ * @brief Adds an electrical box widget to the layout
+ * @param horizontalWidget The parent horizontal widget
+ * @param horizontalLayout The horizontal layout to which the box will be added to
+ * @param component The eletrical node containing the data to be displayed in the box
+ */
 void MainWindow::addElecBox(QWidget *horizontalWidget, QLayout *horizontalLayout, electricalNode *component)
 {
     //Create vertical layout (for header on top of content)
@@ -1502,6 +1627,11 @@ void MainWindow::addElecBox(QWidget *horizontalWidget, QLayout *horizontalLayout
     horizontalLayout->addWidget(elecBox);
 }
 
+/**
+ * @brief Frees the memory allocated for widgets in the electrical page
+ *
+ * Iterates over all child widgets in the electrical scroll area and deletes them
+ */
 void MainWindow::freeElectricalPage()
 {
     QWidget *scrollAreaWidgetContents = ui->scrollAreaWidgetContents;
@@ -1516,7 +1646,12 @@ void MainWindow::freeElectricalPage()
     }
 }
 
-//slot to be triggered in response to events class RAMCleared signal
+/**
+ * @brief Handles the RAM clear event that clears memory for performance
+ *
+ * This slot is triggered in response to the RAMCleared signal emitted by
+ * the events class.
+ */
 void MainWindow::handleRAMClear()
 {
     notifyUser("RAM Cleared",
@@ -1536,7 +1671,10 @@ void MainWindow::handleRAMClear()
 //======================================================================================
 
 #if DEV_MODE
-//scans for available serial ports and adds them to csim port selection box
+/**
+ * @brief Scans for available serial ports and adds them to the CSIM selection box
+ * @param index The index of the selected item in the selection box
+ */
 void MainWindow::setup_csim_port_selection(int index)
 {
     // Check and set initial value for "csimPortName"
@@ -1560,7 +1698,9 @@ void MainWindow::setup_csim_port_selection(int index)
     }
 }
 
-//updates the dev page non cleared error selection box
+/**
+ * @brief Updates the non-cleared error selection box
+ */
 void MainWindow::update_non_cleared_error_selection()
 {
     //clear combo box
@@ -1584,7 +1724,9 @@ void MainWindow::update_non_cleared_error_selection()
     }
 }
 
-//writes empty line to qdebug
+/**
+ * @brief Writes an empty line to QDebug
+ */
 void MainWindow::logEmptyLine()
 {
     //revert to standard output format
@@ -1597,7 +1739,9 @@ void MainWindow::logEmptyLine()
     qSetMessagePattern(QDEBUG_OUTPUT_FORMAT);
 }
 
-//support function, outputs usersettings values to qdebug
+/**
+ * @brief Outputs user settings values to QDebug
+ */
 void MainWindow::displaySavedSettings()
 {
     logEmptyLine();
