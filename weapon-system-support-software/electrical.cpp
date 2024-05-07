@@ -10,7 +10,7 @@
 
 
 /**
- * Initialization constructor for an electrical object.
+ * @brief Initialization constructor for an electrical object.
  *
  * This initializes the default values for an electrical node
  */
@@ -23,7 +23,7 @@ electrical::electrical()
 }
 
 /**
- * Deconstructor for an electrical object.
+ * @brief Deconstructor for an electrical object.
  *
  * This deletes the electrical linked list.
  */
@@ -35,7 +35,7 @@ electrical::~electrical()
 }
 
 /**
- * Adds a node to the electrical linked list
+ * @brief Adds a node to the electrical linked list
  *
  * This takes in below parameters and adds a node with those values.
  * Either creates a single node, or adds to an existing linked list.
@@ -75,7 +75,7 @@ void electrical::addNode(QString name, double voltage, double amps)
 }
 
 /**
- * Frees the memory associated with the linked list.
+ * @brief Frees the memory associated with the linked list.
  *
  * This deletes all nodes in the electrical linked list.
  */
@@ -98,7 +98,7 @@ void electrical::freeLL()
 }
 
 /**
- * Takes in a message and converts to a linked list
+ * @brief Takes in a message and converts to a linked list
  *
  * Divides message into its delimeted parts (ex: name, (amps) 12, (volts) 14)
  * checks for a valid message and then creates a new node from those inputed values.
@@ -113,7 +113,7 @@ bool electrical::loadElecData(QString message)
     // check for real electrical dump
     if(values.length()-1 == NUM_ELECTRIC_ELEMENTS)
     {
-        // get values
+        // get name value from message
         QString name = values[0];
         if(name == "")
         {
@@ -121,6 +121,7 @@ bool electrical::loadElecData(QString message)
             return false;
         }
 
+        // get voltage value from message
         double voltage = values[1].toDouble();
         if(voltage <= -1 || values[1] != "0" && voltage == 0.0)
         {
@@ -128,6 +129,7 @@ bool electrical::loadElecData(QString message)
             return false;
         }
 
+        // get amp value from message
         double amps = values[2].toDouble();
         if(amps <= -1 || values[2] != "0" && amps == 0.0)
         {
@@ -135,19 +137,20 @@ bool electrical::loadElecData(QString message)
             return false;
         }
 
-        //using extracted data, add an error to the end of the error linked list
+        // using extracted data, add a node to the end of the electrical linked list
         addNode(name, voltage, amps);
         return true;
     }
     else
     {
+        // failed to get real dump
         qDebug() << "Invalid input to load electrical data: " << message << "\n"<< Qt::endl;
         return false;
     }
 }
 
 /**
- * Takes in a dump message with multiple electrical messages and converts to electrical linked list.
+ * @brief Takes in a dump message with multiple electrical messages and converts to electrical linked list.
  *
  * Divides message into its delimeted parts (ex: name, (amps) 12, (volts) 14,, name2,(amps) 12,(volts) 14),
  * checks for a valid message and then creates a new node from those inputed values.
@@ -168,32 +171,45 @@ bool electrical::loadElecDump(QString message)
             // Call loadErrorData for each individual error set, if any errors, return
             if (!loadElecData(elec))
             {
+                // return fail
                 return false;
             }
         }
     }
+    // return success
     return true;
 }
 
-//converts the current contents of electrical class to a string
+/**
+ * @brief Converts the current contents of eletrical class to a string
+ * @return electricalString The string containing the entire contents of the eletrical data
+ */
 QString electrical::toString()
 {
+    // initialize method
     electricalNode *wkgNode = headNode;
     QString electricalString;
 
+    // loop through whole list
     while(wkgNode != nullptr)
     {
+        // set up string
         electricalString += wkgNode->name + DELIMETER + " Voltage: " +
                             QString::number(wkgNode->voltage) + DELIMETER
                             + " Amps: " + QString::number(wkgNode->amps);
+
+        // get next node
         wkgNode = wkgNode->nextNode;
 
+        // check for final node
         if (wkgNode != nullptr)
         {
+            // add space
             electricalString += DELIMETER + " ";
         }
     }
 
+    // return converted data string
     return electricalString;
 }
 
@@ -202,11 +218,11 @@ QString electrical::toString()
 //======================================================================================
 #if DEV_MODE
 /**
- * Generates an electrical message (not used)
+ * @brief Generates an electrical message (not used)
  *
  * Generates a message with randomized values.
  *
- * Returns the created, randomized message.
+ * @return message The created, randomized message.
  */
 QString electrical::generateElectricalMessage()
 {
@@ -228,7 +244,7 @@ QString electrical::generateElectricalMessage()
 }
 
 /**
- * Diagnostic function: used to output the entire electrical linked list (not used)
+ * @brief Diagnostic function: used to output the entire electrical linked list (not used)
  */
 void electrical::printNodes()
 {

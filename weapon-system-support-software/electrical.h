@@ -5,7 +5,17 @@
 #include <QDateTime>
 #include "constants.h"
 
+/********************************************************************************
+** electrical.h
+**
+** The Electrical class provides functionality for loading and managing
+** electrical messages from the controller.
+**
+** @author Team Controller
+********************************************************************************/
+
 struct electricalNode {
+    // member variables for node
     int id;
     QString name;
     double voltage;
@@ -16,20 +26,28 @@ struct electricalNode {
 class electrical
 {
 public:
-    //prototypes
+    // constructor/destructor
     electrical();
     ~electrical();
 
+    // number of nodes in list
     int numNodes;
 
-    //ll node
+    // head/bottom of linked list
     electricalNode *headNode;
     electricalNode *lastNode;
 
+    // adds a node to the linked list
     void addNode(QString name, double voltage, double amps);
+
+    // frees the memory
     void freeLL();
+
+    // loads electrical message(s) into linked lists
     bool loadElecData(QString message);
     bool loadElecDump(QString message);
+
+    // convert to string
     QString toString();
 
     #if DEV_MODE
