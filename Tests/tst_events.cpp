@@ -1,3 +1,4 @@
+#if DEV_MODE
 #include <QCoreApplication>
 #include <QTest>
 #include "../weapon-system-support-software/events.cpp"
@@ -609,3 +610,4 @@ void tst_events::test_loadErrorDump()
 
 QTEST_MAIN(tst_events)
 #include "tst_events.moc"
+#endif

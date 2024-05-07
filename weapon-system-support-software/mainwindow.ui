@@ -80,7 +80,7 @@ border-color: rgb(255, 255, 255);</string>
        <property name="bottomMargin">
         <number>0</number>
        </property>
-       <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
+       <item alignment="Qt::AlignLeft|Qt::AlignTop">
         <widget class="QPushButton" name="EventsPageButton">
          <property name="minimumSize">
           <size>
@@ -111,7 +111,7 @@ QPushButton::hover {
          </property>
         </widget>
        </item>
-       <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
+       <item alignment="Qt::AlignLeft|Qt::AlignTop">
         <widget class="QPushButton" name="StatusPageButton">
          <property name="minimumSize">
           <size>
@@ -142,7 +142,7 @@ QPushButton::hover {
          </property>
         </widget>
        </item>
-       <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
+       <item alignment="Qt::AlignLeft|Qt::AlignTop">
         <widget class="QPushButton" name="ElectricalPageButton">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -181,7 +181,7 @@ color: white;
          </property>
         </widget>
        </item>
-       <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
+       <item alignment="Qt::AlignLeft|Qt::AlignTop">
         <widget class="QPushButton" name="DevPageButton">
          <property name="minimumSize">
           <size>
@@ -212,7 +212,7 @@ QPushButton::hover {
          </property>
         </widget>
        </item>
-       <item alignment="Qt::AlignLeft|Qt::AlignVCenter">
+       <item alignment="Qt::AlignTop">
         <widget class="QPushButton" name="ConnectionPageButton">
          <property name="minimumSize">
           <size>
@@ -441,7 +441,7 @@ font: 16pt &quot;Segoe UI&quot;;</string>
             </sizepolicy>
            </property>
            <property name="currentIndex">
-            <number>3</number>
+            <number>6</number>
            </property>
            <widget class="QWidget" name="Events_page">
             <layout class="QGridLayout" name="gridLayout_3">
@@ -568,9 +568,35 @@ QComboBox::down-arrow {
              <item row="3" column="0" rowspan="3" colspan="5">
               <widget class="QTextEdit" name="events_output">
                <property name="styleSheet">
-                <string notr="true">color: rgb(255, 255, 255);
-background-color: rgb(30, 30, 30);
-border-color: rgb(255, 255, 255);</string>
+                <string notr="true">QTextEdit{
+	color: rgb(255, 255, 255);
+	background-color: rgb(30, 30, 30);
+	border-color: rgb(255, 255, 255);
+}
+
+QScrollBar:vertical {
+	background-color: transparent;
+    border: rgb(255, 255, 255);
+    width: 10px;
+}
+
+QScrollBar::handle:vertical {
+    background: rgb(255, 255, 255);
+    min-height: 25px;
+    border-radius: 5px;
+}
+
+QScrollBar::add-line:vertical {
+    background: none;
+}
+
+QScrollBar::sub-line:vertical {
+    background: none;
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+     background: none;
+}</string>
                </property>
                <property name="readOnly">
                 <bool>true</bool>
@@ -2100,10 +2126,41 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
                  <kerning>true</kerning>
                 </font>
                </property>
+               <property name="autoFillBackground">
+                <bool>false</bool>
+               </property>
                <property name="styleSheet">
-                <string notr="true">color: rgb(255, 255, 255);
+                <string notr="true">QAbstractScrollArea
+{
 background-color: rgb(30, 30, 30);
-border-color: rgb(255, 255, 255);</string>
+}
+QWidget#scrollAreaWidgetContents{
+background-color: rgb(30, 30, 30);
+}
+
+QScrollBar:vertical {
+	background-color: transparent;
+    border: rgb(255, 255, 255);
+    width: 10px;
+}
+
+QScrollBar::handle:vertical {
+    background: rgb(255, 255, 255);
+    min-height: 25px;
+    border-radius: 5px;
+}
+
+QScrollBar::add-line:vertical {
+    background: none;
+}
+
+QScrollBar::sub-line:vertical {
+    background: none;
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+     background: none;
+}</string>
                </property>
                <property name="horizontalScrollBarPolicy">
                 <enum>Qt::ScrollBarAsNeeded</enum>
@@ -2131,6 +2188,9 @@ border-color: rgb(255, 255, 255);</string>
                   <horstretch>0</horstretch>
                   <verstretch>0</verstretch>
                  </sizepolicy>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">background-color: rgb(30, 30, 30);</string>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_12"/>
                </widget>
@@ -3910,8 +3970,16 @@ QToolTip{
 
 
 QCheckBox::indicator {
-	width: 20px;
-	height: 20px;
+    width: 30px;
+    height: 30px;
+}
+
+QCheckBox::indicator:checked {
+	image: url(:/resources/Images/check.png);
+}
+
+QCheckBox::indicator:unchecked {
+	image: url(:/resources/Images/unchecked.png);
 }</string>
                </property>
                <property name="text">
@@ -3947,8 +4015,16 @@ QCheckBox::indicator {
 }
 
 QCheckBox::indicator {
-	width: 20px;
-	height: 20px;
+    width: 30px;
+    height: 30px;
+}
+
+QCheckBox::indicator:checked {
+	image: url(:/resources/Images/check.png);
+}
+
+QCheckBox::indicator:unchecked {
+	image: url(:/resources/Images/unchecked.png);
 }</string>
                </property>
                <property name="text">
@@ -4047,8 +4123,16 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
 
 
 QCheckBox::indicator {
-	width: 20px;
-	height: 20px;
+    width: 30px;
+    height: 30px;
+}
+
+QCheckBox::indicator:checked {
+	image: url(:/resources/Images/check.png);
+}
+
+QCheckBox::indicator:unchecked {
+	image: url(:/resources/Images/unchecked.png);
 }</string>
                </property>
                <property name="text">
@@ -4268,8 +4352,16 @@ QToolTip{
 
 
 QCheckBox::indicator {
-	width: 20px;
-	height: 20px;
+    width: 30px;
+    height: 30px;
+}
+
+QCheckBox::indicator:checked {
+	image: url(:/resources/Images/check.png);
+}
+
+QCheckBox::indicator:unchecked {
+	image: url(:/resources/Images/unchecked.png);
 }</string>
                </property>
                <property name="text">
@@ -4314,8 +4406,35 @@ font: 700 24pt &quot;Segoe UI&quot;;</string>
                 <bool>true</bool>
                </property>
                <property name="styleSheet">
-                <string notr="true">background-color: rgb(30, 30, 30);
-border-color: rgb(255, 255, 255);</string>
+                <string notr="true">QTextEdit{
+	color: rgb(255, 255, 255);
+	background-color: rgb(30, 30, 30);
+	border-color: rgb(255, 255, 255);
+}
+
+QScrollBar:vertical {
+	background-color: transparent;
+    border: rgb(255, 255, 255);
+    width: 10px;
+}
+
+QScrollBar::handle:vertical {
+    background: rgb(255, 255, 255);
+    min-height: 25px;
+    border-radius: 5px;
+}
+
+QScrollBar::add-line:vertical {
+    background: none;
+}
+
+QScrollBar::sub-line:vertical {
+    background: none;
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+     background: none;
+}</string>
                </property>
                <property name="readOnly">
                 <bool>true</bool>
@@ -4333,45 +4452,32 @@ border-color: rgb(255, 255, 255);</string>
     </item>
     <item>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="1" column="1">
-       <spacer name="horizontalSpacer_13">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>10</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="1" column="4" alignment="Qt::AlignRight">
-       <widget class="QTextEdit" name="elapsed_time_label">
+      <item row="1" column="7" alignment="Qt::AlignLeft|Qt::AlignBottom">
+       <widget class="QLabel" name="DDMTimer">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="maximumSize">
+        <property name="minimumSize">
          <size>
-          <width>100</width>
+          <width>80</width>
           <height>25</height>
          </size>
         </property>
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Controllers session duration&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <property name="maximumSize">
+         <size>
+          <width>80</width>
+          <height>25</height>
+         </size>
         </property>
         <property name="styleSheet">
-         <string notr="true">QTextEdit {
-color: rgb(255, 255, 255);
-background-color: rgb(47, 47, 47);
-border:none;
-font: 9pt &quot;Segoe UI&quot;;
+         <string notr="true">QLabel {
+	color: rgb(255, 255, 255);
+	background-color: rgb(47, 47, 47);
+	border:none;
+	font: 9pt &quot;Segoe UI&quot;;
 }
 
 QToolTip{
@@ -4380,87 +4486,27 @@ QToolTip{
     border: 1px solid black;
 }</string>
         </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-        <property name="markdown">
+        <property name="text">
          <string/>
         </property>
-        <property name="html">
-         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;right&quot; style=&quot;-qt-paragraph-type:empty; margin-top:6px; margin-bottom:6px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <property name="alignment">
+         <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
         </property>
        </widget>
       </item>
-      <item row="1" column="6" alignment="Qt::AlignRight">
-       <widget class="QTextEdit" name="DDM_timer_label">
+      <item row="1" column="5" alignment="Qt::AlignLeft|Qt::AlignBottom">
+       <widget class="QLabel" name="elapsedTime">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
-        <property name="maximumSize">
+        <property name="minimumSize">
          <size>
-          <width>145</width>
+          <width>80</width>
           <height>25</height>
          </size>
-        </property>
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Time since last message received from controller&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QTextEdit {
-color: rgb(255, 255, 255);
-background-color: rgb(47, 47, 47);
-border:none;
-font: 9pt &quot;Segoe UI&quot;;
-}
-
-QToolTip{
-    background-color: #000000;
-    color: #FFFFFF;
-    border: 1px solid black;
-}
-</string>
-        </property>
-        <property name="verticalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOff</enum>
-        </property>
-        <property name="horizontalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOff</enum>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-        <property name="html">
-         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;right&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="placeholderText">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="7" alignment="Qt::AlignLeft">
-       <widget class="QTextEdit" name="DDMTimer">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
         </property>
         <property name="maximumSize">
          <size>
@@ -4468,71 +4514,15 @@ li.checked::marker { content: &quot;\2612&quot;; }
           <height>25</height>
          </size>
         </property>
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Time since last message received from controller&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <property name="layoutDirection">
+         <enum>Qt::LeftToRight</enum>
         </property>
         <property name="styleSheet">
-         <string notr="true">QTextEdit {
-color: rgb(255, 255, 255);
-background-color: rgb(47, 47, 47);
-border:none;
-font: 9pt &quot;Segoe UI&quot;;
-}
-
-QToolTip{
-    background-color: #000000;
-    color: #FFFFFF;
-    border: 1px solid black;
-}
-</string>
-        </property>
-        <property name="verticalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOff</enum>
-        </property>
-        <property name="horizontalScrollBarPolicy">
-         <enum>Qt::ScrollBarAlwaysOff</enum>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-        <property name="html">
-         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;right&quot; style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="placeholderText">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="5" alignment="Qt::AlignLeft">
-       <widget class="QTextEdit" name="elapsedTime">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>80</width>
-          <height>25</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Controllers session duration&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QTextEdit {
-color: rgb(255, 255, 255);
-background-color: rgb(47, 47, 47);
-border:none;
-font: 9pt &quot;Segoe UI&quot;;
+         <string notr="true">QLabel {
+	color: rgb(255, 255, 255);
+	background-color: rgb(47, 47, 47);
+	border:none;
+	font: 9pt &quot;Segoe UI&quot;;
 }
 
 QToolTip{
@@ -4541,25 +4531,55 @@ QToolTip{
     border: 1px solid black;
 }</string>
         </property>
-        <property name="readOnly">
-         <bool>true</bool>
-        </property>
-        <property name="markdown">
+        <property name="text">
          <string/>
         </property>
-        <property name="html">
-         <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-hr { height: 1px; border-width: 0; }
-li.unchecked::marker { content: &quot;\2610&quot;; }
-li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p align=&quot;right&quot; style=&quot;-qt-paragraph-type:empty; margin-top:6px; margin-bottom:6px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <property name="alignment">
+         <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
         </property>
        </widget>
       </item>
-      <item row="1" column="2" alignment="Qt::AlignLeft">
+      <item row="1" column="0" alignment="Qt::AlignLeft|Qt::AlignBottom">
+       <widget class="QLabel" name="controllerLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>150</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Controller's version&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QLabel {
+color: rgb(255, 255, 255);
+font: 10pt &quot;Segoe UI&quot;;
+}
+
+QToolTip{
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid black;
+}</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2" alignment="Qt::AlignLeft|Qt::AlignBottom">
        <widget class="QLabel" name="crcLabel">
         <property name="maximumSize">
          <size>
@@ -4585,42 +4605,8 @@ QToolTip{
         <property name="text">
          <string/>
         </property>
-        <property name="textInteractionFlags">
-         <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0" alignment="Qt::AlignLeft">
-       <widget class="QLabel" name="controllerLabel">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>150</width>
-          <height>20</height>
-         </size>
-        </property>
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; color:#ffffff;&quot;&gt;Controller's version&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QLabel {
-color: rgb(255, 255, 255);
-font: 10pt &quot;Segoe UI&quot;;
-}
-
-QToolTip{
-    background-color: #000000;
-    color: #FFFFFF;
-    border: 1px solid black;
-}</string>
-        </property>
-        <property name="text">
-         <string/>
+        <property name="alignment">
+         <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
         </property>
         <property name="textInteractionFlags">
          <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
@@ -4639,6 +4625,106 @@ QToolTip{
          </size>
         </property>
        </spacer>
+      </item>
+      <item row="1" column="1">
+       <spacer name="horizontalSpacer_13">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>10</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="1" column="4" alignment="Qt::AlignRight|Qt::AlignBottom">
+       <widget class="QLabel" name="elapsed_time_label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>100</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>100</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QLabel {
+	color: rgb(255, 255, 255);
+	background-color: rgb(47, 47, 47);
+	border:none;
+	font: 9pt &quot;Segoe UI&quot;;
+}
+
+QToolTip{
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid black;
+}</string>
+        </property>
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;right&quot;&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="6" alignment="Qt::AlignRight|Qt::AlignBottom">
+       <widget class="QLabel" name="DDM_timer_label">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>135</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>135</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">QLabel {
+	color: rgb(255, 255, 255);
+	background-color: rgb(47, 47, 47);
+	border:none;
+	font: 9pt &quot;Segoe UI&quot;;
+}
+
+QToolTip{
+    background-color: #000000;
+    color: #FFFFFF;
+    border: 1px solid black;
+}</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
+        </property>
+       </widget>
       </item>
      </layout>
     </item>

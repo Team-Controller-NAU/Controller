@@ -119,6 +119,7 @@ private slots:
     void updateConnectionStatus(bool connectionStatus);
     QString getSessionStatistics();
     void logAdvancedDetails(SerialMessageIdentifier id);
+    void handleRAMClear();
 
     #if DEV_MODE
         void displaySavedSettings();

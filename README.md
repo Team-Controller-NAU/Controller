@@ -1,9 +1,23 @@
 
 
 
+
 # Weapon System Support Software
 
 Weapon System Support Software is a downloadable application which is designed to receive data from Northrop Grumman weapon controllers and display the data in an easy to use GUI. Team Controller is a senior Computer Science capstone group for the Fall 2023 and Spring 2024 semesters from Northern Arizona University. For more information about the project and our team members, visit our [website](https://ceias.nau.edu/capstone/projects/CS/2024/TeamController_F23/)!
+
+## Events Page
+![image](https://github.com/Team-Controller-NAU/Controller/assets/72166103/b89351d7-2b71-4447-8d85-08331b7aceca)
+
+## Status Page
+![image](https://github.com/Team-Controller-NAU/Controller/assets/72166103/33d61992-9ff9-455e-8071-388d31647608)
+
+## Electrical Page
+![image](https://github.com/Team-Controller-NAU/Controller/assets/72166103/9d619d58-0cf4-4296-9ba8-d67377f51bdb)
+
+## Connection Page
+![image](https://github.com/Team-Controller-NAU/Controller/assets/72166103/82ccaef9-62d2-47c6-98c5-b44ea7e5e690)
+
 
 ## Description
 
@@ -34,41 +48,50 @@ Please reference the **Developer Guide** for comprehensive implementation inform
 * [Dylan Motz](https://github.com/Dylan-Motz)
 
 ## Version History
-
+### v1.0.0-beta
+    - Various bug fixes and optimizations
+    - GUI enhancements
+	- Custom checkbox assets
+	- Custom scroll bars
+	- Tab buttons change color on hover
+	- Disabled buttons have unique style
+    - Completed unit/integration/usability testing
+    - Back end modularity improvements and expansion of constants.h
+    - Finalized documentation
 ### v6.0.0-alpha
-	- Various bug fixes and optimizations
- 	- GUI enhancements
-	 	- Revamped Status page
-	 	- Styling for buttons on mouse hover
-	 	- Custom assets for drop down menus
-	 	- Fixed zoom related display issues
-	 	- Refresh serial ports button
-	 	- Search button on events page
-	 - Advanced log file optional setting
-	 - Notify on error cleared optional setting
-	 - Added clear error functionality for log files
-	 - Enhanced unit testing
-	 - Documentation
-		 - Developer Guide
-		 - Installation Guide
-		 - Updated old diagrams
+    - Various bug fixes and optimizations
+    - GUI enhancements
+	- Revamped Status page
+	- Styling for buttons on mouse hover
+	- Custom assets for drop down menus
+	- Fixed zoom related display issues
+	- Refresh serial ports button
+	- Search button on events page
+    - Advanced log file optional setting
+    - Notify on error cleared optional setting
+    - Added clear error functionality for log files
+    - Enhanced unit testing
+    - Documentation
+	 - Developer Guide
+	 - Installation Guide
+	 - Updated old diagrams
 ### v5.0.0-alpha
-	- Various bug fixes and optimizations
-	- Notifications page
-	    - Notification pop up feature
-	- Session Timeout feature
-	- Polishing serial communication
-	- GUI enhancements
-	- Status page rework
-	- Continued testing
+    - Various bug fixes and optimizations
+    - Notifications page
+	- Notification pop up feature
+    - Session Timeout feature
+    - Polishing serial communication
+    - GUI enhancements
+    - Status page rework
+    - Continued testing
 ### v4.0.0-alpha
-	- Various bug fixes and optimizations
-	- Added Settings page
-	- GUI enhancements
-	- Testing started
-	- Physical wires testing
-	- Added additional information to Status page
-	- Added DEV_MODE compilation option to toggle between compiling for user and dev versions.
+    - Various bug fixes and optimizations
+    - Added Settings page
+    - GUI enhancements
+    - Testing started
+    - Physical wires testing
+    - Added additional information to Status page
+    - Added DEV_MODE compilation option to toggle between compiling for user and dev versions.
 ### v3.0.0-alpha
     - Various bug fixes and optimizations
     - Events page search feature

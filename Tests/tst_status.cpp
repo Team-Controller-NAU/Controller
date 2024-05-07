@@ -1,3 +1,4 @@
+#if DEV_MODE
 #include <QCoreApplication>
 #include <QTest>
 //#include "constants.h"
@@ -229,7 +230,6 @@ void tst_status::test_loadData_badInputType()
 //======================================================================================
 //DEV_MODE exclusive test cases
 //======================================================================================
-#if DEV_MODE
 
 /**
  * Test case for loadVersionData() in status.cpp
@@ -292,8 +292,8 @@ void tst_status::test_loadVersionData_badInputType()
     // make sure loadVersionData returns false
     QVERIFY(status.loadVersionData(dataMsg) == false);
 }
-#endif
 
 
 QTEST_MAIN(tst_status)
 #include "tst_status.moc"
+#endif

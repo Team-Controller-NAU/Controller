@@ -15,8 +15,6 @@ MainWindow::MainWindow(QWidget *parent)
     //this determines what will be shown on the events page
     eventFilter(ALL),
 
-    loadingDump(false),
-
     //timer is used to repeatedly transmit handshake signals
     handshakeTimer( new QTimer(this) ),
 
@@ -59,18 +57,7 @@ MainWindow::MainWindow(QWidget *parent)
     //setup signal and slot to notify user when ram is cleared from events
     //this signal connects to a lambda function so we can call more than 1 function
     //using 1 signal-slot connection
-    connect(events, &Events::RAMCleared, this, [=]() {
-        notifyUser("RAM Cleared",
-                   "Events and errors were removed from RAM to improve performance. "
-                   "They are still being tracked by counters and our log file. You can also load them"
-                   "back into the GUI after this session ends.", false);
-
-        //show truncated label on the events page to tell user not all nodes are displayed
-        ui->truncated_label->setVisible(true);
-
-        //get rid of outdated display
-        refreshEventsOutput();
-    });
+    connect(events, &Events::RAMCleared, this, &MainWindow::handleRAMClear);
 
     //will be disabled until RAM is cleared
     ui->truncated_label->setVisible(false);
@@ -208,7 +195,7 @@ void MainWindow::updateConnectionStatus(bool connectionStatus)
 
         //start last message timer
         timeLastReceived = QDateTime::currentDateTime();
-        ui->DDM_timer_label->setText("Time Since Last Message: ");
+        ui->DDM_timer_label->setText("Time Since Last Message :");
         ui->DDMTimer->setText("00:00:00");
         lastMessageTimer->start();
 
@@ -335,12 +322,13 @@ void MainWindow::readSerialData()
     if (ddmCon == nullptr)
     {
         //this should never happen..
-        qDebug() <<"Error: readSerialData() called with no connection class declared"<<Qt::endl;
+        qDebug() <<"Error: readSerialData called with no connection class declared"<<Qt::endl;
         notifyUser("Could not read serial data", "Connection class is not declared", true);
         return;
     }
 
-    loadingDump=true;
+    //prevent timeout during long processing
+    lastMessageTimer->stop();
 
     //read lines until all data in buffer is processed
     while (ddmCon->checkForValidMessage() == VALID_MESSAGE)
@@ -376,7 +364,6 @@ void MainWindow::readSerialData()
                 qDebug() << "Error: readSerialData unexpected communication from controller"<< Qt::endl;
                 notifyUser("Unexpected communication from controller", message, true);
                 ddmCon->sendDisconnectMsg();
-                loadingDump=false;
                 return;
             }
             //ensure we are only getting begin message during handshake
@@ -384,7 +371,6 @@ void MainWindow::readSerialData()
             {
                 notifyUser("Invalid handshake is occurring", message, true);
                 ddmCon->sendDisconnectMsg();
-                loadingDump=false;
                 return;
             }
 
@@ -492,23 +478,24 @@ void MainWindow::readSerialData()
                 qDebug() <<  "Message id: event dump" << qPrintable("\n");
                 #endif
 
-                notifyUser("Loading event dump...", false);
-
                 // load all events to event linked list, notify if fail
                 if (!events->loadEventDump(message))
                 {
                     notifyUser("Invalid event dump received", message, true);
+                }
+                else if (events->totalEvents == 1)
+                {
+                    notifyUser(QString::number(events->totalEvents) + " event loaded from dump", false);
+                }
+                else if (events->totalEvents > 0)
+                {
+                    notifyUser(QString::number(events->totalEvents) + " events loaded from dump", false);
                 }
 
                 // create log file
                 if (!events->outputToLogFile( autosaveLogFile, advancedLogFile ))
                 {
                     notifyUser("Failed to open logfile","Manual download could save the data.", true);
-                }
-
-                if (events->totalEvents > 0)
-                {
-                    notifyUser(QString::number(events->totalEvents) + " events loaded.", false);
                 }
 
                 //new auto save file created, enforce auto save limit
@@ -525,23 +512,24 @@ void MainWindow::readSerialData()
                 qDebug() <<  "Message id: error dump" << qPrintable("\n");
                 #endif
 
-                notifyUser("Loading error dump...", false);
-
                 // load all errors to error linked list, notify if fail
                 if (!events->loadErrorDump(message))
                 {
                     notifyUser("Invalid error dump received", message, true);
+                }
+                else if (events->totalErrors == 1)
+                {
+                    notifyUser(QString::number(events->totalEvents) + " error loaded from dump", false);
+                }
+                else if (events->totalErrors > 0)
+                {
+                    notifyUser(QString::number(events->totalEvents) + " errors loaded from dump", false);
                 }
 
                 // create log file
                 if (!events->outputToLogFile( autosaveLogFile, advancedLogFile ))
                 {
                     notifyUser("Failed to open logfile","Manual download could save the data.", true);
-                }
-
-                if (events->totalErrors > 0)
-                {
-                    notifyUser(QString::number(events->totalEvents) + " errors loaded.", false);
                 }
 
                 //new auto save file created, enforce auto save limit
@@ -651,22 +639,23 @@ void MainWindow::readSerialData()
                 qDebug() << "ERROR: readSerialData message from controller is not recognized"<< Qt::endl;
 
                 //report
-                notifyUser("Unrecognized message received", message, true);
+                notifyUser("Unrecognized message received", QString::fromUtf8(serializedMessage), true);
 
                 break;
             }
-
-            // update the timestamp of last received message
-            timeLastReceived = QDateTime::currentDateTime();
         }
         //invalid message id detected
         else
         {
             qDebug() << "Error: readSerialData Unrecognized serial message received : " << message<< Qt::endl;
-            notifyUser("Unrecognized serial message received", message, true);
+            notifyUser("Unrecognized serial message received", QString::fromUtf8(serializedMessage), true);
         }
     }
-    loadingDump=false;
+    // update the timestamp of last received message
+    timeLastReceived = QDateTime::currentDateTime();
+
+    //re-enable timer
+    lastMessageTimer->start();
 }
 
 //scans for available serial ports and adds them to ddm port selection box
@@ -741,18 +730,8 @@ void MainWindow::enableConnectionChanges()
 //function
 void MainWindow::setup_logfile_location()
 {
-    //check if user has set a custom log file output directory
-    if ( !userSettings.value("logfileLocation").toString().isEmpty() )
-    {
-        //initialize the logfile into this directory
-        autosaveLogFile = userSettings.value("logfileLocation").toString();
-    }
-    //otherwise use default directory
-    else
-    {
-        //use the path of the exe and add a "Log Files" directory
-        autosaveLogFile = QCoreApplication::applicationDirPath() + "/" + INITIAL_LOGFILE_LOCATION;
-    }
+    //initialize the logfile into preset directory
+    autosaveLogFile = userSettings.value("logfileLocation").toString();
 
     //initialize a directory object in selected location
     QDir dir(autosaveLogFile);
@@ -784,18 +763,8 @@ void MainWindow::enforceAutoSaveLimit()
 {
     QString path;
 
-    //check if user has set a custom log file output directory
-    if ( !userSettings.value("logfileLocation").toString().isEmpty() )
-    {
-        //initialize the logfile into this directory
-        path = userSettings.value("logfileLocation").toString();
-    }
-    //otherwise use default directory
-    else
-    {
-        //use the path of the exe and add a "Log Files" directory
-        path = QCoreApplication::applicationDirPath() + "/" + INITIAL_LOGFILE_LOCATION;
-    }
+    //initialize the logfile into this directory
+    path = userSettings.value("logfileLocation").toString();
 
     // Set a filter to display only files
     QDir dir(path);
@@ -879,6 +848,26 @@ void MainWindow::setupSettings()
 
     //==============================================================
 
+    //check if user has not set a custom logfile directory
+    if ( userSettings.value("logfileLocation").toString().isEmpty() || !userSettings.contains("logfileLocation"))
+    {
+        //initialize default setting
+        userSettings.setValue("logfileLocation", QCoreApplication::applicationDirPath() + "/" + INITIAL_LOGFILE_LOCATION);
+    }
+
+    // Ensure the directory exists and create it if not
+    QDir logDir(userSettings.value("logfileLocation").toString());
+    if (!logDir.exists())
+    {
+        if (!logDir.mkpath("."))
+        {
+            qDebug() << "Error: setupSettings Failed to create logfile directory: " << userSettings.value("logfileLocation").toString();
+            notifyUser("Failed to create logfile directory",userSettings.value("logfileLocation").toString(), true );
+        }
+    }
+
+    //==============================================================
+
     // Check if advanced log file setting does not exist
     if (!userSettings.contains("advancedLogFile") || !userSettings.value("advancedLogFile").isValid()) {
         // set the default value
@@ -932,6 +921,9 @@ void MainWindow::setupSettings()
 
     //update gui to match
     ui->connection_timeout->setValue(connectionTimeout);
+
+    //dont allow the user to go below this value for max data nodes
+    ui->connection_timeout->setMinimum(MIN_TIMEOUT_DURATION);
 
     //==============================================================
 
@@ -1063,6 +1055,14 @@ void MainWindow::updateElapsedTime()
 // method updates the elapsed time since last message received to DDM
 void MainWindow::updateTimeSinceLastMessage()
 {
+    //safety in case timer is left running after disconnect
+    if (!ddmCon->connected )
+    {
+        lastMessageTimer->stop();
+        qDebug() << "Error: updateTimeSinceLastMessage, lastMessageTimer is running after disconnect" << Qt::endl;
+        return;
+    }
+
     // initialize variables
     QTime elapsedTime;
 
@@ -1078,8 +1078,13 @@ void MainWindow::updateTimeSinceLastMessage()
         qDebug() << "Error: updateTimeSinceLastMessage time since last DDM message received is negative."<< Qt::endl;
     }
     //check if timeout was reached
-    else if (elapsedMs >= connectionTimeout && !loadingDump)
+    else if (elapsedMs >= connectionTimeout)
     {
+        //notify timeout
+        notifyUser("Connection timeout", "We have not received a message from the controller in "
+                    + QString::number(connectionTimeout) +" msec. (you can "
+                    "modify this from settings page)", true);
+
         //run disconnect method
         on_handshake_button_clicked();
     }
@@ -1511,7 +1516,20 @@ void MainWindow::freeElectricalPage()
     }
 }
 
+//slot to be triggered in response to events class RAMCleared signal
+void MainWindow::handleRAMClear()
+{
+    notifyUser("RAM Cleared",
+               "Events and errors were removed from RAM to improve performance. "
+               "They are still being tracked by counters and our log file. You can also load them"
+               " back into the GUI after this session ends.", false);
 
+    //show truncated label on the events page to tell user not all nodes are displayed
+    ui->truncated_label->setVisible(true);
+
+    //get rid of outdated display
+    refreshEventsOutput();
+}
 
 //======================================================================================
 //DEV_MODE exclusive methods

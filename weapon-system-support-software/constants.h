@@ -34,6 +34,9 @@ const QString ADVANCED_LOG_FILE_INDICATOR = "***";
 // minimum value allowed to be set for max data nodes in user settings
 const int MIN_DATA_NODES_BEFORE_RAM_CLEAR = 1500;
 
+// minimum value allowed for timeout duration
+const int MIN_TIMEOUT_DURATION = 200;
+
 // number of bytes in a newline - linux uses \n =1 byte windows uses \r\n = 2 bytes
 #ifdef Q_OS_LINUX
 const int NEW_LINE_SIZE = 1;
@@ -141,7 +144,7 @@ const int INITIAL_CONNECTION_TIMEOUT = 20000; // time out the connection if a me
 const bool INITIAL_COLORED_EVENTS_OUTPUT = true;
 const bool INITIAL_ADVANCED_LOG_FILE = false;
 const bool INITIAL_NOTIFY_ON_ERROR_CLEARED = false;
-const bool INITIAL_RAM_CLEARING = false; // used for improving CPU performance with large amount of nodes
+const bool INITIAL_RAM_CLEARING = true; // used for improving CPU performance with large amount of nodes
 const int INITIAL_MAX_DATA_NODES = 10000;
 
 // logfile settings
@@ -261,6 +264,8 @@ const QString ELECTRICAL_BOX_HEADER_STYLE = "font: 20pt 'Segoe UI'; background-c
 
 const QString ELECTRICAL_BOX_CONTENT_STYLE = "color: rgb(30, 30, 30); font: 20pt 'Segoe UI';"
                                              "background-color: rgb(105, 105, 105); color: white;";
+
+
 //======================================================================================
 // CSIM exclusive constants
 //======================================================================================
