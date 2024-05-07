@@ -160,19 +160,25 @@ void Connection::transmit(QString message)
     #endif*/
 }
 
-//send disconnect to communicating party
+/**
+ * @brief Send disconnect message to communicating party
+ */
 void Connection::sendDisconnectMsg()
 {
     #if DEV_MODE && SERIAL_COMM_DEBUG
     qDebug() << "Sending disconnect message to controller" << Qt::endl;
     #endif
+
+    // send disconnect message
     transmit(QString::number(CLOSING_CONNECTION) + DELIMETER + "\n");
 }
 
-//send handshake attempt to communicating party
+/**
+ * @brief Send handshake attempt to communicating party
+ */
 void Connection::sendHandshakeMsg()
 {
-    // Send handshake message
+    // send handshake message
     transmit(QString::number(LISTENING) + '\n');
 }
 
@@ -190,7 +196,7 @@ Connection::~Connection()
     // confirm connection to another port
     if ( connected )
     {
-        //transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + DELIMETER + "\n");
+        // transmit(QString::number(static_cast<int>(CLOSING_CONNECTION)) + DELIMETER + "\n");
         sendDisconnectMsg();
 
         //avoid prematurely closing serial port before closing message is sent
