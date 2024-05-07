@@ -1,4 +1,5 @@
 #include "status.h"
+
 /********************************************************************************
 ** status.cpp
 **
@@ -8,7 +9,7 @@
 ********************************************************************************/
 
 /**
- * Initialization constructor for the status class
+ * @brief Initialization constructor for the status class
  *
  * Sets totalFiringEvents to default values
  *
@@ -21,7 +22,7 @@ Status::Status(QObject *parent)
 }
 
 /**
- * Loads data into the status class given a status message
+ * @brief Loads data into the status class given a status message
  *
  * Parses statusMessage and updates status class variabels with new data
  *
@@ -29,7 +30,7 @@ Status::Status(QObject *parent)
  */
 bool Status::loadData(QString statusMessage)
 {
-    /* the statusMessage contains csv data in the following order
+    /* the statusMessage contains data in the following order
      *
         bool armed;
         TriggerStatus trigger1;
@@ -37,7 +38,7 @@ bool Status::loadData(QString statusMessage)
         ControllerState controllerState;
         FiringMode firingMode;
         FeedPosition feedPosition;
-        //to find total events including errors, add total errors and events
+        // to find total events including errors, add total errors and events
         int totalFiringEvents;
         int burstLength;
         double firingRate;
@@ -162,7 +163,7 @@ bool Status::loadData(QString statusMessage)
 }
 
 /**
- * Updates crc and controller versions at the bottom on GUI
+ * @brief Updates crc and controller versions at the bottom on GUI
  *
  * Given a message containing the controller version and crc updates corresponding class variables
  *
@@ -201,7 +202,10 @@ bool Status::loadVersionData(QString versionMessage)
     return true;
 }
 
-//converts the status class values to a string
+/**
+ * @brief Converts the current contents of status class to a string
+ * @return statusStr The string containing the entire contents of the status data
+ */
 QString Status::toString()
 {
     //add each value and a delimeter to the end of the string, then return the string
@@ -231,9 +235,10 @@ QString Status::toString()
 //======================================================================================
 
 #if DEV_MODE
+// generate a status message to send from the controller
 QString Status::generateMessage()
 {
-    /* will create a status message that contains csv data in the following order
+    /* will create a status message that contains data in the following order
      *
         bool armed;
         TriggerStatus trigger1;
@@ -270,7 +275,7 @@ QString Status::generateMessage()
     return message + '\n';
 }
 
-//generate random values for status
+// generate random values for status message
 void Status::randomize(bool secondTrigger)
 {
     armed = QRandomGenerator::global()->bounded(0, 1 + 1);

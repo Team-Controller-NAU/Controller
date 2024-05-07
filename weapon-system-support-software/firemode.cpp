@@ -13,7 +13,7 @@
 
 
 /**
- * Initialization constructor for a firemode object
+ * @brief Initialization constructor for a firemode object
  *
  * Sets maximum position in degrees
  *
@@ -28,7 +28,7 @@ firemode::firemode(QWidget* parent)
 }
 
 /**
- * Paints the firemode graphic
+ * @brief Paints the firemode graphic
  */
 void firemode::paintEvent(QPaintEvent*)
 {

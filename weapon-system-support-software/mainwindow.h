@@ -26,6 +26,17 @@
     #include <QtConcurrent/QtConcurrent>
 #endif
 
+/********************************************************************************
+** mainwindow.h
+**
+** The MainWindow class represents the main window of the entire software. It manages
+** the user interface and coordinates interactions between various components of the software,
+** including serial communication, status updates, event logging, electrical data management,
+** and user settings.
+**
+** @author Team Controller
+********************************************************************************/
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -37,13 +48,14 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+    // constructors
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    //class for ddms serial communication
+    // class for ddms serial communication
     Connection *ddmCon;
 
-    //data classes
+    // data class member variables
     Status *status;
     Events *events;
     electrical *electricalData;
@@ -51,6 +63,7 @@ public:
 
     // vars
     QString ddmPortName;
+    bool loadingDump;
     QTimer* handshakeTimer;
     QTimer* lastMessageTimer;
     QTimer* runningControllerTimer;
@@ -61,14 +74,14 @@ public:
     QString autosaveLogFile;
     bool allowSettingChanges;
 
-    //user managed settings
+    // user managed settings
     bool coloredEventOutput;
     int autoSaveLimit;
     int connectionTimeout;
     bool advancedLogFile;
     bool notifyOnErrorCleared;
 
-    //creates a new connection using currently selected serial port settings
+    // creates a new connection using currently selected serial port settings
     void createDDMCon();
 
     #if DEV_MODE
@@ -107,11 +120,14 @@ private slots:
     void disableConnectionChanges();
     void enableConnectionChanges();
     void updateEventsOutput(EventNode *event);
+
     //clears current content of the events page text output and replaces
     //it with freshly generated data based on current contents of events class
     void refreshEventsOutput();
+
     //clears error in events output
     void clearErrorFromEventsOutput(int errorId);
+
     //checks if the current number of auto saved files is higher than the limit, deletes the
     //oldest one each iteration until the limit is enforced
     void enforceAutoSaveLimit();

@@ -11,11 +11,11 @@ class firemode : public QDial
     Q_OBJECT
 
 public:
-
+    // constructor
     firemode(QWidget * parent = nullptr);
 
 private:
-
+    // firemode graphic painter
     virtual void paintEvent(QPaintEvent*) override;
 
 };
