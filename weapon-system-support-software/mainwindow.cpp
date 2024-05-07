@@ -15,6 +15,9 @@
 
 /**
  * @brief Constructor for MainWindow Class
+ *
+ * Sets up the entire application and GUI window to default initialization values
+ *
  * @param parent Pointer to the parent widget
  */
 MainWindow::MainWindow(QWidget *parent)
