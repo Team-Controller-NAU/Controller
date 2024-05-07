@@ -163,7 +163,7 @@ bool Status::loadData(QString statusMessage)
 }
 
 /**
- * Updates crc and controller versions at the bottom on GUI
+ * @brief Updates crc and controller versions at the bottom on GUI
  *
  * Given a message containing the controller version and crc updates corresponding class variables
  *
