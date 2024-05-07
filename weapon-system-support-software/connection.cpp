@@ -11,7 +11,7 @@
 ********************************************************************************/
 
 /**
- * Initialization constructor for a connection object.
+ * @brief Initialization constructor for a connection object.
  *
  * This initializes the parameters into a QSerialPort object, opens the port for reading
  * and writing, and displays the status.
@@ -54,10 +54,8 @@ Connection::Connection(QString portName, QSerialPort::BaudRate baudRate,
     }
 }
 
-//returns true if a valid message is in the serial port, false otherwise
-
 /**
- * Verifies that the incomming serialized message is valid
+ * @brief Verifies that the incomming serialized message is valid
  *
  * The function first checks the serial port is open, then captures the
  * the message to check for expected end of message character (\n).
@@ -66,7 +64,8 @@ Connection::Connection(QString portName, QSerialPort::BaudRate baudRate,
  */
 int Connection::checkForValidMessage()
 {
-    //ensure port is open to prevent possible errors
+    // returns true if a valid message is in the serial port, false otherwise
+    // ensure port is open to prevent possible errors
     if (serialPort.isOpen())
     {
         //copy data from serial port buffer without altering buffer
@@ -87,6 +86,7 @@ int Connection::checkForValidMessage()
         {
             return UNTERMINATED_MESSAGE;
         }
+        // uncomment to see bytes debug
         /*#if DEV_MODE && SERIAL_COMM_DEBUG
         else
         {
@@ -110,7 +110,7 @@ int Connection::checkForValidMessage()
 }
 
 /**
- * Transmits a message through the serial port.
+ * @brief Transmits a message through the serial port.
  *
  * The function waits for the full message to be sent before continuing. If the transmission fails,
  * an error message is logged.
@@ -151,7 +151,7 @@ void Connection::transmit(QString message)
     }
 
     // Display the contents of the QByteArray in hexadecimal format
-   /* #if DEV_MODE && SERIAL_COMM_DEBUG
+    /* #if DEV_MODE && SERIAL_COMM_DEBUG
     qDebug() << "Data sent (hex): ";
     for (int i = 0; i < data.size(); ++i)
     {
@@ -177,7 +177,7 @@ void Connection::sendHandshakeMsg()
 }
 
 /**
- * Destructor for the Connection class.
+ * @brief Destructor for the Connection class.
  *
  * This destructor is responsible for closing the serial port connection associated with the Connection object.
  * If a handshake has occurred and the port is indeed connected to another port, it will transmit a closing
@@ -206,7 +206,7 @@ Connection::~Connection()
 //======================================================================================
 #if DEV_MODE
 /**
- * Initialization constructor overload for initializing a connection object using stored settings.
+ * @brief Initialization constructor overload for initializing a connection object using stored settings.
  *
  * This constructor delegates to the primary constructor, providing default values for baud rate, data bits,
  * parity, stop bits, and flow control settings using constants defined in constants.h.
